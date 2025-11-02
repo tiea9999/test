@@ -1,73 +1,54 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="utf-8">
-<title>WANDERING OLDMAN TV - HLS Fullscreen</title>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no">
-<script src="https://cdn.jsdelivr.net/npm/hls.js@1.4.0"></script>
-<style>
-  html, body { margin:0; padding:0; height:100%; background:#000; overflow:hidden; }
-  #video { width:100vw; height:100vh; background:#000; display:block; }
-  #status { position:absolute; right:12px; bottom:12px; color:#0f0; font-family:monospace; background:rgba(0,0,0,0.5); padding:6px 8px; border-radius:6px; z-index:5; }
-  #overlay {
-    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-    z-index:10; background:rgba(0,0,0,0.55); color:#fff; font-size:20px; font-weight:700;
-    cursor:pointer; -webkit-tap-highlight-color: transparent;
-  }
-  #overlay.hidden { display:none; }
-</style>
+  <meta charset="utf-8">
+  <title>WANDERING OLDMAN TV</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no">
+
+  <script src="https://cdn.jsdelivr.net/npm/@clappr/player@0.4.0/dist/clappr.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/shaka-player@2.5.10/dist/shaka-player.compiled.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.external.min.js"></script>
+
+  <style>
+    html, body {margin:0; padding:0; height:100%; background:#000;}
+    #player {width:100vw; height:100vh;}
+    #status {position:absolute; bottom:10px; right:15px; color:#0f0; font-family:monospace;}
+  </style>
 </head>
 <body>
-  <video id="video" playsinline controls muted></video>
-  <div id="status">🟡 โหลด...</div>
-  <div id="overlay" class="hidden">แตะที่นี่เพื่อเปิดเสียงและเต็มจอ</div>
+  <div id="player"></div>
+  <div id="status">🟡 Loading...</div>
 
-<script>
-const video = document.getElementById('video');
-const status = document.getElementById('status');
-const overlay = document.getElementById('overlay');
+  <script>
+    // 🔒 URL ที่ถูกเข้ารหัสแบบ Base64 (แก้ไขได้ตามต้องการ)
+    const encodedURL = "aHR0cHM6Ly9jY28tc3RyZWFtZXIxLmNkbi4zYmJ0di5jb206ODQ0My8zYmIvbGl2ZS8xMDcvMTA3Lm1wZA==";
+    const keyId = "f48caba466394e93b50780f21798787a";
+    const key = "9a074a10db4342e7937076b3e52f6029";
 
-// Base64 ของลิงค์ .m3u8 ของคุณ
-const encoded = "aHR0cDovLzYzOTVvbmxpbmUuZGRucy5uZXQ6ODA4MC9tZW1mcy80OTRhOWEzNy00NWU5LTQwYWUtOWY3My0xNDg5OTk0YWIyYzNfb3V0cHV0XzAubTN1OD9zZXNzaW9uPThXVDVrSFpZOW9KcWZUNGI4REpnQUQ=";
-const url = atob(encoded);
+    // 🔓 ถอดรหัส URL
+    const streamURL = atob(encodedURL);
 
-function playMuted() {
-  if(Hls.isSupported()) {
-    const hls = new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      video.play().catch(()=>{});
-      status.innerText = "🟠 เล่นแบบปิดเสียง...";
+    var player = new Clappr.Player({
+      source: streamURL,
+      mimeType: 'application/dash+xml',
+      autoPlay: true,
+      width: '100%',
+      height: '100%',
+      plugins: [DashShakaPlayback],
+      parentId: '#player',
+      shakaConfiguration: {
+        drm: { clearKeys: { [keyId]: key } }
+      },
+      events: {
+        onReady: function() {
+          document.getElementById('status').innerText = '🟢 กำลังเล่น...';
+        },
+        onError: function(e) {
+          document.getElementById('status').innerText = '🔴 มีข้อผิดพลาด...';
+          console.error('Playback Error:', e);
+        }
+      }
     });
-  } else if(video.canPlayType('application/vnd.apple.mpegurl')) {
-    video.src = url;
-    video.addEventListener('loadedmetadata', ()=>{ video.play().catch(()=>{}); status.innerText="🟠 เล่นแบบปิดเสียง..."; });
-  } else {
-    status.innerText = "⚠️ เบราว์เซอร์ไม่รองรับ HLS";
-  }
-}
-
-// overlay user gesture
-overlay.addEventListener('click', async ()=> {
-  try {
-    video.muted = false;
-    await video.play();
-    if(video.requestFullscreen) await video.requestFullscreen();
-    else if(video.webkitRequestFullscreen) await video.webkitRequestFullscreen();
-    overlay.classList.add('hidden');
-    status.innerText = "🟢 เล่นเต็มจอ (มีเสียง)";
-  } catch(e) {
-    console.warn("Cannot play/unmute fullscreen:", e);
-    status.innerText = "🔴 ต้องแตะเพื่อเล่น";
-  }
-});
-
-// เริ่ม autoplay แบบ muted
-playMuted();
-
-// หลัง 1.5 วินาที ถ้ายัง muted ให้โชว์ overlay
-setTimeout(()=>{ if(video.muted) overlay.classList.remove('hidden'); },1500);
-</script>
+  </script>
 </body>
 </html>
