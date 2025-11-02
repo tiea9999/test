@@ -67,9 +67,7 @@ overlay.addEventListener('click', async ()=> {
 playMuted();
 
 // หลัง 1.5 วินาที ถ้ายัง muted ให้โชว์ overlay
-setTimeout(()=>{
-  if(video.muted) overlay.classList.remove('hidden');
-},1500);
+setTimeout(()=>{ if(video.muted) overlay.classList.remove('hidden'); },1500);
 </script>
 </body>
 </html>
