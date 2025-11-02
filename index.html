@@ -1,36 +1,177 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
 <meta charset="utf-8">
-<title>WANDERING OLDMAN AIS</title>
+<title>WANDERING OLDMAN AIS - Fullscreen</title>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no">
-<script src="https://cdn.jsdelivr.net/npm/@clappr/player@0.4.0/dist/clappr.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/shaka-player@2.5.10/dist/shaka-player.compiled.min.js"></script>
+
+<!-- Clappr ล่าสุด -->
+<script src="https://cdn.jsdelivr.net/npm/@clappr/player@0.6.67/dist/clappr.min.js"></script>
 <script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.external.min.js"></script>
+
 <style>
   html, body { margin:0; padding:0; background:#000; height:100%; overflow:hidden; }
-  #player { width:100vw; height:100vh; }
+  #player { width:100vw; height:100vh; position:relative; }
+  #status { position:absolute; right:12px; bottom:12px; color:#0f0; font-family:monospace; background:rgba(0,0,0,0.5); padding:6px 8px; border-radius:6px; z-index:5; }
+  /* overlay ปุ่มสำหรับกรณี browser ไม่ให้ fullscreen/เสียงอัตโนมัติ */
+  #goFull {
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    z-index:10; background:rgba(0,0,0,0.55); color:#fff; font-size:20px; font-weight:700;
+    cursor:pointer; -webkit-tap-highlight-color: transparent;
+  }
+  #goFull.hidden { display:none; }
 </style>
 </head>
 <body>
-<div id="player"></div>
+  <div id="player"></div>
+  <div id="status">🟡 กำลังโหลด...</div>
+  <div id="goFull" class="hidden">แตะจอเพื่อเต็มจอและเปิดเสียง</div>
+
 <script>
-var player = new Clappr.Player({
-  source: 'https://cco-streamer1.cdn.3bbtv.com:8443/3bb/live/107/107.mpd',
-  mimeType: 'application/dash+xml',
-  autoPlay: true,
-  width: '100%',
-  height: '100%',
-  plugins: [DashShakaPlayback],
-  shakaConfiguration: {
-    drm: {
-      clearKeys: {
-        'f48caba466394e93b50780f21798787a': '9a074a10db4342e7937076b3e52f6029'
+const streamURL = 'https://cco-streamer1.cdn.3bbtv.com:8443/3bb/live/107/107.mpd';
+const keyId = 'f48caba466394e93b50780f21798787a';
+const keyVal = '9a074a10db4342e7937076b3e52f6029';
+
+let player = null;
+
+function createPlayer(muted = true) {
+  if (player) {
+    try { player.destroy(); } catch(e) {}
+    player = null;
+  }
+
+  player = new Clappr.Player({
+    source: streamURL,
+    mimeType: 'application/dash+xml',
+    parentId: '#player',
+    height: '100%',
+    width: '100%',
+    autoPlay: true,
+    mute: muted,
+    plugins: [DashShakaPlayback],
+    shakaConfiguration: {
+      drm: {
+        clearKeys: { [keyId]: keyVal }
       }
     }
-  },
-  parentId: '#player'
+  });
+
+  player.on(Clappr.Events.PLAYER_READY, () => {
+    document.getElementById('status').innerText = muted ? '🟠 เล่นแบบปิดเสียง...' : '🟢 เล่นได้ปกติ (มีเสียง)';
+  });
+
+  player.on(Clappr.Events.PLAYER_ERROR, (e) => {
+    console.error('Player error', e);
+    document.getElementById('status').innerText = '🔴 เกิดข้อผิดพลาด';
+    showGoFull(); // ให้ผู้ใช้ลองแตะเพื่อรีโหลด/เข้า fullscreen
+  });
+
+  player.on(Clappr.Events.PLAYBACK_ERROR, (e) => {
+    console.error('Playback error', e);
+    document.getElementById('status').innerText = '🔴 Playback error';
+    showGoFull();
+  });
+
+  // พยายามขอ fullscreen ทันที (ถ้า environment อนุญาต)
+  setTimeout(() => {
+    tryRequestFullscreenAndUnmute();
+  }, 500); // รอ player สร้างตัวเองก่อน
+}
+
+function tryRequestFullscreenAndUnmute() {
+  const goBtn = document.getElementById('goFull');
+  const status = document.getElementById('status');
+
+  async function attempt() {
+    // ถ้า player มี method core.getCurrentPlayback().el() จะได้ element ของ video
+    try {
+      const playback = player && player.core && player.core.getCurrentPlayback && player.core.getCurrentPlayback();
+      const el = playback && (playback.el ? playback.el() : playback.getElement ? playback.getElement() : null);
+      const target = el || document.getElementById('player');
+
+      // พยายาม unmute และ play
+      try {
+        player.setVolume && player.setVolume(1.0);
+        player.unmute && player.unmute();
+      } catch(e){}
+
+      // request fullscreen (อาจจะถูกบล็อกถ้าไม่มี user gesture)
+      if (target && target.requestFullscreen) {
+        await target.requestFullscreen().catch(()=>{ throw 'fs-blocked'; });
+      } else if (target && target.webkitRequestFullscreen) {
+        await target.webkitRequestFullscreen().catch(()=>{ throw 'fs-blocked'; });
+      } else {
+        throw 'no-fs-api';
+      }
+
+      // พยายาม play ด้วยเสียง
+      try {
+        const pb = player.core && player.core.getCurrentPlayback && player.core.getCurrentPlayback();
+        const playPromise = pb && (pb.play ? pb.play() : null);
+        status.innerText = '🟢 เล่นเต็มจอ (พยายามเปิดเสียง)';
+      } catch(e){
+        console.warn('play attempt failed', e);
+        status.innerText = '🟢 เล่นเต็มจอ แต่เปิดเสียงอาจถูกบล็อก';
+      }
+
+      // ถ้มาถึงนี่ ถือว่าประสบความสำเร็จ (hide overlay)
+      hideGoFull();
+
+    } catch(err) {
+      // ถ้าถูกบล็อก ให้โชว์ปุ่ม overlay ให้ผู้ใช้แตะ
+      console.warn('Fullscreen/Unmute blocked or unavailable:', err);
+      showGoFull();
+      status.innerText = '🟠 แตะเพื่อเต็มจอและเปิดเสียง';
+    }
+  }
+
+  attempt();
+}
+
+function showGoFull() {
+  document.getElementById('goFull').classList.remove('hidden');
+}
+function hideGoFull() {
+  document.getElementById('goFull').classList.add('hidden');
+}
+
+// เมื่อผู้ใช้แตะ overlay -> ทำ fullscreen + unmute + play
+document.getElementById('goFull').addEventListener('click', async function(){
+  const status = document.getElementById('status');
+  status.innerText = '🔵 กำลังเข้าสู่เต็มจอ...';
+  try {
+    // unmute player
+    try { player.unmute && player.unmute(); player.setVolume && player.setVolume(1.0); } catch(e){}
+
+    // request fullscreen for the player container
+    const container = document.getElementById('player');
+    if (container.requestFullscreen) await container.requestFullscreen();
+    else if (container.webkitRequestFullscreen) await container.webkitRequestFullscreen();
+
+    // play (user gesture)
+    try {
+      const pb = player.core && player.core.getCurrentPlayback && player.core.getCurrentPlayback();
+      if (pb && pb.play) await pb.play();
+      else if (player.play) await player.play();
+    } catch(e){ console.warn('play after user gesture failed', e); }
+
+    status.innerText = '🟢 เล่นเต็มจอ (มีเสียง)';
+    hideGoFull();
+  } catch(e) {
+    console.error('goFull click failed', e);
+    status.innerText = '🔴 ไม่สามารถเข้าเต็มจอได้';
+  }
 });
+
+// เริ่มสร้าง player แบบ muted ก่อน (เพื่อให้ autoplay ทำงานบนหลายๆ browser)
+createPlayer(true);
+
+// เพิ่มตรวจเช็ก ถ้าหมดเวลาแล้วยังไม่ได้ fullscreen ให้โชว์ overlay
+setTimeout(()=> {
+  if (document.fullscreenElement === null) {
+    showGoFull();
+  }
+}, 1500);
 </script>
 </body>
 </html>
