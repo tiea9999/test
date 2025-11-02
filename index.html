@@ -1,54 +1,36 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <title>WANDERING OLDMAN TV</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no">
-
-  <script src="https://cdn.jsdelivr.net/npm/@clappr/player@0.4.0/dist/clappr.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/shaka-player@2.5.10/dist/shaka-player.compiled.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.external.min.js"></script>
-
-  <style>
-    html, body {margin:0; padding:0; height:100%; background:#000;}
-    #player {width:100vw; height:100vh;}
-    #status {position:absolute; bottom:10px; right:15px; color:#0f0; font-family:monospace;}
-  </style>
+<meta charset="utf-8">
+<title>WANDERING OLDMAN AIS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no">
+<script src="https://cdn.jsdelivr.net/npm/@clappr/player@0.4.0/dist/clappr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/shaka-player@2.5.10/dist/shaka-player.compiled.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.external.min.js"></script>
+<style>
+  html, body { margin:0; padding:0; background:#000; height:100%; overflow:hidden; }
+  #player { width:100vw; height:100vh; }
+</style>
 </head>
 <body>
-  <div id="player"></div>
-  <div id="status">🟡 Loading...</div>
-
-  <script>
-    // 🔒 URL ที่ถูกเข้ารหัสแบบ Base64 (แก้ไขได้ตามต้องการ)
-    const encodedURL = "aHR0cHM6Ly9jY28tc3RyZWFtZXIxLmNkbi4zYmJ0di5jb206ODQ0My8zYmIvbGl2ZS8xMDcvMTA3Lm1wZA==";
-    const keyId = "f48caba466394e93b50780f21798787a";
-    const key = "9a074a10db4342e7937076b3e52f6029";
-
-    // 🔓 ถอดรหัส URL
-    const streamURL = atob(encodedURL);
-
-    var player = new Clappr.Player({
-      source: streamURL,
-      mimeType: 'application/dash+xml',
-      autoPlay: true,
-      width: '100%',
-      height: '100%',
-      plugins: [DashShakaPlayback],
-      parentId: '#player',
-      shakaConfiguration: {
-        drm: { clearKeys: { [keyId]: key } }
-      },
-      events: {
-        onReady: function() {
-          document.getElementById('status').innerText = '🟢 กำลังเล่น...';
-        },
-        onError: function(e) {
-          document.getElementById('status').innerText = '🔴 มีข้อผิดพลาด...';
-          console.error('Playback Error:', e);
-        }
+<div id="player"></div>
+<script>
+var player = new Clappr.Player({
+  source: 'https://cco-streamer1.cdn.3bbtv.com:8443/3bb/live/107/107.mpd',
+  mimeType: 'application/dash+xml',
+  autoPlay: true,
+  width: '100%',
+  height: '100%',
+  plugins: [DashShakaPlayback],
+  shakaConfiguration: {
+    drm: {
+      clearKeys: {
+        'f48caba466394e93b50780f21798787a': '9a074a10db4342e7937076b3e52f6029'
       }
-    });
-  </script>
+    }
+  },
+  parentId: '#player'
+});
+</script>
 </body>
 </html>
