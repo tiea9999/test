@@ -1,54 +1,621 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-  <meta charset="utf-8">
-  <title>WANDERING OLDMAN TV</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,shrink-to-fit=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIEA IPTV</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/@clappr/player@0.4.0/dist/clappr.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/shaka-player@2.5.10/dist/shaka-player.compiled.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/clappr/dash-shaka-playback@latest/dist/dash-shaka-playback.external.min.js"></script>
+    <link rel="icon" href="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
 
-  <style>
-    html, body {margin:0; padding:0; height:100%; background:#000;}
-    #player {width:100vw; height:100vh;}
-    #status {position:absolute; bottom:10px; right:15px; color:#0f0; font-family:monospace;}
-  </style>
-</head>
-<body>
-  <div id="player"></div>
-  <div id="status">🟡 Loading...</div>
-
-  <script>
-    // 🔒 URL ที่ถูกเข้ารหัสแบบ Base64 (แก้ไขได้ตามต้องการ)
-    const encodedURL = "aHR0cHM6Ly9jY28tc3RyZWFtZXIxLmNkbi4zYmJ0di5jb206ODQ0My8zYmIvbGl2ZS8xMDcvMTA3Lm1wZA==";
-    const keyId = "f48caba466394e93b50780f21798787a";
-    const key = "9a074a10db4342e7937076b3e52f6029";
-
-    // 🔓 ถอดรหัส URL
-    const streamURL = atob(encodedURL);
-
-    var player = new Clappr.Player({
-      source: streamURL,
-      mimeType: 'application/dash+xml',
-      autoPlay: true,
-      width: '100%',
-      height: '100%',
-      plugins: [DashShakaPlayback],
-      parentId: '#player',
-      shakaConfiguration: {
-        drm: { clearKeys: { [keyId]: key } }
-      },
-      events: {
-        onReady: function() {
-          document.getElementById('status').innerText = '🟢 กำลังเล่น...';
-        },
-        onError: function(e) {
-          document.getElementById('status').innerText = '🔴 มีข้อผิดพลาด...';
-          console.error('Playback Error:', e);
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
         }
-      }
+
+        body {
+            display: flex;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            overflow: hidden;
+        }
+
+        /* MOBILE BUTTON */
+        #mobileToggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: linear-gradient(90deg, #ff512f, #dd2476);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            z-index: 1000;
+            display: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        #mobileToggle:hover {
+            transform: scale(1.05);
+        }
+
+        /* SIDEBAR */
+        #menu {
+            width: 200px;
+            background: rgba(20, 20, 35, 0.95);
+            backdrop-filter: blur(15px);
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px;
+            overflow-y: auto;
+            transition: 0.4s;
+            box-shadow: 5px 0 40px rgba(0, 0, 0, 0.6);
+        }
+
+        #menu.hidden {
+            transform: translateX(-100%);
+        }
+
+        /* LOGO */
+        .logo-box {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-box img {
+            width: 100%;
+            max-width: 180px;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 0, 150, 0.7);
+        }
+
+        /* HOME */
+        .home-btn {
+            display: block;
+            padding: 10px;
+            text-align: center;
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            border-radius: 8px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .home-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* MENU TITLE */
+        .menu-title {
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            margin: 12px 0 6px;
+            transition: 0.3s ease;
+
+        }
+
+        .menu-title:hover {
+            transform: scale(1.05);
+        }
+
+        .premium {
+            background: linear-gradient(90deg, #ff416c, #ff4b2b);
+        }
+
+        /* ชมพูแดงร้อนแรง */
+        .movie {
+            background: linear-gradient(90deg, #36d1dc, #5b86e5);
+        }
+
+        /* ฟ้า → น้ำเงิน สดใส */
+        .series {
+            background: linear-gradient(90deg, #f9d423, #ff4e50);
+        }
+
+        /* เหลืองทอง → แดงอมส้ม */
+        .anime {
+            background: linear-gradient(90deg, #11998e, #38ef7d);
+        }
+
+        /* เขียว → เขียวอ่อน สดชื่น */
+        .short {
+            background: linear-gradient(90deg, #8e2de2, #4a00e0);
+        }
+
+        /* ม่วงเข้ม → ม่วงสด */
+        .vip {
+            background: linear-gradient(90deg, #fcb045, #fd1d1d);
+        }
+
+        /* ทอง → แดงร้อนแรง */
+
+        /* SUBMENU */
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .submenu.open {
+            max-height: 1000px;
+        }
+
+        /* ACTIVE MENU TITLE */
+        .menu-title.active-title {
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+            transform: scale(1.05);
+            border: 2px solid #fff;
+        }
+
+        /* LINKS */
+        .menu-link {
+            display: block;
+            padding: 10px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.3s;
+            border-radius: 6px;
+        }
+
+        .menu-link:hover {
+            background: #e94560;
+            transform: translateX(6px);
+        }
+
+        /* ACTIVE MENU LINK */
+        .menu-link.active {
+            background: linear-gradient(90deg, #ff512f, #dd2476);
+            box-shadow: 0 0 15px rgba(255, 0, 150, 0.7);
+            transform: translateX(6px);
+            font-weight: bold;
+        }
+
+        /* PLAYER */
+        #main-player {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000 80%);
+        }
+
+        #welcome {
+            text-align: center;
+            opacity: 0.9;
+            margin-top: 150px;
+        }
+
+        #welcome img {
+            width: 300px;
+            max-width: 80%;
+            border-radius: 25px;
+            box-shadow: 0 0 40px rgba(255, 0, 150, 0.7);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+
+            100% {
+                transform: translateY(0);
+            }
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* MOBILE */
+        @media(max-width:768px) {
+            #menu {
+                position: fixed;
+                height: 100%;
+                z-index: 999;
+            }
+
+            #mobileToggle {
+                display: block;
+            }
+        }
+
+        /* FAVORITE CHANNELS */
+
+        #favoriteChannels {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 50px;
+            flex-wrap: wrap;
+        }
+
+        .fav-channel {
+            padding: 12px 20px;
+            background: linear-gradient(90deg, #ff512f, #dd2476);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .fav-channel:hover {
+            transform: scale(1.1);
+        }
+
+        /* FLOAT PLAYER */
+
+        #floatingPlayer {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 70%;
+            background: #000;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(0, 0, 0, 0.9);
+            display: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+
+        #floatingPlayer iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        #closePlayer {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 22px;
+            color: #fff;
+            cursor: pointer;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        #closePlayer:hover {
+            background: red;
+        }
+
+        /* ปรับ fav-channel ให้โลโก้เต็มพื้นที่ */
+        .fav-channel {
+            width: 80px;
+            height: 80px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: transform 0.3s;
+            padding: 0;
+            /* ลบ padding เดิม */
+            background: linear-gradient(90deg, #ff512f, #dd2476);
+        }
+
+        .fav-channel img {
+            width: 100%;
+            /* ให้เต็มพื้นที่ container */
+            height: 100%;
+            /* ให้เต็มพื้นที่ container */
+            object-fit: cover;
+            /* ครอบเต็มช่อง ไม่บิดรูป */
+            display: block;
+        }
+
+        .fav-channel:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="mobileToggle">☰ เมนู</div>
+
+    <div id="menu">
+
+        <div class="logo-box">
+            <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
+        </div>
+        <div class="home-btn" id="homeBtn">🏠 หน้าแรก</div>
+        <!-- ทีวี -->
+        <div class="menu-title premium" data-menu="tvMenu">ทีวีออนไลน์</div>
+        <div id="tvMenu" class="submenu">
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/iptv.html" data-type="page">3BB TV
+
+            </div>
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/inwhd.html" data-type="page">GOD TV
+            </div>
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/sport.html" data-type="page">SPORT TV
+            </div>
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/ball66.html" data-type="page">DOOBALL66
+            </div>
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/live66.html" data-type="page">ตารางแข่ง
+                Ball66
+            </div>
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/DKL.html" data-type="page">ตารางแข่ง DKL
+            </div>
+        </div>
+
+        <!-- หนัง -->
+        <div class="menu-title movie" data-menu="movieMenu">หนัง</div>
+        <div id="movieMenu" class="submenu">
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/037hd.html" data-type="page">037HD
+            </div>
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/hdx.html" data-type="page">LK-HDX
+            </div>
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/24hd.html" data-type="page">24-HDS
+            </div>
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/7hd.html" data-type="page">7HD
+            </div>
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/MOVIE01.html" data-type="page">MIX MOVIE
+            </div>
+
+        </div>
+
+        <!-- ซีรีส์ -->
+        <div class="menu-title series" data-menu="seriesMenu">ซีรีส์</div>
+        <div id="seriesMenu" class="submenu">
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/flixmono.html" data-type="page">Flixmono
+            </div>
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/seriesday.html" data-type="page">Series
+                Day
+            </div>
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/goseries4k.html" data-type="page">
+                GoSeries4K
+            </div>
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/myseries.html" data-type="page">
+                MySeriesHD
+            </div>
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/wlk.html" data-type="page">Wathclakorn
+            </div>
+        </div>
+
+        <div class="menu-title short" data-menu="short">หนังสั้นแนวตั้ง</div>
+        <div id="short" class="submenu">
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/short.html" data-type="page">หนังสั้นจีน
+            </div>
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/rongyok.html" data-type="page">
+                โรงหยกหนังสั้น
+            </div>
+
+        </div>
+
+        <!-- อนิเมะ -->
+        <div class="menu-title anime" data-menu="animeMenu">อนิเมะ</div>
+        <div id="animeMenu" class="submenu">
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/animegood.html" data-type="page">
+                AnimeGOOD
+            </div>
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/masterx.html" data-type="page">MasterX
+            </div>
+
+        </div>
+
+        <div class="menu-title vip" data-menu="vipMenu">VIP</div>
+        <div id="vipMenu" class="submenu">
+
+            <div class="menu-link" data-url="https://nongakka.github.io/doofree/VIP.html" data-type="page"
+                data-pass="9999">VIP
+            </div>
+        </div>
+    </div>
+
+    <div id="main-player">
+
+        <div id="welcome">
+            <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
+            <h1>TIEA IPTV</h1>
+        </div>
+
+        <div id="favoriteChannels">
+            <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/max-01?muted=0">
+                <img src="https://www.fileinwtv.site/postor/20250830165328Mono1.jpg" alt="MAX01 Logo">
+            </div>
+
+            <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/max-02?muted=0">
+                <img src="https://www.fileinwtv.site/postor/20250830165343Mono2.jpg" alt="MAX02 Logo">
+            </div>
+
+            <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/max-03?muted=0">
+                <img src="https://www.fileinwtv.site/postor/20250830165408Mono3.jpg" alt="MAX03 Logo">
+            </div>
+
+            <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/max-04?muted=0">
+                <img src="https://www.fileinwtv.site/postor/20250830165433Mono4.jpg" alt="MAX04 Logo">
+            </div>
+        </div>
+
+        <iframe id="iframePlayer" allowfullscreen allow="fullscreen"></iframe>
+
+    </div>
+
+    <div id="floatingPlayer">
+
+        <div id="closePlayer">✕</div>
+
+        <iframe id="floatFrame" allowfullscreen allow="fullscreen"></iframe>
+
+    </div>
+
+    <script>
+        const menuTitles=document.querySelectorAll(".menu-title");
+const submenus=document.querySelectorAll(".submenu");
+const links=document.querySelectorAll(".menu-link");
+const iframe=document.getElementById("iframePlayer");
+const welcome=document.getElementById("welcome");
+const mobileToggle=document.getElementById("mobileToggle");
+const sidebar=document.getElementById("menu");
+const homeBtn=document.getElementById("homeBtn");
+
+menuTitles.forEach(title=>{
+  title.addEventListener("click",()=>{
+
+    // ลบ active-title ทั้งหมดก่อน
+    menuTitles.forEach(t=>t.classList.remove("active-title"));
+    title.classList.add("active-title");
+
+    const target=document.getElementById(title.dataset.menu);
+
+    submenus.forEach(menu=>{
+      if(menu!==target){menu.classList.remove("open");}
     });
-  </script>
+
+    target.classList.toggle("open");
+  });
+});
+
+links.forEach(link=>{
+  link.addEventListener("click",()=>{
+
+// 🔐 ตรวจสอบรหัสผ่าน
+    const pass = link.dataset.pass;
+
+    if(pass){
+        const input = prompt("กรุณาใส่รหัสผ่าน");
+
+        if(input !== pass){
+            alert("รหัสไม่ถูกต้อง");
+            return;
+        }
+
+    }
+    localStorage.setItem("activeMenu", link.dataset.url);
+    links.forEach(l=>l.classList.remove("active"));
+    link.classList.add("active");
+    link.scrollIntoView({block:"center"});
+    const url = link.dataset.url;
+    const type = link.dataset.type || "iframe"; // ค่าเริ่มต้น
+
+    // 🔥 เลือกการเปิดตามประเภท
+    if(type === "iframe"){
+        iframe.src = url;
+        iframe.style.display="block";
+        welcome.style.display="none";
+    }
+    else if(type === "page"){
+        window.location.href = url;
+    }
+    else if(type === "blank"){
+        window.open(url, "_blank");
+    }
+
+    if(window.innerWidth<768){
+      sidebar.classList.add("hidden");
+    }
+  });
+});
+
+homeBtn.addEventListener("click",()=>{
+  iframe.src="";
+  iframe.style.display="none";
+  welcome.style.display="block";
+
+  links.forEach(l=>l.classList.remove("active"));
+  menuTitles.forEach(t=>t.classList.remove("active-title"));
+  submenus.forEach(menu=>menu.classList.remove("open")); // เพิ่มบรรทัดนี้
+});
+
+mobileToggle.addEventListener("click",()=>{
+  sidebar.classList.toggle("hidden");
+});
+
+// ⭐ restore menu highlight แบบไม่เปิด submenu
+window.addEventListener("load", () => {
+
+  const saved = localStorage.getItem("activeMenu");
+
+  if(!saved) return;  // ถ้าไม่มีค่า อย่าเปิดเมนูใดๆ
+
+  links.forEach(link => {
+    if(link.dataset.url === saved){
+      // ไฮไลท์เฉพาะลิงก์
+      link.classList.add("active");
+      link.scrollIntoView({block:"center"});
+
+      // ไม่เปิด submenu
+      const menu = link.closest(".submenu");
+      if(menu){
+        const title = menu.previousElementSibling;
+        if(title) title.classList.add("active-title"); // ไฮไลท์ title แต่ไม่เปิด
+      }
+    }
+  });
+
+});
+
+const favs=document.querySelectorAll(".fav-channel");
+const floatPlayer=document.getElementById("floatingPlayer");
+const floatFrame=document.getElementById("floatFrame");
+
+favs.forEach(ch => {
+  ch.addEventListener("click", () => {
+    const url = ch.dataset.url;
+
+    // เปิด float player
+    floatFrame.src = url;  
+    floatPlayer.style.display = "block";
+
+    // รอ iframe โหลดแล้วปรับเสียง (สำหรับ player ที่รองรับ)
+    floatFrame.onload = () => {
+      try {
+        const vid = floatFrame.contentWindow.document.querySelector("video");
+        if (vid) vid.volume = 0.25; // ตั้งเสียง 25%
+      } catch(e){
+        // ถ้า cross-origin จะไม่สามารถเข้าถึงได้
+        // embed-test.bananacake.org ใช้ ?muted=0
+      }
+    };
+  });
+});
+document.getElementById("closePlayer").onclick=()=>{
+
+floatPlayer.style.display="none";
+floatFrame.src="";
+
+};
+
+    </script>
+
+
+    </div>
 </body>
+
 </html>
