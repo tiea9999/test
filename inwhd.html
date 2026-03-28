@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หรรมน้อย ออนไลน์</title>
+<script src="https://cdn.tailwindcss.com"></script>
+
+
+<style>
+body{
+background: radial-gradient(circle at top,#1e293b,#0f172a,#020617);
+font-family: 'Segoe UI', sans-serif;
+}
+
+/* Glow Title */
+.glow{
+text-shadow: 0 0 10px #3b82f6,
+             0 0 20px #3b82f6,
+             0 0 40px #2563eb;
+}
+
+/* Glass Card */
+.channel-card{
+background: rgba(30,41,59,0.6);
+backdrop-filter: blur(14px);
+border: 1px solid rgba(255,255,255,0.1);
+transition: all .3s ease;
+}
+
+.channel-card:hover{
+transform: translateY(-8px) scale(1.05);
+box-shadow: 0 0 20px rgba(37,99,235,.6);
+}
+
+/* Menu Button */
+.menu-btn{
+padding:8px 20px;
+border-radius:999px;
+background:#1e293b;
+transition:.3s;
+}
+
+.menu-btn:hover{
+background:linear-gradient(90deg,#2563eb,#3b82f6);
+}
+
+.active-btn{
+background:linear-gradient(90deg,#2563eb,#3b82f6);
+box-shadow:0 0 15px #3b82f6;
+}
+
+/* Modal Glass */
+.modal-box{
+background: rgba(15,23,42,.95);
+backdrop-filter: blur(20px);
+box-shadow: 0 0 30px rgba(37,99,235,.5);
+animation: pop .3s ease;
+}
+
+@keyframes pop{
+from{transform:scale(.8);opacity:0}
+to{transform:scale(1);opacity:1}
+}
+
+.back-home{
+  position:fixed;
+  top:15px;
+  left:15px;   /* 🔥 เปลี่ยนจาก right เป็น left */
+  padding:10px 18px;
+  border-radius:50px;
+  font-weight:600;
+  cursor:pointer;
+  z-index:9999;
+
+  /* Glass Effect */
+  background:rgba(255,255,255,0.15);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+
+  border:1px solid rgba(255,255,255,0.3);
+  color:#fff;
+
+  box-shadow:0 8px 25px rgba(0,0,0,0.3);
+  transition:0.3s ease;
+}
+
+.back-home:hover{
+  background:linear-gradient(90deg,#ff512f,#dd2476);
+  transform:scale(1.05);
+  box-shadow:0 10px 30px rgba(255,0,150,0.6);
+}
+
+/* Mobile */
+@media(max-width:768px){
+  .back-home{
+    padding:8px 14px;
+    font-size:14px;
+    top:10px;
+    left:10px; /* 🔥 มือถือก็ซ้าย */
+  }
+}
+
+#playerModal{
+transition: opacity .3s ease;
+}
+
+</style>
+</head>
+<body class="text-white min-h-screen">
+
+<header class="text-center py-8">
+<h1 class="text-4xl font-bold tracking-widest mb-6 glow">
+หรรมน้อย ออนไลน์
+</h1>
+
+<div class="back-home" onclick="goHome()">
+  ⬅ กลับหน้าหลัก
+</div>
+<div class="flex justify-center gap-4 flex-wrap">
+<button onclick="switchCategory('SPORTS')" id="btn-SPORTS" class="menu-btn">SPORTS</button>
+<button onclick="switchCategory('DIGITAL')" id="btn-DIGITAL" class="menu-btn">DIGITAL</button>
+<button onclick="switchCategory('MOVIE')" id="btn-MOVIE" class="menu-btn">MOVIE</button>
+</div>
+</header>
+
+<div id="channelContainer" class="px-6 pb-16"></div>
+
+<!-- PLAYER -->
+<div id="playerModal"
+onclick="closeModal(event)"
+class="fixed inset-0 bg-black/80 hidden items-center justify-center z-50 backdrop-blur-md">
+
+<div class="modal-box w-11/12 md:w-3/4 lg:w-1/2 rounded-2xl p-4 relative">
+<button onclick="forceClose()" class="absolute top-3 right-4 text-red-400 text-2xl hover:text-red-600">✖</button>
+
+<video
+id="playerVideo"
+class="w-full h-72 md:h-96 rounded-xl bg-black"
+controls
+autoplay
+playsinline>
+</video>
+
+</div>
+
+</div>
+
+<script>
+
+const channels = {
+
+SPORTS: [
+      { name:"MONO MAX1", logo:"https://www.fileinwtv.site/postor/20250830165328Mono1.jpg", url:"https://night.redfight.info/iptv.php?id=82290" },
+      { name:"MONO MAX2", logo:"https://www.fileinwtv.site/postor/20250830165343Mono2.jpg", url:"https://night.redfight.info/iptv.php?id=82079" },
+      { name:"MONO MAX3", logo:"https://www.fileinwtv.site/postor/20250830165408Mono3.jpg", url:"https://night.redfight.info/iptv.php?id=82044" },
+      { name:"MONO MAX4", logo:"https://www.fileinwtv.site/postor/20250830165433Mono4.jpg", url:"https://night.redfight.info/iptv.php?id=81912" },
+      { name:"MONO MAX5", logo:"https://www.fileinwtv.site/postor/20250830165451Mono5.jpg", url:"https://night.redfight.info/iptv.php?id=81779" },
+      { name:"MONO MAX6", logo:"https://www.fileinwtv.site/postor/20250830165513Mono6.jpg", url:"https://night.redfight.info/iptv.php?id=81741" },
+      { name:"MONO MAX7", logo:"https://www.fileinwtv.site/postor/20250830165536Mono7.jpg", url:"https://night.redfight.info/iptv.php?id=81639" },
+      { name:"MONO MAX8", logo:"https://www.fileinwtv.site/postor/20250830165621Mono8.jpg", url:"https://night.redfight.info/iptv.php?id=81611" },
+
+      { name:"Bein Sport1", logo:"https://www.fileinwtv.site/postor/20240418192615Bein1.jpg", url:"https://night.redfight.info/iptv.php?id=7424" },
+      { name:"Bein Sport2", logo:"https://www.fileinwtv.site/postor/20240418192624Bein2.jpg", url:"https://night.redfight.info/iptv.php?id=7423" },
+      { name:"Bein Sport3", logo:"https://www.fileinwtv.site/postor/20240418192653Bein3.jpg", url:"https://night.redfight.info/iptv.php?id=7422" },
+      { name:"Bein Sport4", logo:"https://www.fileinwtv.site/postor/20240418192706Bein4.jpg", url:"https://night.redfight.info/iptv.php?id=7421" },
+      { name:"Bein Sport5", logo:"https://www.fileinwtv.site/postor/20240418192717Bein5.jpg", url:"https://night.redfight.info/iptv.php?id=7420" },
+      { name:"Bein Sport6", logo:"https://www.fileinwtv.site/postor/20240418192728Bein6.jpg", url:"https://night.redfight.info/iptv.php?id=7419" },
+      { name:"Bein Sport7", logo:"https://www.fileinwtv.site/postor/20240418195754Bein7.jpg", url:"https://night.redfight.info/iptv.php?id=7418" },
+      { name:"Bein Sport8", logo:"https://www.fileinwtv.site/postor/20240831143535Bein8.jpg", url:"https://night.redfight.info/iptv.php?id=7417" },
+      { name:"Bein Sport9", logo:"https://www.fileinwtv.site/postor/20240831143312Bein9.jpg", url:"https://night.redfight.info/iptv.php?id=7416" },
+      { name:"Bein Sport10", logo:"https://www.fileinwtv.site/postor/20240831143640Bein10.jpg", url:"https://night.redfight.info/iptv.php?id=7415" },
+
+      { name:"True Sport1", logo:"https://www.fileinwtv.site/postor/20240418192933TrueSport1.jpg", url:"https://night.redfight.info/iptv.php?id=2892" },
+      { name:"True Sport2", logo:"https://www.fileinwtv.site/postor/20240418192951TrueSport2.jpg", url:"https://night.redfight.info/iptv.php?id=2891" },
+      { name:"True Sport3", logo:"https://www.fileinwtv.site/postor/20240418193002TrueSport3.jpg", url:"https://night.redfight.info/iptv.php?id=2890" },
+      { name:"True Sport4", logo:"https://www.fileinwtv.site/postor/20240418193017TrueSport4.jpg", url:"https://night.redfight.info/iptv.php?id=2889" },
+      { name:"True Sport5", logo:"https://www.fileinwtv.site/postor/20240418193030TrueSport5.jpg", url:"https://night.redfight.info/iptv.php?id=2888" },
+      { name:"True Sport7", logo:"https://www.fileinwtv.site/postor/20240418193050TrueSport7.jpg", url:"https://night.redfight.info/iptv.php?id=2829" },
+
+      { name:"SPOTV", logo:"https://www.fileinwtv.site/postor/20240418193126SPOTV.jpg", url:"https://night.redfight.info/iptv.php?id=2027" },
+      { name:"SPOTV2", logo:"https://www.fileinwtv.site/postor/20240418193135SPOTV2.jpg", url:"https://night.redfight.info/iptv.php?id=2023" },
+      { name:"T-Sports7", logo:"https://www.fileinwtv.site/postor/20240418193731tsports7.jpg", url:"https://night.redfight.info/iptv.php?id=435" },
+
+      { name:"TPF3", logo:"https://www.fileinwtv.site/postor/1763868082_0011fc8de4e840e06ced.jpg", url:"https://night.redfight.info/iptv.php?id=2018" },
+      { name:"TPF4", logo:"https://www.fileinwtv.site/postor/20250830205132Premier_Football4.jpg", url:"https://night.redfight.info/iptv.php?id=2017" },
+
+],
+
+DIGITAL: [
+      { name:"3HD", logo:"https://www.fileinwtv.site/postor/20240418191821ch3hd.jpg", url:"https://night.redfight.info/iptv.php?id=7348" },
+      { name:"5HD", logo:"https://www.fileinwtv.site/postor/20240418185850ch5hd.jpg", url:"https://night.redfight.info/iptv.php?id=7347" },
+      { name:"7HD", logo:"https://www.fileinwtv.site/postor/20240418185909ch7hd.jpg", url:"https://night.redfight.info/iptv.php?id=7161" },
+      { name:"TNN16", logo:"https://www.fileinwtv.site/postor/20240418190014TNN16.jpg", url:"https://night.redfight.info/iptv.php?id=6345" },
+      { name:"Nation TV", logo:"https://www.fileinwtv.site/postor/20240418192308Nation1.jpg", url:"https://night.redfight.info/iptv.php?id=6339" },
+      { name:"True4U", logo:"https://www.fileinwtv.site/postor/20240418190115True4u.jpg", url:"https://night.redfight.info/iptv.php?id=6337" },
+      { name:"GMM25", logo:"https://www.fileinwtv.site/postor/20240418190128gmmchannel.jpg", url:"https://night.redfight.info/iptv.php?id=6336" },
+      { name:"Workpoint TV", logo:"https://www.fileinwtv.site/postor/20240418190941Workpoint.jpg", url:"https://night.redfight.info/iptv.php?id=6335" },
+      { name:"MONO29", logo:"https://www.fileinwtv.site/postor/20240418191023mono29.jpg", url:"https://night.redfight.info/iptv.php?id=6333" },
+      { name:"MCOT HD", logo:"https://www.fileinwtv.site/postor/20240418191042mcothd.jpg", url:"https://night.redfight.info/iptv.php?id=6332" },
+      { name:"Thairath TV", logo:"https://www.fileinwtv.site/postor/20241201222710thairahttvhd2.jpg", url:"https://night.redfight.info/iptv.php?id=6330" },
+      { name:"AmarinTV", logo:"https://www.fileinwtv.site/postor/20240418191809amarintvhd.jpg", url:"https://night.redfight.info/iptv.php?id=6328" },
+      { name:"Thai PBS", logo:"https://www.fileinwtv.site/postor/20240418191223tpbshd.jpg", url:"https://night.redfight.info/iptv.php?id=1698" },
+      { name:"PPTV", logo:"https://www.fileinwtv.site/postor/20240418191253pptvhd.jpg", url:"https://night.redfight.info/iptv.php?id=1664" },
+      { name:"ONE31", logo:"https://www.fileinwtv.site/postor/20240418191350onehd.jpg", url:"https://night.redfight.info/iptv.php?id=461" },
+      { name:"CH8", logo:"https://www.fileinwtv.site/postor/20240418191335ch8.jpg", url:"https://night.redfight.info/iptv.php?id=497" },
+      { name:"NBT 2 HD", logo:"https://www.fileinwtv.site/postor/20240418191323nbthd.jpg", url:"https://night.redfight.info/iptv.php?id=1450" },
+],
+
+MOVIE: [
+      { name:"HBO", url:"https://night.redfight.info/iptv.php?id=2820", logo:"https://www.fileinwtv.site/postor/20240418201334HBO.jpg" },
+      { name:"HBO Hits", url:"https://night.redfight.info/iptv.php?id=2819", logo:"https://www.fileinwtv.site/postor/20240418201343HBO_Hits.jpg" },
+      { name:"HBO Signature", url:"https://night.redfight.info/iptv.php?id=2818", logo:"https://www.fileinwtv.site/postor/20240418201358HBO_Signature.jpg" },
+      { name:"HBO Family", url:"https://night.redfight.info/iptv.php?id=2816", logo:"https://www.fileinwtv.site/postor/20240418201412HBO_Family.jpg" },
+      { name:"Cinemax", url:"https://night.redfight.info/iptv.php?id=2815", logo:"https://www.fileinwtv.site/postor/20240418201426cinemax.jpg" },
+      { name:"WarnerTV", url:"https://night.redfight.info/iptv.php?id=2739", logo:"https://www.fileinwtv.site/postor/20240418201607WBTV.jpg" },
+      { name:"AXN", url:"https://night.redfight.info/iptv.php?id=2650", logo:"https://www.fileinwtv.site/postor/20240418201633AXN.jpg" },
+
+      { name:"Boomerang", url:"https://night.redfight.info/iptv.php?id=8999", logo:"https://www.fileinwtv.site/postor/20240418202911Boomerang.jpg" },
+      { name:"Cartoon Network", url:"https://night.redfight.info/iptv.php?id=8007", logo:"https://www.fileinwtv.site/postor/20240418202927CN.jpg" },
+      { name:"Nickelodeon", url:"https://night.redfight.info/iptv.php?id=2029", logo:"https://www.fileinwtv.site/postor/20240418205237Nickelodeon.jpg" },
+      { name:"Nick jr", url:"https://night.redfight.info/iptv.php?id=2875", logo:"https://www.fileinwtv.site/postor/20240418203048Nickjr.jpg" },
+
+      { name:"Discovery", url:"https://night.redfight.info/iptv.php?id=1546", logo:"https://www.fileinwtv.site/postor/20240418210226Discovery.jpg" },
+      { name:"Discovery Asia", url:"https://night.redfight.info/iptv.php?id=1606", logo:"https://www.fileinwtv.site/postor/20240418210201DiscoveryAsia.jpg" },
+      { name:"History", url:"https://night.redfight.info/iptv.php?id=1667", logo:"https://www.fileinwtv.site/postor/20240423163921history.jpg" },
+      { name:"TLC", url:"https://night.redfight.info/iptv.php?id=1496", logo:"https://www.fileinwtv.site/postor/20240418210246TLC.jpg" },
+]
+
+};
+
+
+let currentCategory="SPORTS";
+
+function switchCategory(cat){
+currentCategory=cat;
+document.querySelectorAll("header button").forEach(b=>b.classList.remove("active-btn"));
+document.getElementById("btn-"+cat).classList.add("active-btn");
+renderChannels();
+}
+
+function renderChannels(){
+const container=document.getElementById("channelContainer");
+container.innerHTML="";
+const grid=document.createElement("div");
+grid.className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6";
+
+channels[currentCategory].forEach(ch=>{
+const card=document.createElement("div");
+card.className="channel-card rounded-2xl p-5 text-center cursor-pointer";
+card.innerHTML=`
+<div onclick="openPlayer('${ch.url}')">
+<div class="h-20 flex items-center justify-center">
+<img src="${ch.logo}" class="max-h-16 object-contain drop-shadow-lg">
+</div>
+<div class="mt-4 text-sm font-semibold tracking-wide">${ch.name}</div>
+</div>
+`;
+grid.appendChild(card);
+});
+container.appendChild(grid);
+}
+  
+async function openPlayer(url){
+
+const api = url + "&ajax=1";
+
+try{
+
+const res = await fetch("https://broken-surf-7347.hssmnoy.workers.dev?url="+encodeURIComponent(api));
+const data = await res.json();
+
+if(data.status !== "ok"){
+alert("Stream error");
+return;
+}
+
+const video = document.getElementById("playerVideo");
+video.src = data.file;
+video.play();
+
+document.getElementById("playerModal").classList.remove("hidden");
+document.getElementById("playerModal").classList.add("flex");
+
+}catch(e){
+alert("Load stream failed");
+}
+
+}
+function closeModal(e){
+if(e.target.id==="playerModal"){ forceClose(); }
+}
+
+function forceClose(){
+
+const modal = document.getElementById("playerModal");
+const video = document.getElementById("playerVideo");
+
+video.pause();
+video.src="";
+
+modal.classList.add("hidden");
+modal.classList.remove("flex");
+
+}
+
+switchCategory("SPORTS");
+
+function goHome(){
+  if(document.referrer !== ""){
+      history.back();
+  }else{
+      window.location.href = "https://nongakka.github.io/doofree/index.html";
+  }
+}
+
+</script>
+</body>
+</html>
