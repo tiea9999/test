@@ -2,180 +2,144 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TIEA IPTV</title>
-
+<script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
+/* 🔥 กัน header บัง */
 body{
-    font-family:'Kanit', sans-serif;
-    background:#020617;
-    color:#fff;
-    padding-top:70px; /* 🔥 แก้บัง */
-    overflow-y:auto;  /* 🔥 เลื่อนสุดได้ */
+  padding-top:140px;
 }
 
-.header{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    z-index:9999;
-    backdrop-filter:blur(10px);
-    background:rgba(5,10,20,0.7);
-}
-
-.top-message{
-    text-align:center;
-    font-size:16px; /* 🔥 ลดขนาด */
-    color:#00e5ff;
-    padding:4px;
-}
-
-.back-home{
-    position:fixed;
-    top:80px; /* 🔥 ไม่ทับ */
-    left:5px;
-    padding:4px 8px;
-    border-radius:50px;
-    background:rgba(255,255,255,0.15);
-    color:#fff;
-    cursor:pointer;
-    z-index:10000;
-}
-
-.container{
-    max-width:1400px;
-    margin:auto;
-    padding:10px;
-}
-
-/* PLAYER */
-#playerBox{
-    position:fixed;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    width:80%;
-    max-width:1000px;
-    aspect-ratio:16/9;
-    background:#000;
-    display:none;
-    z-index:9999;
-}
-
-#playerOverlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,0.7);
-    display:none;
-    z-index:9998;
-}
-
+/* 🔥 ลื่นขึ้น */
 video{
-    width:100%;
-    height:100%;
+  width:100%;
+  height:100%;
+  object-fit:contain;
 }
 
-.close{
-    position:absolute;
-    top:8px;
-    right:8px;
-    background:red;
-    color:#fff;
-    border:none;
-    padding:5px;
-    cursor:pointer;
+/* 🔥 scroll ลื่น */
+html,body{
+  overscroll-behavior-y: contain;
 }
 </style>
 </head>
 
-<body>
+<body class="bg-gray-900 text-white p-4">
 
-<div class="header">
-    <div class="top-message">📺 TIEA IPTV 📺</div>
-</div>
+<!-- 🔥 HEADER -->
+<div class="fixed top-0 left-0 w-full z-50 bg-gray-900/95 backdrop-blur border-b border-white/10">
 
-<div class="back-home" onclick="goHome()">⬅กลับ</div>
-
-<div class="container">
-    <button onclick="play('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">
-        ▶️ ทดสอบช่อง
+  <div class="flex items-center justify-between px-2 py-2">
+    <button onclick="goBack()"
+      class="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 text-sm">
+      ⬅ หน้าหลัก
     </button>
+
+    <h1 class="text-lg text-center flex-1">
+      📺 TIEA IPTV 📺
+    </h1>
+
+    <div class="w-[80px]"></div>
+  </div>
+
+  <div id="leagueBar" class="flex gap-3 overflow-x-auto px-2 pb-2"></div>
+
+  <div class="flex gap-2 px-2 pb-2">
+    <div id="sportTabs" class="flex gap-2 overflow-x-auto"></div>
+    <div id="dateTabs" class="flex gap-2 overflow-x-auto flex-1 justify-end"></div>
+  </div>
+
 </div>
 
-<div id="playerOverlay" onclick="closePlayer()"></div>
-
-<div id="playerBox">
-    <button class="close" onclick="closePlayer()">X</button>
-    <video id="video" controls autoplay playsinline preload="auto"></video>
+<!-- 🔥 CONTENT -->
+<div id="matches"
+  class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 mt-2 pb-20">
 </div>
 
 <script>
-const video = document.getElementById("video");
 let hls;
 
-function play(url){
+/* 🔥 PLAYER เร็ว + กันหมุน */
+function playStream(url){
+  const video = document.getElementById("videoPlayer");
 
-    document.getElementById("playerBox").style.display="block";
-    document.getElementById("playerOverlay").style.display="block";
+  if(hls){
+    hls.destroy();
+  }
 
-    if(hls){
+  if(Hls.isSupported()){
+    hls = new Hls({
+      maxBufferLength: 10,
+      maxMaxBufferLength: 20,
+      liveSyncDuration: 2,
+      enableWorker: true,
+      lowLatencyMode: true
+    });
+
+    hls.loadSource(url);
+    hls.attachMedia(video);
+
+    hls.on(Hls.Events.ERROR, function(event,data){
+      if(data.fatal){
         hls.destroy();
-    }
+      }
+    });
 
-    if(Hls.isSupported()){
-
-        hls = new Hls({
-            maxBufferLength: 30,
-            maxMaxBufferLength: 60,
-            liveSyncDuration: 3,
-            liveMaxLatencyDuration: 10,
-            enableWorker: true,
-            lowLatencyMode: true,
-            backBufferLength: 10,
-            fragLoadingTimeOut: 20000,
-            manifestLoadingTimeOut: 20000
-        });
-
-        hls.loadSource(url);
-        hls.attachMedia(video);
-
-        hls.on(Hls.Events.MANIFEST_PARSED, ()=>{
-            video.play().catch(()=>{});
-        });
-
-        // 🔥 กันหมุน
-        hls.on(Hls.Events.ERROR, function(event, data){
-            if(data.fatal){
-                if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
-                    hls.startLoad();
-                }else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
-                    hls.recoverMediaError();
-                }else{
-                    hls.destroy();
-                }
-            }
-        });
-
-    }else{
-        video.src = url;
-        video.play().catch(()=>{});
-    }
+  }else{
+    video.src = url;
+  }
 }
 
+/* 🔥 เปิด player */
+function openPlayer(url){
+  const modal = document.getElementById("playerModal");
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
+
+  playStream(url);
+}
+
+/* 🔥 ปิด */
 function closePlayer(){
-    document.getElementById("playerBox").style.display="none";
-    document.getElementById("playerOverlay").style.display="none";
-    video.pause();
+  const modal = document.getElementById("playerModal");
+  const video = document.getElementById("videoPlayer");
+
+  if(hls) hls.destroy();
+
+  video.pause();
+  video.src="";
+
+  modal.classList.add("hidden");
+  modal.classList.remove("flex");
 }
 
-function goHome(){
-    window.location.href="https://tiea9999.github.io/tv/index.html";
+function goBack(){
+  window.location.href="https://tiea9999.github.io/tv/index.html";
 }
 </script>
+
+<!-- 🔥 PLAYER -->
+<div id="playerModal"
+  onclick="closePlayer()"
+  class="fixed inset-0 bg-black/90 hidden items-center justify-center z-50">
+
+  <div class="relative w-full max-w-4xl mx-4"
+       onclick="event.stopPropagation()">
+
+    <button onclick="closePlayer()"
+      class="absolute -top-10 right-0 bg-red-500 px-3 py-1 rounded">
+      ✕
+    </button>
+
+    <video id="videoPlayer"
+      class="w-full aspect-video bg-black"
+      controls autoplay playsinline>
+    </video>
+
+  </div>
+</div>
 
 </body>
 </html>
