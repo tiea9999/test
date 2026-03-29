@@ -18,16 +18,33 @@ color:#fff;
 overflow:hidden;
 }
 
-/* 🔥 แก้ scroll */
+/* MENU */
 #menu{
-width:220px;
+width:230px;
 background:rgba(20,20,35,0.95);
 padding:20px;
 overflow-y:auto;
-height:100vh;
 }
 
-/* 🔥 ปรับ main ให้เลื่อนได้ */
+.menu-title{
+padding:12px;
+margin:12px 0 6px;
+border-radius:10px;
+background:#333;
+font-weight:bold;
+}
+
+.menu-link{
+padding:10px;
+margin:3px 0;
+border-radius:6px;
+cursor:pointer;
+}
+
+.menu-link:hover{background:#e94560;}
+.menu-link.active{background:#ff512f;}
+
+/* PLAYER */
 #main-player{
 flex:1;
 position:relative;
@@ -35,49 +52,28 @@ display:flex;
 justify-content:center;
 align-items:center;
 background:#000;
-overflow:auto;
 }
 
-/* โลโก้กลาง */
+iframe,video{
+width:100%;
+height:100%;
+border:none;
+}
+
 #welcome{
 display:flex;
 flex-direction:column;
-justify-content:center;
 align-items:center;
+justify-content:center;
 height:100%;
 text-align:center;
 }
 
 #welcome img{
-width:250px;
-max-width:80%;
-border-radius:20px;
-box-shadow:0 0 40px rgba(255,0,150,0.7);
+width:260px;
 margin-bottom:20px;
-}
-
-.menu-title{
-padding:12px;
-border-radius:12px;
-margin:12px 0 6px;
-cursor:pointer;
-font-weight:bold;
-}
-
-.menu-link{
-display:block;
-padding:10px;
-cursor:pointer;
-border-radius:6px;
-}
-
-.menu-link:hover{background:#e94560;}
-.menu-link.active{background:#ff512f;}
-
-iframe{
-width:100%;
-height:100%;
-border:none;
+border-radius:20px;
+box-shadow:0 0 40px rgba(255,0,150,.7);
 }
 </style>
 </head>
@@ -91,8 +87,8 @@ border:none;
 <div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/inwhd.html">GOD TV</div>
 <div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/sport.html">SPORT TV</div>
 <div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/ball66.html">DOOBALL66</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/live66.html">ตาราง Ball66</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/DKL.html">ตาราง DKL</div>
+<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/live66.html">ตารางแข่ง Ball66</div>
+<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/DKL.html">ตารางแข่ง DKL</div>
 
 <div class="menu-title">🎬 หนัง</div>
 <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/037hd.html">037HD</div>
@@ -101,16 +97,16 @@ border:none;
 <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/7hd.html">7HD</div>
 <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/MOVIE01.html">MIX MOVIE</div>
 
-<div class="menu-title">📺 ซีรี่ย์</div>
+<div class="menu-title">📺 ซีรีส์</div>
 <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/flixmono.html">Flixmono</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/seriesday.html">SeriesDay</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/seriesday.html">Series Day</div>
 <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/goseries4k.html">GoSeries4K</div>
 <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/myseries.html">MySeriesHD</div>
 <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/wlk.html">Wathclakorn</div>
 
 <div class="menu-title">🎬 หนังสั้น</div>
 <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/short.html">หนังสั้นจีน</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/rongyok.html">โรงหยก</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/rongyok.html">โรงหยกหนังสั้น</div>
 
 <div class="menu-title">🎮 อนิเมะ</div>
 <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/animegood.html">AnimeGOOD</div>
@@ -130,31 +126,67 @@ border:none;
 
 <iframe id="iframePlayer"></iframe>
 
+<video id="videoPlayer" controls autoplay muted playsinline style="display:none;background:#000;"></video>
+
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
 const links=document.querySelectorAll(".menu-link");
 const iframe=document.getElementById("iframePlayer");
+const video=document.getElementById("videoPlayer");
 const welcome=document.getElementById("welcome");
 
+let hls;
+
+// 🔥 เล่น m3u8 (ลื่น)
+function playVideo(url){
+
+iframe.style.display="none";
+video.style.display="block";
+
+if(hls){hls.destroy();}
+
+if(Hls.isSupported()){
+hls=new Hls({
+maxBufferLength:120,
+maxMaxBufferLength:240,
+liveSyncDuration:15
+});
+hls.loadSource(url);
+hls.attachMedia(video);
+hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play());
+}else{
+video.src=url;
+video.play();
+}
+}
+
+// 🔥 เมนู
 links.forEach(link=>{
 link.onclick=()=>{
 
 links.forEach(l=>l.classList.remove("active"));
 link.classList.add("active");
 
-const type=link.dataset.type;
 const url=link.dataset.url;
 
-if(type==="movie"){
+// 🎬 หนัง → เปิดใหม่ (ไม่กระพริบ)
+if(link.dataset.type==="movie"){
 window.open(url,"_blank");
 return;
 }
 
-if(iframe.src!==url){
-iframe.src=url;
+// 📺 TV
+if(url.includes(".m3u8")){
+playVideo(url);
+return;
 }
 
+// iframe
+iframe.src=url;
+video.style.display="none";
 iframe.style.display="block";
 welcome.style.display="none";
 
