@@ -6,58 +6,85 @@
 <title>TIEA IPTV</title>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 body{
-    font-family:'Kanit', sans-serif;
     background:#020617;
     color:#fff;
-    margin:0;
+    font-family:sans-serif;
+    padding-top:140px;
 }
 
-/* ✅ แก้บังจอ */
 .header{
-    position:sticky;
+    position:fixed;
     top:0;
-    z-index:9999;
-    backdrop-filter:blur(12px);
-    background:rgba(5,10,20,0.9);
-    border-bottom:1px solid rgba(255,255,255,0.08);
+    left:0;
+    width:100%;
+    z-index:999;
+    background:#020617;
+    border-bottom:1px solid #333;
 }
 
-.top-bar{
-    display:flex;
-    justify-content:space-between;
-    padding:8px;
+.section-title{
+    font-size:18px;
+    font-weight:bold;
+    padding:10px;
+    color:#00e5ff;
 }
 
 .section-grid{
     display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:10px;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
     padding:10px;
-}
-
-@media(max-width:700px){
-    .section-grid{grid-template-columns:repeat(2,1fr);}
 }
 
 .card{
     background:#111;
     border-radius:12px;
-    padding:10px;
+    overflow:hidden;
     cursor:pointer;
+    position:relative;
+}
+
+/* 🔥 BG โลโก้ */
+.logo-bg{
+    height:120px;
+    background-size:contain;
+    background-repeat:no-repeat;
+    background-position:center;
+    filter:blur(25px);
+    opacity:.4;
+}
+
+/* 🔥 โลโก้จริง */
+.logo{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+.logo img{
+    height:50px;
+    filter:drop-shadow(0 0 8px rgba(0,200,255,.7));
+}
+
+/* content */
+.content{
+    padding:10px;
+    text-align:center;
+}
+
+.team{
+    font-size:14px;
+    margin-bottom:4px;
 }
 
 .servers button{
-    margin-top:5px;
+    margin:3px;
+    padding:4px 8px;
     font-size:11px;
-    padding:4px 6px;
-    border:none;
-    border-radius:6px;
-    background:#00e5ff;
-    color:#000;
 }
 
 /* PLAYER */
@@ -67,7 +94,7 @@ body{
     left:50%;
     transform:translate(-50%,-50%);
     width:90%;
-    max-width:900px;
+    max-width:800px;
     aspect-ratio:16/9;
     background:#000;
     display:none;
@@ -77,22 +104,18 @@ body{
 #playerOverlay{
     position:fixed;
     inset:0;
-    background:rgba(0,0,0,0.7);
+    background:rgba(0,0,0,.7);
     display:none;
     z-index:9998;
 }
-
-video{width:100%;height:100%;}
 </style>
 </head>
 
 <body>
 
 <div class="header">
-    <div class="top-bar">
-        <div onclick="goHome()">⬅ กลับ</div>
-        <div>📺 TIEA IPTV</div>
-        <div></div>
+    <div style="text-align:center;padding:10px;">
+        📺 TIEA IPTV
     </div>
 </div>
 
@@ -100,40 +123,47 @@ video{width:100%;height:100%;}
 
 <div id="playerOverlay" onclick="closePlayer()"></div>
 <div id="playerBox">
-    <video id="video" controls autoplay></video>
+    <video id="video" controls autoplay playsinline style="width:100%;height:100%"></video>
 </div>
 
 <script>
 
 const URL = "https://broken-surf-7347.hssmnoy.workers.dev/?url=https://drive.google.com/uc?id=15Ye3NPw0cjNrJGTu2Q2aoqoApOp8GipC&export=download";
 
-let all = [];
+let all=[];
+let hls;
 
+/* 🔥 หาโลโก้ที่ใช้ได้ */
+function getLogo(servers){
+    for(const s of servers){
+        if(s.image && s.image.startsWith("http")){
+            return s.image;
+        }
+    }
+    return "https://i.ibb.co/L8y25Wd/sports-icon.png";
+}
+
+/* โหลด */
 async function load(){
     try{
         const res = await fetch(URL);
         const json = await res.json();
-
         all = parse(json);
-
-        console.log("โหลดได้:", all.length);
-
         render();
     }catch(e){
-        console.error("โหลดไม่ได้", e);
         document.getElementById("list").innerHTML="❌ โหลดไม่ได้";
     }
 }
 
+/* parse */
 function parse(data){
     let arr=[];
 
     function walk(g){
         if(g.stations){
             arr.push({
-                title:g.name,
+                title:g.name || "ไม่มีชื่อ",
                 time:(g.name.match(/\d{2}:\d{2}/)||["--:--"])[0],
-                teams:g.name.split("vs"),
                 servers:g.stations
             });
         }
@@ -146,64 +176,90 @@ function parse(data){
     return arr;
 }
 
+/* render */
 function render(){
     const list=document.getElementById("list");
     list.innerHTML="";
 
-    const grid=document.createElement("div");
-    grid.className="section-grid";
+    list.innerHTML+=`<div class="section-title">📅 วันนี้</div>`;
+
+    const section=document.createElement("div");
+    section.className="section-grid";
 
     all.forEach(m=>{
+
         if(!m.servers || !m.servers.length) return;
+
+        const logo = getLogo(m.servers);
 
         const card=document.createElement("div");
         card.className="card";
 
         card.innerHTML=`
-            <div>${m.time}</div>
-            <div>${m.teams[0]}</div>
-            <div>${m.teams[1]||""}</div>
+            <div class="logo-bg" style="background-image:url('${logo}')"></div>
 
-            ${(m.servers||[]).slice(0,3).map(s=>`
-                <button data-url="${s.url}">ดู</button>
-            `).join("")}
+            <div class="logo">
+                <img src="${logo}" onerror="this.src='https://i.ibb.co/L8y25Wd/sports-icon.png'">
+            </div>
+
+            <div class="content">
+                <div class="team">${m.title}</div>
+                <div>🕒 ${m.time}</div>
+
+                <div class="servers">
+                    ${(m.servers||[]).slice(0,4).map(s=>`
+                        <button data-url="${s.url}">ดู</button>
+                    `).join("")}
+                </div>
+            </div>
         `;
 
         card.onclick=()=>play(m.servers[0].url);
 
-        card.querySelectorAll("button").forEach(btn=>{
-            btn.onclick=(e)=>{
+        card.querySelectorAll("button").forEach(b=>{
+            b.onclick=(e)=>{
                 e.stopPropagation();
-                play(btn.dataset.url);
-            }
+                play(b.dataset.url);
+            };
         });
 
-        grid.appendChild(card);
+        section.appendChild(card);
     });
 
-    list.appendChild(grid);
+    list.appendChild(section);
 }
 
-/* 🔥 PLAYER เร็ว */
+/* PLAYER */
 const video=document.getElementById("video");
-let hls;
 
 function play(url){
+
+    if(!url) return;
+
     document.getElementById("playerBox").style.display="block";
     document.getElementById("playerOverlay").style.display="block";
 
-    if(hls) hls.destroy();
+    if(hls){
+        hls.destroy();
+    }
 
     if(Hls.isSupported()){
-        hls = new Hls({
-            maxBufferLength:8,
-            liveSyncDuration:2,
+        hls=new Hls({
+            maxBufferLength:4,
+            liveSyncDuration:1.5,
             lowLatencyMode:true
         });
+
         hls.loadSource(url);
         hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, ()=>{
+            video.play().catch(()=>{});
+        });
+
     }else{
         video.src=url;
+        video.play().catch(()=>{});
     }
 }
 
@@ -211,10 +267,10 @@ function closePlayer(){
     document.getElementById("playerBox").style.display="none";
     document.getElementById("playerOverlay").style.display="none";
     video.pause();
-}
 
-function goHome(){
-    window.location.href="https://tiea9999.github.io/tv/index.html";
+    if(hls){
+        hls.destroy();
+    }
 }
 
 load();
