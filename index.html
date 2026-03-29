@@ -71,9 +71,10 @@ border:none;
 position:absolute;
 font-size:20px;
 display:none;
+z-index:10;
 }
 
-/* 🔥 ช่องโปรดแบบ Netflix */
+/* 🔥 ช่องโปรด */
 #channelGrid{
 position:absolute;
 bottom:20px;
@@ -116,7 +117,8 @@ outline:2px solid #00ffe5;
 
 <div class="menu-title">📺 TV</div>
 
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/live66.html">dooball66</div>
+<!-- 🔥 ถ้าเป็นเว็บ (ไม่ใช่ m3u8) ใช้ type=iframe -->
+<div class="menu-link" data-type="iframe" data-url="https://tiea9999.github.io/tv/live66.html">dooball66</div>
 
 <div class="menu-title">🎬 MOVIE</div>
 
@@ -130,7 +132,7 @@ outline:2px solid #00ffe5;
 
 <iframe id="iframePlayer"></iframe>
 
-<video id="videoPlayer" controls autoplay muted playsinline style="display:none;"></video>
+<video id="videoPlayer" controls autoplay muted playsinline style="display:none;background:#000;"></video>
 
 <!-- 🔥 grid ช่อง -->
 <div id="channelGrid">
@@ -156,7 +158,7 @@ const loading=document.getElementById("loading");
 
 let hls;
 
-// 🔥 เล่น TV
+// 🔥 เล่น TV (m3u8 เท่านั้น)
 function playVideo(url){
 
 loading.style.display="block";
@@ -166,14 +168,20 @@ video.style.display="block";
 if(hls){hls.destroy();}
 
 if(Hls.isSupported()){
-hls=new Hls({maxBufferLength:60,liveSyncDuration:10});
+hls=new Hls({
+maxBufferLength:60,
+maxMaxBufferLength:120,
+liveSyncDuration:10,
+enableWorker:true
+});
 hls.loadSource(url);
 hls.attachMedia(video);
 
 hls.on(Hls.Events.MANIFEST_PARSED,()=>{
 loading.style.display="none";
-video.play();
+video.play().catch(()=>{});
 });
+
 }else{
 video.src=url;
 video.onloadeddata=()=>loading.style.display="none";
@@ -184,40 +192,76 @@ video.play();
 // 🔥 เมนู
 document.querySelectorAll(".menu-link").forEach(el=>{
 el.onclick=()=>{
+
 const type=el.dataset.type;
 const url=el.dataset.url;
 
+loading.style.display="block";
+
+// 📺 TV แบบ m3u8
 if(type==="tv"){
 playVideo(url);
-}else{
+}
+
+// 🌐 TV แบบเว็บ
+else if(type==="iframe"){
+video.style.display="none";
+iframe.style.display="block";
+iframe.src=url;
+iframe.onload=()=>loading.style.display="none";
+}
+
+// 🎬 หนัง (เปิดใหม่ ไม่กระพริบ)
+else if(type==="movie"){
+loading.style.display="none";
 window.open(url,"_blank");
 }
+
 };
 });
 
-// 🔥 grid ช่อง
+// 🔥 grid ช่อง (m3u8)
 document.querySelectorAll(".channel-card").forEach(el=>{
 el.onclick=()=>playVideo(el.dataset.url);
 });
 
-// 🎮 รีโมท
-let items=[...document.querySelectorAll(".menu-link"),...document.querySelectorAll(".channel-card")];
+// 🎮 รีโมท (แยก navigation ดีขึ้น)
+let menuItems=[...document.querySelectorAll(".menu-link")];
+let gridItems=[...document.querySelectorAll(".channel-card")];
+
+let mode="menu"; // menu หรือ grid
 let index=0;
 
 function updateFocus(){
-items.forEach(i=>i.classList.remove("focused"));
-items[index].classList.add("focused");
-items[index].scrollIntoView({block:"center"});
+[...menuItems,...gridItems].forEach(i=>i.classList.remove("focused"));
+
+if(mode==="menu"){
+menuItems[index]?.classList.add("focused");
+menuItems[index]?.scrollIntoView({block:"center"});
+}else{
+gridItems[index]?.classList.add("focused");
+gridItems[index]?.scrollIntoView({inline:"center"});
+}
 }
 updateFocus();
 
 document.addEventListener("keydown",(e)=>{
 
-if(e.key==="ArrowDown"){index=(index+1)%items.length;}
-if(e.key==="ArrowUp"){index=(index-1+items.length)%items.length;}
+if(mode==="menu"){
+if(e.key==="ArrowDown"){index=(index+1)%menuItems.length;}
+if(e.key==="ArrowUp"){index=(index-1+menuItems.length)%menuItems.length;}
+if(e.key==="ArrowRight"){mode="grid";index=0;}
+}
+
+else if(mode==="grid"){
+if(e.key==="ArrowRight"){index=(index+1)%gridItems.length;}
+if(e.key==="ArrowLeft"){index=(index-1+gridItems.length)%gridItems.length;}
+if(e.key==="ArrowUp"){mode="menu";index=0;}
+}
 
 if(e.key==="Enter"){
-items[index].click();
+if(mode==="menu"){menuItems[index]?.click();}
+else{gridItems[index]?.click();}
 }
 
 updateFocus();
