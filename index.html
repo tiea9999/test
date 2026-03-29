@@ -1,139 +1,156 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TIEA IPTV</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIEA IPTV</title>
 
-<link rel="icon" href="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?dl=1">
+    <link rel="icon"
+        href="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?dl=1">
 
-<style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-body{
-display:flex;
-height:100vh;
-background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
-color:#fff;
-overflow:hidden;
-}
+        body {
+            display: flex;
+            height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #fff;
+            overflow: hidden;
+        }
 
-/* MENU */
-#menu{
-width:230px;
-background:rgba(20,20,35,0.95);
-padding:20px;
-overflow-y:auto;
-}
+        /* MENU */
+        #menu {
+            width: 230px;
+            background: rgba(20, 20, 35, 0.95);
+            padding: 20px;
+            overflow-y: auto;
+        }
 
-.menu-title{
-padding:12px;
-margin:12px 0 6px;
-border-radius:10px;
-background:#333;
-font-weight:bold;
-}
+        .menu-title {
+            padding: 12px;
+            margin: 12px 0 6px;
+            border-radius: 10px;
+            background: #333;
+            font-weight: bold;
+        }
 
-.menu-link{
-padding:10px;
-margin:3px 0;
-border-radius:6px;
-cursor:pointer;
-}
+        .menu-link {
+            padding: 10px;
+            margin: 3px 0;
+            border-radius: 6px;
+            cursor: pointer;
+        }
 
-.menu-link:hover{background:#e94560;}
-.menu-link.active{background:#ff512f;}
+        .menu-link:hover {
+            background: #e94560;
+        }
 
-/* PLAYER */
-#main-player{
-flex:1;
-position:relative;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#000;
-}
+        .menu-link.active {
+            background: #ff512f;
+        }
 
-iframe,video{
-width:100%;
-height:100%;
-border:none;
-}
+        /* PLAYER */
+        #main-player {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #000;
+        }
 
-#welcome{
-display:flex;
-flex-direction:column;
-align-items:center;
-justify-content:center;
-height:100%;
-text-align:center;
-}
+        iframe,
+        video {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
 
-#welcome img{
-width:260px;
-margin-bottom:20px;
-border-radius:20px;
-box-shadow:0 0 40px rgba(255,0,150,.7);
-}
-</style>
+        #welcome {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        #welcome img {
+            width: 260px;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            box-shadow: 0 0 40px rgba(255, 0, 150, .7);
+        }
+    </style>
 </head>
 
 <body>
 
-<div id="menu">
+    <div id="menu">
 
-<div class="menu-title">📺 ทีวีออนไลน์</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/iptv.html">3BB TV</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/inwhd.html">GOD TV</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/sport.html">SPORT TV</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/ball66.html">DOOBALL66</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/live66.html">ตารางแข่ง Ball66</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/DKL.html">ตารางแข่ง DKL</div>
+        <div class="menu-title">📺 ทีวีออนไลน์</div>
+        <div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/iptv.html">3BB TV</div>
+        <div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/inwhd.html">GOD TV</div>
+        <div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/sport.html">SPORT TV</div>
+        <div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/ball66.html">DOOBALL66</div>
+        <div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/live66.html">ตารางแข่ง Ball66
+        </div>
+        <div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/DKL.html">ตารางแข่ง DKL</div>
 
-<div class="menu-title">🎬 หนัง</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/037hd.html">037HD</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/hdx.html">LK-HDX</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/24hd.html">24-HDS</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/7hd.html">7HD</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/MOVIE01.html">MIX MOVIE</div>
+        <div class="menu-title">🎬 หนัง</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/037hd.html">037HD</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/hdx.html">LK-HDX</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/24hd.html">24-HDS</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/7hd.html">7HD</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/MOVIE01.html">MIX MOVIE</div>
 
-<div class="menu-title">📺 ซีรีส์</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/flixmono.html">Flixmono</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/seriesday.html">Series Day</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/goseries4k.html">GoSeries4K</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/myseries.html">MySeriesHD</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/wlk.html">Wathclakorn</div>
+        <div class="menu-title">📺 ซีรีส์</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/flixmono.html">Flixmono</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/seriesday.html">Series Day
+        </div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/goseries4k.html">GoSeries4K
+        </div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/myseries.html">MySeriesHD</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/wlk.html">Wathclakorn</div>
 
-<div class="menu-title">🎬 หนังสั้น</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/short.html">หนังสั้นจีน</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/rongyok.html">โรงหยกหนังสั้น</div>
+        <div class="menu-title">🎬 หนังสั้น</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/short.html">หนังสั้นจีน</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/rongyok.html">โรงหยกหนังสั้น
+        </div>
 
-<div class="menu-title">🎮 อนิเมะ</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/animegood.html">AnimeGOOD</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/masterx.html">MasterX</div>
+        <div class="menu-title">🎮 อนิเมะ</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/animegood.html">AnimeGOOD</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/masterx.html">MasterX</div>
 
-<div class="menu-title">💎 VIP</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/VIP.html">VIP</div>
+        <div class="menu-title">💎 VIP</div>
+        <div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/VIP.html">VIP</div>
 
-</div>
+    </div>
 
-<div id="main-player">
+    <div id="main-player">
 
-<div id="welcome">
-<img src="https://www.dropbox.com/scl/fi/qmxborwldhasptwy7e25v/TIEA-IPTV.png?dl=1">
-<h1>TIEA IPTV</h1>
-</div>
+        <div id="welcome">
+            <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
+            <h1>TIEA IPTV</h1>
+        </div>
 
-<iframe id="iframePlayer"></iframe>
+        <iframe id="iframePlayer"></iframe>
 
-<video id="videoPlayer" controls autoplay muted playsinline style="display:none;background:#000;"></video>
+        <video id="videoPlayer" controls autoplay muted playsinline style="display:none;background:#000;"></video>
 
-</div>
+    </div>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
-<script>
-const links=document.querySelectorAll(".menu-link");
+    <script>
+        const links=document.querySelectorAll(".menu-link");
 const iframe=document.getElementById("iframePlayer");
 const video=document.getElementById("videoPlayer");
 const welcome=document.getElementById("welcome");
@@ -192,7 +209,8 @@ welcome.style.display="none";
 
 };
 });
-</script>
+    </script>
 
 </body>
+
 </html>
