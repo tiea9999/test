@@ -7,175 +7,49 @@
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
+
 <style>
 body{
     font-family:'Kanit', sans-serif;
     background:#020617;
     color:#fff;
-    font-variant-numeric: tabular-nums;
-    padding-top:100px;
+    padding-top:70px; /* 🔥 แก้บัง */
+    overflow-y:auto;  /* 🔥 เลื่อนสุดได้ */
 }
 
-*{
-    font-family:'Kanit', sans-serif;
-}
-/* GRID */
-.container{
-    max-width:1400px;   
-    margin:0 auto;      
-    padding:10px 16px;  
-}
-@media (max-width:1200px){
-    .container{grid-template-columns:repeat(4,1fr);}
-}
-@media (max-width:800px){
-    .container{grid-template-columns:repeat(2,1fr);}
-}
-
-/* CARD */
-.card{
-    position:relative;
-    border-radius:18px;
-    overflow:hidden;
-    aspect-ratio:16/9;
-    cursor:pointer;
-    transition:.25s;
-
-    background:rgba(255,255,255,0.06); /* 🔥 โปร่ง */
-    backdrop-filter:blur(12px);
-    border:1px solid rgba(0,200,255,0.25);
-    box-shadow:
-        0 6px 20px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(255,255,255,0.08);
-}
-.card:hover .channel-logo img{
-   transform:translateY(-3px);
-
-    border:1px solid rgba(0,229,255,0.8);
-
-    box-shadow:
-        0 10px 30px rgba(0,0,0,0.6),
-        0 0 20px rgba(0,229,255,0.6);
-}
-
-.bg{
-    position:absolute;
-    inset:0;
-
-    background:
-    radial-gradient(circle at 50% 50%, rgba(0,200,255,0.35), transparent 70%),
-    linear-gradient(160deg,#020617,#020617);
-    opacity:0.6;
-}
-
-/* OVERLAY */
-.overlay{
-
-    background:linear-gradient(
-        to top,
-        rgba(0,0,0,0.25),
-        rgba(0,0,0,0.1),
-        transparent
-    );
-}
-
-/* CONTENT */
-.content{
-    position:absolute;
-    bottom:0;
-    width:100%;
-
-    padding:10px;
-    padding-top:40px; /* 🔥 ต้องมากกว่า .top เล็กน้อย */
-
-    z-index:2;
-}
-
-/* TOP */
-.top{
-    position:absolute;
+.header{
+    position:fixed;
     top:0;
     left:0;
     width:100%;
-
-    box-sizing:border-box; /* 🔥 สำคัญมาก */
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    padding:6px 10px;
-    font-size:12px;
-    font-weight:600;
-    color:#aaa;
-    background:linear-gradient(
-        to bottom,
-        rgba(0,0,0,0.7),
-        rgba(0,0,0,0)
-    );
-
-    z-index:2;
+    z-index:9999;
+    backdrop-filter:blur(10px);
+    background:rgba(5,10,20,0.7);
 }
 
-/* 🔥 TEAMS ใหม่ */
-.teams{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    gap:12px;
-    margin-top:10px;
-    backdrop-filter:blur(4px);   /* 🔥 โปรขึ้น */
-    background:rgba(0,0,0,0.25);   /* 🔥 พื้นหลัง */
-    padding:6px;
-    border-radius:10px;
-}
-
-.team{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:4px;
-    max-width:40%;
-}
-
-.team span{
-    font-size:13px;              /* 🔥 ใหญ่ขึ้น */
-    font-weight:450;             /* 🔥 หนาขึ้น */
-    color:#e6edf3;              /* 🔥 ขาวชัด */
+.top-message{
     text-align:center;
-    letter-spacing:0.2px;
-    text-shadow:0 1px 3px rgba(0,0,0,0.8); /* 🔥 เงาเบาๆ */
-
-    display:-webkit-box;
-    -webkit-line-clamp:2;
-    -webkit-box-orient:vertical;
-    overflow:hidden;
+    font-size:16px; /* 🔥 ลดขนาด */
+    color:#00e5ff;
+    padding:4px;
 }
 
-/* VS */
-.vs{
-    font-size:13px;
-    font-weight:bold;
-    color:#00e5ff; /* 🔥 สีสด */
-    text-shadow:0 0 8px rgba(0,229,255,0.8);
+.back-home{
+    position:fixed;
+    top:80px; /* 🔥 ไม่ทับ */
+    left:5px;
+    padding:4px 8px;
+    border-radius:50px;
+    background:rgba(255,255,255,0.15);
+    color:#fff;
+    cursor:pointer;
+    z-index:10000;
 }
 
-/* SERVERS */
-.servers{
-    margin-top:8px;
-    display:flex;
-    gap:4px;
-    flex-wrap:wrap;
-    justify-content:center;
-}
-.servers button{
-    font-size:10px;
-    padding:3px 6px;
-    border-radius:6px;
-    border:none;
-    background:#fff;
-    color:#000;
-    font-weight:bold;
+.container{
+    max-width:1400px;
+    margin:auto;
+    padding:10px;
 }
 
 /* PLAYER */
@@ -184,20 +58,14 @@ body{
     top:50%;
     left:50%;
     transform:translate(-50%,-50%);
-
     width:80%;
     max-width:1000px;
     aspect-ratio:16/9;
-
     background:#000;
-    border-radius:12px;
-    overflow:hidden;
-
     display:none;
     z-index:9999;
 }
 
-/* ฉากหลังมืด */
 #playerOverlay{
     position:fixed;
     inset:0;
@@ -209,751 +77,92 @@ body{
 video{
     width:100%;
     height:100%;
-    pointer-events:auto;
 }
 
 .close{
     position:absolute;
     top:8px;
     right:8px;
-
-    z-index:10000; /* 🔥 เพิ่มตัวนี้ */
-
     background:red;
+    color:#fff;
     border:none;
-    color:#fff;
-    padding:4px 8px;
-    border-radius:6px;
+    padding:5px;
     cursor:pointer;
 }
-
-.servers button{
-    font-size:11px;
-    padding:5px 10px;
-    border-radius:20px;
-    border:none;
-    background:rgba(255,255,255,0.06);
-    color:#ccc;
-    font-weight:bold;
-    cursor:pointer;
-    transition:.2s;
-}
-
-.servers button:hover{
-    background:#2e3b5f;
-    color:#fff;
-}
-
-/* 🔥 ปุ่มที่เลือก */
-.servers button.active{
-    background:rgba(0,229,255,0.9);
-    color:#000;
-    box-shadow:0 0 8px rgba(0,200,83,0.7);
-}
-
-/* HD */
-.servers button:first-child{
-    background:#1976d2;
-    color:#fff;
-}
-
-/* HD ที่ถูกเลือก */
-.servers button.active:first-child{
-    background:#00e5ff;
-    color:#000;
-}
-
-.section-grid{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:14px;
-    padding:10px;
-}
-
-@media (max-width:1200px){
-    .section-grid{grid-template-columns:repeat(4,1fr);}
-}
-@media (max-width:900px){
-    .section-grid{grid-template-columns:repeat(3,1fr);}
-}
-@media (max-width:600px){
-    .section-grid{grid-template-columns:repeat(2,1fr);}
-}
-
-.tabs{
-    display:flex;
-    gap:8px;
-    padding:10px;
-    justify-content:center;
-}
-
-.tab{
-    padding:6px 14px;
-    border-radius:20px;
-    border:none;
-    background:#1f2a44;
-    color:#aaa;
-    cursor:pointer;
-    font-weight:bold;
-    transition:.2s;
-}
-
-.tab:hover{
-    background:#2e3b5f;
-    color:#fff;
-}
-
-.tab.active{
-    background:#00c853;
-    color:#000;
-}
-
-.channel-logo{
-    position:absolute;
-    top:30%;
-    left:50%;
-    transform:translate(-50%,-50%);
-
-    z-index:4;
-
-    background:none; /* ❌ เอากล่องออก */
-    backdrop-filter:none;
-    padding:0;
-}
-
-.channel-logo img{
-    height:55px;
-
-    filter:
-        drop-shadow(0 0 10px rgba(0,200,255,0.6))
-        drop-shadow(0 0 25px rgba(0,200,255,0.3));
-
-    opacity:0.95;
-}
-
-.badge-hd{
-    position:absolute;
-    bottom:8px;
-    left:8px;
-
-    background:#00e5ff;
-    color:#000;
-    font-size:10px;
-    font-weight:bold;
-
-    padding:3px 6px;
-    border-radius:6px;
-}
-
-.logo-bg{
-    position:absolute;
-    inset:0;
-
-    background-size:contain;
-    background-position:center;
-    background-repeat:no-repeat;
-
-    filter:blur(40px);
-    opacity:0.25;
-    z-index:1;
-}
-.card.no-logo .channel-logo{
-    display:none;
-}
-
-.card.no-logo .logo-bg{
-    display:none;
-}
-
-.tabs{
-    display:flex;
-    gap:10px;
-    justify-content:center;
-    margin-top:10px;
-}
-
-/* กล่องครอบ */
-.tabs-date, .tabs-sport{
-    background:rgba(255,255,255,0.04);
-    padding:6px;
-    border-radius:30px;
-    backdrop-filter:blur(10px);
-    box-shadow:0 0 10px rgba(0,0,0,0.4);
-}
-
-/* ปุ่มพื้นฐาน */
-.tab-date, .tab-sport{
-    padding:6px 16px;
-    border-radius:20px;
-    border:none;
-    background:transparent;
-    color:#aaa;
-    cursor:pointer;
-    font-weight:bold;
-    transition:.25s;
-}
-
-/* hover */
-.tab-date:hover, .tab-sport:hover{
-    color:#fff;
-}
-
-/* active (วัน) */
-.tab-date.active{
-    background:linear-gradient(135deg,#00e5ff,#00c853);
-    color:#000;
-    box-shadow:0 0 10px rgba(0,229,255,0.7);
-}
-
-/* active (กีฬา) */
-.tab-sport.active{
-    background:linear-gradient(135deg,#ff9800,#ff5722);
-    color:#000;
-    box-shadow:0 0 10px rgba(255,152,0,0.7);
-}
-.tabs-sport{
-    margin-top:6px;
-}
-
-/* ทำให้ปุ่มดูมีชีวิต */
-.tab-sport{
-    position:relative;
-    overflow:hidden;
-}
-
-.tab-sport::after{
-    content:"";
-    position:absolute;
-    inset:0;
-    background:linear-gradient(120deg,transparent,rgba(255,255,255,0.2),transparent);
-    opacity:0;
-    transition:.3s;
-}
-
-.tab-sport:hover::after{
-    opacity:1;
-}
-
-/* กีฬา = ซ้าย */
-.tabs-sport{
-    justify-content:flex-start;
-    flex-wrap:wrap;
-}
-
-/* วันที่ = ขวา */
-.tabs-date{
-    justify-content:flex-end;
-    white-space:nowrap;
-}
-.tabs{
-    display:flex;
-    gap:8px;
-}
-.tab-date{
-    font-size:12px;
-    padding:6px 12px;
-}
-
-.top-message{
-    text-align:center;
-    font-size:20px;
-    color:#00e5ff;
-
-    padding:6px 10px;
-    margin-top:6px;
-
-    background:rgba(0,229,255,0.08);
-    border:3px solid rgba(0,229,255,0.2);
-    border-radius:10px;
-
-    box-shadow:0 0 10px rgba(0,229,255,0.2);
-}
-
-.top-bar{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-
-    padding:8px 12px;
-}
-
-
-.header{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    z-index:9999;
-
-    backdrop-filter:blur(12px);
-    background:rgba(5,10,20,0.75);
-
-    border-bottom:1px solid rgba(255,255,255,0.08);
-}
-/* Back Home */
-
-.back-home{
-    position:fixed;
-    top:120px; /* 🔥 อยู่ใต้ header */
-    left:5px;
-
-    padding:4px 8px;
-    border-radius:50px;
-    font-weight:600;
-    cursor:pointer;
-
-    z-index:10000;
-
-    background:rgba(255,255,255,0.15);
-    backdrop-filter:blur(12px);
-    border:1px solid rgba(255,255,255,0.3);
-    color:#fff;
-
-    box-shadow:0 8px 25px rgba(0,0,0,0.3);
-    transition:0.3s ease;
-}
-
-.back-home:hover{
-    background:linear-gradient(90deg,#ff512f,#dd2476);
-    transform:scale(1.05);
-    box-shadow:0 10px 30px rgba(255,0,150,0.6);
-}
-
-
 </style>
 </head>
 
 <body>
 
-
 <div class="header">
-
-    <div class="top-message">
-        📺 TIEA IPTV 📺
-    </div>
-
-    <div class="top-bar">
-
-        <div id="sportTabs" class="tabs tabs-sport"></div>
-
-        <div class="tabs tabs-date">
-            <button class="tab-date active" onclick="switchTab(event,'📅 วันนี้')">📅 วันนี้</button>
-            <button class="tab-date" onclick="switchTab(event,'📅 พรุ่งนี้')">📅 พรุ่งนี้</button>
-            <button class="tab-date" onclick="switchTab(event,'📅 วันถัดไป')">📅 วันถัดไป</button>
-            <button class="tab-date" onclick="switchTab(event,'📅 วันอื่นๆ')">📅 วันอื่นๆ</button>
-        </div>
-</div>    
-
+    <div class="top-message">📺 TIEA IPTV 📺</div>
 </div>
 
 <div class="back-home" onclick="goHome()">⬅กลับ</div>
 
+<div class="container">
+    <button onclick="play('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8')">
+        ▶️ ทดสอบช่อง
+    </button>
 </div>
 
-<div id="list" class="container"></div>
 <div id="playerOverlay" onclick="closePlayer()"></div>
 
-
-<!-- PLAYER -->
 <div id="playerBox">
     <button class="close" onclick="closePlayer()">X</button>
-    <video id="video" controls autoplay></video>
+    <video id="video" controls autoplay playsinline preload="auto"></video>
 </div>
 
 <script>
-
-function switchTab(e, tab){
-    currentTab = tab;
-
-    document.querySelectorAll(".tab-date").forEach(b=>{
-        b.classList.remove("active");
-    });
-
-    e.target.classList.add("active");
-    render();
-}
-
-function switchSport(e, sport){
-    currentSport = sport;
-
-    document.querySelectorAll(".tab-sport").forEach(b=>{
-        b.classList.remove("active");
-    });
-
-    e.target.classList.add("active");
-    render();
-}
-
-/* PLAYLIST */
-const URL = "https://broken-surf-7347.hssmnoy.workers.dev/?url=https://drive.google.com/uc?id=15Ye3NPw0cjNrJGTu2Q2aoqoApOp8GipC&export=download";
-
-let all = [];
-let currentUrl = ""; 
-let currentTab = "📅 วันนี้";
-let currentSport = "⚽ ฟุตบอล";
-
-function checkImage(url){
-    return new Promise(resolve=>{
-        const img = new Image();
-        img.onload = ()=>resolve(true);
-        img.onerror = ()=>resolve(false);
-        img.src = url;
-    });
-}
-
-function getValidLogo(servers){
-    if(!servers || !servers.length) return "";
-
-    const BAD_LOGO = "https://i.ibb.co/L8y25Wd/sports-icon.png";
-
-    for(const s of servers){
-        if(!s.image) continue;
-
-        const img = s.image.trim();
-
-        // ❌ ข้าม placeholder
-        if(img === BAD_LOGO) continue;
-
-        // ❌ กันพวก error image
-        if(img.includes("imgbb.com") || img.includes("no-image")) continue;
-
-        // ✅ ใช้ได้
-        if(img.startsWith("http")){
-            return img;
-        }
-    }
-
-    return "";
-}
-
-/* LOAD */
-async function load(){
-    const res = await fetch(URL);
-    const json = await res.json();
-    all = await parse(json); // 🔥 ต้อง await
-    renderSportTabs();
-    render();
-}
-
-function renderSportTabs(){
-
-    const box = document.getElementById("sportTabs");
-    box.innerHTML = "";
-
-    const sportsRaw = [...new Set(all.map(m => m.sport))];
-
-// 🔥 กำหนดลำดับที่ต้องการ
-const priority = ["⚽ ฟุตบอล", "🏀 NBA"];
-
-// เอาที่อยู่ใน priority ก่อน
-const sports = [
-    ...priority.filter(s => sportsRaw.includes(s)),
-    ...sportsRaw.filter(s => !priority.includes(s))
-];
-
-// เพิ่ม "ทั้งหมด" ไว้หน้า
-sports.unshift("ทั้งหมด");    
-
-    sports.forEach((sport,i)=>{
-
-        const btn = document.createElement("button");
-        btn.className = "tab-sport " + (i==0 ? "active":"");
-        btn.innerText = sport;
-
-        btn.onclick = (e)=>switchSport(e, sport);
-
-        box.appendChild(btn);
-    });
-
-    currentSport = "ทั้งหมด";
-}
-
-
-
-function detectSport(g){
-
-    const text = ((g.name || "") + " " + (g.image || "")).toLowerCase();
-
-    // ⚽ Football / Soccer
-    if(text.match(/football|soccer|premier league|laliga|serie a|bundesliga|nwsl/)) return "⚽ ฟุตบอล";
-
-    // 🏀 NBA / Basketball
-    if(text.match(/nba|basketball|wnba/)) return "🏀 NBA";
-
-    // 🏒 Hockey (NHL)
-    if(text.match(/nhl|hockey/)) return "🏒 ฮอกกี้";
-
-    // ⛳ Golf
-    if(text.match(/golf|pga|dp world tour/)) return "⛳ กอล์ฟ";
-
-    // 🎾 Tennis
-    if(text.match(/tennis|atp|wta/)) return "🎾 เทนนิส";
-
-    // 🏎️ Motorsport
-    if(text.match(/f1|formula|motogp/)) return "🏎️ มอเตอร์สปอร์ต";
-
-    // 🥊 Combat
-    if(text.match(/ufc|boxing|mma/)) return "🥊 ต่อสู้";
-
-    // 🎮 Esport
-    if(text.match(/esport|dota|lol/)) return "🎮 Esport";
-
-    // 🏐 Volleyball
-    if(text.match(/volleyball/)) return "🏐 วอลเลย์บอล";
-
-    // 🏈 American Football
-    if(text.match(/nfl/)) return "🏈 อเมริกันฟุตบอล";
-    
-    // 🏉 Rugby
-    if(text.match(/rugby|tigers|dragons|warriors|rlc|super league/)) return "🏉 รักบี้";
-
-    // 🏏 Cricket
-    if(text.match(/cricket|ipl|indians|knight riders|t20/)) return "🏏 คริกเก็ต";
-    
-    //
-    if(text.includes(" vs ")) return "⚽ ฟุตบอล";
-    
-    // ❗ fallback
-    return "กีฬาอื่นๆ";
-}
-
-
-/* PARSE */
-async function parse(data){
-    let arr=[];
-
-    async function walk(g, parentName=""){
-
-        const currentGroupName = g.name || parentName;
-
-        if(g.stations){
-            arr.push({
-                title: g.name,
-                teams: getTeams(g.name),
-                time: getTime(g.name),
-                dateGroup: getDateGroup(g.name),
-
-                // 🔥 ใช้ parent group ตรวจ sport
-                sport: detectSport({
-    		name: parentName + " " + g.name,
-    		image: g.image
-		}),
-
-                bg: g.image || "",
-                img: g.image || "",
-                servers: g.stations
-            });
-        }
-
-        if(g.groups){
-            for(const sub of g.groups){
-                await walk(sub, currentGroupName);
-            }
-        }
-    }
-
-    for(const g of data.groups){
-        await walk(g);
-    }
-
-    return arr;
-}
-
-/* TEAM */
-function getTeams(title){
-
-    let t = title.replace(/\(.*?\)/g,"").trim();
-
-    // 🟢 ถ้ามี vs → กีฬาแบบทีม
-    if(t.toLowerCase().includes("vs")){
-        let parts = t.split(/vs/i);
-        return [
-            parts[0].trim(),
-            parts[1].trim()
-        ];
-    }
-
-    // 🔵 ไม่มี vs → กีฬาเดี่ยว (กอล์ฟ / เทนนิส / F1)
-    return [t, ""];
-}
-
-/* TIME */
-function getTime(name){
-    let m = name.match(/\d{2}:\d{2}/);
-    return m ? m[0] : "--:--";
-}
-
-function getDateGroup(name){
-    const now = new Date();
-
-    let match = name.match(/(\d{2})\/(\d{2})\s*(\d{2}):(\d{2})/);
-    if(!match) return "อื่นๆ";
-
-    const day = parseInt(match[1]);
-    const month = parseInt(match[2]) - 1;
-    const hour = parseInt(match[3]);
-    const minute = parseInt(match[4]);
-
-    const matchDate = new Date();
-    matchDate.setFullYear(now.getFullYear());
-    matchDate.setMonth(month);
-    matchDate.setDate(day);
-    matchDate.setHours(hour, minute, 0, 0);
-
-    // 🔥 สร้าง today / tomorrow / next day
-    const today = new Date();
-    const tomorrow = new Date();
-    const nextDay = new Date();
-
-    tomorrow.setDate(today.getDate() + 1);
-    nextDay.setDate(today.getDate() + 2);
-
-    // 🔥 ล้างเวลา
-    [today, tomorrow, nextDay].forEach(d => d.setHours(0,0,0,0));
-
-    const checkDate = new Date(matchDate);
-    checkDate.setHours(0,0,0,0);
-
-    if(checkDate.getTime() === today.getTime()){
-        return "📅 วันนี้";
-    }else if(checkDate.getTime() === tomorrow.getTime()){
-        return "📅 พรุ่งนี้";
-    }else if(checkDate.getTime() === nextDay.getTime()){
-        return "📅 วันถัดไป"; // 🔥 ใหม่
-    }else{
-        return "📅 วันอื่นๆ";
-    }
-}
-
-
-/* RENDER */
-async function render(){
-    const list = document.getElementById("list");
-    list.innerHTML="";
-
-    all.sort((a,b)=>{
-        const [ah,am] = a.time.split(":").map(Number);
-        const [bh,bm] = b.time.split(":").map(Number);
-        return (ah*60+am) - (bh*60+bm);
-    });
-
-    const grouped = {};
-    all.forEach(m=>{
-        const key = m.dateGroup || "อื่นๆ";
-        if(!grouped[key]) grouped[key] = [];
-        grouped[key].push(m);
-    });
-
-    const order = ["📅 วันนี้","📅 พรุ่งนี้","📅 วันถัดไป","📅 วันอื่นๆ"];
-
-    order.forEach(groupName=>{
-
-        if(groupName !== currentTab) return;
-
-        const section = document.createElement("div");
-        section.className = "section-grid";
-
-        for (const m of (grouped[groupName] || [])) {
-
-    // 🔥 filter sport
-    if(currentSport !== "ทั้งหมด" && m.sport !== currentSport){
-    continue;
-}
-
-            if(!m.servers || !m.servers.length) continue;
-
-            const card = document.createElement("div");
-            card.className="card";
-
-            const mainLogo = getValidLogo(m.servers);
-            const showLogo = !!mainLogo;
-
-            card.innerHTML = `
-                <div class="bg"></div>
-
-                ${showLogo ? `
-                <div class="logo-bg" style="background-image:url('${mainLogo}')"></div>
-                <div class="channel-logo">
-                    <img src="${mainLogo}" 
-		onerror="
-    		this.onerror=null;
-    		this.remove();
-    		this.closest('.card').classList.add('no-logo');
-		">
-                </div>
-                ` : ""}
-
-                <div class="overlay"></div>
-
-                <div class="top">
-                    <div>${m.sport}</div>
-                    <div>🕒 ${m.time}</div>
-                </div>
-
-                <div class="content">
-                    <div class="teams">
-    ${
-        m.teams[1]
-        ? `
-        <div class="team"><span>${m.teams[0]}</span></div>
-        <div class="vs">VS</div>
-        <div class="team"><span>${m.teams[1]}</span></div>
-        `
-        : `
-        <div class="team" style="max-width:100%">
-            <span>${m.teams[0]}</span>
-        </div>
-        `
-    }
-</div>
-
-                    <div class="servers">
-                        ${(m.servers || []).slice(0,4).map((s,i)=>`
-                            <button data-url="${s.url}">
-                                ${i==0?'HD':'สำรอง'}
-                            </button>
-                        `).join("")}
-                    </div>
-                </div>
-            `;
-
-            // ✅ คลิกการ์ด
-            card.onclick = ()=>play(m.servers?.[0]?.url);
-
-            // ✅ ปุ่ม server (ไม่ใช้ onclick string แล้ว)
-            const buttons = card.querySelectorAll("button");
-            buttons.forEach(btn=>{
-                btn.addEventListener("click", (e)=>{
-                    e.stopPropagation();
-                    play(btn.dataset.url);
-                });
-            });
-
-            section.appendChild(card);
-        }
-
-        list.appendChild(section);
-    });
-}
-
-/* PLAYER */
-const video=document.getElementById("video");
+const video = document.getElementById("video");
+let hls;
 
 function play(url){
-    currentUrl = url; // 🔥 เพิ่ม
 
     document.getElementById("playerBox").style.display="block";
     document.getElementById("playerOverlay").style.display="block";
 
-    render(); // 🔥 เพิ่ม (อัปเดตปุ่ม)
+    if(hls){
+        hls.destroy();
+    }
 
     if(Hls.isSupported()){
-        const hls=new Hls();
+
+        hls = new Hls({
+            maxBufferLength: 30,
+            maxMaxBufferLength: 60,
+            liveSyncDuration: 3,
+            liveMaxLatencyDuration: 10,
+            enableWorker: true,
+            lowLatencyMode: true,
+            backBufferLength: 10,
+            fragLoadingTimeOut: 20000,
+            manifestLoadingTimeOut: 20000
+        });
+
         hls.loadSource(url);
         hls.attachMedia(video);
+
+        hls.on(Hls.Events.MANIFEST_PARSED, ()=>{
+            video.play().catch(()=>{});
+        });
+
+        // 🔥 กันหมุน
+        hls.on(Hls.Events.ERROR, function(event, data){
+            if(data.fatal){
+                if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
+                    hls.startLoad();
+                }else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
+                    hls.recoverMediaError();
+                }else{
+                    hls.destroy();
+                }
+            }
+        });
+
     }else{
-        video.src=url;
+        video.src = url;
+        video.play().catch(()=>{});
     }
 }
 
@@ -962,9 +171,10 @@ function closePlayer(){
     document.getElementById("playerOverlay").style.display="none";
     video.pause();
 }
-function goHome(){ window.location.href="https://tiea9999.github.io/tv/index.html"; }
-load();
 
+function goHome(){
+    window.location.href="https://tiea9999.github.io/tv/index.html";
+}
 </script>
 
 </body>
