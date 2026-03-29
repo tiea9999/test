@@ -9,6 +9,7 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+
 body{
 display:flex;
 height:100vh;
@@ -19,7 +20,7 @@ overflow:hidden;
 
 /* SIDEBAR */
 #menu{
-width:200px;
+width:220px;
 background:rgba(20,20,35,0.95);
 padding:20px;
 overflow-y:auto;
@@ -28,8 +29,9 @@ overflow-y:auto;
 .menu-title{
 padding:12px;
 border-radius:12px;
-margin:10px 0;
+margin:12px 0 6px;
 cursor:pointer;
+font-weight:bold;
 }
 
 .menu-link{
@@ -37,20 +39,20 @@ display:block;
 padding:10px;
 cursor:pointer;
 border-radius:6px;
+transition:.2s;
 }
 
-.menu-link.active{
-background:#e94560;
-}
+.menu-link:hover{background:#e94560;}
+.menu-link.active{background:#ff512f;}
 
 /* PLAYER */
 #main-player{
 flex:1;
+position:relative;
 display:flex;
 justify-content:center;
 align-items:center;
 background:#000;
-position:relative;
 }
 
 iframe{
@@ -71,17 +73,37 @@ text-align:center;
 <div id="menu">
 
 <div class="menu-title">📺 ทีวีออนไลน์</div>
-
-<div class="menu-link" data-url="https://tiea9999.github.io/tv/iptv.html">3BB TV</div>
-<div class="menu-link" data-url="https://tiea9999.github.io/tv/inwhd.html">GOD TV</div>
-<div class="menu-link" data-url="https://tiea9999.github.io/tv/sport.html">SPORT TV</div>
-<div class="menu-link" data-url="https://tiea9999.github.io/tv/ball66.html">DOOBALL66</div>
+<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/iptv.html">3BB TV</div>
+<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/inwhd.html">GOD TV</div>
+<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/sport.html">SPORT TV</div>
+<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/ball66.html">DOOBALL66</div>
+<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/live66.html">ตาราง Ball66</div>
+<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/DKL.html">ตาราง DKL</div>
 
 <div class="menu-title">🎬 หนัง</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/037hd.html">037HD</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/hdx.html">LK-HDX</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/24hd.html">24-HDS</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/7hd.html">7HD</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/MOVIE01.html">MIX MOVIE</div>
 
-<div class="menu-link" data-url="https://tiea9999.github.io/tv/037hd.html">037HD</div>
-<div class="menu-link" data-url="https://tiea9999.github.io/tv/hdx.html">LK-HDX</div>
-<div class="menu-link" data-url="https://tiea9999.github.io/tv/24hd.html">24-HDS</div>
+<div class="menu-title">📺 ซีรี่ย์</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/flixmono.html">Flixmono</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/seriesday.html">SeriesDay</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/goseries4k.html">GoSeries4K</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/myseries.html">MySeriesHD</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/wlk.html">Wathclakorn</div>
+
+<div class="menu-title">🎬 หนังสั้น</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/short.html">หนังสั้นจีน</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/rongyok.html">โรงหยก</div>
+
+<div class="menu-title">🎮 อนิเมะ</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/animegood.html">AnimeGOOD</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/masterx.html">MasterX</div>
+
+<div class="menu-title">💎 VIP</div>
+<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/VIP.html">VIP</div>
 
 </div>
 
@@ -102,31 +124,29 @@ const iframe=document.getElementById("iframePlayer");
 const welcome=document.getElementById("welcome");
 
 links.forEach(link=>{
-link.addEventListener("click",()=>{
+link.onclick=()=>{
 
 links.forEach(l=>l.classList.remove("active"));
 link.classList.add("active");
 
+const type=link.dataset.type;
 const url=link.dataset.url;
 
-// 🔥 ตรวจว่าเป็นหนัง
-const isMovie = url.includes("037hd") || url.includes("hdx") || url.includes("24hd");
-
-// 🎬 หนัง → เปิดใหม่ (แก้กระพริบ)
-if(isMovie){
+// 🎬 หนัง / ซีรี่ย์ / VIP → เปิดใหม่ (กัน JW กระพริบ)
+if(type==="movie"){
 window.open(url,"_blank");
 return;
 }
 
-// 📺 ทีวี → iframe
-if(iframe.src !== url){
+// 📺 TV → iframe
+if(iframe.src!==url){
 iframe.src=url;
 }
 
 iframe.style.display="block";
 welcome.style.display="none";
 
-});
+};
 });
 
 </script>
