@@ -18,12 +18,42 @@ color:#fff;
 overflow:hidden;
 }
 
-/* SIDEBAR */
+/* 🔥 แก้ scroll */
 #menu{
 width:220px;
 background:rgba(20,20,35,0.95);
 padding:20px;
 overflow-y:auto;
+height:100vh;
+}
+
+/* 🔥 ปรับ main ให้เลื่อนได้ */
+#main-player{
+flex:1;
+position:relative;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#000;
+overflow:auto;
+}
+
+/* โลโก้กลาง */
+#welcome{
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+height:100%;
+text-align:center;
+}
+
+#welcome img{
+width:250px;
+max-width:80%;
+border-radius:20px;
+box-shadow:0 0 40px rgba(255,0,150,0.7);
+margin-bottom:20px;
 }
 
 .menu-title{
@@ -39,32 +69,16 @@ display:block;
 padding:10px;
 cursor:pointer;
 border-radius:6px;
-transition:.2s;
 }
 
 .menu-link:hover{background:#e94560;}
 .menu-link.active{background:#ff512f;}
-
-/* PLAYER */
-#main-player{
-flex:1;
-position:relative;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#000;
-}
 
 iframe{
 width:100%;
 height:100%;
 border:none;
 }
-
-#welcome{
-text-align:center;
-}
-
 </style>
 </head>
 
@@ -110,6 +124,7 @@ text-align:center;
 <div id="main-player">
 
 <div id="welcome">
+<img src="https://www.dropbox.com/scl/fi/qmxborwldhasptwy7e25v/TIEA-IPTV.png?dl=1">
 <h1>TIEA IPTV</h1>
 </div>
 
@@ -118,7 +133,6 @@ text-align:center;
 </div>
 
 <script>
-
 const links=document.querySelectorAll(".menu-link");
 const iframe=document.getElementById("iframePlayer");
 const welcome=document.getElementById("welcome");
@@ -132,13 +146,11 @@ link.classList.add("active");
 const type=link.dataset.type;
 const url=link.dataset.url;
 
-// 🎬 หนัง / ซีรี่ย์ / VIP → เปิดใหม่ (กัน JW กระพริบ)
 if(type==="movie"){
 window.open(url,"_blank");
 return;
 }
 
-// 📺 TV → iframe
 if(iframe.src!==url){
 iframe.src=url;
 }
@@ -148,7 +160,6 @@ welcome.style.display="none";
 
 };
 });
-
 </script>
 
 </body>
