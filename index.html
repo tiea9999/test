@@ -9,7 +9,6 @@
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-
 body{
 display:flex;
 height:100vh;
@@ -20,94 +19,50 @@ overflow:hidden;
 
 /* SIDEBAR */
 #menu{
-width:220px;
-background:#141423;
-padding:15px;
+width:200px;
+background:rgba(20,20,35,0.95);
+padding:20px;
 overflow-y:auto;
-transition:.3s;
 }
 
 .menu-title{
-padding:10px;
+padding:12px;
+border-radius:12px;
 margin:10px 0;
-border-radius:10px;
-background:#333;
 cursor:pointer;
 }
 
 .menu-link{
+display:block;
 padding:10px;
-margin:4px 0;
-border-radius:8px;
 cursor:pointer;
-transition:.2s;
+border-radius:6px;
 }
 
-/* 🔥 focus รีโมท */
-.menu-link.focused{
+.menu-link.active{
 background:#e94560;
-transform:scale(1.05);
-outline:2px solid #00ffe5;
 }
 
+/* PLAYER */
 #main-player{
 flex:1;
-position:relative;
 display:flex;
 justify-content:center;
 align-items:center;
 background:#000;
+position:relative;
 }
 
-/* PLAYER */
-video,iframe{
+iframe{
 width:100%;
 height:100%;
 border:none;
 }
 
-/* loading */
-#loading{
-position:absolute;
-font-size:20px;
-display:none;
-z-index:10;
+#welcome{
+text-align:center;
 }
 
-/* 🔥 ช่องโปรด */
-#channelGrid{
-position:absolute;
-bottom:20px;
-left:240px;
-right:20px;
-display:flex;
-gap:12px;
-overflow-x:auto;
-}
-
-.channel-card{
-min-width:120px;
-height:70px;
-background:#222;
-border-radius:10px;
-display:flex;
-align-items:center;
-justify-content:center;
-cursor:pointer;
-transition:.2s;
-}
-
-.channel-card img{
-width:100%;
-height:100%;
-object-fit:cover;
-border-radius:10px;
-}
-
-.channel-card.focused{
-transform:scale(1.1);
-outline:2px solid #00ffe5;
-}
 </style>
 </head>
 
@@ -115,157 +70,65 @@ outline:2px solid #00ffe5;
 
 <div id="menu">
 
-<div class="menu-title">📺 TV</div>
+<div class="menu-title">📺 ทีวีออนไลน์</div>
 
-<!-- 🔥 ถ้าเป็นเว็บ (ไม่ใช่ m3u8) ใช้ type=iframe -->
-<div class="menu-link" data-type="iframe" data-url="https://tiea9999.github.io/tv/live66.html">dooball66</div>
+<div class="menu-link" data-url="https://tiea9999.github.io/tv/iptv.html">3BB TV</div>
+<div class="menu-link" data-url="https://tiea9999.github.io/tv/inwhd.html">GOD TV</div>
+<div class="menu-link" data-url="https://tiea9999.github.io/tv/sport.html">SPORT TV</div>
+<div class="menu-link" data-url="https://tiea9999.github.io/tv/ball66.html">DOOBALL66</div>
 
-<div class="menu-title">🎬 MOVIE</div>
+<div class="menu-title">🎬 หนัง</div>
 
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/037hd.html">037HD</div>
+<div class="menu-link" data-url="https://tiea9999.github.io/tv/037hd.html">037HD</div>
+<div class="menu-link" data-url="https://tiea9999.github.io/tv/hdx.html">LK-HDX</div>
+<div class="menu-link" data-url="https://tiea9999.github.io/tv/24hd.html">24-HDS</div>
 
 </div>
 
 <div id="main-player">
 
-<div id="loading">⏳ กำลังโหลด...</div>
+<div id="welcome">
+<h1>TIEA IPTV</h1>
+</div>
 
 <iframe id="iframePlayer"></iframe>
 
-<video id="videoPlayer" controls autoplay muted playsinline style="display:none;background:#000;"></video>
-
-<!-- 🔥 grid ช่อง -->
-<div id="channelGrid">
-
-<div class="channel-card" data-url="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
-<img src="https://www.fileinwtv.site/postor/20250830165328Mono1.jpg">
 </div>
-
-<div class="channel-card" data-url="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8">
-<img src="https://www.fileinwtv.site/postor/20250830165343Mono2.jpg">
-</div>
-
-</div>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <script>
+
+const links=document.querySelectorAll(".menu-link");
 const iframe=document.getElementById("iframePlayer");
-const video=document.getElementById("videoPlayer");
-const loading=document.getElementById("loading");
+const welcome=document.getElementById("welcome");
 
-let hls;
+links.forEach(link=>{
+link.addEventListener("click",()=>{
 
-// 🔥 เล่น TV (m3u8 เท่านั้น)
-function playVideo(url){
+links.forEach(l=>l.classList.remove("active"));
+link.classList.add("active");
 
-loading.style.display="block";
-iframe.style.display="none";
-video.style.display="block";
+const url=link.dataset.url;
 
-if(hls){hls.destroy();}
+// 🔥 ตรวจว่าเป็นหนัง
+const isMovie = url.includes("037hd") || url.includes("hdx") || url.includes("24hd");
 
-if(Hls.isSupported()){
-hls=new Hls({
-maxBufferLength:60,
-maxMaxBufferLength:120,
-liveSyncDuration:10,
-enableWorker:true
-});
-hls.loadSource(url);
-hls.attachMedia(video);
-
-hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-loading.style.display="none";
-video.play().catch(()=>{});
-});
-
-}else{
-video.src=url;
-video.onloadeddata=()=>loading.style.display="none";
-video.play();
-}
-}
-
-// 🔥 เมนู
-document.querySelectorAll(".menu-link").forEach(el=>{
-el.onclick=()=>{
-
-const type=el.dataset.type;
-const url=el.dataset.url;
-
-loading.style.display="block";
-
-// 📺 TV แบบ m3u8
-if(type==="tv"){
-playVideo(url);
-}
-
-// 🌐 TV แบบเว็บ
-else if(type==="iframe"){
-video.style.display="none";
-iframe.style.display="block";
-iframe.src=url;
-iframe.onload=()=>loading.style.display="none";
-}
-
-// 🎬 หนัง (เปิดใหม่ ไม่กระพริบ)
-else if(type==="movie"){
-loading.style.display="none";
+// 🎬 หนัง → เปิดใหม่ (แก้กระพริบ)
+if(isMovie){
 window.open(url,"_blank");
+return;
 }
 
-};
+// 📺 ทีวี → iframe
+if(iframe.src !== url){
+iframe.src=url;
+}
+
+iframe.style.display="block";
+welcome.style.display="none";
+
+});
 });
 
-// 🔥 grid ช่อง (m3u8)
-document.querySelectorAll(".channel-card").forEach(el=>{
-el.onclick=()=>playVideo(el.dataset.url);
-});
-
-// 🎮 รีโมท (แยก navigation ดีขึ้น)
-let menuItems=[...document.querySelectorAll(".menu-link")];
-let gridItems=[...document.querySelectorAll(".channel-card")];
-
-let mode="menu"; // menu หรือ grid
-let index=0;
-
-function updateFocus(){
-[...menuItems,...gridItems].forEach(i=>i.classList.remove("focused"));
-
-if(mode==="menu"){
-menuItems[index]?.classList.add("focused");
-menuItems[index]?.scrollIntoView({block:"center"});
-}else{
-gridItems[index]?.classList.add("focused");
-gridItems[index]?.scrollIntoView({inline:"center"});
-}
-}
-updateFocus();
-
-document.addEventListener("keydown",(e)=>{
-
-if(mode==="menu"){
-if(e.key==="ArrowDown"){index=(index+1)%menuItems.length;}
-if(e.key==="ArrowUp"){index=(index-1+menuItems.length)%menuItems.length;}
-if(e.key==="ArrowRight"){mode="grid";index=0;}
-}
-
-else if(mode==="grid"){
-if(e.key==="ArrowRight"){index=(index+1)%gridItems.length;}
-if(e.key==="ArrowLeft"){index=(index-1+gridItems.length)%gridItems.length;}
-if(e.key==="ArrowUp"){mode="menu";index=0;}
-}
-
-if(e.key==="Enter"){
-if(mode==="menu"){menuItems[index]?.click();}
-else{gridItems[index]?.click();}
-}
-
-updateFocus();
-});
 </script>
 
 </body>
