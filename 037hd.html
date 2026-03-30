@@ -775,53 +775,53 @@ const PLAYLISTS = [
 
 
 {
-    name: "หนังใหม่ชนโรง",
-    type: "json",
-    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ชนโรง.json",
-    
+name: "หนังใหม่ชนโรง",
+type: "json",
+url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ชนโรง.json",
+
 },
 {
-    name: "หนังใหม่ 2026",
-    type: "json",
-    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ 2026.json",
-    
+name: "หนังใหม่ 2026",
+type: "json",
+url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ 2026.json",
+
 },
 {
-    name: "หนังใหม่ 2025",
-    type: "json",
-    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ 2025.json",
-    
+name: "หนังใหม่ 2025",
+type: "json",
+url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ 2025.json",
+
 },
 {
-    name: "หนังไทย",
-    type: "json",
-    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังไทย.json",
-    
+name: "หนังไทย",
+type: "json",
+url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังไทย.json",
+
 },
 {
-    name: "หนังเอเซีย",
-    type: "json",
-    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังเอเชีย.json",
-    
+name: "หนังเอเซีย",
+type: "json",
+url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังเอเชีย.json",
+
 },
 {
-    name: "หนังฝรั่ง",
-    type: "json",
-    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังฝรั่ง.json",
-    
+name: "หนังฝรั่ง",
+type: "json",
+url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังฝรั่ง.json",
+
 },
 {
-    name: "หนังการ์ตูน",
-    type: "json",
-    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังการ์ตูน.json",
-    
+name: "หนังการ์ตูน",
+type: "json",
+url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังการ์ตูน.json",
+
 },
 {
-    name: "Netflix",
-    type: "json",
-    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/Netflix.json",
-    
-},	
+name: "Netflix",
+type: "json",
+url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/Netflix.json",
+
+},
 ];
 
 function parseM3U(data, playlistName){
@@ -936,7 +936,7 @@ else if(pl.type==="json"){
 
     try{
         const data = JSON.parse(text);
-        channels = parseJSONPlaylist(data, pl.name, true); // ✅ combineSeries = true
+        channels = parseJSONPlaylist(data, pl.name);
     }catch(e){
         // ถ้าไม่ใช่ JSON → parse เป็น M3U
         channels = parseM3U(text, pl.name);
@@ -964,30 +964,9 @@ renderGrid();
 
 }
 
-function parseJSONPlaylist(data, playlistName, combineSeries=false){
+function parseJSONPlaylist(data, playlistName){
 
     let channels = [];
-
-if(combineSeries && typeof data === "object" && !Array.isArray(data)){
-    Object.keys(data).forEach(seriesName=>{
-        const episodes = data[seriesName];
-        if(!Array.isArray(episodes)) return;
-
-        channels.push({
-            title: seriesName,
-            group: episodes[0]?.category || playlistName,
-            logo: episodes[0]?.poster || "",
-            episodes: episodes.map(ep=>({
-                title: ep.title || ep.name || "ไม่ทราบชื่อ",
-                url: ep.url,
-                poster: ep.poster || "",
-                page: ep.page || ""
-            }))
-        });
-    });
-
-    return channels;
-}
 
 // =========================
 // 🔥 แบบที่ 0 : channels (dookeela)
@@ -1057,28 +1036,8 @@ if(data.channels && Array.isArray(data.channels)){
 
         return channels;
     }
-
-	// =========================
-// 🔥 แบบที่ 3 : JSON หนัง (มี poster)
 // =========================
-if(Array.isArray(data) && data.length && data[0].poster){
-
-    data.forEach(item => {
-
-        channels.push({
-            title: item.title || item.name || "ไม่ทราบชื่อ",
-            group: item.group || playlistName,
-            logo: item.poster || "",
-            url: item.stream || item.url || "",
-            servers: item.servers || []   // ✅ เพิ่มตรงนี้ด้วย
-        });
-
-    });
-
-    return channels;
-}
-// =========================
-// 🔥 แบบที่ 4 : array ธรรมดา (playlist หนัง)
+// 🔥 แบบที่ 3 : array ธรรมดา (playlist หนัง)
 // =========================
 if(Array.isArray(data)){
 
@@ -1088,38 +1047,19 @@ if(Array.isArray(data)){
             title: item.title || item.name || "ไม่ทราบชื่อ",
             group: item.group || playlistName,
             logo: item.logo || item.image || "",
-            url: item.url || item.stream || "",
-            servers: item.servers || []   // ✅ เพิ่มบรรทัดนี้
+            url: item.url || item.stream || ""
         });
 
     });
 
     return channels;
 }
-
-// =========================
-// แบบที่ 5 : ซีรีส์/รายการทีวี (series + poster + page)
-if(typeof data === "object" && !Array.isArray(data)){
-    Object.keys(data).forEach(seriesName=>{
-        const episodes = data[seriesName];
-        if(!Array.isArray(episodes)) return;
-        episodes.forEach(ep=>{
-            channels.push({
-                title: ep.title || ep.name || "ไม่ทราบชื่อ",
-                group: ep.category || seriesName || playlistName,
-                logo: ep.poster || "",
-                url: ep.url,
-                urls: ep.url ? [ep.url] : [],       // 🔥 เพิ่มตรงนี้
-                referer: ep.page || ""
-            });
-        });
-    });
     return channels;
 }
 
-    return channels;
-}
-    
+
+
+
 function buildMainMenu(){
 
     const menu=document.getElementById("mainMenu");
@@ -1157,6 +1097,27 @@ function buildMainMenu(){
 }
 
 buildMainMenu();
+
+document.getElementById("switchPlayerBtn").onclick = function(){
+
+    if(forcedPlayer === null){
+        forcedPlayer = "html5";
+        this.innerText = "HTML5";
+    }
+    else if(forcedPlayer === "html5"){
+        forcedPlayer = "jw";
+        this.innerText = "JW";
+    }
+    else{
+        forcedPlayer = null;
+        this.innerText = "Auto";
+    }
+
+    if(currentChannel){
+        playStream(currentChannel);
+    }
+
+};
 
 document.getElementById("backHome").addEventListener("click", () => {
     window.location.href = "https://tiea9999.github.io/tv/index.html";
@@ -1263,61 +1224,11 @@ function renderGrid(){
                  src="${ch.logo||'https://via.placeholder.com/300x450?text=No+Image'}">
             <div class="movie-title">${ch.title}</div>
         `;
-        card.onclick = () => {
-
-    // ✅ 1. ถ้ามีหลาย server → ให้เลือก
-    if(ch.servers && ch.servers.length > 1){
-        openServerPopup({
-            name: ch.title,
-            servers: ch.servers
-        });
-        return;
-    }
-
-    // ✅ 2. ถ้ามี server เดียว → เล่นทันที
-    if(ch.servers && ch.servers.length === 1){
-        playStream({
-            title: ch.title,
-            url: ch.servers[0].url
-        });
-        return;
-    }
-
-    // 🔄 3. ของเดิม (เผื่อกรณีอื่น)
-    if(ch.episodes && ch.episodes.length > 0){
-        renderSeriesEpisodes(ch);
-    } else {
-        playStream(ch);
-    }
-};
+        card.onclick=()=>playStream(ch);
         grid.appendChild(card);
     });
 
     renderPagination(totalPages);
-}
-
-function renderSeriesEpisodes(series){
-    grid.innerHTML = "";
-
-    series.episodes
-.forEach(ep => {   // ใช้ตามลำดับ array ดั้งเดิม
-        const card = document.createElement("div");
-        card.className = "movie-card";
-
-        card.innerHTML = `<div class="movie-title">${ep.title}</div>`;
-
-        card.onclick = () => {
-            playStream(ep); // เล่น episode
-        };
-
-        grid.appendChild(card);
-    });
-
-    const backBtn = document.createElement("button");
-    backBtn.textContent = "← กลับ";
-    backBtn.className = "back-btn";
-    backBtn.onclick = ()=>{ renderGrid(); };
-    grid.prepend(backBtn);
 }
 
 function renderAnimeGrid(){
@@ -1519,46 +1430,21 @@ function resetPlayers(){
     }
         
     if(jwInstance){
-
-    try{
-        jwInstance.stop();
-        jwInstance.remove();
-    }catch(e){}
-
+    try{ jwInstance.remove(); }catch(e){}
     jwInstance = null;
 }
-
-// 🔥 kill JW ทุก instance กันเสียงค้าง
-try{
-    jwplayer().remove();
-}catch(e){}
-
-	
-    const jwDiv = document.getElementById("jw-player");
-
-if(jwDiv){
-    jwDiv.innerHTML = "";
-}
-    
-const oldVideo = document.getElementById("videoPlayer");
+    document.getElementById("jw-player").innerHTML="";
+    const oldVideo = document.getElementById("videoPlayer");
 
 if(oldVideo){
 
-    try{
     oldVideo.pause();
-    oldVideo.muted = true;
-}catch(e){}
-
     oldVideo.removeAttribute("src");
-    oldVideo.srcObject = null;
-
-    while(oldVideo.firstChild){
-        oldVideo.removeChild(oldVideo.firstChild);
-    }
-
     oldVideo.load();
 
-    video = oldVideo;
+    const newVideo = oldVideo.cloneNode(true);
+    oldVideo.parentNode.replaceChild(newVideo, oldVideo);
+    video = newVideo;
 
     video.style.display = "block";
     document.getElementById("jw-player").style.display = "none";
@@ -1567,14 +1453,8 @@ if(oldVideo){
     setPlayerLabel(forcedPlayer ? forcedPlayer.toUpperCase() : "Auto");
 
 const iframe = document.getElementById("iframePlayer");
-
 if(iframe){
-
-    iframe.src = "";
-    iframe.removeAttribute("src");
-
     iframe.src = "about:blank";
-
     iframe.style.display = "none";
 }
 
@@ -1584,15 +1464,6 @@ function startJW(channel){
 
     video.style.display="none";
     document.getElementById("jw-player").style.display="block";
-
-    // 🔥 kill player เก่าก่อน
-    if(jwInstance){
-        try{
-            jwInstance.stop(true);
-            jwInstance.remove();
-        }catch(e){}
-        jwInstance = null;
-    }
 
     jwInstance = jwplayer("jw-player").setup({
         file: channel.url,
@@ -1607,16 +1478,32 @@ function startJW(channel){
 
 }
 
+function startJWfallback(channel){
+
+    video.style.display="none";
+    document.getElementById("jw-player").style.display="block";
+
+    jwInstance = jwplayer("jw-player").setup({
+        file: channel.url,
+        width: "100%",
+        height: "100%",
+        autostart: true,
+        primary: "html5"
+    });
+
+    jwInstance.on('ready', function(){
+        setDefaultVolumeJW();
+    });
+
+}
+
+
 /* PLAY */
-
 function playStream(channel){
-
-    resetPlayers();   // 🔥 ย้ายขึ้นมาบรรทัดแรก
-
     currentChannel = channel; 
-
     overlay.classList.add("active");
     playerContainer.classList.add("active");
+    resetPlayers();
 
     if(!channel.url && channel.urls){
     channel.url = channel.urls[0];
@@ -1651,8 +1538,8 @@ if(
     !url.includes(".mp4") &&
     !url.includes(".mpd") &&
     !url.includes(".txt") &&
-    !url.includes("/qualitys/")
-     
+    !url.includes("/qualitys/")&&
+	url.includes("master")
 ){
 
     setPlayerLabel("Iframe");
@@ -1697,7 +1584,7 @@ if(forcedPlayer === "html5"){
 
             hls = new Hls({
     enableWorker:true,
-    lowLatencyMode:false,
+    lowLatencyMode:true,
 
     // 🔥 บังคับ parse playlist
     manifestLoadingTimeOut: 20000,
@@ -1845,34 +1732,23 @@ url.includes("master")
     video.style.display="block";
     document.getElementById("jw-player").style.display="none";
 
+    // 1️⃣ Safari native
     if(video.canPlayType("application/vnd.apple.mpegurl") && !channel.referer){
 
-    setPlayerLabel("Native HLS");
-
-    video.src = channel.url;
-    video.load();
-    setDefaultVolumeHTML5();
-
-    video.addEventListener("loadedmetadata", function(){
+        setPlayerLabel("Native HLS");
+        video.src = channel.url;
+        video.load();
+		setDefaultVolumeHTML5();
         video.play().catch(()=>{});
-    }, { once:true });
 
-    video.addEventListener("error", function(){
-        startJWfallback(channel);
-    }, { once:true });
+        setTimeout(()=>{
+            if(video.readyState < 2){
+                startJWfallback(channel);
+            }
+        },3000);
 
-    // 🔥 ตรวจว่าเล่นจริงหรือไม่
-    setTimeout(()=>{
-
-        if(video.paused || video.currentTime === 0){
-            console.log("Native HLS stuck → fallback JW");
-            startJWfallback(channel);
-        }
-
-    },3000);
-
-    return;
-}
+        return;   // ✅ สำคัญมาก
+    }
 
     // 2️⃣ HLS.js
     if(typeof Hls !== "undefined" && Hls.isSupported()){
@@ -1887,7 +1763,7 @@ url.includes("master")
      hls = new Hls({
 
 enableWorker:true,
-lowLatencyMode:false,
+lowLatencyMode:true,
 
 manifestLoadingTimeOut:20000,
 manifestLoadingMaxRetry:5,
@@ -1898,9 +1774,10 @@ xhrSetup: function(xhr,url){
 
     xhr.withCredentials = false;
 
-    if(channel.referer){
-        xhr.setRequestHeader("Referer", channel.referer);
-    }
+    // 🔥 เพิ่ม 3 บรรทัดนี้
+    xhr.setRequestHeader("Referer", location.href);
+    xhr.setRequestHeader("Origin", location.origin);
+    xhr.setRequestHeader("User-Agent", navigator.userAgent);
 
 }
 });  
@@ -1977,48 +1854,36 @@ xhrSetup: function(xhr,url){
 function startJWfallback(channel){
 
     setPlayerLabel("JW (Fallback)");
-
     video.style.display="none";
     document.getElementById("jw-player").style.display="block";
-
-    if(jwInstance){
-        try{
-            jwInstance.stop(true);
-            jwInstance.remove();
-        }catch(e){}
-        jwInstance = null;
-    }
 
     let type = null;
 
     if(channel.url.toLowerCase().includes(".mpd")) type = "dash";
     else if(
-        channel.url.toLowerCase().includes(".m3u8") ||
-        channel.url.toLowerCase().includes(".txt")
-    ) type = "hls";
+    channel.url.toLowerCase().includes(".m3u8") ||
+    channel.url.toLowerCase().includes(".txt")
+) type = "hls";
 
     jwInstance = jwplayer("jw-player").setup({
-        file: channel.url,
-        width: "100%",
-        height: "100%",
-        autostart: true,
-        primary: "html5",
-        type: type
-    });
-
-    jwInstance.on('ready', function(){
-        setDefaultVolumeJW();
-    });
+    file: channel.url,
+    width: "100%",
+    height: "100%",
+    autostart: true,
+    primary: "html5",
+    type: type,
+    
+});
+	jwInstance.on('ready', function(){
+    setDefaultVolumeJW();   // ✅ 25%
+});
 }
 
 /* CLOSE */
 overlay.onclick=()=>{
-
-resetPlayers();
-
 overlay.classList.remove("active");
 playerContainer.classList.remove("active");
-
+resetPlayers();
 };
 
 /* ================= INIT ================= */
