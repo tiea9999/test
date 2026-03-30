@@ -5,197 +5,646 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TIEA IPTV</title>
 
-<link rel="icon" href="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?dl=1">
+<link rel="icon" href="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 
 body{
-display:flex;
-height:100vh;
-background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
-color:#fff;
+  display:flex;
+  height:100vh;
+  background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);
+  color:#fff;
+  overflow:hidden;
 }
 
-/* 📱 แนวตั้ง fix */
-@media(max-width:768px){
-body{flex-direction:column;}
-#menu{width:100%;height:50vh;}
-#main-player{height:50vh;}
+/* MOBILE BUTTON */
+#mobileToggle{
+  position:fixed;
+  top:15px;
+  left:15px;
+  background:linear-gradient(90deg,#ff512f,#dd2476);
+  padding:8px 14px;
+  border-radius:8px;
+  cursor:pointer;
+  z-index:1000;
+  display:none;
+  font-weight:bold;
+  transition:0.3s;
 }
+#mobileToggle:hover{transform:scale(1.05);}
 
-/* MENU */
+/* SIDEBAR */
 #menu{
-width:230px;
-background:rgba(20,20,35,0.95);
-padding:20px;
-overflow-y:auto;
+  width:200px;
+  background:rgba(20,20,35,0.95);
+  backdrop-filter:blur(15px);
+  border-right:1px solid rgba(255,255,255,0.08);
+  padding:20px;
+  overflow-y:auto;
+  transition:0.4s;
+  box-shadow:5px 0 40px rgba(0,0,0,0.6);
+}
+#menu.hidden{transform:translateX(-100%);}
+
+/* LOGO */
+.logo-box{
+  text-align:center;
+  margin-bottom:25px;
+  padding-bottom:15px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+.logo-box img{
+  width:100%;
+  max-width:180px;
+  border-radius:20px;
+  box-shadow:0 0 30px rgba(255,0,150,0.7);
 }
 
+/* HOME */
+.home-btn{
+  display:block;
+  padding:10px;
+  text-align:center;
+  background:linear-gradient(90deg,#00c6ff,#0072ff);
+  border-radius:8px;
+  margin-bottom:15px;
+  cursor:pointer;
+  font-weight:bold;
+  transition:0.3s;
+}
+.home-btn:hover{transform:scale(1.05);}
+
+/* MENU TITLE */
 .menu-title{
-padding:12px;
-margin:12px 0 6px;
-background:#333;
-border-radius:10px;
-font-weight:bold;
-}
+  padding:12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+  margin:12px 0 6px;
+  transition:0.3s ease;
 
+}
+  
+.menu-title:hover{transform:scale(1.05);}
+
+.premium {background: linear-gradient(90deg, #ff416c, #ff4b2b);} /* ชมพูแดงร้อนแรง */
+.movie {background: linear-gradient(90deg, #36d1dc, #5b86e5);} /* ฟ้า → น้ำเงิน สดใส */
+.series {background: linear-gradient(90deg, #f9d423, #ff4e50);} /* เหลืองทอง → แดงอมส้ม */
+.anime {background: linear-gradient(90deg, #11998e, #38ef7d);} /* เขียว → เขียวอ่อน สดชื่น */
+.short {background: linear-gradient(90deg, #8e2de2, #4a00e0);} /* ม่วงเข้ม → ม่วงสด */
+.vip {background: linear-gradient(90deg, #fcb045, #fd1d1d);} /* ทอง → แดงร้อนแรง */
+
+/* SUBMENU */
+.submenu{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.4s ease;
+}
+.submenu.open{max-height:1000px;}
+
+/* ACTIVE MENU TITLE */
+.menu-title.active-title{
+  box-shadow: 0 0 20px rgba(255,255,255,0.4);
+  transform: scale(1.05);
+  border:2px solid #fff;
+}
+/* LINKS */
 .menu-link{
-padding:10px;
-margin:3px 0;
-border-radius:6px;
-cursor:pointer;
+  display:block;
+  padding:10px 15px;
+  font-size:14px;
+  cursor:pointer;
+  transition:0.3s;
+  border-radius:6px;
 }
-
-.menu-link:hover{background:#e94560;}
-.menu-link.active{background:#ff512f;}
-
+.menu-link:hover{
+  background:#e94560;
+  transform:translateX(6px);
+}
+/* ACTIVE MENU LINK */
+.menu-link.active{
+  background: linear-gradient(90deg,#ff512f,#dd2476);
+  box-shadow: 0 0 15px rgba(255,0,150,0.7);
+  transform: translateX(6px);
+  font-weight: bold;
+}
 /* PLAYER */
 #main-player{
-flex:1;
-position:relative;
+  flex:1;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:radial-gradient(circle at center,#1a1a2e 0%,#000 80%);
+}
+#welcome{
+text-align:center;
+opacity:0.9;
+margin-top:150px;
+}
+#welcome img{
+  width:300px;
+  max-width:80%;
+  border-radius:25px;
+  box-shadow:0 0 40px rgba(255,0,150,0.7);
+  animation:float 3s ease-in-out infinite;
+}
+@keyframes float{
+  0%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
+  100%{transform:translateY(0);}
+}
+#iframePlayer, #floatingPlayer iframe{
+  width:100%;
+  height:100%;
+  border:none;
+}
+
+/* MOBILE */
+@media(max-width:768px){
+  #menu{position:fixed;height:100%;z-index:999;}
+  #mobileToggle{display:block;}
+}
+
+/* FAVORITE CHANNELS */
+
+#favoriteChannels{
 display:flex;
+gap:15px;
 justify-content:center;
-align-items:center;
+margin-top:50px;
+flex-wrap:wrap;
+}
+
+/* FLOAT PLAYER */
+
+#floatingPlayer{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+width:70%;
+height:70%;
 background:#000;
+border-radius:12px;
+box-shadow:0 0 50px rgba(0,0,0,0.9);
+display:none;
+z-index:9999;
 overflow:hidden;
 }
 
-iframe,video{
+#floatingPlayer iframe{
 width:100%;
 height:100%;
 border:none;
 }
 
-/* 🔥 โลโก้ใหม่ (ไม่บังเมนู) */
-#welcome{
+#closePlayer{
 position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-text-align:center;
-z-index:1;
-pointer-events:none;
+top:8px;
+right:12px;
+font-size:22px;
+color:#fff;
+cursor:pointer;
+z-index:10;
+background:rgba(0,0,0,0.5);
+padding:4px 10px;
+border-radius:6px;
 }
 
-#welcome img{
-width:220px;
-max-width:70vw;
-border-radius:20px;
-box-shadow:0 0 40px rgba(255,0,150,.7);
-margin-bottom:10px;
+#closePlayer:hover{
+background:red;
+}
+/* ปรับ fav-channel ให้โลโก้เต็มพื้นที่ */
+.fav-channel{
+  width: 80px;       
+  height: 80px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  transition: transform 0.3s;
+  padding: 0; /* ลบ padding เดิม */
+  background: linear-gradient(90deg,#ff512f,#dd2476);
 }
 
-/* 📱 ย่อโลโก้ในแนวตั้ง */
-@media(max-width:768px){
-#welcome img{width:150px;}
+.fav-channel img{
+  width: 100%;       /* ให้เต็มพื้นที่ container */
+  height: 100%;      /* ให้เต็มพื้นที่ container */
+  object-fit: cover; /* ครอบเต็มช่อง ไม่บิดรูป */
+  display: block;
 }
+
+.fav-channel:hover{
+  transform: scale(1.1);
+}
+
+.menu-section{
+  margin:14px 0 8px;
+  padding:6px 10px;
+
+  font-size:12px;
+  font-weight:600;
+  letter-spacing:1px;
+
+  color:#00e5ff;
+
+  display:flex;
+  align-items:center;
+  gap:6px;
+
+  position:relative;
+}
+
+/* เส้นเรืองแสง */
+.menu-section::after{
+  content:"";
+  flex:1;
+  height:1px;
+  margin-left:8px;
+
+  background:linear-gradient(
+    to right,
+    rgba(0,229,255,0.8),
+    rgba(0,229,255,0.05)
+  );
+}
+
+/* glow */
+.menu-section span{
+  text-shadow:0 0 8px rgba(0,229,255,0.7);
+}
+.menu-link{
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:8px;
+  border-radius:10px;
+}
+
+.menu-link img{
+  width:100%;
+  max-width:120px;
+  height:40px;
+  object-fit:contain;
+  filter:drop-shadow(0 0 6px rgba(255,255,255,0.3));
+  transition:0.3s;
+}
+
+.menu-link:hover img{
+  transform:scale(1.1);
+}
+
 </style>
 </head>
 
 <body>
 
+<div id="mobileToggle">☰ เมนู</div>
+
 <div id="menu">
 
-<div class="menu-title">📺 ทีวีออนไลน์</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/iptv.html">3BB TV</div>
-<div class="menu-link" data-type="tv" data-url="https://night.redfight.info/iptv.php">GOD TV</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/sport.html">SPORT TV</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/ball66.html">DOOBALL66</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv-online/live.html">ตารางแข่ง Ball66</div>
-<div class="menu-link" data-type="tv" data-url="https://tiea9999.github.io/tv/DKL.html">ตารางแข่ง DKL</div>
+<div class="logo-box">
+  <img src="https://img2.pic.in.th/ChatGPT-Image-23-..-2569-10_56_05.png">
+</div>
+<div class="home-btn" id="homeBtn">🏠 หน้าแรก</div>
+<!-- ทีวี -->
+<div class="menu-title premium" data-menu="tvMenu">ทีวีออนไลน์</div>
+<div id="tvMenu" class="submenu">
 
-<div class="menu-title">🎬 หนัง</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/037hd.html">037HD</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/hdx.html">LK-HDX</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/24hd.html">24-HDS</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/7hd.html">7HD</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/MOVIE01.html">MIX MOVIE</div>
+<div class="menu-link"
+     data-url="https://nongakka.github.io/doofree/iptv.html"
+     data-type="page">3BB TV
+     
+</div>
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/inwhd.html"
+     data-type="page">GOD TV
+</div>
 
-<div class="menu-title">📺 ซีรีส์</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/flixmono.html">Flixmono</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/seriesday.html">Series Day</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/goseries4k.html">GoSeries4K</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/myseries.html">MySeriesHD</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/wlk.html">Wathclakorn</div>
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/sport.html"
+     data-type="page">SPORT TV
+</div>  
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/ball66.html"
+     data-type="page">DOOBALL66
+</div>  
+ 
+<div class="menu-section">
+  <span>ตารางแข่งขัน</span>
+</div>
 
-<div class="menu-title">🎬 หนังสั้น</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/short.html">หนังสั้นจีน</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/rongyok.html">โรงหยกหนังสั้น</div>
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/live66.html"
+     data-type="page">Ball66
+</div>   
 
-<div class="menu-title">🎮 อนิเมะ</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/animegood.html">AnimeGOOD</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/masterx.html">MasterX</div>
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/DKL.html"
+     data-type="page">DKL
+</div>   
+</div>
 
-<div class="menu-title">💎 VIP</div>
-<div class="menu-link" data-type="movie" data-url="https://tiea9999.github.io/tv/VIP.html">VIP</div>
+<!-- หนัง -->
+<div class="menu-title movie" data-menu="movieMenu">หนัง</div>
+<div id="movieMenu" class="submenu">
+  
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/037hd.html"
+     data-type="page">
+     <img src="https://www.037hddmovie.com/wp-content/uploads/2025/12/LOGO_037HDDMOVIE.png">
+</div>
 
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/hdx.html"
+     data-type="page">
+     <img src="https://lk-hdx.com/wp-content/uploads/2023/08/lk-hd-logo.png">
+
+</div>
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/24hd.html"
+     data-type="page">
+     <img src="https://7-hd.com/wp-content/uploads/2023/05/logo-24-hd-tv.webp">
+
+</div> 
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/ezmovie.html"
+     data-type="page">
+     <img src="https://ezmovie.movie/build/web/ez-movie/img/ez-movie-logo.webp">
+
+</div>   
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/7hd.html"
+     data-type="page">7HD
+    
+</div>
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/MOVIE01.html"
+     data-type="page">MIX MOVIE
+  
+
+</div>     
+   
+</div>
+
+<!-- ซีรีส์ -->
+<div class="menu-title series" data-menu="seriesMenu">ซีรีส์</div>
+<div id="seriesMenu" class="submenu">
+    
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/flixmono.html"
+     data-type="page">
+     <img src="https://flixmono.com/wp-content/uploads/2025/05/cropped-F.png">
+
+</div>
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/seriesday.html"
+     data-type="page">
+     <img src="https://www.serie-days.com/wp-content/uploads/2023/02/seriesday-logo.png">
+
+</div>
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/goseries4k.html"
+     data-type="page">
+     <img src="https://goseries4k.com/wp-content/uploads/2025/03/cropped-cropped-logo-2-2-1.png">
+
+</div>
+
+<div class="menu-link"
+     data-url="https://nongakka.github.io/doofree/myseries.html"
+     data-type="page">
+     <img src="https://myserieshd.com/wp-content/uploads/2025/05/logo1-2.webp">
+
+</div>
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/wlk.html"
+     data-type="page">
+     <img src="https://cdn.watchlakorn.net/images/video_logo.png">
+
+</div>
+</div>
+  
+<div class="menu-title short" data-menu="short">หนังสั้นแนวตั้ง</div>
+<div id="short" class="submenu">
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/short.html"
+     data-type="page">
+     <img src="https://img2.pic.in.th/icon_shortflim.png">
+ 
+</div>
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/rongyok.html"
+     data-type="page">
+     <img src="https://img1.pic.in.th/images/rongyok.png">
+</div>  
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/ezshort.html"
+     data-type="page">
+     <img src="https://ezmovie.movie/build/web/ez-movie/img/ez-movie-logo.webp">
+</div>   
+
+</div>
+
+<!-- อนิเมะ -->
+<div class="menu-title anime" data-menu="animeMenu">อนิเมะ</div>
+<div id="animeMenu" class="submenu">
+  
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/animegood.html"
+     data-type="page">
+     <img src="https://anime-good.com/wp-content/uploads/2025/11/cropped-cropped-animegood-logo.png">
+</div>
+
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/masterx.html"
+     data-type="page">
+     <img src="https://www.anime-masterx.com/anime-master-logonew.webp?v=99">
+</div>
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/anime108.html"
+     data-type="page">
+     <img src="https://www.anime108.com/wp-content/uploads/2024/04/anime108-e1713838624780.png">
+</div>  
+  
+</div>
+
+<div class="menu-title vip" data-menu="vipMenu">VIP</div>
+<div id="vipMenu" class="submenu">
+     
+<div class="menu-link"
+     data-url="https://tiea9999.github.io/tv/VIP.html"
+     data-type="page"
+     data-pass="9999">VIP
+</div>
+</div>
 </div>
 
 <div id="main-player">
 
-<div id="welcome">
-<img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
-<h2>TIEA IPTV</h2>
+  <div id="welcome">
+    <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
+    <h1>TIEA IPTV</h1>
+  </div>
+
+  <div id="favoriteChannels">
+  <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/max-01?muted=0">
+    <img src="https://www.fileinwtv.site/postor/20250830165328Mono1.jpg" alt="MAX01 Logo">
+  </div>
+
+  <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/max-02?muted=0">
+    <img src="https://www.fileinwtv.site/postor/20250830165343Mono2.jpg" alt="MAX02 Logo">
+  </div>
+
+  <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/max-03?muted=0">
+    <img src="https://www.fileinwtv.site/postor/20250830165408Mono3.jpg" alt="MAX03 Logo">
+  </div>
+
+  <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/max-04?muted=0">
+    <img src="https://www.fileinwtv.site/postor/20250830165433Mono4.jpg" alt="MAX04 Logo">
+  </div>
 </div>
 
-<iframe id="iframePlayer"></iframe>
-<video id="videoPlayer" controls autoplay muted playsinline style="display:none;"></video>
+  <iframe id="iframePlayer" allowfullscreen allow="fullscreen"></iframe>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<div id="floatingPlayer">
+
+<div id="closePlayer">✕</div>
+
+<iframe id="floatFrame" allowfullscreen allow="fullscreen"></iframe>
+
+</div>
 
 <script>
+const menuTitles=document.querySelectorAll(".menu-title");
+const submenus=document.querySelectorAll(".submenu");
 const links=document.querySelectorAll(".menu-link");
 const iframe=document.getElementById("iframePlayer");
-const video=document.getElementById("videoPlayer");
 const welcome=document.getElementById("welcome");
+const mobileToggle=document.getElementById("mobileToggle");
+const sidebar=document.getElementById("menu");
+const homeBtn=document.getElementById("homeBtn");
 
-let hls;
+menuTitles.forEach(title=>{
+  title.addEventListener("click",()=>{
 
-function playVideo(url){
-iframe.style.display="none";
-video.style.display="block";
+    // ลบ active-title ทั้งหมดก่อน
+    menuTitles.forEach(t=>t.classList.remove("active-title"));
+    title.classList.add("active-title");
 
-if(hls){hls.destroy();}
+    const target=document.getElementById(title.dataset.menu);
 
-if(Hls.isSupported()){
-hls=new Hls({maxBufferLength:120,liveSyncDuration:15});
-hls.loadSource(url);
-hls.attachMedia(video);
-hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play());
-}else{
-video.src=url;
-video.play();
-}
-}
+    submenus.forEach(menu=>{
+      if(menu!==target){menu.classList.remove("open");}
+    });
+
+    target.classList.toggle("open");
+  });
+});
 
 links.forEach(link=>{
-link.onclick=()=>{
+  link.addEventListener("click",()=>{
 
-links.forEach(l=>l.classList.remove("active"));
-link.classList.add("active");
+// 🔐 ตรวจสอบรหัสผ่าน
+    const pass = link.dataset.pass;
 
-const url=link.dataset.url;
+    if(pass){
+        const input = prompt("กรุณาใส่รหัสผ่าน");
 
-if(link.dataset.type==="movie"){
-window.open(url,"_blank");
-return;
-}
+        if(input !== pass){
+            alert("รหัสไม่ถูกต้อง");
+            return;
+        }
 
-if(url.includes(".m3u8")){
-playVideo(url);
-return;
-}
+    }
+    
+    links.forEach(l=>l.classList.remove("active"));
+    link.classList.add("active");
+    
+    const url = link.dataset.url;
+    const type = link.dataset.type || "iframe"; // ค่าเริ่มต้น
 
-iframe.src=url;
-video.style.display="none";
-iframe.style.display="block";
-welcome.style.display="none";
+    // 🔥 เลือกการเปิดตามประเภท
+    if(type === "iframe"){
+        iframe.src = url;
+        iframe.style.display="block";
+        welcome.style.display="none";
+    }
+    else if(type === "page"){
+        window.location.href = url;
+    }
+    else if(type === "blank"){
+        window.open(url, "_blank");
+    }
+
+    if(window.innerWidth<768){
+      sidebar.classList.add("hidden");
+    }
+  });
+});
+
+homeBtn.addEventListener("click",()=>{
+  iframe.src="";
+  iframe.style.display="none";
+  welcome.style.display="block";
+
+  links.forEach(l=>l.classList.remove("active"));
+  menuTitles.forEach(t=>t.classList.remove("active-title"));
+  submenus.forEach(menu=>menu.classList.remove("open")); // เพิ่มบรรทัดนี้
+});
+
+mobileToggle.addEventListener("click",()=>{
+  sidebar.classList.toggle("hidden");
+});
+
+
+
+const favs=document.querySelectorAll(".fav-channel");
+const floatPlayer=document.getElementById("floatingPlayer");
+const floatFrame=document.getElementById("floatFrame");
+
+favs.forEach(ch => {
+  ch.addEventListener("click", () => {
+    const url = ch.dataset.url;
+
+    // เปิด float player
+    floatFrame.src = url;  
+    floatPlayer.style.display = "block";
+
+    // รอ iframe โหลดแล้วปรับเสียง (สำหรับ player ที่รองรับ)
+    floatFrame.onload = () => {
+      try {
+        const vid = floatFrame.contentWindow.document.querySelector("video");
+        if (vid) vid.volume = 0.25; // ตั้งเสียง 25%
+      } catch(e){
+        // ถ้า cross-origin จะไม่สามารถเข้าถึงได้
+        // embed-test.bananacake.org ใช้ ?muted=0
+      }
+    };
+  });
+});
+document.getElementById("closePlayer").onclick=()=>{
+
+floatPlayer.style.display="none";
+floatFrame.src="";
 
 };
-});
+
 </script>
 
 </body>
