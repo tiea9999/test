@@ -23,6 +23,24 @@ body{
     z-index:999;
     background:#020617;
     border-bottom:1px solid #333;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:10px;
+}
+
+.back-btn{
+    background:#ff512f;
+    border:none;
+    padding:6px 12px;
+    border-radius:6px;
+    color:#fff;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.back-btn:hover{
+    background:#dd2476;
 }
 
 .section-title{
@@ -47,7 +65,6 @@ body{
     position:relative;
 }
 
-/* 🔥 BG โลโก้ */
 .logo-bg{
     height:120px;
     background-size:contain;
@@ -57,7 +74,6 @@ body{
     opacity:.4;
 }
 
-/* 🔥 โลโก้จริง */
 .logo{
     position:absolute;
     top:50%;
@@ -70,7 +86,6 @@ body{
     filter:drop-shadow(0 0 8px rgba(0,200,255,.7));
 }
 
-/* content */
 .content{
     padding:10px;
     text-align:center;
@@ -87,7 +102,6 @@ body{
     font-size:11px;
 }
 
-/* PLAYER */
 #playerBox{
     position:fixed;
     top:50%;
@@ -114,9 +128,9 @@ body{
 <body>
 
 <div class="header">
-    <div style="text-align:center;padding:10px;">
-        📺 TIEA IPTV
-    </div>
+    <button class="back-btn" onclick="goHome()">⬅ กลับหน้าหลัก</button>
+    <div>📺 TIEA IPTV</div>
+    <div style="width:60px"></div>
 </div>
 
 <div id="list"></div>
@@ -133,7 +147,10 @@ const URL = "https://broken-surf-7347.hssmnoy.workers.dev/?url=https://drive.goo
 let all=[];
 let hls;
 
-/* 🔥 หาโลโก้ที่ใช้ได้ */
+function goHome(){
+    window.location.href = "index.html"; // 🔥 แก้ลิงก์หน้าแรกตรงนี้ได้
+}
+
 function getLogo(servers){
     for(const s of servers){
         if(s.image && s.image.startsWith("http")){
@@ -143,7 +160,6 @@ function getLogo(servers){
     return "https://i.ibb.co/L8y25Wd/sports-icon.png";
 }
 
-/* โหลด */
 async function load(){
     try{
         const res = await fetch(URL);
@@ -155,7 +171,6 @@ async function load(){
     }
 }
 
-/* parse */
 function parse(data){
     let arr=[];
 
@@ -176,7 +191,6 @@ function parse(data){
     return arr;
 }
 
-/* render */
 function render(){
     const list=document.getElementById("list");
     list.innerHTML="";
@@ -229,7 +243,6 @@ function render(){
     list.appendChild(section);
 }
 
-/* PLAYER */
 const video=document.getElementById("video");
 
 function play(url){
@@ -279,3 +292,4 @@ load();
 
 </body>
 </html>
+
