@@ -1,638 +1,615 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
-
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-    <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
-    <script>
-        jwplayer.key="XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo";
-    </script>
-
-    <style>
-        :root {
-            --bg: #0f0f0f;
-            --card: #1b1b1b;
-            --accent: #f5c518;
-        }
-
-        * {
-            box-sizing: border-box
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Kanit', sans-serif;
-            background: #0b0b0b;
-            color: #fff;
-            display: flex;
-            overflow: hidden;
-            /* เพิ่มบรรทัดนี้ */
-        }
-
-        .playlist-box {
-            background: #222;
-            padding: 8px;
-            margin-bottom: 6px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .playlist-name {
-            flex: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 13px;
-        }
-
-        .playlist-actions {
-            display: flex;
-            gap: 4px;
-        }
-
-        .playlist-actions button {
-            border: none;
-            padding: 3px 6px;
-            border-radius: 4px;
-            color: #fff;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .playlist-box.active {
-            background: #333;
-            border-left: 3px solid var(--accent);
-        }
-
-        /* SIDEBAR */
-        .sidebar {
-            width: 280px;
-            background: #0f0f0f;
-            height: 100vh;
-            padding: 5px 20px 20px 20px;
-            /* ลด padding-top */
-            position: fixed;
-            left: 0;
-            top: 0;
-            border-right: 1px solid #222;
-            overflow-y: auto;
-            transition: .3s;
-            z-index: 100;
-        }
-
-
-        /* ปุ่ม */
-
-        .sidebar-section {
-            margin: 12px 0;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #1f1f1f;
-            text-align: center;
-        }
-
-        .sidebar-section:last-child {
-            border-bottom: none;
-        }
-
-
-
-        .sidebar h3 {
-            font-size: 14px;
-            margin-bottom: 5px;
-            color: #aaa;
-            text-transform: uppercase;
-            letter-spacing: .5px;
-        }
-
-        .sidebar input {
-            width: 100%;
-            margin-bottom: 8px;
-            padding: 8px;
-            background: #1c1c1c;
-            border: 1px solid #222;
-            color: #fff;
-            border-radius: 6px;
-        }
-
-        .sidebar button {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 4px;
-            background: var(--accent);
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        #themeToggle {
-            margin-bottom: 6px;
-        }
-
-        .sidebar-section:first-of-type {
-            margin-top: 6px;
-        }
-
-        /* ===== CATEGORY MENU MODERN ===== */
-
-        #categoryList {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        #categoryList li {
-            list-style: none;
-            padding: 10px 14px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 400;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #1a1a1a;
-            transition: all .25s ease;
-            border: 1px solid #222;
-        }
-
-        #categoryList li:hover {
-            background: #242424;
-            transform: translateX(4px);
-        }
-
-        #categoryList li.active {
-            background: linear-gradient(90deg, #3b82f6, #6366f1);
-            border: none;
-            box-shadow: 0 5px 15px rgba(59, 130, 246, .25);
-        }
-
-        #categoryList li.active span {
-            background: rgba(255, 255, 255, .2);
-        }
-
-        /* badge ตัวเลข */
-        .category-count {
-            background: #333;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .sidebar-section h2 {
-            font-size: 18px;
-            font-weight: 600;
-            letter-spacing: 1px;
-            margin: 0;
-            position: relative;
-            display: inline-block;
-            padding-bottom: 8px;
-        }
-
-        /* เส้นไล่สีใต้หัวข้อ */
-        .sidebar-section h2::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            bottom: 0;
-            width: 60%;
-            height: 3px;
-            border-radius: 10px;
-            background: linear-gradient(90deg, #ff512f, #dd2476);
-        }
-
-        /* ให้หัวข้ออยู่กลาง */
-        .sidebar-section h2,
-        .sidebar-section h3 {
-            text-align: center;
-        }
-
-        /* แต่รายการ playlist ชิดซ้าย */
-        #playlistContainer {
-            text-align: left;
-        }
-
-        /* แต่รายการหมวดหมู่ชิดซ้าย */
-        #categoryList {
-            text-align: left;
-        }
-
-        /* ให้ li ชิดซ้ายชัดเจน */
-        #categoryList li {
-            text-align: left;
-        }
-
-        /* LIGHT MODE - Soft Eye Comfort */
-
-        body.light {
-            background: #dde2e7;
-            /* เทาอ่อนนุ่ม ลดแสง */
-            color: #1e293b;
-        }
-
-        body.light .main {
-            background: #e3e7ec;
-        }
-
-        body.light .sidebar {
-            background: #e7ebf0;
-            /* ไม่ขาว */
-            border-right: 1px solid #cfd6dd;
-            color: #1f2937;
-        }
-
-        /* หมวดหมู่ */
-        body.light #categoryList li {
-            background: #eef2f6;
-            color: #1f2937;
-            border: 1px solid #d8dee6;
-        }
-
-        body.light #categoryList li:hover {
-            background: #e2e8f0;
-        }
-
-        body.light #categoryList li.active {
-            background: #3b82f6;
-            color: #fff;
-        }
-
-        /* badge */
-        body.light .category-count {
-            background: #d6dbe1;
-            color: #334155;
-        }
-
-        body.light #categoryList li.active .category-count {
-            background: rgba(255, 255, 255, .25);
-            color: #fff;
-        }
-
-        /* การ์ด */
-        body.light .movie-card {
-            background: #f0f3f7;
-            box-shadow: 0 6px 15px rgba(0, 0, 0, .05);
-        }
-
-        /* ทำให้ตัวหนังสือเมนูอ่านง่าย */
-        body.light #categoryList li {
-            color: #1f2937;
-            /* เทาเข้ม อ่านง่าย */
-            background: #eef2f6;
-            /* พื้นหลังอ่อน */
-            border: 1px solid #d8dee6;
-        }
-
-        body.light #categoryList li:hover {
-            background: #e2e8f0;
-        }
-
-        body.light #categoryList li.active {
-            background: #3b82f6;
-            /* น้ำเงินสุภาพ */
-            color: #fff;
-        }
-
-        body.light .category-count {
-            background: #cfd6dd;
-            color: #333;
-        }
-
-        body.light #categoryList li.active .category-count {
-            background: rgba(255, 255, 255, .25);
-            color: #fff;
-        }
-
-
-
-        /* MAIN */
-        .main {
-            margin-left: 280px;
-            width: 100%;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .main-content {
-            padding: 20px 30px 30px 30px;
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .main-header {
-            padding: 30px 30px 0 30px;
-            flex-shrink: 0;
-            background: inherit;
-            z-index: 5;
-        }
-
-        .movie-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 20px;
-            /* ลดช่องว่างนิดให้บาลานซ์ */
-        }
-
-        .movie-card {
-            background: #1b1b1b;
-            border-radius: 14px;
-            cursor: pointer;
-            transition: .3s;
-            overflow: hidden;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, .4);
-        }
-
-        .movie-card img {
-            width: 90%;
-            /* ไม่เต็มกรอบ */
-            height: 220px;
-            /* ลดความสูงลง */
-            object-fit: cover;
-            display: block;
-            margin: 15px auto 10px;
-            /* จัดกลาง + เว้นบนล่าง */
-            border-radius: 10px;
-        }
-
-        .movie-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, .6);
-        }
-
-        .movie-title {
-            padding: 5px 12px 14px;
-            font-size: 13.5px;
-            /* ลดขนาดจาก 13px */
-            font-weight: 300;
-            /* บางลง (ปกติ) */
-            line-height: 1.4em;
-            text-align: center;
-
-            white-space: normal;
-            /* ให้ขึ้นบรรทัดใหม่ได้ */
-            overflow: visible;
-            /* ไม่ซ่อนข้อความ */
-            word-break: break-word;
-            /* กันคำยาวล้น */
-        }
-
-        /* PLAYER */
-        #overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, .8);
-            backdrop-filter: blur(8px);
-            opacity: 0;
-            pointer-events: none;
-            transition: .3s;
-            z-index: 1000;
-            /* แก้ตรงนี้ */
-        }
-
-        /* วางตรงนี้ */
-        #overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        #player-container {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(.9);
-            width: 80%;
-            max-width: 1100px;
-            aspect-ratio: 16/9;
-            height: auto;
-            background: #000;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 40px 100px rgba(0, 0, 0, .8);
-            opacity: 0;
-            pointer-events: none;
-            transition: .3s;
-            z-index: 1100;
-
-        }
-
-
-        #player-container.active {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-            position: fixed;
-        }
-
-        video,
-        #jw-player {
-            width: 100%;
-            height: 100%
-        }
-
-        .refresh-btn {
-            background: #00c853;
-            border: none;
-            padding: 6px;
-            border-radius: 6px;
-            color: #fff;
-            cursor: pointer;
-            margin-top: 8px;
-        }
-
-        .close-btn {
-            position: fixed;
-            /* ใช้ fixed แทน absolute */
-            top: 20px;
-            right: 20px;
-            background: red;
-            color: #fff;
-            border: none;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 18px;
-            cursor: pointer;
-            z-index: 1200;
-            /* มากกว่า player */
-        }
-
-        .close-btn:hover {
-            background: #ff4444;
-        }
-
-        .back-btn {
-            background: #ff512f;
-            border: none;
-            padding: 8px 14px;
-            border-radius: 8px;
-            color: #fff;
-            font-weight: 600;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: .2s;
-        }
-
-        .back-btn:hover {
-            background: #dd2476;
-        }
-
-        #mainMenu button.active {
-            background: linear-gradient(90deg, #3b82f6, #6366f1);
-            color: #fff;
-            font-weight: 600;
-            box-shadow: 0 5px 15px rgba(59, 130, 246, .3);
-        }
-
-        /* TOP BAR */
-
-        .top-bar {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        /* BACK BUTTON MODERN */
-
-        .back-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: linear-gradient(90deg, #ff512f, #dd2476);
-            border: none;
-            padding: 8px 14px;
-            border-radius: 10px;
-            color: #fff;
-            font-weight: 500;
-            cursor: pointer;
-            transition: .25s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, .3);
-        }
-
-        .back-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, .4);
-        }
-
-        /* PAGINATION */
-
-        .pagination {
-            display: flex;
-            gap: 20px;
-            margin-left: 12px;
-            margin-top: -20px;
-            align-items: center;
-        }
-
-        .pagination button {
-            background: #1e1e1e;
-            color: #aaa;
-            border: 1px solid #333;
-            padding: 6px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: .2s;
-            min-width: 34px;
-            text-align: center;
-            margin-right: 6px;
-        }
-
-        .pagination button:hover {
-            background: #333;
-            color: #fff;
-        }
-
-        .pagination button.active {
-
-            background: linear-gradient(90deg, #3b82f6, #6366f1);
-            color: #fff;
-            border: none;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, .4);
-
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>หรรมน้อย ออนไลน์</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+<script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
+<script>jwplayer.key="XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo";</script>
+
+<style>
+:root{
+--bg:#0f0f0f;
+--card:#1b1b1b;
+--accent:#f5c518;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'Kanit',sans-serif;
+  background:#0b0b0b;
+  color:#fff;
+  display:flex;
+  overflow:hidden;   /* เพิ่มบรรทัดนี้ */
+}
+
+.playlist-box{
+background:#222;
+padding:8px;
+margin-bottom:6px;
+border-radius:6px;
+cursor:pointer;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:6px;
+}
+
+.playlist-name{
+flex:1;
+white-space:nowrap;
+overflow:hidden;
+text-overflow:ellipsis;
+font-size:13px;
+}
+
+.playlist-actions{
+display:flex;
+gap:4px;
+}
+
+.playlist-actions button{
+border:none;
+padding:3px 6px;
+border-radius:4px;
+color:#fff;
+cursor:pointer;
+font-size:12px;
+}
+
+.playlist-box.active{
+background:#333;
+border-left:3px solid var(--accent);
+}
+
+/* SIDEBAR */
+.sidebar{
+  width:280px;
+  background:#0f0f0f;
+  height:100vh;
+  padding:5px 20px 20px 20px; /* ลด padding-top */
+  position:fixed;
+  left:0;
+  top:0;
+  border-right:1px solid #222;
+  overflow-y:auto;
+  transition:.3s;
+  z-index:100;
+}
+
+
+/* ปุ่ม */
+
+.sidebar-section{
+  margin:12px 0;
+  padding-bottom:15px;
+  border-bottom:1px solid #1f1f1f;
+  text-align:center;
+}
+
+.sidebar-section:last-child{
+border-bottom:none;
+}
+
+
+
+.sidebar h3{
+font-size:14px;
+margin-bottom:5px;
+color:#aaa;
+text-transform:uppercase;
+letter-spacing:.5px;
+}
+
+.sidebar input{
+width:100%;
+margin-bottom:8px;
+padding:8px;
+background:#1c1c1c;
+border:1px solid #222;
+color:#fff;
+border-radius:6px;
+}
+
+.sidebar button{
+width:100%;
+padding:8px;
+margin-bottom:4px;
+background:var(--accent);
+border:none;
+border-radius:6px;
+cursor:pointer;
+font-weight:600;
+}
+
+.sidebar ul{
+list-style:none;
+padding:0;
+margin:0;
+}
+
+#themeToggle{
+  margin-bottom:6px;
+}
+
+.sidebar-section:first-of-type{
+  margin-top:6px;
+}
+
+/* ===== CATEGORY MENU MODERN ===== */
+
+#categoryList{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+#categoryList li{
+  list-style:none;
+  padding:10px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  font-size:13px;
+  font-weight:400;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#1a1a1a;
+  transition:all .25s ease;
+  border:1px solid #222;
+}
+
+#categoryList li:hover{
+  background:#242424;
+  transform:translateX(4px);
+}
+
+#categoryList li.active{
+  background:linear-gradient(90deg,#3b82f6,#6366f1);
+  border:none;
+  box-shadow:0 5px 15px rgba(59,130,246,.25);
+}
+
+#categoryList li.active span{
+  background:rgba(255,255,255,.2);
+}
+
+/* badge ตัวเลข */
+.category-count{
+  background:#333;
+  padding:3px 8px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:600;
+}
+
+.sidebar-section h2{
+  font-size:18px;
+  font-weight:600;
+  letter-spacing:1px;
+  margin:0;
+  position:relative;
+  display:inline-block;
+  padding-bottom:8px;
+}
+
+/* เส้นไล่สีใต้หัวข้อ */
+.sidebar-section h2::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  bottom:0;
+  width:60%;
+  height:3px;
+  border-radius:10px;
+  background:linear-gradient(90deg,#ff512f,#dd2476);
+}
+
+/* ให้หัวข้ออยู่กลาง */
+.sidebar-section h2,
+.sidebar-section h3{
+  text-align:center;
+}
+
+/* แต่รายการ playlist ชิดซ้าย */
+#playlistContainer{
+  text-align:left;
+}
+
+/* แต่รายการหมวดหมู่ชิดซ้าย */
+#categoryList{
+  text-align:left;
+}
+
+/* ให้ li ชิดซ้ายชัดเจน */
+#categoryList li{
+  text-align:left;
+}
+
+/* LIGHT MODE - Soft Eye Comfort */
+
+body.light{
+  background:#dde2e7;      /* เทาอ่อนนุ่ม ลดแสง */
+  color:#1e293b;
+}
+
+body.light .main{
+  background:#e3e7ec;
+}
+
+body.light .sidebar{
+  background:#e7ebf0;      /* ไม่ขาว */
+  border-right:1px solid #cfd6dd;
+  color:#1f2937;
+}
+
+/* หมวดหมู่ */
+body.light #categoryList li{
+  background:#eef2f6;
+  color:#1f2937;
+  border:1px solid #d8dee6;
+}
+
+body.light #categoryList li:hover{
+  background:#e2e8f0;
+}
+
+body.light #categoryList li.active{
+  background:#3b82f6;
+  color:#fff;
+}
+
+/* badge */
+body.light .category-count{
+  background:#d6dbe1;
+  color:#334155;
+}
+
+body.light #categoryList li.active .category-count{
+  background:rgba(255,255,255,.25);
+  color:#fff;
+}
+
+/* การ์ด */
+body.light .movie-card{
+  background:#f0f3f7;
+  box-shadow:0 6px 15px rgba(0,0,0,.05);
+}
+
+/* ทำให้ตัวหนังสือเมนูอ่านง่าย */
+body.light #categoryList li{
+  color:#1f2937;          /* เทาเข้ม อ่านง่าย */
+  background:#eef2f6;     /* พื้นหลังอ่อน */
+  border:1px solid #d8dee6;
+}
+
+body.light #categoryList li:hover{
+  background:#e2e8f0;
+}
+
+body.light #categoryList li.active{
+  background:#3b82f6;     /* น้ำเงินสุภาพ */
+  color:#fff;
+}
+
+body.light .category-count{
+  background:#cfd6dd;
+  color:#333;
+}
+
+body.light #categoryList li.active .category-count{
+  background:rgba(255,255,255,.25);
+  color:#fff;
+}
+
+
+
+/* MAIN */
+.main{
+  margin-left:280px;
+  width:100%;
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+.main-content{
+  padding:20px 30px 30px 30px;
+  overflow-y:auto;
+  flex:1;
+}
+
+.main-header{
+  padding:30px 30px 0 30px;
+  flex-shrink:0;
+  background:inherit;
+  z-index:5;
+}
+
+.movie-grid{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+gap:20px; /* ลดช่องว่างนิดให้บาลานซ์ */
+}
+
+.movie-card{
+  background:#1b1b1b;
+  border-radius:14px;
+  cursor:pointer;
+  transition:.3s;
+  overflow:hidden;
+  box-shadow:0 8px 20px rgba(0,0,0,.4);
+}
+
+.movie-card img{
+  width:100%;
+  height:180px;           /* ปรับความสูงให้เหมาะกับ card */
+  object-fit:contain;     /* ใช้ contain แทน cover */
+  display:block;
+  margin:0 auto;          /* จัดกลาง */
+  border-radius:10px;
+  background:#111;        /* ถ้ารูปเล็ก จะมีพื้นหลังดำ */
+}
+
+//.movie-card img{
+//  width:90%;              /* ไม่เต็มกรอบ */
+//  height:220px;           /* ลดความสูงลง */
+//  object-fit:cover;
+// display:block;
+//  margin:15px auto 10px;  /* จัดกลาง + เว้นบนล่าง */
+//  border-radius:10px;
+//}
+
+.movie-card:hover{
+transform:translateY(-6px);
+box-shadow:0 20px 40px rgba(0,0,0,.6);
+}
+
+.movie-title{
+  padding:5px 12px 14px;
+  font-size:13.5px;      /* ลดขนาดจาก 13px */
+  font-weight:300;     /* บางลง (ปกติ) */
+  line-height:1.4em;
+  text-align:center;
+
+  white-space:normal;      /* ให้ขึ้นบรรทัดใหม่ได้ */
+  overflow:visible;        /* ไม่ซ่อนข้อความ */
+  word-break:break-word;   /* กันคำยาวล้น */
+}
+
+/* PLAYER */
+#overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,.8);
+backdrop-filter:blur(8px);
+opacity:0;
+pointer-events:none;
+transition:.3s;
+z-index:1000;   /* แก้ตรงนี้ */
+}
+
+/* วางตรงนี้ */
+#overlay.active{
+  opacity:1;
+  pointer-events:auto;
+}
+
+#player-container{
+position:fixed;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%) scale(.9);
+width:80%;
+max-width:1100px;
+aspect-ratio:16/9;
+height:auto;
+background:#000;
+border-radius:16px;
+overflow:hidden;
+box-shadow:0 40px 100px rgba(0,0,0,.8);
+opacity:0;
+pointer-events:none;
+transition:.3s;
+z-index:1100;   
+
+}
+
+
+#player-container.active{
+opacity:1;
+transform:translate(-50%,-50%) scale(1);
+pointer-events:auto;
+position:fixed;
+}
+video,#jw-player{width:100%;height:100%}
+.refresh-btn{
+background:#00c853;
+border:none;
+padding:6px;
+border-radius:6px;
+color:#fff;cursor:pointer;margin-top:8px;
+}
+
+.close-btn{
+position:fixed;      /* ใช้ fixed แทน absolute */
+top:20px;
+right:20px;
+background:red;
+color:#fff;
+border:none;
+border-radius:50%;
+width:40px;
+height:40px;
+font-size:18px;
+cursor:pointer;
+z-index:1200;        /* มากกว่า player */
+}
+
+.close-btn:hover{
+  background:#ff4444;
+}
+
+.back-btn{
+  background:#ff512f;
+  border:none;
+  padding:8px 14px;
+  border-radius:8px;
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  margin-bottom:20px;
+  transition:.2s;
+}
+
+.back-btn:hover{
+  background:#dd2476;
+}
+#mainMenu button.active{
+    background:linear-gradient(90deg,#3b82f6,#6366f1);
+    color:#fff;
+    font-weight:600;
+    box-shadow:0 5px 15px rgba(59,130,246,.3);
+}
+
+/* TOP BAR */
+
+.top-bar{
+display:flex;
+align-items:center;
+gap:15px;
+}
+
+/* BACK BUTTON MODERN */
+
+.back-btn{
+display:flex;
+align-items:center;
+gap:6px;
+background:linear-gradient(90deg,#ff512f,#dd2476);
+border:none;
+padding:8px 14px;
+border-radius:10px;
+color:#fff;
+font-weight:500;
+cursor:pointer;
+transition:.25s;
+box-shadow:0 5px 15px rgba(0,0,0,.3);
+}
+
+.back-btn:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 20px rgba(0,0,0,.4);
+}
+
+/* PAGINATION */
+
+.pagination{
+display:flex;
+gap:20px;
+margin-left:12px;
+margin-top:-20px;
+align-items:center;
+}
+
+.pagination button{
+background:#1e1e1e;
+color:#aaa;
+border:1px solid #333;
+padding:6px 12px;
+border-radius:8px;
+cursor:pointer;
+font-size:14px;
+transition:.2s;
+min-width:34px;
+text-align:center;
+margin-right:6px;
+}
+
+.pagination button:hover{
+background:#333;
+color:#fff;
+}
+
+.pagination button.active{
+
+background:linear-gradient(90deg,#3b82f6,#6366f1);
+color:#fff;
+border:none;
+box-shadow:0 4px 12px rgba(59,130,246,.4);
+
+}
+
+</style>
 
 </head>
 
 <body>
 
-    <div class="sidebar">
+<div class="sidebar">
 
-        <div class="sidebar-section">
-            <h2>TIEA IPTV</h2>
-        </div>
+<div class="sidebar-section">
+<h2>หรรมน้อย ออนไลน์</h2>
+</div>
 
 
-        <button id="themeToggle">🌙 โหมดมืด</button>
+<button id="themeToggle">🌙 โหมดมืด</button>
 
-        <div class="sidebar-section">
-            <h3>🔎 ค้นหา</h3>
-            <input type="text" id="searchInput" placeholder="พิมพ์ชื่อช่อง...">
-        </div>
+<div class="sidebar-section">
+<h3>🔎 ค้นหา</h3>
+<input type="text" id="searchInput" placeholder="พิมพ์ชื่อช่อง...">
+</div>
 
-        <div class="sidebar-section">
-            <h3>รายการหนัง</h3>
-            <div id="mainMenu" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;"></div>
+<div class="sidebar-section">
+<h3>รายการหนัง</h3>
+<div id="mainMenu" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px;"></div>
 
-            <hr style="margin:15px 0;">
-            <h3 id="categoryToggle" style="cursor:pointer;">📁 หมวดหมู่ ▸</h3>
-            <ul id="categoryList" style="display:none;"></ul>
-        </div>
+<hr style="margin:15px 0;">
+<h3 id="categoryToggle" style="cursor:pointer;">📁 หมวดหมู่ ▸</h3>
+<ul id="categoryList" style="display:none;"></ul>
+</div>
 
-    </div>
-    <div class="main">
+</div>
+<div class="main">
 
-        <div class="main-header">
+<div class="main-header">
 
-            <div class="top-bar">
+<div class="top-bar">
 
-                <button id="backHome" class="back-btn">
+<button id="backHome" class="back-btn">
 <span>←</span>
 <span>หน้าหลัก</span>
 </button>
 
-                <div id="paginationTop" class="pagination"></div>
+<div id="paginationTop" class="pagination"></div>
 
-            </div>
+</div>
 
-        </div>
+</div>
 
-        <div class="main-content">
-            <div class="movie-grid" id="movieGrid"></div>
-        </div>
+  <div class="main-content">
+    <div class="movie-grid" id="movieGrid"></div>
+  </div>
 
-    </div>
+</div>
 
-    <div id="overlay"></div>
+<div id="overlay"></div>
 
-    <div id="player-container">
-        <button id="closePlayer" class="close-btn">✕</button>
+<div id="player-container">
+<button id="closePlayer" class="close-btn">✕</button>
 
-        <!-- 🔽 วางตรงนี้ -->
-        <div id="player-type-label" style="position:absolute;
+<!-- 🔽 วางตรงนี้ -->
+<div id="player-type-label"
+     style="position:absolute;
             top:15px;
             right:80px;
             background:rgba(0,0,0,.6);
@@ -641,30 +618,32 @@
             font-size:13px;
             font-weight:500;
             z-index:1200;">
-            ไม่มีการเล่น
-        </div>
-        <!-- 🔼 จบตรงนี้ -->
+    ไม่มีการเล่น
+</div>
+<!-- 🔼 จบตรงนี้ -->
 
-        <!-- 🔽 วางปุ่มตรงนี้ -->
-        <div style="position:absolute;top:20px;left:20px;z-index:1200;">
-            <button id="switchPlayerBtn"
+<!-- 🔽 วางปุ่มตรงนี้ -->
+<div style="position:absolute;top:20px;left:20px;z-index:1200;">
+<button id="switchPlayerBtn"
 style="padding:6px 10px;border:none;border-radius:6px;background:#2196f3;color:#fff;cursor:pointer;">
 🔁 Auto
 </button>
-        </div>
-        <!-- 🔼 จบปุ่ม -->
+</div>
+<!-- 🔼 จบปุ่ม -->
 
-        <video id="videoPlayer" controls playsinline autoplay></video>
-        <div id="jw-player" style="display:none;"></div>
+<video id="videoPlayer" controls playsinline autoplay></video>
+<div id="jw-player" style="display:none;"></div>
 
-        <iframe id="iframePlayer" style="display:none;width:100%;height:100%;border:none;" allowfullscreen
-            allow="autoplay">
-        </iframe>
+<iframe id="iframePlayer"
+        style="display:none;width:100%;height:100%;border:none;"
+        allowfullscreen
+        allow="autoplay">
+</iframe>
 
-    </div>
+</div>
 
-    <!-- SERVER POPUP -->
-    <div id="serverPopup" style="
+<!-- SERVER POPUP -->
+<div id="serverPopup" style="
 position:fixed;
 top:0;
 left:0;
@@ -678,7 +657,7 @@ justify-content:center;
 z-index:2000;
 ">
 
-        <div style="
+<div style="
 background:#1c1c1c;
 padding:25px;
 border-radius:16px;
@@ -687,16 +666,16 @@ max-width:500px;
 box-shadow:0 20px 60px rgba(0,0,0,.7);
 ">
 
-            <h3 style="margin-top:0;text-align:center;">เลือก Server</h3>
+<h3 style="margin-top:0;text-align:center;">เลือก Server</h3>
 
-            <div id="serverList" style="
+<div id="serverList" style="
 display:flex;
 flex-direction:column;
 gap:10px;
 margin-top:15px;
 "></div>
 
-            <button onclick="closeServerPopup()"
+<button onclick="closeServerPopup()" 
 style="
 margin-top:20px;
 width:100%;
@@ -710,10 +689,11 @@ cursor:pointer;
 ปิด
 </button>
 
-        </div>
-    </div>
-    <script>
-        let allChannels = [];
+</div>
+</div>
+<script>
+
+let allChannels = [];
 let currentCategory = null;
 let playlistCounts = {};   // 👈 วางตรงนี้
 
@@ -760,9 +740,12 @@ const playerContainer=document.getElementById("player-container");
 const closeBtn = document.getElementById("closePlayer");
 
 closeBtn.addEventListener("click", () => {
+
+    resetPlayers();   // 🔥 ให้หยุด player ก่อน
+
     overlay.classList.remove("active");
     playerContainer.classList.remove("active");
-    resetPlayers();
+
 });
 
 playerContainer.addEventListener("click", e => {
@@ -775,53 +758,53 @@ const PLAYLISTS = [
 
 
 {
-name: "หนังใหม่ชนโรง",
-type: "json",
-url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ชนโรง.json",
-
+    name: "หนังใหม่ชนโรง",
+    type: "json",
+    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ชนโรง.json",
+    
 },
 {
-name: "หนังใหม่ 2026",
-type: "json",
-url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ 2026.json",
-
+    name: "หนังใหม่ 2026",
+    type: "json",
+    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ 2026.json",
+    
 },
 {
-name: "หนังใหม่ 2025",
-type: "json",
-url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ 2025.json",
-
+    name: "หนังใหม่ 2025",
+    type: "json",
+    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังใหม่ 2025.json",
+    
 },
 {
-name: "หนังไทย",
-type: "json",
-url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังไทย.json",
-
+    name: "หนังไทย",
+    type: "json",
+    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังไทย.json",
+    
 },
 {
-name: "หนังเอเซีย",
-type: "json",
-url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังเอเชีย.json",
-
+    name: "หนังเอเซีย",
+    type: "json",
+    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังเอเชีย.json",
+    
 },
 {
-name: "หนังฝรั่ง",
-type: "json",
-url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังฝรั่ง.json",
-
+    name: "หนังฝรั่ง",
+    type: "json",
+    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังฝรั่ง.json",
+    
 },
 {
-name: "หนังการ์ตูน",
-type: "json",
-url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังการ์ตูน.json",
-
+    name: "หนังการ์ตูน",
+    type: "json",
+    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/หนังการ์ตูน.json",
+    
 },
 {
-name: "Netflix",
-type: "json",
-url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/Netflix.json",
-
-},
+    name: "Netflix",
+    type: "json",
+    url: "https://raw.githubusercontent.com/nongakka/037hd/main/json/Netflix.json",
+    
+},	
 ];
 
 function parseM3U(data, playlistName){
@@ -936,7 +919,7 @@ else if(pl.type==="json"){
 
     try{
         const data = JSON.parse(text);
-        channels = parseJSONPlaylist(data, pl.name);
+        channels = parseJSONPlaylist(data, pl.name, true); // ✅ combineSeries = true
     }catch(e){
         // ถ้าไม่ใช่ JSON → parse เป็น M3U
         channels = parseM3U(text, pl.name);
@@ -964,9 +947,30 @@ renderGrid();
 
 }
 
-function parseJSONPlaylist(data, playlistName){
+function parseJSONPlaylist(data, playlistName, combineSeries=false){
 
     let channels = [];
+
+if(combineSeries && typeof data === "object" && !Array.isArray(data)){
+    Object.keys(data).forEach(seriesName=>{
+        const episodes = data[seriesName];
+        if(!Array.isArray(episodes)) return;
+
+        channels.push({
+            title: seriesName,
+            group: episodes[0]?.category || playlistName,
+            logo: episodes[0]?.poster || "",
+            episodes: episodes.map(ep=>({
+                title: ep.title || ep.name || "ไม่ทราบชื่อ",
+                url: ep.url,
+                poster: ep.poster || "",
+                page: ep.page || ""
+            }))
+        });
+    });
+
+    return channels;
+}
 
 // =========================
 // 🔥 แบบที่ 0 : channels (dookeela)
@@ -1036,8 +1040,28 @@ if(data.channels && Array.isArray(data.channels)){
 
         return channels;
     }
+
+	// =========================
+// 🔥 แบบที่ 3 : JSON หนัง (มี poster)
 // =========================
-// 🔥 แบบที่ 3 : array ธรรมดา (playlist หนัง)
+if(Array.isArray(data) && data.length && data[0].poster){
+
+    data.forEach(item => {
+
+        channels.push({
+            title: item.title || item.name || "ไม่ทราบชื่อ",
+            group: item.group || playlistName,
+            logo: item.poster || "",
+            url: item.stream || item.url || "",
+            servers: item.servers || []   // ✅ เพิ่มตรงนี้ด้วย
+        });
+
+    });
+
+    return channels;
+}
+// =========================
+// 🔥 แบบที่ 4 : array ธรรมดา (playlist หนัง)
 // =========================
 if(Array.isArray(data)){
 
@@ -1047,19 +1071,38 @@ if(Array.isArray(data)){
             title: item.title || item.name || "ไม่ทราบชื่อ",
             group: item.group || playlistName,
             logo: item.logo || item.image || "",
-            url: item.url || item.stream || ""
+            url: item.url || item.stream || "",
+            servers: item.servers || []   // ✅ เพิ่มบรรทัดนี้
         });
 
     });
 
     return channels;
 }
+
+// =========================
+// แบบที่ 5 : ซีรีส์/รายการทีวี (series + poster + page)
+if(typeof data === "object" && !Array.isArray(data)){
+    Object.keys(data).forEach(seriesName=>{
+        const episodes = data[seriesName];
+        if(!Array.isArray(episodes)) return;
+        episodes.forEach(ep=>{
+            channels.push({
+                title: ep.title || ep.name || "ไม่ทราบชื่อ",
+                group: ep.category || seriesName || playlistName,
+                logo: ep.poster || "",
+                url: ep.url,
+                urls: ep.url ? [ep.url] : [],       // 🔥 เพิ่มตรงนี้
+                referer: ep.page || ""
+            });
+        });
+    });
     return channels;
 }
 
-
-
-
+    return channels;
+}
+    
 function buildMainMenu(){
 
     const menu=document.getElementById("mainMenu");
@@ -1098,29 +1141,8 @@ function buildMainMenu(){
 
 buildMainMenu();
 
-document.getElementById("switchPlayerBtn").onclick = function(){
-
-    if(forcedPlayer === null){
-        forcedPlayer = "html5";
-        this.innerText = "HTML5";
-    }
-    else if(forcedPlayer === "html5"){
-        forcedPlayer = "jw";
-        this.innerText = "JW";
-    }
-    else{
-        forcedPlayer = null;
-        this.innerText = "Auto";
-    }
-
-    if(currentChannel){
-        playStream(currentChannel);
-    }
-
-};
-
 document.getElementById("backHome").addEventListener("click", () => {
-    window.location.href = "https://tiea9999.github.io/tv/index.html";
+    window.location.href = "https://nongakka.github.io/doofree/index.html";
 });
 
 /* CATEGORY */
@@ -1224,11 +1246,61 @@ function renderGrid(){
                  src="${ch.logo||'https://via.placeholder.com/300x450?text=No+Image'}">
             <div class="movie-title">${ch.title}</div>
         `;
-        card.onclick=()=>playStream(ch);
+        card.onclick = () => {
+
+    // ✅ 1. ถ้ามีหลาย server → ให้เลือก
+    if(ch.servers && ch.servers.length > 1){
+        openServerPopup({
+            name: ch.title,
+            servers: ch.servers
+        });
+        return;
+    }
+
+    // ✅ 2. ถ้ามี server เดียว → เล่นทันที
+    if(ch.servers && ch.servers.length === 1){
+        playStream({
+            title: ch.title,
+            url: ch.servers[0].url
+        });
+        return;
+    }
+
+    // 🔄 3. ของเดิม (เผื่อกรณีอื่น)
+    if(ch.episodes && ch.episodes.length > 0){
+        renderSeriesEpisodes(ch);
+    } else {
+        playStream(ch);
+    }
+};
         grid.appendChild(card);
     });
 
     renderPagination(totalPages);
+}
+
+function renderSeriesEpisodes(series){
+    grid.innerHTML = "";
+
+    series.episodes
+.forEach(ep => {   // ใช้ตามลำดับ array ดั้งเดิม
+        const card = document.createElement("div");
+        card.className = "movie-card";
+
+        card.innerHTML = `<div class="movie-title">${ep.title}</div>`;
+
+        card.onclick = () => {
+            playStream(ep); // เล่น episode
+        };
+
+        grid.appendChild(card);
+    });
+
+    const backBtn = document.createElement("button");
+    backBtn.textContent = "← กลับ";
+    backBtn.className = "back-btn";
+    backBtn.onclick = ()=>{ renderGrid(); };
+    grid.prepend(backBtn);
 }
 
 function renderAnimeGrid(){
@@ -1430,21 +1502,46 @@ function resetPlayers(){
     }
         
     if(jwInstance){
-    try{ jwInstance.remove(); }catch(e){}
+
+    try{
+        jwInstance.stop();
+        jwInstance.remove();
+    }catch(e){}
+
     jwInstance = null;
 }
-    document.getElementById("jw-player").innerHTML="";
-    const oldVideo = document.getElementById("videoPlayer");
+
+// 🔥 kill JW ทุก instance กันเสียงค้าง
+try{
+    jwplayer().remove();
+}catch(e){}
+
+	
+    const jwDiv = document.getElementById("jw-player");
+
+if(jwDiv){
+    jwDiv.innerHTML = "";
+}
+    
+const oldVideo = document.getElementById("videoPlayer");
 
 if(oldVideo){
 
+    try{
     oldVideo.pause();
+    oldVideo.muted = true;
+}catch(e){}
+
     oldVideo.removeAttribute("src");
+    oldVideo.srcObject = null;
+
+    while(oldVideo.firstChild){
+        oldVideo.removeChild(oldVideo.firstChild);
+    }
+
     oldVideo.load();
 
-    const newVideo = oldVideo.cloneNode(true);
-    oldVideo.parentNode.replaceChild(newVideo, oldVideo);
-    video = newVideo;
+    video = oldVideo;
 
     video.style.display = "block";
     document.getElementById("jw-player").style.display = "none";
@@ -1453,8 +1550,14 @@ if(oldVideo){
     setPlayerLabel(forcedPlayer ? forcedPlayer.toUpperCase() : "Auto");
 
 const iframe = document.getElementById("iframePlayer");
+
 if(iframe){
+
+    iframe.src = "";
+    iframe.removeAttribute("src");
+
     iframe.src = "about:blank";
+
     iframe.style.display = "none";
 }
 
@@ -1464,6 +1567,15 @@ function startJW(channel){
 
     video.style.display="none";
     document.getElementById("jw-player").style.display="block";
+
+    // 🔥 kill player เก่าก่อน
+    if(jwInstance){
+        try{
+            jwInstance.stop(true);
+            jwInstance.remove();
+        }catch(e){}
+        jwInstance = null;
+    }
 
     jwInstance = jwplayer("jw-player").setup({
         file: channel.url,
@@ -1478,32 +1590,16 @@ function startJW(channel){
 
 }
 
-function startJWfallback(channel){
-
-    video.style.display="none";
-    document.getElementById("jw-player").style.display="block";
-
-    jwInstance = jwplayer("jw-player").setup({
-        file: channel.url,
-        width: "100%",
-        height: "100%",
-        autostart: true,
-        primary: "html5"
-    });
-
-    jwInstance.on('ready', function(){
-        setDefaultVolumeJW();
-    });
-
-}
-
-
 /* PLAY */
+
 function playStream(channel){
+
+    resetPlayers();   // 🔥 ย้ายขึ้นมาบรรทัดแรก
+
     currentChannel = channel; 
+
     overlay.classList.add("active");
     playerContainer.classList.add("active");
-    resetPlayers();
 
     if(!channel.url && channel.urls){
     channel.url = channel.urls[0];
@@ -1538,8 +1634,8 @@ if(
     !url.includes(".mp4") &&
     !url.includes(".mpd") &&
     !url.includes(".txt") &&
-    !url.includes("/qualitys/")&&
-	url.includes("master")
+    !url.includes("/qualitys/")
+     
 ){
 
     setPlayerLabel("Iframe");
@@ -1584,7 +1680,7 @@ if(forcedPlayer === "html5"){
 
             hls = new Hls({
     enableWorker:true,
-    lowLatencyMode:true,
+    lowLatencyMode:false,
 
     // 🔥 บังคับ parse playlist
     manifestLoadingTimeOut: 20000,
@@ -1732,23 +1828,34 @@ url.includes("master")
     video.style.display="block";
     document.getElementById("jw-player").style.display="none";
 
-    // 1️⃣ Safari native
     if(video.canPlayType("application/vnd.apple.mpegurl") && !channel.referer){
 
-        setPlayerLabel("Native HLS");
-        video.src = channel.url;
-        video.load();
-		setDefaultVolumeHTML5();
+    setPlayerLabel("Native HLS");
+
+    video.src = channel.url;
+    video.load();
+    setDefaultVolumeHTML5();
+
+    video.addEventListener("loadedmetadata", function(){
         video.play().catch(()=>{});
+    }, { once:true });
 
-        setTimeout(()=>{
-            if(video.readyState < 2){
-                startJWfallback(channel);
-            }
-        },3000);
+    video.addEventListener("error", function(){
+        startJWfallback(channel);
+    }, { once:true });
 
-        return;   // ✅ สำคัญมาก
-    }
+    // 🔥 ตรวจว่าเล่นจริงหรือไม่
+    setTimeout(()=>{
+
+        if(video.paused || video.currentTime === 0){
+            console.log("Native HLS stuck → fallback JW");
+            startJWfallback(channel);
+        }
+
+    },3000);
+
+    return;
+}
 
     // 2️⃣ HLS.js
     if(typeof Hls !== "undefined" && Hls.isSupported()){
@@ -1763,7 +1870,7 @@ url.includes("master")
      hls = new Hls({
 
 enableWorker:true,
-lowLatencyMode:true,
+lowLatencyMode:false,
 
 manifestLoadingTimeOut:20000,
 manifestLoadingMaxRetry:5,
@@ -1774,10 +1881,9 @@ xhrSetup: function(xhr,url){
 
     xhr.withCredentials = false;
 
-    // 🔥 เพิ่ม 3 บรรทัดนี้
-    xhr.setRequestHeader("Referer", location.href);
-    xhr.setRequestHeader("Origin", location.origin);
-    xhr.setRequestHeader("User-Agent", navigator.userAgent);
+    if(channel.referer){
+        xhr.setRequestHeader("Referer", channel.referer);
+    }
 
 }
 });  
@@ -1854,36 +1960,48 @@ xhrSetup: function(xhr,url){
 function startJWfallback(channel){
 
     setPlayerLabel("JW (Fallback)");
+
     video.style.display="none";
     document.getElementById("jw-player").style.display="block";
+
+    if(jwInstance){
+        try{
+            jwInstance.stop(true);
+            jwInstance.remove();
+        }catch(e){}
+        jwInstance = null;
+    }
 
     let type = null;
 
     if(channel.url.toLowerCase().includes(".mpd")) type = "dash";
     else if(
-    channel.url.toLowerCase().includes(".m3u8") ||
-    channel.url.toLowerCase().includes(".txt")
-) type = "hls";
+        channel.url.toLowerCase().includes(".m3u8") ||
+        channel.url.toLowerCase().includes(".txt")
+    ) type = "hls";
 
     jwInstance = jwplayer("jw-player").setup({
-    file: channel.url,
-    width: "100%",
-    height: "100%",
-    autostart: true,
-    primary: "html5",
-    type: type,
-    
-});
-	jwInstance.on('ready', function(){
-    setDefaultVolumeJW();   // ✅ 25%
-});
+        file: channel.url,
+        width: "100%",
+        height: "100%",
+        autostart: true,
+        primary: "html5",
+        type: type
+    });
+
+    jwInstance.on('ready', function(){
+        setDefaultVolumeJW();
+    });
 }
 
 /* CLOSE */
 overlay.onclick=()=>{
+
+resetPlayers();
+
 overlay.classList.remove("active");
 playerContainer.classList.remove("active");
-resetPlayers();
+
 };
 
 /* ================= INIT ================= */
@@ -2012,7 +2130,7 @@ categoryToggle.addEventListener("click", () => {
     }
 
 });	
-    </script>
+</script>
 
 </body>
 
