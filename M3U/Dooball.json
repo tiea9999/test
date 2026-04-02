@@ -2806,6 +2806,29 @@
     ]
   },
   {
+    "title": "hd-hbo",
+    "group": "Dooball",
+    "logo": "https://www.fileinwtv.site/postor/20240418201334HBO.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://love.sikoyo3159.workers.dev/lx-origin/th-hbo_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 1",
+        "url": "https://love.tivov68423.workers.dev/lx-origin/th-hbo_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 2",
+        "url": "https://love.tecobo5568.workers.dev/lx-origin/th-hbo_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 3",
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-hbo_720/chunks.m3u8"
+      }
+    ]
+  },
+  {
     "title": "hd-asianmore",
     "group": "Dooball",
     "logo": "https://api.bananamuffin.org/images/png/hd-asianmore.png",
