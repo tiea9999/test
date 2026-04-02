@@ -50,11 +50,11 @@ width:100%;
 height:100%;
 }
 
-/* ❌ ปุ่มปิด */
+/* ❌ ปิด */
 .close-btn{
-position:absolute;
-top:15px;
-right:15px;
+position:fixed;
+top:20px;
+right:20px;
 background:red;
 color:#fff;
 border:none;
@@ -63,23 +63,24 @@ height:45px;
 border-radius:50%;
 font-size:18px;
 cursor:pointer;
-z-index:10000;
+z-index:20000;
 }
 
-/* 🏠 ปุ่มกลับ */
+/* 🏠 หน้าโฮม */
 .home-btn{
-position:absolute;
-top:15px;
-left:15px;
+position:fixed;
+top:20px;
+left:20px;
 background:#2196f3;
 color:#fff;
 border:none;
-padding:8px 14px;
-border-radius:10px;
+padding:10px 16px;
+border-radius:12px;
 cursor:pointer;
-z-index:10000;
+z-index:20000;
+font-size:14px;
+box-shadow:0 5px 20px rgba(0,0,0,.5);
 }
-
 </style>
 </head>
 
@@ -89,7 +90,7 @@ z-index:10000;
 
 <div id="player-container">
 
-<button id="homeBtn" class="home-btn">🏠 หน้าหลัก</button>
+<button id="homeBtn" class="home-btn">🏠 หน้าโฮม</button>
 <button id="closePlayerBtn" class="close-btn">✕</button>
 
 <video id="videoPlayer" controls playsinline autoplay muted></video>
@@ -141,16 +142,15 @@ function resetPlayers(){
 function playStream(ch){
 
     resetPlayers();
-
     document.getElementById("player-container").style.display="block";
 
     let url = ch.url || ch.stream;
     if(!url && ch.servers?.length) url = ch.servers[0].url;
     if(!url) return;
 
-    url = url.toLowerCase();
+    const lower = url.toLowerCase();
 
-    if(url.includes(".mp4")){
+    if(lower.includes(".mp4")){
         video.src=url;
         setDefaultVolumeHTML5();
         video.play().then(()=>{video.muted=false}).catch(()=>{});
@@ -158,7 +158,7 @@ function playStream(ch){
         return;
     }
 
-    if(url.includes(".m3u8")){
+    if(lower.includes(".m3u8")){
         if(Hls.isSupported()){
             hls = new Hls({manifestLoadingMaxRetry:6});
             hls.loadSource(url);
@@ -177,7 +177,7 @@ function playStream(ch){
         return;
     }
 
-    if(url.includes(".mpd")){
+    if(lower.includes(".mpd")){
         const dash = dashjs.MediaPlayer().create();
         dash.initialize(video,url,true);
         setDefaultVolumeHTML5();
@@ -227,14 +227,17 @@ document.getElementById("closePlayerBtn").addEventListener("click",(e)=>{
 document.getElementById("homeBtn").addEventListener("click",(e)=>{
     e.stopPropagation();
     closePlayer();
-    window.scrollTo({top:0,behavior:"smooth"});
+
+    // 🔥 กลับหน้าโฮมจริง
+    window.location.href = "https://tiea9999.github.io/tv/index.html";
 });
 
+/* กดพื้นหลังปิด */
 document.getElementById("player-container").addEventListener("click",()=>{
-    closePlayer(); // 🔥 กดพื้นหลังปิด
+    closePlayer();
 });
 
-/* LOAD JSON */
+/* LOAD */
 async function load(){
 
     const url="https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/M3U/Dooball.json";
