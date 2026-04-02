@@ -2,7 +2,10 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- 🔥 สำคัญมาก -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
 <title>TIEA IPTV</title>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -11,50 +14,70 @@
 <script>jwplayer.key="XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo";</script>
 
 <style>
-body{margin:0;background:#0b0b0b;color:#fff;font-family:sans-serif}
 
-/* GRID */
+body{
+margin:0;
+background:#0b0b0b;
+color:#fff;
+font-family:sans-serif;
+overflow-x:hidden;
+}
+
+/* 🔥 GRID AUTO ไม่ล้น */
 .movie-grid{
 display:grid;
-grid-template-columns:repeat(5,1fr);
-gap:10px;
+grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
+gap:8px;
 padding:10px;
 }
+
+@media(max-width:500px){
+.movie-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(min-width:501px) and (max-width:900px){
+.movie-grid{grid-template-columns:repeat(3,1fr);}
+}
+@media(min-width:901px){
+.movie-grid{grid-template-columns:repeat(5,1fr);}
+}
+
 .movie-card{
 background:#1b1b1b;
 border-radius:10px;
 cursor:pointer;
 }
+
 .movie-card img{
 width:100%;
-height:140px;
+height:120px;
 object-fit:contain;
 background:#000;
 }
-.movie-title{text-align:center;padding:5px;font-size:13px}
 
-/* PLAYER */
+.movie-title{
+text-align:center;
+padding:5px;
+font-size:13px;
+}
+
+/* PLAYER เต็มจอจริง */
 #player-container{
 position:fixed;
 top:0;
 left:0;
-width:100%;
-height:100%;
+width:100vw;
+height:100vh;
 background:#000;
 display:none;
 z-index:9999;
+overflow:hidden;
 }
 
-video,#jw-player{
-width:100%;
-height:100%;
-}
-
-/* ❌ ปิด */
+/* ปุ่ม */
 .close-btn{
 position:fixed;
-top:20px;
-right:20px;
+top:env(safe-area-inset-top,20px);
+right:15px;
 background:red;
 color:#fff;
 border:none;
@@ -63,24 +86,30 @@ height:45px;
 border-radius:50%;
 font-size:18px;
 cursor:pointer;
-z-index:20000;
+z-index:99999;
 }
 
-/* 🏠 หน้าโฮม */
 .home-btn{
 position:fixed;
-top:20px;
-left:20px;
+top:env(safe-area-inset-top,20px);
+left:15px;
 background:#2196f3;
 color:#fff;
 border:none;
 padding:10px 16px;
 border-radius:12px;
 cursor:pointer;
-z-index:20000;
+z-index:99999;
 font-size:14px;
-box-shadow:0 5px 20px rgba(0,0,0,.5);
 }
+
+/* video ไม่ล้น */
+video,#jw-player{
+width:100%;
+height:100%;
+object-fit:contain;
+}
+
 </style>
 </head>
 
@@ -100,180 +129,154 @@ box-shadow:0 5px 20px rgba(0,0,0,.5);
 
 <script>
 
-let video = document.getElementById("videoPlayer");
-let jwInstance = null;
-let hls = null;
+let video=document.getElementById("videoPlayer");
+let jwInstance=null;
+let hls=null;
 
-/* 🔊 VOLUME */
+/* 🔊 เสียงดัง */
 function setDefaultVolumeHTML5(){
-    video.muted = true;
-    video.volume = 1.0;
-    setTimeout(()=>{video.muted=false},300);
+video.muted=true;
+video.volume=1.0;
+setTimeout(()=>{video.muted=false},300);
 }
 function setDefaultVolumeJW(){
-    if(jwInstance) jwInstance.setVolume(100);
+if(jwInstance) jwInstance.setVolume(100);
 }
 
 /* RESET */
 function resetPlayers(){
-
-    if(hls){
-        try{hls.destroy()}catch(e){}
-        hls=null;
-    }
-
-    if(jwInstance){
-        try{
-            jwInstance.stop();
-            jwInstance.remove();
-        }catch(e){}
-        jwInstance=null;
-    }
-
-    video.pause();
-    video.src="";
-    video.load();
-
-    video.style.display="block";
-    document.getElementById("jw-player").style.display="none";
+if(hls){try{hls.destroy()}catch(e){} hls=null;}
+if(jwInstance){try{jwInstance.stop();jwInstance.remove()}catch(e){} jwInstance=null;}
+video.pause();
+video.src="";
+video.load();
+video.style.display="block";
+document.getElementById("jw-player").style.display="none";
 }
 
 /* PLAY */
 function playStream(ch){
 
-    resetPlayers();
-    document.getElementById("player-container").style.display="block";
+resetPlayers();
+document.getElementById("player-container").style.display="block";
 
-    let url = ch.url || ch.stream;
-    if(!url && ch.servers?.length) url = ch.servers[0].url;
-    if(!url) return;
+let url=ch.url||ch.stream;
+if(!url && ch.servers?.length) url=ch.servers[0].url;
+if(!url) return;
 
-    const lower = url.toLowerCase();
+const lower=url.toLowerCase();
 
-    if(lower.includes(".mp4")){
-        video.src=url;
-        setDefaultVolumeHTML5();
-        video.play().then(()=>{video.muted=false}).catch(()=>{});
-        retryPlay();
-        return;
-    }
+/* MP4 */
+if(lower.includes(".mp4")){
+video.src=url;
+setDefaultVolumeHTML5();
+video.play().catch(()=>{});
+return;
+}
 
-    if(lower.includes(".m3u8")){
-        if(Hls.isSupported()){
-            hls = new Hls({manifestLoadingMaxRetry:6});
-            hls.loadSource(url);
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-                setDefaultVolumeHTML5();
-                video.play().then(()=>{video.muted=false}).catch(()=>{});
-                retryPlay();
-            });
-        }else{
-            video.src=url;
-            setDefaultVolumeHTML5();
-            video.play().then(()=>{video.muted=false}).catch(()=>{});
-            retryPlay();
-        }
-        return;
-    }
+/* HLS */
+if(lower.includes(".m3u8")){
+if(Hls.isSupported()){
+hls=new Hls({manifestLoadingMaxRetry:6});
+hls.loadSource(url);
+hls.attachMedia(video);
+hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+setDefaultVolumeHTML5();
+video.play().catch(()=>{});
+});
+}else{
+video.src=url;
+setDefaultVolumeHTML5();
+video.play().catch(()=>{});
+}
+return;
+}
 
-    if(lower.includes(".mpd")){
-        const dash = dashjs.MediaPlayer().create();
-        dash.initialize(video,url,true);
-        setDefaultVolumeHTML5();
-        retryPlay();
-        return;
-    }
+/* DASH */
+if(lower.includes(".mpd")){
+const dash=dashjs.MediaPlayer().create();
+dash.initialize(video,url,true);
+setDefaultVolumeHTML5();
+return;
+}
 
-    startJW(url);
+/* fallback JW */
+startJW(url);
 }
 
 /* JW */
 function startJW(url){
-    video.style.display="none";
-    document.getElementById("jw-player").style.display="block";
+video.style.display="none";
+document.getElementById("jw-player").style.display="block";
 
-    jwInstance = jwplayer("jw-player").setup({
-        file:url,
-        autostart:true,
-        width:"100%",
-        height:"100%"
-    });
+jwInstance=jwplayer("jw-player").setup({
+file:url,
+autostart:true,
+width:"100%",
+height:"100%"
+});
 
-    jwInstance.on('ready',()=>setDefaultVolumeJW());
+jwInstance.on('ready',()=>setDefaultVolumeJW());
 }
 
-/* RETRY */
-function retryPlay(){
-    setTimeout(()=>{
-        if(video.paused){
-            video.play().catch(()=>{});
-        }
-    },1000);
-}
-
-/* ❌ ปิด */
+/* ปิด */
 function closePlayer(){
-    resetPlayers();
-    document.getElementById("player-container").style.display="none";
+resetPlayers();
+document.getElementById("player-container").style.display="none";
 }
 
 /* EVENTS */
-document.getElementById("closePlayerBtn").addEventListener("click",(e)=>{
-    e.stopPropagation();
-    closePlayer();
-});
+document.getElementById("closePlayerBtn").onclick=(e)=>{
+e.stopPropagation();
+closePlayer();
+};
 
-document.getElementById("homeBtn").addEventListener("click",(e)=>{
-    e.stopPropagation();
-    closePlayer();
+document.getElementById("homeBtn").onclick=(e)=>{
+e.stopPropagation();
+closePlayer();
+window.location.href="https://tiea9999.github.io/tv/index.html";
+};
 
-    // 🔥 กลับหน้าโฮมจริง
-    window.location.href = "https://tiea9999.github.io/tv/index.html";
-});
-
-/* กดพื้นหลังปิด */
-document.getElementById("player-container").addEventListener("click",()=>{
-    closePlayer();
-});
+document.getElementById("player-container").onclick=()=>{
+closePlayer();
+};
 
 /* LOAD */
 async function load(){
 
-    const url="https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/M3U/Dooball.json";
-    const res=await fetch(url);
-    const data=await res.json();
+const res=await fetch("https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/M3U/Dooball.json");
+const data=await res.json();
 
-    const grid=document.getElementById("movieGrid");
-    let list=[];
+const grid=document.getElementById("movieGrid");
+let list=[];
 
-    if(data.groups){
-        data.groups.forEach(g=>{
-            g.stations.forEach(s=>{
-                list.push({
-                    title:s.name,
-                    logo:s.image||g.image,
-                    url:s.url
-                });
-            });
-        });
-    }else{
-        list=data;
-    }
+if(data.groups){
+data.groups.forEach(g=>{
+g.stations.forEach(s=>{
+list.push({
+title:s.name,
+logo:s.image||g.image,
+url:s.url
+});
+});
+});
+}else{
+list=data;
+}
 
-    list.forEach(ch=>{
-        const card=document.createElement("div");
-        card.className="movie-card";
+list.forEach(ch=>{
+const card=document.createElement("div");
+card.className="movie-card";
 
-        card.innerHTML=`
-        <img src="${ch.logo||''}">
-        <div class="movie-title">${ch.title}</div>
-        `;
+card.innerHTML=`
+<img src="${ch.logo||''}">
+<div class="movie-title">${ch.title}</div>
+`;
 
-        card.onclick=()=>playStream(ch);
+card.onclick=()=>playStream(ch);
 
-        grid.appendChild(card);
-    });
+grid.appendChild(card);
+});
 
 }
 
