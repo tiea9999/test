@@ -11,24 +11,35 @@
 <script>jwplayer.key="XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo";</script>
 
 <style>
-body{margin:0;background:#000;color:#fff;font-family:sans-serif}
-.movie-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:10px}
-.movie-card{background:#111;border-radius:10px;cursor:pointer}
-.movie-card img{width:100%;height:150px;object-fit:contain;background:#000}
-.movie-title{text-align:center;font-size:13px;padding:5px}
-#player-container{position:fixed;top:0;left:0;width:100%;height:100%;background:#000;display:none;z-index:9999}
+body{margin:0;background:#0b0b0b;color:#fff;font-family:sans-serif}
+.movie-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:10px}
+.movie-card{background:#1b1b1b;border-radius:10px;cursor:pointer}
+.movie-card img{width:100%;height:140px;object-fit:contain;background:#000}
+.movie-title{text-align:center;padding:5px;font-size:13px}
+
+#player-container{
+position:fixed;top:0;left:0;width:100%;height:100%;
+background:#000;display:none;z-index:9999;
+}
+
 video,#jw-player{width:100%;height:100%}
-.close-btn{position:absolute;top:10px;right:10px;background:red;border:none;color:#fff;padding:10px}
+
+.close-btn{
+position:absolute;top:10px;right:10px;
+background:red;border:none;color:#fff;
+width:40px;height:40px;border-radius:50%;
+}
 </style>
 </head>
 
 <body>
 
-<div class="movie-grid" id="movieGrid"></div>
+<div id="movieGrid" class="movie-grid"></div>
 
 <div id="player-container">
-<button class="close-btn" onclick="closePlayer()">ปิด</button>
+<button class="close-btn" onclick="closePlayer()">✕</button>
 
+<!-- 🔥 แก้ autoplay -->
 <video id="videoPlayer" controls playsinline autoplay muted></video>
 <div id="jw-player" style="display:none;"></div>
 
@@ -36,14 +47,11 @@ video,#jw-player{width:100%;height:100%}
 
 <script>
 
-/* ================= PLAYLIST (ของเดิมคุณ) ================= */
-const PLAYLIST = "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/M3U/Dooball.json";
-
 let video = document.getElementById("videoPlayer");
 let jwInstance = null;
 let hls = null;
 
-/* ================= VOLUME FIX ================= */
+/* ================= 🔥 FIX VOLUME ================= */
 function setDefaultVolumeHTML5(){
     video.muted = true;
     video.volume = 1.0;
@@ -64,7 +72,7 @@ function resetPlayers(){
 
     if(hls){
         try{ hls.destroy(); }catch(e){}
-        hls = null;
+        hls=null;
     }
 
     if(jwInstance){
@@ -72,7 +80,7 @@ function resetPlayers(){
             jwInstance.stop();
             jwInstance.remove();
         }catch(e){}
-        jwInstance = null;
+        jwInstance=null;
     }
 
     video.pause();
@@ -84,16 +92,23 @@ function resetPlayers(){
 }
 
 /* ================= PLAY ================= */
-function playStream(url){
+function playStream(channel){
 
     resetPlayers();
 
     document.getElementById("player-container").style.display="block";
 
-    const lower = url.toLowerCase();
+    let url = channel.url || channel.stream;
+    if(!url && channel.servers && channel.servers.length){
+        url = channel.servers[0].url;
+    }
+
+    if(!url) return;
+
+    url = url.toLowerCase();
 
     // ===== MP4 =====
-    if(lower.includes(".mp4")){
+    if(url.includes(".mp4")){
         video.src = url;
         setDefaultVolumeHTML5();
 
@@ -103,12 +118,11 @@ function playStream(url){
     }
 
     // ===== HLS =====
-    if(lower.includes(".m3u8")){
+    if(url.includes(".m3u8")){
 
         if(Hls.isSupported()){
 
             hls = new Hls({
-                enableWorker:true,
                 manifestLoadingMaxRetry:6,
                 fragLoadingMaxRetry:6
             });
@@ -118,6 +132,7 @@ function playStream(url){
 
             hls.on(Hls.Events.MANIFEST_PARSED, function(){
                 setDefaultVolumeHTML5();
+
                 video.play().then(()=>{video.muted=false}).catch(()=>{});
                 retryPlay();
             });
@@ -125,6 +140,7 @@ function playStream(url){
         }else{
             video.src = url;
             setDefaultVolumeHTML5();
+
             video.play().then(()=>{video.muted=false}).catch(()=>{});
             retryPlay();
         }
@@ -133,7 +149,7 @@ function playStream(url){
     }
 
     // ===== DASH =====
-    if(lower.includes(".mpd")){
+    if(url.includes(".mpd")){
         const dash = dashjs.MediaPlayer().create();
         dash.initialize(video, url, true);
         setDefaultVolumeHTML5();
@@ -178,28 +194,47 @@ function closePlayer(){
     document.getElementById("player-container").style.display="none";
 }
 
-/* ================= LOAD ================= */
+/* ================= LOAD (รองรับ JSON คุณ) ================= */
 async function load(){
 
-    const res = await fetch(PLAYLIST);
+    const url = "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/M3U/Dooball.json";
+    const res = await fetch(url);
     const data = await res.json();
 
     const grid = document.getElementById("movieGrid");
 
-    data.forEach(ch=>{
-        const div = document.createElement("div");
-        div.className="movie-card";
+    // รองรับหลายรูปแบบ JSON
+    let list = [];
 
-        div.innerHTML = `
-        <img src="${ch.poster || ''}">
+    if(data.groups){
+        data.groups.forEach(g=>{
+            g.stations.forEach(s=>{
+                list.push({
+                    title: s.name || "ไม่มีชื่อ",
+                    logo: s.image || g.image || "",
+                    url: s.url
+                });
+            });
+        });
+    }
+    else if(Array.isArray(data)){
+        list = data;
+    }
+
+    list.forEach(ch=>{
+        const card = document.createElement("div");
+        card.className="movie-card";
+
+        card.innerHTML = `
+        <img src="${ch.logo || ''}">
         <div class="movie-title">${ch.title}</div>
         `;
 
-        div.onclick = ()=>{
-            playStream(ch.stream || ch.url);
+        card.onclick = ()=>{
+            playStream(ch);
         };
 
-        grid.appendChild(div);
+        grid.appendChild(card);
     });
 
 }
