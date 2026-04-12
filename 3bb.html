@@ -81,7 +81,7 @@ z-index:9999;
 
 <body>
 
-<div class="back-home" onclick="location.reload()">⬅ หน้าโฮม</div>
+<div class="back-home" onclick="goHome()">🏠 หน้าโฮม</div>
 <h2>TIEA IPTV</h2>
 
 <div id="player-container">
@@ -561,7 +561,9 @@ let v=document.getElementById("html5-player");
 v.pause();
 v.src="";
 }
-
+function goHome(){
+  window.location.href = "https://tiea9999.github.io/tv-online/";
+}
 </script>
 
 </body>
