@@ -7,106 +7,50 @@
 
 <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
 <script>
-jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
+    jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
 </script>
-
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
-body{margin:0;background:#000;color:#fff;font-family:Arial;}
-h2{text-align:center;color:orange;margin:10px;}
+body {margin:0; padding:0; background:#000; color:#fff; font-family:Arial,sans-serif; display:flex; flex-direction:column; align-items:center;}
+#channel-list {margin:10px auto; max-width:1200px; display:grid; grid-template-columns:repeat(7,1fr); gap:10px; overflow-x:auto; padding:10px;}
+.channel {cursor:pointer; padding:5px 3px; background:#222; border:2px solid #444; border-radius:8px; text-align:center; font-size:12px; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; min-height:80px; transition:all 0.2s;}
+.channel img {width:65px; height:65px; margin-bottom:5px; object-fit:contain;}
+.channel:hover {background:#000; border-color:orange;}
+.channel.active {background:orange; color:black; border-color:yellow;}
+#channel-list::-webkit-scrollbar {height:8px;}
+#channel-list::-webkit-scrollbar-thumb {background:orange; border-radius:4px;}
+#channel-list::-webkit-scrollbar-track {background:#111;}
+@media(max-width:768px){#channel-list{grid-template-columns:repeat(5,1fr);}.channel{min-height:70px;}}
+@media(max-width:480px){#channel-list{grid-template-columns:repeat(3,1fr);}.channel img{width:52px;height:52px;}.channel{font-size:10px; min-height:60px;}}
 
-#channel-list{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(90px,1fr));
-gap:10px;
-padding:10px;
-}
+/* Back Home */
+.back-home{position:fixed; top:15px; left:15px; padding:10px 18px; border-radius:50px; font-weight:600; cursor:pointer; z-index:9999; background:rgba(255,255,255,0.15); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,0.3); color:#fff; box-shadow:0 8px 25px rgba(0,0,0,0.3); transition:0.3s ease;}
+.back-home:hover{background:linear-gradient(90deg,#ff512f,#dd2476); transform:scale(1.05); box-shadow:0 10px 30px rgba(255,0,150,0.6);}
 
-.channel{
-background:#222;
-border:2px solid #444;
-border-radius:10px;
-padding:5px;
-text-align:center;
-cursor:pointer;
-}
-.channel.active{background:orange;color:#000;}
-.channel img{width:60px;height:60px;object-fit:contain;}
-
-#player-container{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-width:90%;
-max-width:1000px;
-aspect-ratio:16/9;
-background:#000;
-border:2px solid orange;
-border-radius:10px;
-display:none;
-z-index:9999;
-}
-
-#jw-player,#html5-player{
-width:100%!important;
-height:100%!important;
-}
-
-#closeBtn{
-position:absolute;
-top:10px;
-right:10px;
-background:red;
-color:#fff;
-border:none;
-padding:6px 10px;
-cursor:pointer;
-z-index:10001;
-}
-
-#maximizeBtn{
-position:absolute;
-top:10px;
-right:55px;
-background:orange;
-border:none;
-padding:6px 10px;
-cursor:pointer;
-z-index:10001;
-}
-
-.back-home{
-position:fixed;
-top:10px;
-left:10px;
-background:rgba(255,255,255,0.2);
-padding:8px 12px;
-border-radius:20px;
-cursor:pointer;
-z-index:9999;
-}
+/* Floating Player */
+#player-container {position:fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60%; max-width: 1600px; aspect-ratio: 16 / 9; background:black; z-index:9999; border:2px solid orange; border-radius:8px; overflow:hidden; box-shadow:0 8px 20px rgba(0,0,0,0.5); cursor:move; display:none;}
+#jw-player,#html5-player{width:100%!important;height:100%!important;}
+#player-container button{position:absolute; top:5px; right:5px; z-index:10000; background:red; color:white; border:none; border-radius:3px; padding:2px 6px; cursor:pointer;}
+#player-container button#maximizeBtn{right:35px; background:orange;}
 </style>
 </head>
-
 <body>
 
-<div class="back-home" onclick="goHome()">⬅ หน้าโฮม</div>
-<h2>TIEA IPTV</h2>
+<div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
+<h2 style="color:orange; text-align:center;">TIEA IPTV</h2>
 
 <div id="player-container">
-<div id="jw-player"></div>
-<video id="html5-player" controls autoplay muted playsinline style="display:none;"></video>
-<button id="closeBtn" onclick="closePlayer()">X</button>
-<button id="maximizeBtn" onclick="toggleMaximize()">⬜</button>
+    <div id="jw-player"></div>
+    <video id="html5-player" controls autoplay muted playsinline style="width:100%; display:none; background:black;"></video>
+    <button onclick="closePlayer()">X</button>
+    <button id="maximizeBtn" onclick="toggleMaximize()">⬜</button>
 </div>
-
 <div id="channel-list"></div>
 
 <script>
+const WORKER_PROXY = "https://your-worker.example.workers.dev/?url="; // เปลี่ยนเป็น Worker ของคุณ
 
-/* ================= CHANNEL ================= */
 const channels = [
     {
                 name: "TV5HD",
@@ -404,141 +348,104 @@ const channels = [
 				
 ];
 
-/* ================= LOAD ================= */
-document.addEventListener("DOMContentLoaded",()=>{
-const list=document.getElementById("channel-list");
+let currentHls = null;
+let isMax = false;
+function proxyUrl(url){
+    // ❗ ถ้าเป็นลิงก์ worker ของคุณอยู่แล้ว → ไม่ต้อง proxy ซ้ำ
+    if (url.includes("workers.dev")) return url;
 
-channels.forEach(ch=>{
-let div=document.createElement("div");
-div.className="channel";
+    // ❗ ถ้าเป็น .mpd (DRM) → ไม่ต้อง proxy (JW ใช้ตรง)
+    if (url.endsWith(".mpd")) return url;
 
-div.innerHTML=`
-<img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/60?text=TV'">
-<div>${ch.name}</div>
-`;
-
-div.onclick=()=>loadChannel(ch,div);
-list.appendChild(div);
-});
-});
-
-let currentHls=null;
-let isMax=false;
-
-/* ================= PLAY ================= */
-function loadChannel(ch,el){
-
-document.querySelectorAll('.channel').forEach(c=>c.classList.remove('active'));
-el.classList.add('active');
-
-const container=document.getElementById("player-container");
-container.style.display="block";
-
-const jw=document.getElementById("jw-player");
-const video=document.getElementById("html5-player");
-
-if(currentHls){currentHls.destroy(); currentHls=null;}
-try{jwplayer("jw-player").remove();}catch(e){}
-
-video.pause();
-video.src="";
-video.style.display="none";
-jw.style.display="block";
-
-/* 🔥 CONFIG */
-let config={
-file:ch.file,
-width:"100%",
-aspectratio:"16:9",
-autostart:true
-};
-
-/* 🔥 DRM */
-if(ch.drm){
-config.drm={
-clearkey:{
-keyId:ch.keyId,
-key:ch.key
-}
-};
+    // ❗ เฉพาะ .m3u8 ที่โดน 403 ค่อย proxy
+    return url;
 }
 
-let player=jwplayer("jw-player").setup(config);
+function loadChannel(channel, element){
+    document.querySelectorAll('.channel').forEach(ch=>ch.classList.remove('active'));
+    if(element) element.classList.add('active');
 
-/* 🔥 fallback */
-let used=false;
-player.on("error",()=>{
-if(!used){used=true; useHTML5(ch.file);}
+    const jwContainer=document.getElementById("jw-player");
+    const html5Video=document.getElementById("html5-player");
+    const container=document.getElementById("player-container");
+
+    // แสดง Player กลางจอและขนาดใหญ่
+    container.style.display="block";
+    container.style.width="60%";       // ขยายใหญ่ตั้งแต่แรก
+    container.style.maxWidth="1600px";
+    container.style.height="auto";      // aspect-ratio จะจัดให้เอง
+    container.style.top="50%";
+    container.style.left="50%";
+    container.style.bottom="auto";
+    container.style.right="auto";
+    container.style.transform="translate(-50%, -50%)";
+    container.style.borderRadius="8px";
+
+    if(currentHls){currentHls.destroy(); currentHls=null;}
+    try{jwplayer("jw-player").remove();}catch(e){}
+    html5Video.pause(); html5Video.src=""; html5Video.style.display="none";
+
+    const fileUrl = proxyUrl(channel.file);
+    const jwConfig = {file:fileUrl,width:"100%",aspectratio:"16:9",autostart:true,mute:false,volume:25};
+    if(channel.drm) jwConfig.drm={clearkey:{keyId:channel.keyId,key:channel.key}};
+
+    const playerInstance=jwplayer("jw-player").setup(jwConfig);
+    let fallbackUsed=false;
+
+    playerInstance.on("error",function(){if(!fallbackUsed){fallbackUsed=true; useHTML5(fileUrl);}});
+    setTimeout(()=>{const state=playerInstance.getState();if(state!=="playing"&&state!=="buffering"&&!fallbackUsed){fallbackUsed=true; useHTML5(fileUrl);}},12000);
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+    const listContainer=document.getElementById("channel-list");
+    channels.forEach(ch=>{
+        const div=document.createElement("div");
+        div.className="channel";
+        div.innerHTML=`<img src="${ch.logo}"><span>${ch.name}</span>`;
+        div.onclick=()=>loadChannel(ch,div);
+        listContainer.appendChild(div);
+    });
 });
 
-setTimeout(()=>{
-let state=player.getState();
-if(state!=="playing" && !used){
-used=true;
-useHTML5(ch.file);
-}
-},10000);
-
-}
-
-/* ================= HTML5 ================= */
 function useHTML5(url){
-
-const jw=document.getElementById("jw-player");
-const video=document.getElementById("html5-player");
-
-jw.style.display="none";
-video.style.display="block";
-
-if(video.canPlayType('application/vnd.apple.mpegurl')){
-video.src=url;
-video.play();
-}else if(Hls.isSupported()){
-currentHls=new Hls();
-currentHls.loadSource(url);
-currentHls.attachMedia(video);
-currentHls.on(Hls.Events.MANIFEST_PARSED,()=>video.play());
+    const jwContainer=document.getElementById("jw-player");
+    const html5Video=document.getElementById("html5-player");
+    jwContainer.style.display="none"; html5Video.style.display="block"; html5Video.volume=0.25;
+    if(html5Video.canPlayType('application/vnd.apple.mpegurl')){html5Video.src=url; html5Video.play();}
+    else if(Hls.isSupported()){currentHls=new Hls(); currentHls.loadSource(url); currentHls.attachMedia(html5Video); currentHls.on(Hls.Events.MANIFEST_PARSED,function(){ html5Video.play(); });}
 }
 
-}
-
-/* ================= CLOSE ================= */
 function closePlayer(){
-document.getElementById("player-container").style.display="none";
-
-if(currentHls){currentHls.destroy(); currentHls=null;}
-try{jwplayer("jw-player").remove();}catch(e){}
-
-let v=document.getElementById("html5-player");
-v.pause();
-v.src="";
+    const container=document.getElementById("player-container");
+    container.style.display="none";
+    if(currentHls){currentHls.destroy(); currentHls=null;}
+    try{jwplayer("jw-player").remove();}catch(e){}
+    const html5Video=document.getElementById("html5-player"); html5Video.pause(); html5Video.src="";
 }
 
-/* ================= MAX ================= */
+function goHome(){ window.location.href="https://tiea9999.github.io/tv/index.html"; }
+
 function toggleMaximize(){
-let c=document.getElementById("player-container");
-
-if(!isMax){
-c.style.width="100%";
-c.style.height="100%";
-c.style.top="0";
-c.style.left="0";
-c.style.transform="none";
-isMax=true;
-}else{
-c.style.width="90%";
-c.style.top="50%";
-c.style.left="50%";
-c.style.transform="translate(-50%,-50%)";
-isMax=false;
-}
+    const container=document.getElementById("player-container");
+    if(!isMax){
+        container.style.width="100%"; container.style.height="100%";
+        container.style.top="0"; container.style.left="0"; container.style.bottom="0"; container.style.right="0"; container.style.borderRadius="0"; isMax=true;
+    } else {
+        container.style.width="400px"; container.style.height="225px";
+        container.style.bottom="20px"; container.style.right="20px";
+        container.style.top="auto"; container.style.left="auto"; container.style.borderRadius="8px"; isMax=false;
+    }
 }
 
-/* ================= HOME ================= */
-function goHome(){
-window.location.href="https://tiea9999.github.io/tv/index.html";
+// ลาก Player
+dragElement(document.getElementById("player-container"));
+function dragElement(elmnt){
+    let pos1=0,pos2=0,pos3=0,pos4=0;
+    elmnt.onmousedown=dragMouseDown;
+    function dragMouseDown(e){e=e||window.event; e.preventDefault(); pos3=e.clientX; pos4=e.clientY; document.onmouseup=closeDragElement; document.onmousemove=elementDrag;}
+    function elementDrag(e){e=e||window.event; e.preventDefault(); pos1=pos3-e.clientX; pos2=pos4-e.clientY; pos3=e.clientX; pos4=e.clientY; elmnt.style.top=(elmnt.offsetTop-pos2)+"px"; elmnt.style.left=(elmnt.offsetLeft-pos1)+"px";}
+    function closeDragElement(){document.onmouseup=null;document.onmousemove=null;}
 }
-
 </script>
 
 </body>
