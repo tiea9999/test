@@ -19,7 +19,6 @@ body{
   overflow:hidden;
 }
 
-/* MOBILE BUTTON */
 #mobileToggle{
   position:fixed;
   top:15px;
@@ -35,7 +34,6 @@ body{
 }
 #mobileToggle:hover{transform:scale(1.05);}
 
-/* SIDEBAR */
 #menu{
   width:200px;
   background:rgba(20,20,35,0.95);
@@ -48,7 +46,6 @@ body{
 }
 #menu.hidden{transform:translateX(-100%);}
 
-/* LOGO */
 .logo-box{
   text-align:center;
   margin-bottom:25px;
@@ -62,7 +59,6 @@ body{
   box-shadow:0 0 30px rgba(255,0,150,0.7);
 }
 
-/* HOME */
 .home-btn{
   display:block;
   padding:10px;
@@ -76,7 +72,6 @@ body{
 }
 .home-btn:hover{transform:scale(1.05);}
 
-/* MENU TITLE */
 .menu-title{
   padding:12px;
   border-radius:12px;
@@ -90,11 +85,8 @@ body{
 .premium {background: linear-gradient(90deg, #ff416c, #ff4b2b);}
 .movie {background: linear-gradient(90deg, #36d1dc, #5b86e5);}
 .series {background: linear-gradient(90deg, #f9d423, #ff4e50);}
-.anime {background: linear-gradient(90deg, #11998e, #38ef7d);}
-.short {background: linear-gradient(90deg, #8e2de2, #4a00e0);}
 .vip {background: linear-gradient(90deg, #fcb045, #fd1d1d);}
 
-/* SUBMENU */
 .submenu{
   max-height:0;
   overflow:hidden;
@@ -102,14 +94,12 @@ body{
 }
 .submenu.open{max-height:1000px;}
 
-/* ACTIVE MENU TITLE */
 .menu-title.active-title{
   box-shadow: 0 0 20px rgba(255,255,255,0.4);
   transform: scale(1.05);
   border:2px solid #fff;
 }
 
-/* LINKS */
 .menu-link{
   display:flex;
   justify-content:center;
@@ -118,6 +108,8 @@ body{
   border-radius:10px;
   cursor:pointer;
   transition:0.3s;
+  min-height:56px;
+  text-align:center;
 }
 .menu-link:hover{
   background:#e94560;
@@ -134,6 +126,7 @@ body{
   max-width:120px;
   height:40px;
   object-fit:contain;
+  display:block;
   filter:drop-shadow(0 0 6px rgba(255,255,255,0.3));
   transition:0.3s;
 }
@@ -141,7 +134,6 @@ body{
   transform:scale(1.1);
 }
 
-/* PLAYER */
 #main-player{
   flex:1;
   position:relative;
@@ -242,11 +234,13 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  background:linear-gradient(135deg,#222,#111);
-  font-size:15px;
-  color:#ddd;
+  background:linear-gradient(135deg,#2a2a45,#111);
+  color:#fff;
   text-align:center;
-  padding:10px;
+  padding:12px;
+  font-size:15px;
+  font-weight:700;
+  line-height:1.4;
 }
 .content-card .card-title{
   padding:10px 12px 6px;
@@ -269,7 +263,6 @@ body{
   color:#fff;
 }
 
-/* MOBILE */
 @media(max-width:768px){
   #menu{position:fixed;height:100%;z-index:999;}
   #mobileToggle{display:block;}
@@ -277,7 +270,6 @@ body{
   .content-card img,.content-card .thumb-fallback{height:190px;}
 }
 
-/* FLOAT PLAYER */
 #floatingPlayer{
   position:fixed;
   top:50%;
@@ -311,7 +303,6 @@ body{
 }
 #closePlayer:hover{background:red;}
 
-/* FAVORITE CHANNELS */
 .fav-channel{
   width:80px;
   height:80px;
@@ -369,35 +360,29 @@ body{
 <div id="mobileToggle">☰ เมนู</div>
 
 <div id="menu">
-
   <div class="logo-box">
     <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
   </div>
 
   <div class="home-btn" id="homeBtn">🏠 หน้าแรก</div>
 
-  <!-- ทีวี -->
   <div class="menu-title premium" data-menu="tvMenu">ทีวีออนไลน์</div>
   <div id="tvMenu" class="submenu">
     <div class="menu-link" data-url="https://tiea9999.github.io/tv/ball66.html" data-type="page">DOOBALL66</div>
     <div class="menu-link" data-url="https://tiea9999.github.io/tv/sport.html" data-type="page">SPORT TV</div>
     <div class="menu-link" data-url="https://tiea9999.github.io/tv/3bb.html" data-type="page">3BB TV</div>
 
-    <div class="menu-section">
-      <span>ตารางแข่งขัน</span>
-    </div>
+    <div class="menu-section"><span>ตารางแข่งขัน</span></div>
 
     <div class="menu-link" data-url="https://tiea9999.github.io/tv/live66.html" data-type="page">Ball66</div>
     <div class="menu-link" data-url="https://tiea9999.github.io/tv/DKL.html" data-type="page">DKL</div>
   </div>
 
-  <!-- หนัง -->
   <div class="menu-title movie" data-menu="movieMenu">หนัง</div>
   <div id="movieMenu" class="submenu">
     <div class="menu-link" data-url="https://tiea9999.github.io/tv/MOVIE01.html" data-type="page">MIX MOVIE</div>
   </div>
 
-  <!-- ซีรีส์ -->
   <div class="menu-title series" data-menu="seriesMenu">ซีรีส์</div>
   <div id="seriesMenu" class="submenu">
     <div class="menu-link"
@@ -407,7 +392,6 @@ body{
     </div>
   </div>
 
-  <!-- VIP -->
   <div class="menu-title vip" data-menu="vipMenu">VIP</div>
   <div id="vipMenu" class="submenu">
     <div class="menu-link"
@@ -418,7 +402,6 @@ body{
 </div>
 
 <div id="main-player">
-
   <div id="welcomeWrap">
     <div id="welcome">
       <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
@@ -429,15 +412,12 @@ body{
       <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/monomax-01-th?muted=0">
         <img src="https://www.fileinwtv.site/postor/20250830165328Mono1.jpg" alt="MAX01 Logo">
       </div>
-
       <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/monomax-02-th?muted=0">
         <img src="https://www.fileinwtv.site/postor/20250830165343Mono2.jpg" alt="MAX02 Logo">
       </div>
-
       <div class="fav-channel" data-url="https://edge-sg-01.bananacake.org/s/mse_052d72e9cbf2903c657557bb/1927b4c3/playlist.m3u8">
         <img src="https://www.fileinwtv.site/postor/20250830165408Mono3.jpg" alt="MAX03 Logo">
       </div>
-
       <div class="fav-channel" data-url="https://edge-sg-01.bananacake.org/s/mse_b0d3474623f86ddb1c0e61bd/a8553707/playlist.m3u8">
         <img src="https://www.fileinwtv.site/postor/20250830165433Mono4.jpg" alt="MAX04 Logo">
       </div>
@@ -495,7 +475,7 @@ function showStatus(message){
 }
 
 function getThumb(item){
-  return item.image || item.poster || item.thumb || item.logo || "";
+  return item.image || item.poster || item.thumb || item.logo || item.cover || "";
 }
 
 function getTitle(item){
@@ -558,22 +538,21 @@ function renderJsonItems(items, title){
     const cardTitle = getTitle(item);
     const meta = [item.year, item.language, item.category].filter(Boolean).join(" • ");
 
-    const media = thumb
-      ? `<img src="${thumb}" alt="${cardTitle}" onerror="this.outerHTML='<div class=&quot;thumb-fallback&quot;>ไม่มีรูป</div>'">`
-      : `<div class="thumb-fallback">ไม่มีรูป</div>`;
-
     card.innerHTML = `
-      ${media}
+      ${thumb
+        ? `<img src="${thumb}" alt="${cardTitle}" onerror="this.outerHTML='<div class=&quot;thumb-fallback&quot;>${cardTitle}</div>'">`
+        : `<div class="thumb-fallback">${cardTitle}</div>`
+      }
       <div class="card-title">${cardTitle}</div>
       <div class="card-meta">${meta || "เลือกเพื่อเปิด"}</div>
     `;
 
-    card.addEventListener("click", () => openJsonItem(item, cardTitle));
+    card.addEventListener("click", () => openJsonItem(item));
     contentGrid.appendChild(card);
   });
 }
 
-function openJsonItem(item, fallbackTitle){
+function openJsonItem(item){
   const next = getNextUrl(item);
 
   if(item.items && Array.isArray(item.items)){
@@ -618,11 +597,9 @@ menuTitles.forEach(title => {
     title.classList.add("active-title");
 
     const target = document.getElementById(title.dataset.menu);
-
     submenus.forEach(menu => {
-      if(menu !== target){ menu.classList.remove("open"); }
+      if(menu !== target) menu.classList.remove("open");
     });
-
     target.classList.toggle("open");
   });
 });
@@ -646,14 +623,11 @@ links.forEach(link => {
 
     if(type === "iframe"){
       showIframe(url);
-    }
-    else if(type === "page"){
+    } else if(type === "page"){
       window.location.href = url;
-    }
-    else if(type === "blank"){
+    } else if(type === "blank"){
       window.open(url, "_blank");
-    }
-    else if(type === "json"){
+    } else if(type === "json"){
       await loadJsonMenu(url, "ซีรีส์");
     }
 
@@ -683,7 +657,6 @@ favs.forEach(ch => {
     const url = ch.dataset.url;
     floatFrame.src = url;
     floatPlayer.style.display = "block";
-
     floatFrame.onload = () => {
       try {
         const vid = floatFrame.contentWindow.document.querySelector("video");
