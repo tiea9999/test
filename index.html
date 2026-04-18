@@ -6,6 +6,7 @@
 <title>TIEA IPTV</title>
 
 <link rel="icon" href="https://www.dropbox.com/scl/fi/qmxborwldhasptwy7e25v/TIEA-IPTV.png?rlkey=lskyoeb3637zo3eqa3j4ye0uy&dl=1">
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
@@ -83,17 +84,15 @@ body{
   font-weight:600;
   margin:12px 0 6px;
   transition:0.3s ease;
-
 }
-  
 .menu-title:hover{transform:scale(1.05);}
 
-.premium {background: linear-gradient(90deg, #ff416c, #ff4b2b);} /* ชมพูแดงร้อนแรง */
-.movie {background: linear-gradient(90deg, #36d1dc, #5b86e5);} /* ฟ้า → น้ำเงิน สดใส */
-.series {background: linear-gradient(90deg, #f9d423, #ff4e50);} /* เหลืองทอง → แดงอมส้ม */
-.anime {background: linear-gradient(90deg, #11998e, #38ef7d);} /* เขียว → เขียวอ่อน สดชื่น */
-.short {background: linear-gradient(90deg, #8e2de2, #4a00e0);} /* ม่วงเข้ม → ม่วงสด */
-.vip {background: linear-gradient(90deg, #fcb045, #fd1d1d);} /* ทอง → แดงร้อนแรง */
+.premium {background: linear-gradient(90deg, #ff416c, #ff4b2b);}
+.movie {background: linear-gradient(90deg, #36d1dc, #5b86e5);}
+.series {background: linear-gradient(90deg, #f9d423, #ff4e50);}
+.anime {background: linear-gradient(90deg, #11998e, #38ef7d);}
+.short {background: linear-gradient(90deg, #8e2de2, #4a00e0);}
+.vip {background: linear-gradient(90deg, #fcb045, #fd1d1d);}
 
 /* SUBMENU */
 .submenu{
@@ -109,26 +108,39 @@ body{
   transform: scale(1.05);
   border:2px solid #fff;
 }
+
 /* LINKS */
 .menu-link{
-  display:block;
-  padding:10px 15px;
-  font-size:14px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:8px;
+  border-radius:10px;
   cursor:pointer;
   transition:0.3s;
-  border-radius:6px;
 }
 .menu-link:hover{
   background:#e94560;
   transform:translateX(6px);
 }
-/* ACTIVE MENU LINK */
 .menu-link.active{
   background: linear-gradient(90deg,#ff512f,#dd2476);
   box-shadow: 0 0 15px rgba(255,0,150,0.7);
   transform: translateX(6px);
   font-weight: bold;
 }
+.menu-link img{
+  width:100%;
+  max-width:120px;
+  height:40px;
+  object-fit:contain;
+  filter:drop-shadow(0 0 6px rgba(255,255,255,0.3));
+  transition:0.3s;
+}
+.menu-link:hover img{
+  transform:scale(1.1);
+}
+
 /* PLAYER */
 #main-player{
   flex:1;
@@ -138,11 +150,22 @@ body{
   justify-content:center;
   align-items:center;
   background:radial-gradient(circle at center,#1a1a2e 0%,#000 80%);
+  overflow:hidden;
 }
+
+#welcomeWrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  width:100%;
+  height:100%;
+}
+
 #welcome{
-text-align:center;
-opacity:0.9;
-margin-top:150px;
+  text-align:center;
+  opacity:0.95;
+  margin-top:0;
 }
 #welcome img{
   width:300px;
@@ -156,149 +179,188 @@ margin-top:150px;
   50%{transform:translateY(-10px);}
   100%{transform:translateY(0);}
 }
+
+#favoriteChannels{
+  display:flex;
+  gap:15px;
+  justify-content:center;
+  margin-top:28px;
+  flex-wrap:wrap;
+  padding:0 20px;
+}
+
 #iframePlayer, #floatingPlayer iframe{
   width:100%;
   height:100%;
   border:none;
 }
 
+#contentArea{
+  width:100%;
+  height:100%;
+  overflow-y:auto;
+  padding:24px;
+  display:none;
+}
+
+#contentHeader{
+  font-size:26px;
+  font-weight:700;
+  margin-bottom:18px;
+  color:#fff;
+}
+
+#contentGrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:18px;
+}
+
+.content-card{
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:0.25s;
+  box-shadow:0 8px 25px rgba(0,0,0,0.35);
+}
+.content-card:hover{
+  transform:translateY(-6px) scale(1.02);
+  box-shadow:0 12px 30px rgba(255,0,150,0.25);
+}
+.content-card img{
+  width:100%;
+  height:240px;
+  object-fit:cover;
+  display:block;
+  background:#111;
+}
+.content-card .thumb-fallback{
+  width:100%;
+  height:240px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#222,#111);
+  font-size:15px;
+  color:#ddd;
+  text-align:center;
+  padding:10px;
+}
+.content-card .card-title{
+  padding:10px 12px 6px;
+  font-size:14px;
+  font-weight:700;
+  line-height:1.35;
+  min-height:50px;
+}
+.content-card .card-meta{
+  padding:0 12px 12px;
+  font-size:12px;
+  color:#bbb;
+}
+
+.status-box{
+  margin:18px 0;
+  padding:14px 16px;
+  border-radius:12px;
+  background:rgba(255,255,255,0.08);
+  color:#fff;
+}
+
 /* MOBILE */
 @media(max-width:768px){
   #menu{position:fixed;height:100%;z-index:999;}
   #mobileToggle{display:block;}
-}
-
-/* FAVORITE CHANNELS */
-
-#favoriteChannels{
-display:flex;
-gap:15px;
-justify-content:center;
-margin-top:50px;
-flex-wrap:wrap;
+  #contentGrid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+  .content-card img,.content-card .thumb-fallback{height:190px;}
 }
 
 /* FLOAT PLAYER */
-
 #floatingPlayer{
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-width:70%;
-height:70%;
-background:#000;
-border-radius:12px;
-box-shadow:0 0 50px rgba(0,0,0,0.9);
-display:none;
-z-index:9999;
-overflow:hidden;
+  position:fixed;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  width:70%;
+  height:70%;
+  background:#000;
+  border-radius:12px;
+  box-shadow:0 0 50px rgba(0,0,0,0.9);
+  display:none;
+  z-index:9999;
+  overflow:hidden;
 }
-
 #floatingPlayer iframe{
-width:100%;
-height:100%;
-border:none;
+  width:100%;
+  height:100%;
+  border:none;
 }
-
 #closePlayer{
-position:absolute;
-top:8px;
-right:12px;
-font-size:22px;
-color:#fff;
-cursor:pointer;
-z-index:10;
-background:rgba(0,0,0,0.5);
-padding:4px 10px;
-border-radius:6px;
+  position:absolute;
+  top:8px;
+  right:12px;
+  font-size:22px;
+  color:#fff;
+  cursor:pointer;
+  z-index:10;
+  background:rgba(0,0,0,0.5);
+  padding:4px 10px;
+  border-radius:6px;
 }
+#closePlayer:hover{background:red;}
 
-#closePlayer:hover{
-background:red;
-}
-/* ปรับ fav-channel ให้โลโก้เต็มพื้นที่ */
+/* FAVORITE CHANNELS */
 .fav-channel{
-  width: 80px;       
-  height: 80px;
-  border-radius: 12px;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden;
-  transition: transform 0.3s;
-  padding: 0; /* ลบ padding เดิม */
-  background: linear-gradient(90deg,#ff512f,#dd2476);
+  width:80px;
+  height:80px;
+  border-radius:12px;
+  cursor:pointer;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  transition:transform 0.3s;
+  padding:0;
+  background:linear-gradient(90deg,#ff512f,#dd2476);
 }
-
 .fav-channel img{
-  width: 100%;       /* ให้เต็มพื้นที่ container */
-  height: 100%;      /* ให้เต็มพื้นที่ container */
-  object-fit: cover; /* ครอบเต็มช่อง ไม่บิดรูป */
-  display: block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
 }
-
 .fav-channel:hover{
-  transform: scale(1.1);
+  transform:scale(1.1);
 }
 
 .menu-section{
   margin:14px 0 8px;
   padding:6px 10px;
-
   font-size:12px;
   font-weight:600;
   letter-spacing:1px;
-
   color:#00e5ff;
-
   display:flex;
   align-items:center;
   gap:6px;
-
   position:relative;
 }
-
-/* เส้นเรืองแสง */
 .menu-section::after{
   content:"";
   flex:1;
   height:1px;
   margin-left:8px;
-
   background:linear-gradient(
     to right,
     rgba(0,229,255,0.8),
     rgba(0,229,255,0.05)
   );
 }
-
-/* glow */
 .menu-section span{
   text-shadow:0 0 8px rgba(0,229,255,0.7);
 }
-.menu-link{
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  padding:8px;
-  border-radius:10px;
-}
-
-.menu-link img{
-  width:100%;
-  max-width:120px;
-  height:40px;
-  object-fit:contain;
-  filter:drop-shadow(0 0 6px rgba(255,255,255,0.3));
-  transition:0.3s;
-}
-
-.menu-link:hover img{
-  transform:scale(1.1);
-}
-
 </style>
 </head>
 
@@ -308,232 +370,335 @@ background:red;
 
 <div id="menu">
 
-<div class="logo-box">
-  <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
-</div>
-<div class="home-btn" id="homeBtn">🏠 หน้าแรก</div>
-<!-- ทีวี -->
-<div class="menu-title premium" data-menu="tvMenu">ทีวีออนไลน์</div>
-<div id="tvMenu" class="submenu">
-<div class="menu-link"
-     data-url="https://tiea9999.github.io/tv/ball66.html"
-     data-type="page">DOOBALL66
-</div>  
-<div class="menu-link"
-     data-url="https://tiea9999.github.io/tv/sport.html"
-     data-type="page">SPORT TV
-</div>    
-  
-<div class="menu-link"
-     data-url="https://tiea9999.github.io/tv/3bb.html"
-     data-type="page">3BB TV
-</div>
-<div class="menu-section">
-  <span>ตารางแข่งขัน</span>
-</div>
+  <div class="logo-box">
+    <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
+  </div>
 
-<div class="menu-link"
-     data-url="https://tiea9999.github.io/tv/live66.html"
-     data-type="page">Ball66
-</div>   
+  <div class="home-btn" id="homeBtn">🏠 หน้าแรก</div>
 
-<div class="menu-link"
-     data-url="https://tiea9999.github.io/tv/DKL.html"
-     data-type="page">DKL
-</div>   
-</div>
+  <!-- ทีวี -->
+  <div class="menu-title premium" data-menu="tvMenu">ทีวีออนไลน์</div>
+  <div id="tvMenu" class="submenu">
+    <div class="menu-link" data-url="https://tiea9999.github.io/tv/ball66.html" data-type="page">DOOBALL66</div>
+    <div class="menu-link" data-url="https://tiea9999.github.io/tv/sport.html" data-type="page">SPORT TV</div>
+    <div class="menu-link" data-url="https://tiea9999.github.io/tv/3bb.html" data-type="page">3BB TV</div>
 
-<!-- หนัง -->
-<div class="menu-title movie" data-menu="movieMenu">หนัง</div>
-<div id="movieMenu" class="submenu">
-  
+    <div class="menu-section">
+      <span>ตารางแข่งขัน</span>
+    </div>
 
+    <div class="menu-link" data-url="https://tiea9999.github.io/tv/live66.html" data-type="page">Ball66</div>
+    <div class="menu-link" data-url="https://tiea9999.github.io/tv/DKL.html" data-type="page">DKL</div>
+  </div>
 
-<div class="menu-link"
-     data-url="https://tiea9999.github.io/tv/MOVIE01.html"
-     data-type="page">MIX MOVIE
-  
+  <!-- หนัง -->
+  <div class="menu-title movie" data-menu="movieMenu">หนัง</div>
+  <div id="movieMenu" class="submenu">
+    <div class="menu-link" data-url="https://tiea9999.github.io/tv/MOVIE01.html" data-type="page">MIX MOVIE</div>
+  </div>
 
-</div>     
-   
-</div>
+  <!-- ซีรีส์ -->
+  <div class="menu-title series" data-menu="seriesMenu">ซีรีส์</div>
+  <div id="seriesMenu" class="submenu">
+    <div class="menu-link"
+         data-url="https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/M3U/chinese.json"
+         data-type="json">
+      <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1" alt="ซีรีส์">
+    </div>
+  </div>
 
-<!-- ซีรีส์ -->
-<div class="menu-title series" data-menu="seriesMenu">ซีรีส์</div>
-<div id="seriesMenu" class="submenu">
-    
-<div class="menu-link"
-     data-url="https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/M3U/chinese.json"
-     data-type="page">
-     <img src="https://flixmono.com/wp-content/uploads/2025/05/cropped-F.png">
-
-
-</div>  
-</div>
-
-<div class="menu-title vip" data-menu="vipMenu">VIP</div>
-<div id="vipMenu" class="submenu">
-     
-<div class="menu-link"
-     data-url="https://tiea9999.github.io/tv/VIP.html"
-     data-type="page"
-     data-pass="9999">VIP
-</div>
-</div>
+  <!-- VIP -->
+  <div class="menu-title vip" data-menu="vipMenu">VIP</div>
+  <div id="vipMenu" class="submenu">
+    <div class="menu-link"
+         data-url="https://tiea9999.github.io/tv/VIP.html"
+         data-type="page"
+         data-pass="9999">VIP</div>
+  </div>
 </div>
 
 <div id="main-player">
 
-  <div id="welcome">
-    <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
-    <h1>TIEA IPTV</h1>
+  <div id="welcomeWrap">
+    <div id="welcome">
+      <img src="https://www.dropbox.com/scl/fi/nfxxskq5ydbebgvs1lcfi/output_857d150a-0947-4571-a612-402b9466aa4d_512x512_1773067860534.png?rlkey=92c2e2ilfdsm12r7tajb63p5d&dl=1">
+      <h1 style="margin-top:16px;">TIEA IPTV</h1>
+    </div>
+
+    <div id="favoriteChannels">
+      <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/monomax-01-th?muted=0">
+        <img src="https://www.fileinwtv.site/postor/20250830165328Mono1.jpg" alt="MAX01 Logo">
+      </div>
+
+      <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/monomax-02-th?muted=0">
+        <img src="https://www.fileinwtv.site/postor/20250830165343Mono2.jpg" alt="MAX02 Logo">
+      </div>
+
+      <div class="fav-channel" data-url="https://edge-sg-01.bananacake.org/s/mse_052d72e9cbf2903c657557bb/1927b4c3/playlist.m3u8">
+        <img src="https://www.fileinwtv.site/postor/20250830165408Mono3.jpg" alt="MAX03 Logo">
+      </div>
+
+      <div class="fav-channel" data-url="https://edge-sg-01.bananacake.org/s/mse_b0d3474623f86ddb1c0e61bd/a8553707/playlist.m3u8">
+        <img src="https://www.fileinwtv.site/postor/20250830165433Mono4.jpg" alt="MAX04 Logo">
+      </div>
+    </div>
   </div>
 
-  <div id="favoriteChannels">
-  <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/monomax-01-th?muted=0">
-    <img src="https://www.fileinwtv.site/postor/20250830165328Mono1.jpg" alt="MAX01 Logo">
+  <div id="contentArea">
+    <div id="contentHeader">รายการ</div>
+    <div id="contentStatus" class="status-box" style="display:none;"></div>
+    <div id="contentGrid"></div>
   </div>
 
-  <div class="fav-channel" data-url="https://embed-test.bananacake.org/embed/monomax-02-th?muted=0">
-    <img src="https://www.fileinwtv.site/postor/20250830165343Mono2.jpg" alt="MAX02 Logo">
-  </div>
-
-  <div class="fav-channel" data-url="https://edge-sg-01.bananacake.org/s/mse_052d72e9cbf2903c657557bb/1927b4c3/playlist.m3u8">
-    <img src="https://www.fileinwtv.site/postor/20250830165408Mono3.jpg" alt="MAX03 Logo">
-  </div>
-
-  <div class="fav-channel" data-url="https://edge-sg-01.bananacake.org/s/mse_b0d3474623f86ddb1c0e61bd/a8553707/playlist.m3u8">
-    <img src="https://www.fileinwtv.site/postor/20250830165433Mono4.jpg" alt="MAX04 Logo">
-  </div>
-</div>
-
-  <iframe id="iframePlayer" allowfullscreen allow="fullscreen"></iframe>
-
+  <iframe id="iframePlayer" allowfullscreen allow="fullscreen" style="display:none;"></iframe>
 </div>
 
 <div id="floatingPlayer">
-
-<div id="closePlayer">✕</div>
-
-<iframe id="floatFrame" allowfullscreen allow="fullscreen"></iframe>
-
+  <div id="closePlayer">✕</div>
+  <iframe id="floatFrame" allowfullscreen allow="fullscreen"></iframe>
 </div>
 
 <script>
-const menuTitles=document.querySelectorAll(".menu-title");
-const submenus=document.querySelectorAll(".submenu");
-const links=document.querySelectorAll(".menu-link");
-const iframe=document.getElementById("iframePlayer");
-const welcome=document.getElementById("welcome");
-const mobileToggle=document.getElementById("mobileToggle");
-const sidebar=document.getElementById("menu");
-const homeBtn=document.getElementById("homeBtn");
+const menuTitles = document.querySelectorAll(".menu-title");
+const submenus = document.querySelectorAll(".submenu");
+const links = document.querySelectorAll(".menu-link");
+const iframe = document.getElementById("iframePlayer");
+const welcomeWrap = document.getElementById("welcomeWrap");
+const mobileToggle = document.getElementById("mobileToggle");
+const sidebar = document.getElementById("menu");
+const homeBtn = document.getElementById("homeBtn");
+const contentArea = document.getElementById("contentArea");
+const contentGrid = document.getElementById("contentGrid");
+const contentHeader = document.getElementById("contentHeader");
+const contentStatus = document.getElementById("contentStatus");
 
-menuTitles.forEach(title=>{
-  title.addEventListener("click",()=>{
+function showWelcome(){
+  iframe.src = "";
+  iframe.style.display = "none";
+  contentArea.style.display = "none";
+  contentGrid.innerHTML = "";
+  contentStatus.style.display = "none";
+  contentStatus.textContent = "";
+  welcomeWrap.style.display = "flex";
+}
 
-    // ลบ active-title ทั้งหมดก่อน
-    menuTitles.forEach(t=>t.classList.remove("active-title"));
+function showIframe(url){
+  contentArea.style.display = "none";
+  welcomeWrap.style.display = "none";
+  iframe.style.display = "block";
+  iframe.src = url;
+}
+
+function showStatus(message){
+  contentStatus.style.display = "block";
+  contentStatus.textContent = message;
+}
+
+function getThumb(item){
+  return item.image || item.poster || item.thumb || item.logo || "";
+}
+
+function getTitle(item){
+  return item.title || item.name || item.label || "ไม่พบชื่อ";
+}
+
+function getNextUrl(item){
+  if (item.source) return item.source;
+  if (item.url) return item.url;
+  if (item.link) return item.link;
+  if (item.file) return item.file;
+  if (item.servers && item.servers.length && item.servers[0].url) return item.servers[0].url;
+  return "";
+}
+
+function normalizeItems(data){
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data.items)) return data.items;
+  if (Array.isArray(data.data)) return data.data;
+  if (Array.isArray(data.results)) return data.results;
+  return [];
+}
+
+async function loadJsonMenu(url, title = "ซีรีส์"){
+  welcomeWrap.style.display = "none";
+  iframe.style.display = "none";
+  contentArea.style.display = "block";
+  contentHeader.textContent = title;
+  contentGrid.innerHTML = "";
+  showStatus("กำลังโหลดรายการ...");
+
+  try{
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("โหลดไม่สำเร็จ");
+    const data = await res.json();
+    const items = normalizeItems(data);
+
+    if(!items.length){
+      showStatus("ไม่พบรายการ");
+      return;
+    }
+
+    contentStatus.style.display = "none";
+    renderJsonItems(items, title);
+  }catch(err){
+    showStatus("โหลดรายการไม่สำเร็จ");
+    console.error(err);
+  }
+}
+
+function renderJsonItems(items, title){
+  contentHeader.textContent = title;
+  contentGrid.innerHTML = "";
+
+  items.forEach(item => {
+    const card = document.createElement("div");
+    card.className = "content-card";
+
+    const thumb = getThumb(item);
+    const cardTitle = getTitle(item);
+    const meta = [item.year, item.language, item.category].filter(Boolean).join(" • ");
+
+    const media = thumb
+      ? `<img src="${thumb}" alt="${cardTitle}" onerror="this.outerHTML='<div class=&quot;thumb-fallback&quot;>ไม่มีรูป</div>'">`
+      : `<div class="thumb-fallback">ไม่มีรูป</div>`;
+
+    card.innerHTML = `
+      ${media}
+      <div class="card-title">${cardTitle}</div>
+      <div class="card-meta">${meta || "เลือกเพื่อเปิด"}</div>
+    `;
+
+    card.addEventListener("click", () => openJsonItem(item, cardTitle));
+    contentGrid.appendChild(card);
+  });
+}
+
+function openJsonItem(item, fallbackTitle){
+  const next = getNextUrl(item);
+
+  if(item.items && Array.isArray(item.items)){
+    renderJsonItems(item.items, getTitle(item));
+    return;
+  }
+
+  if(!next){
+    alert("ไม่พบลิงก์");
+    return;
+  }
+
+  if(next.endsWith(".json")){
+    loadJsonMenu(next, getTitle(item));
+    return;
+  }
+
+  if(item.servers && item.servers.length && item.servers[0].url){
+    const playUrl = item.servers[0].url;
+    if(playUrl.includes(".m3u8")){
+      window.open(playUrl, "_blank");
+      return;
+    }
+  }
+
+  if(next.includes(".m3u8")){
+    window.open(next, "_blank");
+    return;
+  }
+
+  if(next.startsWith("http")){
+    window.location.href = next;
+    return;
+  }
+
+  alert("เปิดรายการนี้ไม่ได้");
+}
+
+menuTitles.forEach(title => {
+  title.addEventListener("click", () => {
+    menuTitles.forEach(t => t.classList.remove("active-title"));
     title.classList.add("active-title");
 
-    const target=document.getElementById(title.dataset.menu);
+    const target = document.getElementById(title.dataset.menu);
 
-    submenus.forEach(menu=>{
-      if(menu!==target){menu.classList.remove("open");}
+    submenus.forEach(menu => {
+      if(menu !== target){ menu.classList.remove("open"); }
     });
 
     target.classList.toggle("open");
   });
 });
 
-links.forEach(link=>{
-  link.addEventListener("click",()=>{
-
-// 🔐 ตรวจสอบรหัสผ่าน
+links.forEach(link => {
+  link.addEventListener("click", async () => {
     const pass = link.dataset.pass;
-
     if(pass){
-        const input = prompt("กรุณาใส่รหัสผ่าน");
-
-        if(input !== pass){
-            alert("รหัสไม่ถูกต้อง");
-            return;
-        }
-
+      const input = prompt("กรุณาใส่รหัสผ่าน");
+      if(input !== pass){
+        alert("รหัสไม่ถูกต้อง");
+        return;
+      }
     }
-    
-    links.forEach(l=>l.classList.remove("active"));
-    link.classList.add("active");
-    
-    const url = link.dataset.url;
-    const type = link.dataset.type || "iframe"; // ค่าเริ่มต้น
 
-    // 🔥 เลือกการเปิดตามประเภท
+    links.forEach(l => l.classList.remove("active"));
+    link.classList.add("active");
+
+    const url = link.dataset.url;
+    const type = link.dataset.type || "iframe";
+
     if(type === "iframe"){
-        iframe.src = url;
-        iframe.style.display="block";
-        welcome.style.display="none";
+      showIframe(url);
     }
     else if(type === "page"){
-        window.location.href = url;
+      window.location.href = url;
     }
     else if(type === "blank"){
-        window.open(url, "_blank");
+      window.open(url, "_blank");
+    }
+    else if(type === "json"){
+      await loadJsonMenu(url, "ซีรีส์");
     }
 
-    if(window.innerWidth<768){
+    if(window.innerWidth < 768){
       sidebar.classList.add("hidden");
     }
   });
 });
 
-homeBtn.addEventListener("click",()=>{
-  iframe.src="";
-  iframe.style.display="none";
-  welcome.style.display="block";
-
-  links.forEach(l=>l.classList.remove("active"));
-  menuTitles.forEach(t=>t.classList.remove("active-title"));
-  submenus.forEach(menu=>menu.classList.remove("open")); // เพิ่มบรรทัดนี้
+homeBtn.addEventListener("click", () => {
+  showWelcome();
+  links.forEach(l => l.classList.remove("active"));
+  menuTitles.forEach(t => t.classList.remove("active-title"));
+  submenus.forEach(menu => menu.classList.remove("open"));
 });
 
-mobileToggle.addEventListener("click",()=>{
+mobileToggle.addEventListener("click", () => {
   sidebar.classList.toggle("hidden");
 });
 
-
-
-const favs=document.querySelectorAll(".fav-channel");
-const floatPlayer=document.getElementById("floatingPlayer");
-const floatFrame=document.getElementById("floatFrame");
+const favs = document.querySelectorAll(".fav-channel");
+const floatPlayer = document.getElementById("floatingPlayer");
+const floatFrame = document.getElementById("floatFrame");
 
 favs.forEach(ch => {
   ch.addEventListener("click", () => {
     const url = ch.dataset.url;
-
-    // เปิด float player
-    floatFrame.src = url;  
+    floatFrame.src = url;
     floatPlayer.style.display = "block";
 
-    // รอ iframe โหลดแล้วปรับเสียง (สำหรับ player ที่รองรับ)
     floatFrame.onload = () => {
       try {
         const vid = floatFrame.contentWindow.document.querySelector("video");
-        if (vid) vid.volume = 0.25; // ตั้งเสียง 25%
-      } catch(e){
-        // ถ้า cross-origin จะไม่สามารถเข้าถึงได้
-        // embed-test.bananacake.org ใช้ ?muted=0
-      }
+        if (vid) vid.volume = 0.25;
+      } catch(e){}
     };
   });
 });
-document.getElementById("closePlayer").onclick=()=>{
 
-floatPlayer.style.display="none";
-floatFrame.src="";
-
+document.getElementById("closePlayer").onclick = () => {
+  floatPlayer.style.display = "none";
+  floatFrame.src = "";
 };
 
+showWelcome();
 </script>
 
 </body>
