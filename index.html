@@ -566,7 +566,7 @@
 
             <div class="group-title">หนัง</div>
             <button class="menu-btn focusable" data-source="movie-main">🎬 หนังทั้งหมด</button>
-           
+            <button class="menu-btn focusable" data-source="movie-24hd">🎬 หนัง 24HD</button>
 
 
 
@@ -655,9 +655,9 @@
     };
 
     const SAMPLE_TV = [
-      { title:'Football03', image:'https://cms.dmpcdn.com/livetv/2025/10/27/ebbad850-b303-11f0-b265-23dfa726a2d7_webp_original.webp', url:'https://love.bebin98399.workers.dev/vx-origin/epl-3_720/chunks.m3u8', group:'ทีวี', type:'tv' },
-      { title:'Bein01', image:'https://cms.dmpcdn.com/livetv/2023/07/24/5f3c5240-29cc-11ee-b2f4-e9de482d866e_webp_original.webp', url:'https://love.bebin98399.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8', group:'ทีวี', type:'tv' },
-      { title:'Bein02', image:'https://cms.dmpcdn.com/livetv/2023/07/24/5fda18e0-29cc-11ee-846b-a1c4e5181c87_webp_original.webp', url:'https://love.bebin98399.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8', group:'กีฬา', type:'tv' }
+      { title:'MONOMAX 01', image:'', url:'https://monomax-sz.thaicdn.com/mono29hd/mono29hd.stream/playlist.m3u8', group:'ทีวี', type:'tv' },
+      { title:'MONOMAX 02', image:'', url:'https://monomax-sz.thaicdn.com/mono_plus/mono_plus.stream/playlist.m3u8', group:'ทีวี', type:'tv' },
+      { title:'SPORT DEMO', image:'', url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8', group:'กีฬา', type:'tv' }
     ];
 
     const state = {
@@ -1081,17 +1081,35 @@
       try { video.pause(); video.removeAttribute('src'); video.load(); } catch(e){}
     }
 
+    function unwrapProxyUrl(url='') {
+      try {
+        if (url.includes('iptv.tawatchai250958.workers.dev/?url=')) {
+          return decodeURIComponent(url.split('?url=')[1] || url);
+        }
+      } catch(e) {}
+      return url;
+    }
+
+    function shouldUseProxy(url='') {
+      const u = String(url).toLowerCase();
+      if (!/^https?:/i.test(url)) return false;
+      if (u.includes('iptv.tawatchai250958.workers.dev')) return false;
+      /* Android TV/โปรเจคเตอร์บางรุ่นจะเปิด intent/proxy เป็นหน้าขาว
+         จึงไม่ครอบ proxy กับ CDN/worker ที่เป็นลิงก์เล่นอยู่แล้ว */
+      if (u.includes('workers.dev')) return false;
+      if (u.includes('thaicdn') || u.includes('mux.dev') || u.includes('byteark') || u.includes('monomax')) return false;
+      return true;
+    }
+
     function buildPlayCandidates(url) {
       const list = [];
       if (!url) return list;
-      list.push(url);
-      if (/^https?:/i.test(url) && !url.includes('iptv.tawatchai250958.workers.dev')) {
-        list.push(PROXY + encodeURIComponent(url));
-      }
+      list.push(url); // เล่นลิงก์ตรงก่อนเสมอ
+      if (shouldUseProxy(url)) list.push(PROXY + encodeURIComponent(url));
       return [...new Set(list)];
     }
 
-    function attachAutoFallback(candidates, title) {
+    function attachAutoFallback(candidates, title, rawUrl) {
       let switched = false;
       const tryNext = () => {
         if (switched) return;
@@ -1099,16 +1117,15 @@
         const next = candidates[1];
         if (next) {
           setStatus('ลิงก์หลักไม่ขึ้น • กำลังลอง proxy ให้: ' + title);
-          playUrl(next, title, true);
+          playUrl(next, title, true, rawUrl || candidates[0]);
         } else {
-          setStatus('เล่นผ่านเว็บไม่ขึ้น • กำลังเปิด PLAYER ภายนอก');
-          openExternalPlayer('intent');
+          setStatus('เล่นผ่านเว็บไม่ขึ้น • กด MX หรือ PLAYER เพื่อเปิดด้วยตัวเล่นของกล่อง');
         }
       };
 
       const timer = setTimeout(() => {
         if (video.readyState < 2 || video.currentTime === 0) tryNext();
-      }, 1800);
+      }, 3200);
 
       const clearTimer = () => clearTimeout(timer);
       video.addEventListener('playing', clearTimer, { once:true });
@@ -1119,7 +1136,7 @@
     }
 
 
-    async function playUrl(url, title='กำลังเล่น', skipProxyBuild=false) {
+    async function playUrl(url, title='กำลังเล่น', skipProxyBuild=false, rawOriginal='') {
       if (!url) {
         setStatus('❌ Missing url parameter');
         return;
@@ -1128,7 +1145,7 @@
       const candidates = skipProxyBuild ? [url] : buildPlayCandidates(url);
       const currentUrl = candidates[0] || url;
 
-      state.originalUrl = url;
+      state.originalUrl = rawOriginal || (skipProxyBuild ? unwrapProxyUrl(state.originalUrl || url) : unwrapProxyUrl(url));
       state.webPlayableUrl = currentUrl;
       state.currentUrl = currentUrl;
       state.currentTitle = title;
@@ -1141,7 +1158,7 @@
         video.muted = true;
         video.volume = 0.8;
 
-        const fallbackToNext = attachAutoFallback(candidates, title);
+        const fallbackToNext = attachAutoFallback(candidates, title, state.originalUrl);
 
         if (/\.mpd($|\?)/i.test(currentUrl)) {
           state.dash = dashjs.MediaPlayer().create();
@@ -1204,14 +1221,22 @@
       setStatus('ปิดตัวเล่นแล้ว');
     }
 
-    function openExternalPlayer(mode='intent') {
-      const url = state.originalUrl || state.currentUrl;
-      if (!url) return;
-      if (mode === 'mx') {
-        window.location.href = 'intent:' + url + '#Intent;package=com.mxtech.videoplayer.ad;type=video/*;end';
-      } else {
-        window.location.href = 'intent:' + url + '#Intent;type=video/*;end';
+    function makeIntentUrl(url, mode='intent') {
+      const clean = unwrapProxyUrl(url || '');
+      try {
+        const u = new URL(clean);
+        const scheme = u.protocol.replace(':', '') || 'https';
+        const pkg = mode === 'mx' ? 'package=com.mxtech.videoplayer.ad;' : '';
+        return 'intent://' + u.host + u.pathname + u.search + u.hash + '#Intent;scheme=' + scheme + ';action=android.intent.action.VIEW;type=video/*;' + pkg + 'end';
+      } catch(e) {
+        return clean;
       }
+    }
+
+    function openExternalPlayer(mode='intent') {
+      const url = unwrapProxyUrl(state.originalUrl || state.currentUrl);
+      if (!url) return;
+      window.location.href = makeIntentUrl(url, mode);
     }
 
     function goHome() {
