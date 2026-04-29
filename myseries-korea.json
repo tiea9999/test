@@ -1,0 +1,110 @@
+[
+
+  {
+    "title": "Something Is Not Right (2025) แพ้เสียงในหัว(ใจ)",
+    "groups": ["series","series-korea"],
+    "language": "ซับไทย",
+    "poster": "https://series-fulls.com/wp-content/uploads/2026/04/แพ้เสียงในหัวใจ-1.webp",
+    "latest_ep": 1,
+    "total_ep": 12,
+    "episodes": [
+      { "title": "EP1", "servers": [{ "name": "Main", "url": "https://ok-hd.com/hls/7f6ad99c389aee1be145632a40b547bb/master.m3u8" }] },
+      { "title": "EP2", "servers": [{ "name": "Main", "url": "https://ok-hd.com/hls/ddf9f8ee29674276e3419e21eb77ed69/master.m3u8" }] },
+      { "title": "EP3", "servers": [{ "name": "Main", "url": "https://ok-hd.com/hls/a0a12b2b3f2937915b8838792ead5a8e/master.m3u8" }] },
+      { "title": "EP4", "servers": [{ "name": "Main", "url": "https://ok-hd.com/hls/170e404afa4c8183ae39f72fedc1ba03/master.m3u8" }] }
+    ]
+  },  
+  {
+    "title": "The Scarecrow (2026) หุ่นลวงเชือด ",
+    "groups": ["series","series-korea"],
+    "language": "ซับไทย",
+    "poster": "https://series-fulls.com/wp-content/uploads/2026/04/หุ่นลวงเชือด-1.webp",
+    "latest_ep": 1,
+    "total_ep": 12,
+    "episodes": [
+      { "title": "EP1", "servers": [{ "name": "Main", "url": "https://ok-hd.com/hls/4de96e9dcffe6aa0f8686147d3248b2a/master.m3u8" }] },
+      { "title": "EP2", "servers": [{ "name": "Main", "url": "https://ok-hd.com/hls/5ed401ff93f6d5e5feaae0e4c044779d/master.m3u8" }] },
+      { "title": "EP3", "servers": [{ "name": "Main", "url": "https://ok-hd.com/hls/28eada4c8e3997c68f4c444193a3fcd3/master.m3u8" }] },
+      { "title": "EP4", "servers": [{ "name": "Main", "url": "https://ok-hd.com/hls/576f3a5b8db917b2110a94671104578e/master.m3u8" }] }
+    ]
+  },  
+  {
+    "title": "Never Forget Your Enemy (2026) ยังไงก็ใช่นาย",
+   "groups": ["series-koera"],
+    "language": "พากย์ไทย",
+    "poster": "https://series-fulls.com/wp-content/uploads/2026/04/ยังไงก็ใช่นาย-1.webp",
+    "latest_ep": 1,
+    "total_ep": 8,
+    "episodes": [
+      {
+        "title": "EP1",
+        "servers": [
+          { "name": "Main", "url": "https://ok-hd.com/hls/717769bceab874c7e240b51c4dc579f4/master.m3u8" }
+        ]
+      },
+      {
+        "title": "EP2",
+        "servers": [
+          { "name": "Main", "url": "https://ok-hd.com/hls/e545103bb8a47e323b4537a8b4413edd/master.m3u8" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "title": "Love Phobia (2026) เอไอไขรัก",
+   "groups": ["series-koera"],
+    "language": "พากย์ไทย",
+    "poster": "https://series-fulls.com/wp-content/uploads/2026/04/เอไอไขรัก-1.webp",
+    "latest_ep": 1,
+    "total_ep": 8,
+    "episodes": [
+      {
+        "title": "EP1",
+        "servers": [
+          { "name": "Main", "url": "https://ok-hd.com/hls/0b5a67bfa2648b3388008b0eb28c6418/master.m3u8" }
+        ]
+      },
+      {
+        "title": "EP6",
+        "servers": [
+          { "name": "Main", "url": "https://ok-hd.com/hls/692a2972a41cbf65e6e0739ab6ec55fb/master.m3u8" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "title": "Honour (2026) ทนายสามสาวฉาว",
+    "groups": ["series-koera"],
+    "language": "พากย์ไทย",
+    "poster": "https://series-fulls.com/wp-content/uploads/2026/04/ทนายสามสาวฉาว-1.webp",
+    "latest_ep": 1,
+    "total_ep": 12,
+    "episodes": [
+      {
+        "title": "EP1",
+        "servers": [
+          { "name": "Main", "url": "https://ok-hd.com/hls/147158002933d48eeb00e2004054b346/master.m3u8" }
+        ]
+      }
+    ]
+  },
+
+  {
+    "title": "Sirens Kiss (2026) จุมพิตไซเรน",
+    "groups": ["series-koera"],
+    "language": "พากย์ไทย",
+    "poster": "https://series-fulls.com/wp-content/uploads/2026/03/จุมพิตไซเรน-1-1.webp",
+    "latest_ep": 1,
+    "total_ep": 12,
+    "episodes": [
+      {
+        "title": "EP1",
+        "servers": [
+          { "name": "Main", "url": "https://ok-hd.com/hls/fdb1cebd5b51e9603c2dd3dda767486d/master.m3u8" }
+        ]
+      }
+    ]
+  }
+]
