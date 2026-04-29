@@ -1,0 +1,116 @@
+[
+  {
+    "title": "Last Samurai Standing (2025) ศึกซามูไรผู้พิชิต พากย์ไทย เต็มเรื่อง",
+    "groups": ["series-japan","series"],
+    "language": "พากย์ไทย",
+    "poster": "https://myserieshd.com/wp-content/uploads/2026/03/ยุทธการใต้สมุทร-111.webp",
+    "latest_ep": 1,
+    "total_ep": 8,
+    "episodes": [
+      {
+        "title": "EP1",
+        "servers": [
+          {
+            "name": "Main",
+            "url": "https://ok-hd.com/hls/305436708bde32fdf293d9c6a348c7da/master.m3u8"
+          },
+          {
+            "name": "Backup",
+            "url": "https://ok-hd.com/hls/305436708bde32fdf293d9c6a348c7da/master.m3u8"
+          }
+        ]
+      },
+      {
+        "title": "EP2",
+        "servers": [
+          {
+            "name": "Main",
+            "url": "https://ok-hd.com/hls/8de33098abb4d9c1fe7a0ec0ed6e1c81/master.m3u8"
+          },
+          {
+            "name": "Backup",
+            "url": "https://ok-hd.com/hls/8de33098abb4d9c1fe7a0ec0ed6e1c81/master.m3u8"
+          }
+        ]
+      },
+      {
+        "title": "EP3",
+        "servers": [
+          {
+            "name": "Main",
+            "url": "https://ok-hd.com/hls/cfbcd46e7c8852ff0e4c9b6b72771fe7/master.m3u8"
+          },
+          {
+            "name": "Backup",
+            "url": "https://ok-hd.com/hls/cfbcd46e7c8852ff0e4c9b6b72771fe7/master.m3u8"
+          }
+        ]
+      },
+      {
+        "title": "EP4",
+        "servers": [
+          {
+            "name": "Main",
+            "url": "https://ok-hd.com/hls/ac8cedcb82cfff60e4269c490eb07b01/master.m3u8"
+          },
+          {
+            "name": "Backup",
+            "url": "https://ok-hd.com/hls/ac8cedcb82cfff60e4269c490eb07b01/master.m3u8"
+          }
+        ]
+      },
+      {
+        "title": "EP5",
+        "servers": [
+          {
+            "name": "Main",
+            "url": "https://ok-hd.com/hls/49c3edb2486136e77b5a9b74ea90c23c/master.m3u8"
+          },
+          {
+            "name": "Backup",
+            "url": "https://ok-hd.com/hls/49c3edb2486136e77b5a9b74ea90c23c/master.m3u8"
+          }
+        ]
+      },
+      {
+        "title": "EP6",
+        "servers": [
+          {
+            "name": "Main",
+            "url": "https://ok-hd.com/hls/57d327a9962edd98e2f9e3722e9986bf/master.m3u8"
+          },
+          {
+            "name": "Backup",
+            "url": "https://ok-hd.com/hls/57d327a9962edd98e2f9e3722e9986bf/master.m3u8"
+          }
+        ]
+      },
+      {
+        "title": "EP7",
+        "servers": [
+          {
+            "name": "Main",
+            "url": "https://ok-hd.com/hls/1bbe9847abc4c8296bcfa7fb83fe0602/master.m3u8"
+          },
+          {
+            "name": "Backup",
+            "url": "https://ok-hd.com/hls/1bbe9847abc4c8296bcfa7fb83fe0602/master.m3u8"
+          }
+        ]
+      },
+      {
+        "title": "ตอนจบ",
+        "servers": [
+          {
+            "name": "Main",
+            "url": "https://ok-hd.com/hls/ba17aaf3a3d0d35bf174378e04c6b346/master.m3u8"
+          },
+          {
+            "name": "Backup",
+            "url": "https://ok-hd.com/hls/ba17aaf3a3d0d35bf174378e04c6b346/master.m3u8"
+          }
+        ]
+      }
+    ]
+  }
+]
