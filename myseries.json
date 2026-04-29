@@ -1,0 +1,41 @@
+{
+  "type": "menu",
+  "title": "MySeries",
+  "items": [
+     {
+      "title": "ดูหนังออนไลน์",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-movie.json"
+    },   
+    {
+      "title": "ดูซีรี่ย์ออนไลน์",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-series.json"
+    },
+    {
+      "title": "ดูซีรีย์เกาหลี",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-korea.json"
+    },
+    {
+      "title": "ดูซีรีย์จีน",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-china.json"
+    },
+    {
+      "title": "ดูซีรีย์ญี่ปุ่น",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-japan.json"
+    },
+    {
+      "title": "ดูละครไทย",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-thai.json"
+    },
+    {
+      "title": "ดูซีรีย์-หนังสั้น",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-short.json"
+    }
+  ]
+}
