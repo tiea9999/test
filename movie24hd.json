@@ -1,0 +1,953 @@
+{
+  "site": "TIEA IPTV",
+  "version": "1.0",
+  "updated": "2026-04-18",
+  "items": [
+
+  
+    {
+      "title": "Outcome (2026)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Outcome-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/Q-hK5zQM_Disl/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Noah Kahan Out of Body (2026) โนอาห์ คาห์น เส้นทางสู่จุดสูงสุด",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Noah-Kahan-Out-of-Body-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/cGN-8vW_yYocr/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Balls Up (2026) โกลาหล บอลโลก",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Balls-Up-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "พากย์ไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/BBCZiXB-fK_RF/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Toaster (2026) ปิง ปิ่ง ปิ้ง",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Toaster-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/g8qytF_4-iPm5/playlist.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "18th Rose (2026) กุหลาบแรกแย้ม",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/18th-Rose-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "พากย์ไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/ZkwAk5_Dk-hgg/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Doctor Plague (2026) หมอกาฬโรค",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Doctor-Plague-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/PqRmK_HS-SpoE/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Infiltrate (2026)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Infiltrate-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/A8R-gr9YJC_43/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Tu Yaa Main (2026) ไม่เธอ ก็ฉัน",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Tu-Yaa-Main-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/9I-jO_eOa4Q2W/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Thrash (2026) ฉลามคลั่ง ทะเลเดือด",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Thrash-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "พากย์ไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/qJPg_zgy9C-kt/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "The Yeti (2026)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/The-Yeti-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "SoundTrack",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/atdT9g-H_jw4w/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Untold Jail Blazers (2026) เจลเบลเซอร์ส",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Untold-Jail-Blazers-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "พากย์ไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/558NvI_vq-f0j/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Psycho Killer (2026) ฆาตกรโรคจิต",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Psycho-Killer-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/Uj_xv-ttXN2hs/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Soul-Guiding Lantern 2 (2026) โคมไฟดูดวิญญาณ 2",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Soul-Guiding-Lantern-2-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังจีน",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/Q8g4Q_aN-I8iM/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Legend of Ling Jing (2026) ตำนานหลิงจิง",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Legend-of-Ling-Jing-2026-e1775704231275.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังจีน",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/B-etU_4X11iQb/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Pizza Movie (2026)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Pizza-Movie-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/Xi1-dcG_Z21Zm/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "Sniper No Nation (2026) สไนเปอร์ นักรบไร้สัญชาติ",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Sniper-No-Nation-2026.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language": "ซับไทย",
+      "servers": [
+        {
+          "name": "Main",
+          "url": "https://media.vdohls.com/p1R-iJ4o5_P5Q/video.m3u8"
+        }
+      ]
+    },
+    {
+      "title": "The Cursed Mask (2025) ตาโขน",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/The-Cursed-Mask-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังไทย",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "พากย์ไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/y-H4VeMzt_R9O/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Suzuki=Bakudan (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/SuzukiBakudan-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังจีน",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/Y-vbivDkN_SAO/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Not Without Hope (2025) มิตรสหาย ขอบฟ้า ความหวัง",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Not-Without-Hope-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "พากย์ไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/02YzC_eg-Jhg2/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Diva La Vie (2025) ดีว่า..ราวี",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Diva-La-Vie-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังไทย",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "พากย์ไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/vj_LF-aJ30zyy/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Mudborn (2025) หุ่นดินผี",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Mudborn-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังจีน",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "พากย์ไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/SLblG0_V-tal7/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Sirāt (2025) ซีรอต ฝ่าถนนโลกันตร์",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Sirat-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/AJD-K_nHZBbK3/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "ChaO (2025) เจา คนเล็กผจญเงือกใหญ่",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/ChaO-2025-e1775616927962.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังการฺตูน",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/G-CxzBKk64_Le/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Diabolic (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Diabolic-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/ZGKxNga_f-Zbo/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Pretty Crazy (2025) เดี๋ยวสวย เดี๋ยวแสบ ผมแทบจะเครซี่",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Pretty-Crazy-2025-e1775446614243.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "พากย์ไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/M73-HP_gpc9ah/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Kokuho (2025) สมบัติชาติ",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Kokuho-2025-e1775185479267.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังญี่ปุ่น",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "" 
+        }
+      ]
+    },
+    {
+      "title": "Once We Were Us (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/04/Once-We-Were-Us-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/kPcn-7J8S_8Li/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Showtime 7 (2025) โหนล่ามหาประลัย",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Showtime-7-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/jTy-JWb7E_4aB/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Palestine 36 (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Palestine-36-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/0mV_A8Lx21-nq/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "The Tutor (2025) พี่วรรณมาสอน",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/The-Tutor-2025-e1774925599314.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังไทย",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "พากย์ไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/Eq_GDgSgZm-Az/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "The Last Beergin (2025) ล้อมวงดื่มครั้งสุดท้าย",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/The-Last-Beergin-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/yttwQba_m-pmn/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Tokyo Taxi (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Tokyo-Taxi-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังญี่ปุ่น",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/D-ekRvZde_Kue/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "GARO Taiga (2025) กำเนิดอัศวินหมาป่าทองคำ",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/GARO-Taiga-2025-e1774842469235.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังญี่ปุ่น",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/Hi_K-8fAzTfKm/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Worldbreaker (2025) มฤตยูแหวกโลก",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Worldbreaker-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2025",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/inby5M_uI-dUq/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Mother of Flies (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Mother-of-Flies-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/qSpD-MW_fJHq9/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Anemone (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Anemone-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/M1-AmN_xyDDMT/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "A Town Called Purgatory (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/A-Town-Called-Purgatory-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/fQwvwo_uQh-LX/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Is This Thing On (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Is-This-Thing-On-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/Ee-GWT_GxoFyJ/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Kowloon Generic Romance (2025) เกาลูน อุบัติรักปริศนาลับ",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Kowloon-Generic-Romance-2025-e1774321665480.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2026,
+      "rating": 0,
+      "language":"พากย์ไทย",   
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/tuvj-QD4_BRfp/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "The Mastermind (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/The-Mastermind-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language":     "SoundTrack", 
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/aL00m-WoFT_89/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "The Race (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/The-Race-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":  2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/lLKAem-E_WMOi/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Mieruko-chan (2025) ใครว่าหนูเห็นผี",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Mieruko-chan-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังญีปุ่น", 
+      "status": "movie",
+      "year":  2025, 
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/ZIm56m_yXU-ml/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Ek Deewane Ki Deewaniyat (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Ek-Deewane-Ki-Deewaniyat-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":  2025, 
+      "rating": 0,
+      "language":  "SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/ts_wdfU7TP-Z1/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "The Voice of Hind Rajab (2025) ฮินด์ ราจาบ เสียงร่ำไห้จากกาซา",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/The-Voice-of-Hind-Rajab-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":  2025,   
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/53_j-q78V0n8H/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Banduan (2025) คืนเดือดฝ่าวงล้อมนรก",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Banduan-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":  2025,   
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/IOAtQ4N-Sx_F1/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "DRAGN (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/DRAGN-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":  2025,   
+      "rating": 0,
+      "language": "เสียงโรง", 
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/1m-rW_jwLaNOG/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "My Boo 2 (2025) อนงค์ สอง..สามสี่ชาติ",
+      "image": "https://www.24hd.net/wp-content/uploads/2025/10/My-Boo-2-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory":  "หนังไทย",
+      "status": "movie",
+      "year":  2025, 
+      "rating": 0,
+      "language": "พากย์ไทย", 
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/YHHvL_21-yq2w/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Death Whisperer 3 (2025) ธี่หยด 3",
+      "image": "https://www.24hd.net/wp-content/uploads/2025/07/Death-Whisperer-3-2025-e1753081688935.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังไทย", 
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "พากย์ไทย", 
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/m2_aapZ6-Uy8m/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "The Housemaid (2025) ความลับแม่บ้านร้าย",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/The-Housemaid-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":   2025,  
+      "rating": 0,
+      "language":  "พากย์ไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/pM-J_slrX6eBO/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Thy Will Be Done (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Thy-Will-Be-Done-2025-e1773375260668.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025, 
+      "rating": 0,
+      "language":"SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/7-CaIDu_ud9QU/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Unavailable (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2026/03/Unavailable-2025-e1773375006331.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":2025, 
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/G-noscZR_n0Fy/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Las ilusyunadas (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2025/12/Las-ilusyunadas-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025, 
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/Z-anAAYuZ2_17/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Salikmata (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2025/12/Salikmata-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025, 
+      "rating": 0,
+      "language":"SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/TSO_ijVC-jyER/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "The Bitter Taste (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2025/12/The-Bitter-Taste-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/5VrY_6jv-adhz/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Tenung (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2025/12/Tenung-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year": 2025,
+      "rating": 0,
+      "language":"SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/M_Y0-1Hoaj7oM/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Walker (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2025/12/Walker-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":  2025, 
+      "rating": 0,
+      "language": "ซับไทย",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/pr9sm-aepW_tY/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Simon Says (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2025/12/Simon-Says-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":  2025, 
+      "rating": 0,
+      "language":"SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/sS87Y-y6J_bc5/video.m3u8" 
+        }
+      ]
+    },
+    {
+      "title": "Special Unit The First Murder (2025)",
+      "image": "https://www.24hd.net/wp-content/uploads/2025/12/Special-Unit-The-First-Murder-2025.webp",
+      "type": "movie",
+      "category": "หนังใหม่2026",
+      "subcategory": "หนังฝรั่ง",
+      "status": "movie",
+      "year":  2025,
+      "rating": 0,
+      "language":"SoundTrack",
+    "servers": [
+      { "name": "Main", 
+        "url": "https://media.vdohls.com/iw_B-ddWL8R4c/video.m3u8" 
+        }
+      ]
+    }    
+  ]
+}
