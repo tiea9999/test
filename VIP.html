@@ -16,19 +16,6 @@
             font-family: sans-serif;
         }
 
-        #homeBtn {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 9999;
-            padding: 10px 14px;
-            background: #00c853;
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            cursor: pointer;
-        }
-
         .row-title {
             padding: 10px;
             display: flex;
@@ -104,6 +91,65 @@
             background: #000;
             z-index: 1000;
         }
+
+        #player {
+            cursor: none;
+        }
+
+        #player.show-controls {
+            cursor: default;
+        }
+
+        .player-top-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1004;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            max-width: calc(100vw - 20px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease;
+        }
+
+        #player.show-controls .player-top-buttons {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .player-top-buttons .btn,
+        .player-top-buttons .btn3,
+        .player-top-buttons .btn4,
+        .player-top-buttons .home-player-btn {
+            position: static;
+            top: auto;
+            right: auto;
+        }
+
+        .home-player-btn {
+            background: #00c853;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #mxHint {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease;
+        }
+
+        #player.show-controls #mxHint {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
 
         video,
         iframe {
@@ -204,15 +250,17 @@
 
 <body>
 
-    <button id="homeBtn">🏠 HOME</button>
 
     <div id="grid"></div>
     <div id="overlay"></div>
 
     <div id="player">
-        <button class="btn" onclick="goHome()">✕</button>
-        <button class="btn3" onclick="openExternal()">▶ MX</button>
-        <button class="btn4" onclick="copyCurrentLink()">คัดลอก</button>
+        <div class="player-top-buttons">
+            <button class="btn" id="closePlayerBtn" onclick="closePlayerToLastView()" tabindex="0">✕</button>
+            <button class="btn3" onclick="openExternal()" tabindex="0">▶ MX</button>
+            <button class="btn4" onclick="copyCurrentLink()" tabindex="0">คัดลอก</button>
+            <button class="home-player-btn" onclick="goHome()" tabindex="0">🏠 HOME</button>
+        </div>
         <div id="mxHint">ถ้าภาพไม่ขึ้นในแอพ24 ให้กด ▶ MX</div>
         <video id="video" playsinline webkit-playsinline x5-playsinline controls autoplay muted preload="auto"></video>
         <iframe id="frame" allowfullscreen referrerpolicy="no-referrer"></iframe>
@@ -222,10 +270,30 @@
         const PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 
         const SOURCES = [
-{
-name: " 18+",
+{name: "EZ 18+",
 type: "json",
-url: "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/Vip.json"}
+url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/Vip.json",
+},
+{
+name: "njav 18+",
+type: "json",
+url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/njav.json",
+},
+{
+name: "avpung 18+",
+type: "json",
+url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_avpung.json",
+},
+{
+name: "jav24 18+",
+type: "json",
+url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_jav24.json",
+},
+{
+name: "pornxxx",
+type: "json",
+url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornxxx.json",
+},
        ];
 
         const FALLBACK_IMG =
@@ -254,6 +322,8 @@ url: "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/Vip.json"}
 
         let currentList = [];
         let currentIndex = 0;
+        let lastView = { type: "grid", item: null };
+        let controlTimer = null;
 
         function safeId(text) {
             return String(text).replace(/[^\wก-๙-]/g, "_");
@@ -385,6 +455,7 @@ url: "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/Vip.json"}
         function createCard(item, onClick) {
             const div = document.createElement("div");
             div.className = "card";
+            div.tabIndex = 0;
 
             const img = getImage(item);
             const title = getTitle(item);
@@ -401,6 +472,12 @@ url: "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/Vip.json"}
             `;
 
             div.onclick = onClick;
+            div.onkeydown = (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onClick();
+                }
+            };
             return div;
         }
 
@@ -522,6 +599,7 @@ url: "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/Vip.json"}
         }
 
         function showEP(item) {
+            lastView = { type: "ep", item };
             overlay.style.display = "block";
             grid.style.display = "none";
 
@@ -538,8 +616,9 @@ url: "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/Vip.json"}
             item.episodes.forEach((ep, index) => {
                 const d = document.createElement("div");
                 d.className = "ep-card";
+                d.tabIndex = 0;
                 d.textContent = ep.name || ep.title || `EP ${index + 1}`;
-                d.onclick = () => {
+                const playThisEp = () => {
                     const servers = normalizeServers(
                         ep.servers || ep.sources || ep.links || ep.files || ep.playlist || []
                     );
@@ -554,6 +633,13 @@ url: "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/Vip.json"}
                         alert("❌ ตอนนี้ไม่มีลิงก์เล่น");
                     }
                 };
+                d.onclick = playThisEp;
+                d.onkeydown = (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        playThisEp();
+                    }
+                };
                 box.appendChild(d);
             });
         }
@@ -563,6 +649,7 @@ url: "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/Vip.json"}
             currentIndex = 0;
             overlay.style.display = "none";
             player.style.display = "block";
+            showPlayerControls(true);
             playServers(currentList);
         }
 
@@ -909,19 +996,72 @@ url: "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/Vip.json"}
             allView.page = 1;
         }
 
-        function goHome() {
+        function showPlayerControls(focusX = false) {
+            player.classList.add("show-controls");
+            clearTimeout(controlTimer);
+
+            if (focusX) {
+                setTimeout(() => {
+                    const xBtn = document.getElementById("closePlayerBtn");
+                    if (xBtn && player.style.display === "block") xBtn.focus();
+                }, 60);
+            }
+
+            controlTimer = setTimeout(() => {
+                player.classList.remove("show-controls");
+            }, 4500);
+        }
+
+        function closePlayerToLastView() {
             cleanupPlayers();
             player.style.display = "none";
-            overlay.style.display = "none";
-            overlay.innerHTML = "";
-            grid.style.display = "block";
-            window.scrollTo(0, 0);
-      }
-function goHome(){
-  window.location.href = "https://tiea9999.github.io/tv/";
-}
+            player.classList.remove("show-controls");
 
-        document.getElementById("homeBtn").onclick = goHome;
+            if (lastView.type === "ep" && lastView.item) {
+                showEP(lastView.item);
+                return;
+            }
+
+            if (allView.active) {
+                renderAllPage();
+                return;
+            }
+
+            overlay.style.display = "none";
+            grid.style.display = "block";
+            setTimeout(() => document.querySelector(".card")?.focus(), 100);
+        }
+
+        function seekVideo(sec) {
+            showPlayerControls();
+            if (!video || video.style.display === "none") return;
+            video.currentTime = Math.max(0, (video.currentTime || 0) + sec);
+        }
+
+        function goHome() {
+            window.location.href = "https://tiea9999.github.io/tv/";
+        }
+
+        player.addEventListener("mousemove", () => showPlayerControls());
+        player.addEventListener("click", () => showPlayerControls());
+        player.addEventListener("touchstart", () => showPlayerControls());
+
+        document.addEventListener("keydown", (e) => {
+            if (player.style.display !== "block") return;
+
+            showPlayerControls(true);
+
+            if (e.key === "ArrowLeft") {
+                e.preventDefault();
+                seekVideo(-15);
+            } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                seekVideo(15);
+            } else if (e.key === "Escape" || e.key === "Backspace" || e.keyCode === 10009) {
+                e.preventDefault();
+                closePlayerToLastView();
+            }
+        });
 
         loadAll();
     </script>
