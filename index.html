@@ -516,6 +516,32 @@
                 display: none;
             }
         }
+    
+        /* ===== REMOTE PLAYER CONTROL FIX ===== */
+        #playerWrap {
+            cursor: none;
+        }
+
+        #playerWrap.show-ui {
+            cursor: default;
+        }
+
+        #playerBar {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .22s ease;
+        }
+
+        #playerWrap.show-ui #playerBar {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #playerBar.hide-ui {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
     </style>
 </head>
 
@@ -658,6 +684,7 @@
     let cache = {};
     let sectionExpandState = {};
     let focusIndex = 0;
+    let playerReturnMode = 'list';
     let playWatchdog = null;
     let lastVideoTime = 0;
     let stuckCount = 0;
@@ -770,18 +797,34 @@
       playerNextBtn.classList.add('hidden');
     }
 
-    function showPlayerUi() {
+    function showPlayerUi(focusClose = false) {
+      playerWrap.classList.add('show-ui');
       playerBar.classList.remove('hide-ui');
+
+      if (focusClose) {
+        setTimeout(() => {
+          if (playerWrap.style.display === 'block') playerCloseBtn.focus();
+        }, 60);
+      }
+
       if (playerUiTimer) clearTimeout(playerUiTimer);
       playerUiTimer = setTimeout(() => {
-        if (playerWrap.style.display === 'block') playerBar.classList.add('hide-ui');
-      }, 2800);
+        if (playerWrap.style.display === 'block') {
+          playerBar.classList.add('hide-ui');
+          playerWrap.classList.remove('show-ui');
+
+          try {
+            if (document.activeElement && playerBar.contains(document.activeElement)) {
+              document.activeElement.blur();
+            }
+          } catch(e) {}
+        }
+      }, 3200);
     }
 
     function showPlayer() {
       playerWrap.style.display = 'block';
-      showPlayerUi();
-      setTimeout(() => playerCloseBtn.focus(), 60);
+      showPlayerUi(true);
     }
 
     function closePlayer() {
@@ -789,9 +832,27 @@
         clearTimeout(playerUiTimer);
         playerUiTimer = null;
       }
+
       clearPlayer();
       playerWrap.style.display = 'none';
       playerBar.classList.remove('hide-ui');
+      playerWrap.classList.remove('show-ui');
+
+      try {
+        if (document.fullscreenElement) document.exitFullscreen();
+        else if (document.webkitFullscreenElement) document.webkitExitFullscreen();
+      } catch(e) {}
+
+      if (playerReturnMode === 'episodes' && currentSeries) {
+        currentMode = 'episodes';
+        listView.style.display = 'none';
+        epsWrap.style.display = 'block';
+      } else {
+        currentMode = 'list';
+        listView.style.display = 'block';
+        epsWrap.style.display = 'none';
+      }
+
       focusCurrentView();
     }
 
@@ -1184,7 +1245,7 @@
         return Array.from(playerBar.querySelectorAll('button:not(.hidden)'));
       }
       if (currentMode === 'episodes') {
-        return Array.from(epsGrid.querySelectorAll('.ep-btn'));
+        return Array.from(document.querySelectorAll('#epBackBtn, #epsGrid .ep-btn'));
       }
       return Array.from(grid.querySelectorAll('.card, .more-btn, .sample-card'));
     }
@@ -1343,8 +1404,21 @@
       currentMode = 'episodes';
       listView.style.display = 'none';
       epsWrap.style.display = 'block';
-      epsTitle.textContent = seriesItem.title || 'ตอนทั้งหมด';
+      epsTitle.innerHTML = '<button id="epBackBtn" class="top-btn" style="margin-right:10px">← กลับ</button>' + sanitize(seriesItem.title || 'ตอนทั้งหมด');
       epsGrid.innerHTML = '';
+
+      setTimeout(() => {
+        const epBackBtn = document.getElementById('epBackBtn');
+        if (epBackBtn) {
+          epBackBtn.onclick = () => {
+            currentMode = 'list';
+            currentSeries = null;
+            listView.style.display = 'block';
+            epsWrap.style.display = 'none';
+            focusCurrentView();
+          };
+        }
+      }, 0);
 
       if (save) saveReturnState({ mode: 'episodes', seriesTitle: seriesItem.title || '' });
 
@@ -1567,6 +1641,7 @@
     }
 
     async function playItem(item, serverIndex = 0) {
+      playerReturnMode = currentMode === 'episodes' ? 'episodes' : 'list';
       currentItem = item;
       currentServerIndex = serverIndex;
       clearPlayer();
@@ -1808,30 +1883,94 @@
 
     ['mousemove','click','touchstart'].forEach(ev => {
       document.addEventListener(ev, () => {
-        if (playerWrap.style.display === 'block') showPlayerUi();
+        if (playerWrap.style.display === 'block') showPlayerUi(false);
       }, { passive: true });
     });
 
+    function requestPlayerFullscreen() {
+      try {
+        if (playerWrap.requestFullscreen) playerWrap.requestFullscreen();
+        else if (playerWrap.webkitRequestFullscreen) playerWrap.webkitRequestFullscreen();
+      } catch(e) {}
+    }
+
+    function seekVideo(sec) {
+      try {
+        video.currentTime = Math.max(0, (video.currentTime || 0) + sec);
+      } catch(e) {}
+    }
+
+    function backFromEpisodesToList() {
+      currentMode = 'list';
+      currentSeries = null;
+      listView.style.display = 'block';
+      epsWrap.style.display = 'none';
+      focusCurrentView();
+    }
+
     document.addEventListener('keydown', async (e) => {
-      if (e.key === 'Escape' || e.key === 'Backspace') {
-        e.preventDefault();
-        if (playerWrap.style.display === 'block') {
+      const isBack = e.key === 'Escape' || e.key === 'Backspace' || e.key === 'BrowserBack' || e.keyCode === 10009;
+
+      if (playerWrap.style.display === 'block') {
+        showPlayerUi(true);
+
+        if (e.key === 'ArrowLeft' || e.keyCode === 37) {
+          e.preventDefault();
+          e.stopPropagation();
+          seekVideo(-10);
+          return;
+        }
+
+        if (e.key === 'ArrowRight' || e.keyCode === 39) {
+          e.preventDefault();
+          e.stopPropagation();
+          seekVideo(10);
+          return;
+        }
+
+        if (e.key === 'Enter' || e.key === 'OK' || e.keyCode === 13 || e.keyCode === 23) {
+          if (document.activeElement === playerCloseBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            closePlayer();
+            return;
+          }
+
+          e.preventDefault();
+          e.stopPropagation();
+          requestPlayerFullscreen();
+          return;
+        }
+
+        if (isBack) {
+          e.preventDefault();
+          e.stopPropagation();
           closePlayer();
           return;
         }
-        if (currentMode === 'episodes') {
-          currentMode = 'list';
-          currentSeries = null;
-          listView.style.display = 'block';
-          epsWrap.style.display = 'none';
-          focusCurrentView();
-          return;
-        }
+
+        return;
       }
 
-      if (playerWrap.style.display === 'block') {
-        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) showPlayerUi();
-        if (e.key === 'Enter' && document.activeElement === playerCloseBtn) closePlayer();
+      if (isBack) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (currentMode === 'episodes') {
+          backFromEpisodesToList();
+          return;
+        }
+
+        const prev = historyStack.pop();
+        if (prev?.source) {
+          currentSource = prev.source;
+          currentTitle = prev.title;
+          currentKind = prev.kind;
+          await loadCurrentMenu();
+          return;
+        }
+
+        focusCurrentView();
         return;
       }
 
@@ -1858,7 +1997,7 @@
         e.preventDefault();
         focusElementByIndex(Math.max(idx - cols, 0));
       }
-    });
+    }, true);
 
     window.addEventListener('pageshow', async () => {
       const restored = await restoreReturnState();
