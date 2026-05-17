@@ -661,6 +661,8 @@
     let playWatchdog = null;
     let lastVideoTime = 0;
     let stuckCount = 0;
+    let recoverBusy = false;
+    let lastRecoverAt = 0;
 
     function setStatus(msg) {
       statusBox.textContent = msg || '';
@@ -1416,27 +1418,49 @@
       stopPlayWatchdog();
       lastVideoTime = 0;
       stuckCount = 0;
+      recoverBusy = false;
+      lastRecoverAt = 0;
+
       playWatchdog = setInterval(() => {
         if (playerWrap.style.display !== 'block' || video.style.display === 'none') return;
+
         try {
-          if (video.paused && video.readyState >= 2) video.play().catch(() => {});
+          if (video.paused && video.readyState >= 3) {
+            video.play().catch(() => {});
+          }
+
           const now = video.currentTime || 0;
-          if (Math.abs(now - lastVideoTime) < 0.05 && !video.paused) stuckCount++;
-          else stuckCount = 0;
-          lastVideoTime = now;
-          if (stuckCount >= 6) {
+          const moved = Math.abs(now - lastVideoTime) > 0.08;
+
+          if (moved || video.readyState >= 3) {
             stuckCount = 0;
+          } else if (!video.paused) {
+            stuckCount++;
+          }
+
+          lastVideoTime = now;
+
+          // รอให้นิ่งก่อนค่อยกู้ ลดอาการเด้ง-หมุน-เด้งซ้ำ
+          if (stuckCount >= 12 && !recoverBusy && Date.now() - lastRecoverAt > 35000) {
+            recoverBusy = true;
+            lastRecoverAt = Date.now();
+            stuckCount = 0;
+
+            playerNote.textContent = 'สัญญาณสะดุด กำลังประคองเส้นเดิม...';
+
             if (hls) {
-              hls.stopLoad();
-              setTimeout(() => {
-                try {
-                  hls.startLoad(Math.max(0, (video.currentTime || 0) - 1));
-                  video.play().catch(() => {});
-                } catch(e) {}
-              }, 900);
-            } else if (dash) {
-              video.play().catch(() => {});
+              try {
+                hls.startLoad(Math.max(0, (video.currentTime || 0) - 1));
+              } catch(e) {}
             }
+
+            try {
+              if (video.readyState >= 2) video.play().catch(() => {});
+            } catch(e) {}
+
+            setTimeout(() => {
+              recoverBusy = false;
+            }, 12000);
           }
         } catch(e) {}
       }, 5000);
@@ -1455,21 +1479,50 @@
         autoStartLoad: true,
         startPosition: -1,
         lowLatencyMode: false,
-        maxBufferLength: isMovie ? 35 : 22,
-        maxMaxBufferLength: isMovie ? 60 : 36,
-        backBufferLength: isMovie ? 30 : 10,
-        maxBufferHole: 0.7,
-        highBufferWatchdogPeriod: 4,
-        manifestLoadingTimeOut: 25000,
-        levelLoadingTimeOut: 25000,
-        fragLoadingTimeOut: 30000,
-        manifestLoadingMaxRetry: 6,
-        levelLoadingMaxRetry: 6,
-        fragLoadingMaxRetry: 8,
+        maxBufferLength: isMovie ? 42 : 32,
+        maxMaxBufferLength: isMovie ? 75 : 55,
+        backBufferLength: isMovie ? 35 : 16,
+        maxBufferHole: 1.6,
+        highBufferWatchdogPeriod: 8,
+        manifestLoadingTimeOut: 35000,
+        levelLoadingTimeOut: 35000,
+        fragLoadingTimeOut: 45000,
+        manifestLoadingMaxRetry: 10,
+        levelLoadingMaxRetry: 10,
+        fragLoadingMaxRetry: 14,
+        manifestLoadingRetryDelay: 2200,
+        levelLoadingRetryDelay: 2200,
+        fragLoadingRetryDelay: 2400,
         capLevelToPlayerSize: true,
         testBandwidth: false,
-        liveSyncDurationCount: 3,
-        liveMaxLatencyDurationCount: 7
+        liveSyncDurationCount: 5,
+        liveMaxLatencyDurationCount: 14
+      });
+    }
+
+    function setupGentleVideoEvents() {
+      if (setupGentleVideoEvents._ready) return;
+      setupGentleVideoEvents._ready = true;
+
+      video.addEventListener('waiting', () => {
+        playerNote.textContent = 'กำลังบัฟเฟอร์...';
+        try {
+          if (hls) hls.startLoad();
+        } catch(e) {}
+      });
+
+      video.addEventListener('stalled', () => {
+        playerNote.textContent = 'สัญญาณสะดุด รอเส้นหลัก...';
+        setTimeout(() => {
+          try {
+            if (hls) hls.startLoad();
+            if (video.readyState >= 2) video.play().catch(() => {});
+          } catch(e) {}
+        }, 1800);
+      });
+
+      video.addEventListener('playing', () => {
+        stuckCount = 0;
       });
     }
 
@@ -1496,7 +1549,7 @@
       clearMovieFallbackTimer();
       movieFallbackTimer = setTimeout(() => {
         openExternalPlayer(url);
-      }, 2200);
+      }, 12000);
     }
 
     function showIframe(url) {
@@ -1539,6 +1592,7 @@
         }
 
         showPlayer();
+        setupGentleVideoEvents();
         startPlayWatchdog();
         attachPlaybackSuccessHandlers();
         if (movieMode) startMovieFallback(directUrl);
@@ -1550,14 +1604,28 @@
             hls.attachMedia(video);
             hls.on(Hls.Events.MANIFEST_PARSED, () => tryStartVideoWithSound(() => openExternalPlayer(directUrl)));
             hls.on(Hls.Events.ERROR, (event, data) => {
-              if (data?.fatal) {
-                try {
-                  if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
-                  else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
-                  else openExternalPlayer(directUrl);
-                } catch (e) {
-                  openExternalPlayer(directUrl);
+              if (!data) return;
+
+              // non-fatal ปล่อยให้ hls.js จัดการเอง ลดอาการเด้งซ้ำ
+              if (!data.fatal) return;
+
+              try {
+                if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+                  playerNote.textContent = 'เน็ตสะดุด กำลังต่อเส้นเดิม...';
+                  setTimeout(() => { try { hls.startLoad(); } catch(e) {} }, 1200);
+                  return;
                 }
+
+                if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+                  playerNote.textContent = 'ภาพสะดุด กำลังกู้คืน...';
+                  try { hls.recoverMediaError(); } catch(e) {}
+                  return;
+                }
+
+                // error อื่นค่อยเปิด PLAYER หลังรอ ไม่เด้งทันที
+                setTimeout(() => openExternalPlayer(directUrl), 2500);
+              } catch (e) {
+                setTimeout(() => openExternalPlayer(directUrl), 2500);
               }
             });
             return;
