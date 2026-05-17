@@ -1,97 +1,1802 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>TIEA IPTV FINAL MYSeries HARD CUT 2 ONLY</title>
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-<style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#050505;color:#fff;font-family:Arial,Helvetica,sans-serif;overflow:hidden}:root{--line:#2a2a2a;--accent:#00d0ff;--focus:0 0 0 3px rgba(0,208,255,.95),0 0 20px rgba(0,208,255,.55)}.app{display:flex;width:100vw;height:100vh;background:radial-gradient(circle at top right,rgba(0,208,255,.12),transparent 28%),#050505}.sidebar{width:235px;min-width:235px;height:100%;background:linear-gradient(180deg,#111,#080808);border-right:1px solid var(--line);overflow-y:auto;padding:14px 10px 90px}.brand{text-align:center;font-weight:900;font-size:25px;color:var(--accent);letter-spacing:1px;margin:4px 0 14px;text-shadow:0 0 18px rgba(0,208,255,.35)}.subbrand{color:#9befff;font-size:12px;margin-top:2px}.group-title{color:#9fd4e0;font-size:12px;margin:18px 8px 8px;opacity:.9}button{font-family:inherit}.menu-btn,.top-btn,.card,.player-btn,.page-btn,.episode-btn,.see-all-btn{outline:none}.menu-btn{display:block;width:100%;text-align:left;background:#181818;border:1px solid #222;color:#fff;padding:12px;border-radius:14px;margin:7px 0;font-size:15px;font-weight:800;cursor:pointer;transition:.15s}.menu-btn.active{border-color:rgba(0,208,255,.8);background:linear-gradient(180deg,#102833,#151515)}.menu-btn:focus,.card:focus,.top-btn:focus,.player-btn:focus,.page-btn:focus,.episode-btn:focus,.see-all-btn:focus{box-shadow:var(--focus);border-color:var(--accent)}.menu-btn:active,.card:active,.top-btn:active,.player-btn:active,.page-btn:active,.episode-btn:active,.see-all-btn:active{transform:scale(.98)}.main{flex:1;min-width:0;height:100%;display:flex;flex-direction:column;overflow:hidden}.topbar{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--line);background:rgba(8,8,8,.97);flex-wrap:wrap}.top-btn{border:1px solid #2b2b2b;background:#171717;color:#fff;border-radius:12px;padding:11px 14px;font-size:14px;font-weight:800;cursor:pointer}.top-btn.home{background:linear-gradient(180deg,#01aa63,#00874f)}.top-btn.reload{background:linear-gradient(180deg,#14698b,#0f4c64)}.top-btn.live{background:linear-gradient(180deg,#5a2f8f,#43226d)}.status{flex:1;min-width:200px;padding:10px 12px;border-radius:12px;background:#101010;border:1px solid #222;color:#c7f7ff;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.content{flex:1;min-height:0;overflow-y:auto;padding:14px;scroll-behavior:smooth}.hero{border:1px solid #222;background:linear-gradient(135deg,rgba(0,208,255,.13),rgba(0,0,0,.05) 38%),linear-gradient(180deg,#171717,#0e0e0e);border-radius:20px;padding:18px;margin-bottom:14px}.hero-title{font-size:26px;font-weight:900;margin-bottom:6px}.hero-sub{color:#a8edf7;font-size:14px;line-height:1.45}.section{margin-bottom:24px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px}.section-title{font-size:20px;font-weight:900;color:#fff}.section-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.badge{font-size:12px;padding:6px 10px;border-radius:999px;background:#121212;border:1px solid #262626;color:#9deeff}.see-all-btn,.page-btn{border:1px solid #2d2d2d;background:#171717;color:#fff;padding:8px 12px;border-radius:12px;font-weight:800;cursor:pointer}.row{display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 8px;scroll-behavior:smooth}.row::-webkit-scrollbar{height:8px}.row::-webkit-scrollbar-thumb{background:#333;border-radius:999px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}.card{position:relative;border:1px solid #242424;border-radius:18px;background:linear-gradient(180deg,#171717,#0e0e0e);overflow:hidden;cursor:pointer;padding:0;text-align:left;color:inherit;min-height:240px;flex:0 0 190px;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}.card:hover,.card:focus{transform:scale(1.075);z-index:5;border-color:#00d0ff;box-shadow:0 0 22px rgba(0,208,255,.62),0 0 44px rgba(0,208,255,.26)}.card-glow{position:absolute;inset:0;background:radial-gradient(circle at center,rgba(0,208,255,.25),transparent 62%);opacity:0;transition:opacity .25s ease;pointer-events:none;z-index:1}.card:hover .card-glow,.card:focus .card-glow{opacity:1}.poster-wrap{position:relative;width:100%;height:160px;background:#111;overflow:hidden}.thumb{width:100%;height:100%;object-fit:cover;display:block;background:#111}.thumb.tv{object-fit:contain;padding:10px}.thumb.folder-logo{object-fit:contain;padding:18px;background:linear-gradient(135deg,#001b24,#000)}.thumb.fallback{display:flex;align-items:center;justify-content:center;font-size:40px;color:#00d0ff;background:linear-gradient(135deg,#0c2730,#111)}.lang-ribbon{position:absolute;right:-36px;top:16px;width:135px;transform:rotate(45deg);background:#ff1f62;color:#fff;text-align:center;font-size:13px;font-weight:900;padding:6px 0;z-index:4;box-shadow:0 2px 8px rgba(0,0,0,.35)}.status-pill{position:absolute;left:7px;bottom:7px;background:#b8783d;color:#fff;font-size:13px;font-weight:900;padding:5px 8px;border-radius:6px;z-index:4;text-shadow:0 1px 2px #000}.status-pill.done{background:#777}.ep-pill{position:absolute;right:7px;bottom:7px;background:#2b7ed8;color:#fff;font-size:13px;font-weight:900;padding:5px 8px;border-radius:6px;z-index:4;text-shadow:0 1px 2px #000}.card-body{padding:12px;position:relative;z-index:2}.card-title{font-size:16px;font-weight:900;line-height:1.35;min-height:46px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.folder-card .card-title{color:#9ff4ff}.card-meta{margin-top:8px;font-size:12px;color:#9cdce6;display:flex;flex-wrap:wrap;gap:6px}.tag{padding:4px 8px;border-radius:999px;border:1px solid #24444d;background:rgba(0,208,255,.09)}.player-panel{position:fixed;inset:0;display:none;background:rgba(0,0,0,.94);z-index:9999;flex-direction:column}.player-panel.show{display:flex}.player-top{display:flex;gap:10px;padding:12px;border-bottom:1px solid #222;align-items:center;flex-wrap:wrap;background:rgba(10,10,10,.98)}.player-title{flex:1;min-width:180px;font-weight:900;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.player-btn{border:1px solid #2d2d2d;background:#171717;color:#fff;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:800;cursor:pointer}.player-btn.close{background:linear-gradient(180deg,#7b2020,#601919)}.player-btn.home{background:linear-gradient(180deg,#00a760,#008450)}.player-btn.mx{background:linear-gradient(180deg,#1164a5,#0b4a7c)}.player-wrap{flex:1;min-height:0;display:flex;flex-direction:column;padding:12px;gap:10px}.video-shell{flex:1;min-height:220px;background:#000;border:1px solid #222;border-radius:18px;overflow:hidden}video{width:100%;height:100%;background:#000}.player-hint{font-size:13px;color:#b8ecf7;border:1px solid #1e3b41;background:#0d171a;border-radius:12px;padding:10px 12px}.modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.86);z-index:9998;padding:20px}.modal.show{display:flex}.modal-box{width:min(1200px,100%);max-height:92vh;background:linear-gradient(180deg,#151515,#0c0c0c);border:1px solid #2a2a2a;border-radius:22px;display:flex;flex-direction:column;overflow:hidden}.modal-head{padding:12px 14px;border-bottom:1px solid #222;display:flex;gap:10px;align-items:center;flex-wrap:wrap}.modal-title{font-size:20px;font-weight:900;flex:1}.modal-body{padding:14px;overflow:auto}.modal-foot{padding:10px 14px 14px;border-top:1px solid #222;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.pages{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.episode-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-top:14px}.episode-btn{border:1px solid #2a2a2a;background:#161616;color:#fff;padding:12px;border-radius:14px;font-weight:800;cursor:pointer;text-align:left}.detail-box{padding:14px;border:1px solid #242424;border-radius:18px;background:linear-gradient(180deg,#141414,#0d0d0d);margin-bottom:14px}.detail-title{font-size:22px;font-weight:900;margin-bottom:6px}.detail-sub{color:#a9edf7;font-size:14px;line-height:1.5}@media(max-width:860px){.sidebar{width:190px;min-width:190px}.grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}.card{flex-basis:160px}.poster-wrap{height:140px}}
-</style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>TIEA IPTV ULTRA FINAL MPD MASTER TXT MYSERIES</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            background: #060606;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            overflow: hidden;
+        }
+
+        :root {
+            --bg: #060606;
+            --panel: #111;
+            --panel2: #171717;
+            --line: #2a2a2a;
+            --accent: #00d0ff;
+            --accent2: #00ff95;
+            --danger: #ff5252;
+            --text: #fff;
+            --muted: #a9a9a9;
+            --focus: 0 0 0 3px rgba(0, 208, 255, .95), 0 0 18px rgba(0, 208, 255, .55);
+        }
+
+        body {
+            background: radial-gradient(circle at top right, rgba(0, 208, 255, .08), transparent 25%), var(--bg);
+        }
+
+        .app {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 235px;
+            min-width: 235px;
+            height: 100%;
+            background: linear-gradient(180deg, #111, #0b0b0b);
+            border-right: 1px solid var(--line);
+            overflow-y: auto;
+            padding: 14px 10px 90px;
+            flex-shrink: 0;
+        }
+
+        .brand {
+            text-align: center;
+            font-weight: 900;
+            font-size: 26px;
+            color: var(--accent);
+            letter-spacing: 1px;
+            margin: 4px 0 14px;
+            text-shadow: 0 0 18px rgba(0, 208, 255, .35);
+        }
+
+        .subbrand {
+            color: #9befff;
+            font-size: 12px;
+            margin-top: 2px;
+        }
+
+        .group-title {
+            color: #9fd4e0;
+            font-size: 12px;
+            margin: 18px 8px 8px;
+            opacity: .9;
+        }
+
+        .menu-btn,
+        .focusable {
+            outline: none;
+        }
+
+        .menu-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: var(--panel2);
+            border: 1px solid #202020;
+            color: #fff;
+            padding: 12px 12px;
+            border-radius: 14px;
+            margin: 7px 0;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, background .15s ease;
+        }
+
+        .menu-btn.active {
+            border-color: rgba(0, 208, 255, .8);
+            background: linear-gradient(180deg, rgba(0, 208, 255, .16), rgba(0, 208, 255, .08));
+        }
+
+        .menu-btn:focus,
+        .top-btn:focus,
+        .more-btn:focus,
+        .card:focus,
+        .ep-btn:focus,
+        .player-btn:focus,
+        .modal-btn:focus {
+            outline: none;
+            box-shadow: var(--focus);
+            border-color: rgba(0, 208, 255, .85);
+        }
+
+        .menu-btn:active,
+        .card:active,
+        .ep-btn:active,
+        .top-btn:active,
+        .player-btn:active,
+        .more-btn:active,
+        .modal-btn:active {
+            transform: scale(.985);
+        }
+
+        .main {
+            flex: 1;
+            overflow: auto;
+            padding: 14px 14px 90px;
+            scroll-behavior: smooth;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: linear-gradient(180deg, rgba(6, 6, 6, .98), rgba(6, 6, 6, .9));
+            padding: 4px 0 12px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(8px);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 900;
+            color: var(--accent);
+            letter-spacing: .3px;
+        }
+
+        .sub {
+            color: var(--muted);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .tools {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .top-btn,
+        .more-btn,
+        .ep-btn,
+        .player-btn,
+        .modal-btn {
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 10px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .status {
+            display: none;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .08);
+            color: #e7f7ff;
+            margin-bottom: 14px;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 10px;
+        }
+
+        .section-title {
+            flex: 1;
+            font-size: 18px;
+            font-weight: 900;
+            color: #dffaff;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, .055);
+            border: 1px solid rgba(255, 255, 255, .06);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            display: block;
+            width: 100%;
+            border: 1px solid #202020;
+            border-radius: 16px;
+            overflow: hidden;
+            background: linear-gradient(180deg, #141414, #0d0d0d);
+            color: #fff;
+            padding: 0;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .card img {
+            display: block;
+            width: 100%;
+            height: 205px;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .card.tv img {
+            object-fit: contain;
+            padding: 8px;
+            height: 145px;
+        }
+
+        .no-thumb {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #111, #1b1b1b);
+            color: #6be8ff;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .card-title {
+            padding: 10px 10px 4px;
+            font-size: 14px;
+            line-height: 1.35;
+            min-height: 46px;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .card-meta {
+            padding: 0 10px 10px;
+            font-size: 12px;
+            color: #aeb8bd;
+            line-height: 1.35;
+            min-height: 22px;
+        }
+
+        .sample-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+            gap: 14px;
+        }
+
+        .sample-card {
+            display: block;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, .12);
+            border-radius: 20px;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(31, 80, 92, .95), rgba(11, 11, 15, .98));
+            color: #fff;
+            padding: 0;
+            text-align: left;
+            cursor: pointer;
+            box-shadow: 0 10px 26px rgba(0, 0, 0, .24);
+        }
+
+        .sample-thumb {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 58px;
+            background: radial-gradient(circle at 50% 35%, rgba(80, 220, 255, .22), rgba(8, 22, 34, .08) 42%, rgba(3, 8, 14, .14) 70%), linear-gradient(180deg, rgba(32, 95, 108, .94), rgba(8, 16, 24, .95));
+            border-bottom: 1px solid rgba(255, 255, 255, .08);
+        }
+
+        .sample-thumb img {
+            width: 72%;
+            height: 72%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .sample-body {
+            padding: 14px 14px 12px;
+        }
+
+        .sample-title {
+            font-size: 15px;
+            font-weight: 900;
+            line-height: 1.35;
+            min-height: 42px;
+            text-transform: uppercase;
+        }
+
+        .sample-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .sample-tag {
+            display: inline-flex;
+            align-items: center;
+            min-height: 28px;
+            padding: 0 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(111, 255, 234, .5);
+            background: rgba(76, 209, 191, .18);
+            color: #dffff8;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .eps-wrap {
+            display: none;
+        }
+
+        .eps-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .eps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+            gap: 10px;
+        }
+
+        .ep-btn {
+            text-align: left;
+            padding: 14px 12px;
+            min-height: 52px;
+            background: linear-gradient(180deg, #161616, #0f0f0f);
+        }
+
+        #playerWrap {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: none;
+            z-index: 9999;
+        }
+
+        #videoPlayer {
+            width: 100%;
+            height: 100%;
+            background: #000;
+        }
+
+        #iframePlayer {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #000;
+            display: none;
+        }
+
+        #playerBar {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            gap: 8px;
+            z-index: 10001;
+            flex-wrap: wrap;
+            opacity: 1;
+            transition: opacity .25s ease;
+            align-items: center;
+        }
+
+        #playerBar.hide-ui {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .player-btn {
+            border: 0;
+        }
+
+        .btn-home {
+            background: #0b7dda;
+        }
+
+        .btn-close {
+            background: #d93025;
+        }
+
+        .btn-player {
+            background: #00897b;
+        }
+
+        .btn-mx {
+            background: #f39c12;
+        }
+
+        .btn-next {
+            background: #7b1fa2;
+        }
+
+        .btn-retry {
+            background: #455a64;
+        }
+
+        .player-note {
+            margin-left: auto;
+            background: rgba(0, 0, 0, .45);
+            border: 1px solid rgba(255, 255, 255, .12);
+            color: #d1f7ff;
+            padding: 9px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            max-width: 52vw;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 170px;
+                min-width: 170px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+            }
+
+            .card img {
+                height: 170px;
+            }
+
+            .card.tv img {
+                height: 120px;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .sidebar {
+                width: 145px;
+                min-width: 145px;
+                padding-bottom: 110px;
+            }
+
+            .main {
+                padding: 12px 12px 120px;
+            }
+
+            .title {
+                font-size: 20px;
+            }
+
+            .sub {
+                font-size: 12px;
+            }
+
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+                gap: 10px;
+            }
+
+            .card img {
+                height: 150px;
+            }
+
+            .card.tv img {
+                height: 105px;
+            }
+
+            .player-note {
+                display: none;
+            }
+        }
+    </style>
 </head>
+
 <body>
-<div class="app"><aside class="sidebar" id="sidebar"><div class="brand">TIEA IPTV<div class="subbrand">MYSeries CUT 2 ONLY</div></div><div class="group-title">เมนูหลัก</div><button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><button class="menu-btn" data-action="live-page">📅 ตารางแข่งขัน</button><div class="group-title">ทีวีออนไลน์</div><button class="menu-btn" data-source="tv-main">📺 ทีวีออนไลน์</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/iptv.html">📡 IPTV เดิม</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/sport.html">🏆 SPORT TV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/ball66.html">⚽ DOOBALL66</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><div class="group-title">หนัง</div><button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><div class="group-title">ซีรีส์</div><button class="menu-btn" data-source="series-main">📚 MySeries ทั้งหมด</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/Vip.html">💎 VIP</button><div class="group-title">ระบบ</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button></aside><main class="main"><div class="topbar"><button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><button class="top-btn live" id="liveBtn">📅 live.html</button><div class="status" id="statusText">พร้อมใช้งาน • FINAL HARD CUT เหลือแค่ 2 โฟลเดอร์</div></div><div class="content" id="content"></div></main></div>
-<div class="player-panel" id="playerPanel"><div class="player-top"><button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn home" id="playerHomeBtn">🏠 หน้าโฮม</button><div class="player-title" id="playerTitle">กำลังเล่น</div><button class="player-btn mx" id="mxBtn">▶ MX</button><button class="player-btn" id="extBtn">▶ PLAYER</button></div><div class="player-wrap"><div class="video-shell"><video id="video" controls playsinline webkit-playsinline autoplay></video></div><div class="player-hint">เล่นผ่านเว็บก่อน ถ้าไม่ขึ้นภาพค่อยกด PLAYER/MX • ปุ่ม X กลับหน้ารายการ</div></div></div>
-<div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><div class="modal-title" id="modalTitle">ดูทั้งหมด</div><button class="player-btn close" id="closeModalBtn">✕ ปิด</button></div><div class="modal-body" id="modalBody"></div><div class="modal-foot"><div class="badge" id="modalCount">ทั้งหมด 0 รายการ</div><div class="pages"><button class="page-btn" id="prevPageBtn">◀ ก่อนหน้า</button><div class="badge" id="pageInfo">หน้า 1 / 1</div><button class="page-btn" id="nextPageBtn">ถัดไป ▶</button></div></div></div></div>
-<script>
-const HOME_URL='https://tiea9999.github.io/tv/index.html';
-const LIVE_URL='https://tiea9999.github.io/tv/live.html';
-const RAW_TVONLINE='https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/';
-const PROXY='https://iptv.tawatchai250958.workers.dev/?url=';
-const FOLDER_LOGO='https://www.dropbox.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54&st=evm0iz63&dl=1';
-/* สำคัญ: เมนูหลักอยู่ repo tv ชื่อไฟล์ตัวเล็ก */
-const MYSERIES_MENU='https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/myseries.json';
+    <div class="app">
+        <aside class="sidebar" id="sidebar">
+            <div class="brand">TIEA IPTV<div class="subbrand">ULTRA FINAL</div>
+            </div>
 
-/* สำรองตรงรายหมวดตามรูป: ถ้าเมนูหลักโหลดไม่ได้ จะโหลดไฟล์ย่อยจาก tv-online ทันที */
-const MYSERIES_DIRECT=[
- {title:'ดูหนังออนไลน์',source:RAW_TVONLINE+'myseries-movie.json'},
- {title:'ดูซีรี่ย์ออนไลน์',source:RAW_TVONLINE+'myseries-series.json'}
-];
-const SOURCES={'tv-main':[{title:'ทีวีออนไลน์',source:RAW_TVONLINE+'M3U/Dooball.json'},{title:'IPTV VIP',source:RAW_TVONLINE+'M3U/Vip.json'}],'movie-main':[{title:'หนัง 24HD',source:RAW_TVONLINE+'movie24hd.json'}],'movie-24hd':[{title:'หนัง 24HD',source:RAW_TVONLINE+'movie24hd.json'}],'series-main':[{title:'MySeries',source:MYSERIES_MENU}],'series-24hd':[{title:'Series 24HD',source:RAW_TVONLINE+'series24hd.json'}]};
-const SAMPLE_TV=[{title:'MONOMAX 01',image:'',url:'https://monomax-sz.thaicdn.com/mono29hd/mono29hd.stream/playlist.m3u8',groups:['tv'],type:'tv'},{title:'MONOMAX 02',image:'',url:'https://monomax-sz.thaicdn.com/mono_plus/mono_plus.stream/playlist.m3u8',groups:['tv'],type:'tv'},{title:'SPORT DEMO',image:'',url:'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8',groups:['sport'],type:'tv'}];
-const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{}};
-const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel');
-function setStatus(t){statusText.textContent=t||'พร้อมใช้งาน'}function cleanUrl(u){return String(u||'').trim()}function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('raw.githubusercontent.com')||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
-function groupName(g){let t=String(g||'').trim();const map={'series':'ดูซีรี่ย์ออนไลน์','series-online':'ดูซีรี่ย์ออนไลน์','series-china':'ดูซีรี่ย์จีน','series-korea':'ดูซีรี่ย์เกาหลี','series-thai':'ดูซีรี่ย์ไทย','series-japan':'ซีรี่ย์ญี่ปุ่น','movie':'ดูหนังออนไลน์','short':'ดูละครสั้น','tv':'ทีวี','sport':'กีฬา'};if(map[t])return map[t];if(t.includes('ละครสั้น')||t.includes('หนังสั้น'))return 'ดูละครสั้น';if(t.includes('ดูหนัง')||t==='หนัง'||t.includes('หนังออนไลน์'))return 'ดูหนังออนไลน์';if(t.includes('จีน'))return 'ดูซีรี่ย์จีน';if(t.includes('เกาหลี'))return 'ดูซีรี่ย์เกาหลี';if(t.includes('ญี่ปุ่น'))return 'ซีรี่ย์ญี่ปุ่น';if(t.includes('ละครไทย')||t.includes('ซีรี่ย์ไทย')||t.includes('ซีรีย์ไทย'))return 'ดูซีรี่ย์ไทย';if(t.includes('ซีรี่ย์')||t.includes('ซีรีย์')||t.includes('ออนไลน์'))return 'ดูซีรี่ย์ออนไลน์';return t||'อื่นๆ'}
-function groupsOf(item,parent=''){let arr=[];if(Array.isArray(item.groups))arr.push(...item.groups.map(groupName));if(typeof item.groups==='string')arr.push(groupName(item.groups));if(item.group)arr.push(groupName(item.group));if(item.category)arr.push(groupName(item.category));if(!arr.length&&parent)arr.push(groupName(parent));if(!arr.length)arr.push('อื่นๆ');return [...new Set(arr.filter(Boolean))]}
-function serversOf(item){let out=[];if(Array.isArray(item.servers)){item.servers.forEach(s=>{const u=cleanUrl(s.url||s.link||s.file||s.source);if(u)out.push({name:s.name||'Main',url:u})})}const one=cleanUrl(item.url||item.link||item.stream||item.file);if(one&&!isJsonUrl(one))out.push({name:'Main',url:one});return out}
-function episodesOf(item,img=''){if(!Array.isArray(item.episodes))return [];return item.episodes.map((ep,i)=>({title:ep.title||ep.name||ep.ep_name||`EP${i+1}`,image:imgOf(ep)||img,servers:serversOf(ep),type:'episode'})).filter(e=>e.servers.length)}
-function calcStatus(item,eps){const raw=String(item.status||item.finish||item.end||item.complete||'').trim();if(raw)return raw;const title=String(item.title||'');if(title.includes('จบเรื่อง')||title.includes('ครบทุกตอน')||title.includes('(END)'))return 'จบแล้ว';const latest=Number(item.latest_ep||0),total=Number(item.total_ep||0);if(total&&latest&&latest>=total)return 'จบแล้ว';if(eps&&eps.some(e=>String(e.title||'').includes('ตอนจบ')))return 'จบแล้ว';if(eps&&eps.length)return 'ยังไม่จบ';return ''}
-function normalize(data,parent=''){let out=[],seen=new Set();function add(obj){const k=[obj.kind,obj.title,obj.source,obj.servers?.[0]?.url,obj.episodes?.length].join('|').toLowerCase();if(seen.has(k))return;seen.add(k);out.push(obj)}function walk(node,pg=''){if(Array.isArray(node)){node.forEach(x=>walk(x,pg));return}if(!node||typeof node!=='object')return;const title=node.title||node.name||node.channel||'ไม่มีชื่อ',img=imgOf(node),gs=groupsOf(node,pg||parent),source=cleanUrl(node.source||node.url||node.link||node.file);if((node.type==='menu'||Array.isArray(node.items))&&Array.isArray(node.items)){node.items.forEach(x=>walk(x,title));return}if((node.type==='source'||source)&&source&&isJsonUrl(source)&&!node.episodes){add({kind:'folder',title,image:img,source,groups:gs,group:gs[0]||title,status:node.status||''});return}if(Array.isArray(node.data)){node.data.forEach(x=>walk(x,gs[0]));return}const eps=episodesOf(node,img),sv=serversOf(node);if(eps.length){add({kind:'series',title,image:img,groups:gs,group:gs[0],language:node.language||'',year:node.year||'',status:calcStatus(node,eps),latest_ep:node.latest_ep||eps.length,total_ep:node.total_ep||eps.length,episodes:eps,raw:node})}else if(sv.length){add({kind:'play',title,image:img,groups:gs,group:gs[0]||'อื่นๆ',language:node.language||'',year:node.year||'',status:calcStatus(node,[]),servers:sv,type:node.type||'video',raw:node})}}walk(data,parent);return out}
-function parseM3U(text,parent='ทีวี'){const out=[];let cur=null;text.split(/\r?\n/).forEach(raw=>{const line=raw.trim();if(!line)return;if(line.startsWith('#EXTINF:')){const logo=line.match(/tvg-logo="([^"]*)"/i)?.[1]||'',group=groupName(line.match(/group-title="([^"]*)"/i)?.[1]||parent),title=line.split(',').pop()?.trim()||'ช่อง';cur={kind:'play',title,image:logo,group,groups:[group],servers:[],type:'tv'}}else if(!line.startsWith('#')&&cur){cur.servers=[{name:'Main',url:line}];out.push(cur);cur=null}});return out}
-async function fetchText(url){const sep=url.includes('?')?'&':'?';const res=await fetch(url+sep+'t='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);return await res.text()}
-async function loadUrl(url,parent=''){const text=await fetchText(url),trim=text.trim();if(trim.startsWith('{')||trim.startsWith('['))return normalize(JSON.parse(text),parent);if(trim.includes('#EXTM3U')||trim.includes('#EXTINF'))return parseM3U(text,parent);return []}
+            <div class="group-title">เมนูหลัก</div>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 หน้าโฮม</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/tv/live.html">⚽ ตารางแข่งขัน</button>
 
+            <div class="group-title">ทีวีออนไลน์</div>
+            <button class="menu-btn active" data-kind="tv" data-title="📺 ทีวีออนไลน์" data-source="https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/M3U/Dooball.json">📺 ทีวีออนไลน์</button>
+        <button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/tv/sport.html">🏆 SPORT TV</button>
 
+ 
 
-function getMySeriesTwoFolders(){
- return [
-  {kind:'folder',title:'ดูหนังออนไลน์',image:FOLDER_LOGO,source:RAW_TVONLINE+'myseries-movie.json',groups:['MySeries'],group:'MySeries'},
-  {kind:'folder',title:'ดูซีรี่ย์ออนไลน์',image:FOLDER_LOGO,source:RAW_TVONLINE+'myseries-series.json',groups:['MySeries'],group:'MySeries'}
- ];
-}
+            <div class="group-title">หนัง / ซีรีส์</div>
+            <button class="menu-btn" data-kind="movie" data-title="🎬 หนัง 24HD" data-source="https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/movie24hd.json">🎬 หนัง 24HD</button>
+            <button class="menu-btn" data-kind="series" data-title="📺 ซีรีส์ 24HD" data-source="https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/series24hd.json">📺 ซีรีส์ 24HD</button>
+            <button class="menu-btn" data-kind="series" data-title="📺 MySeries" data-source="https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-series.json">📺 MySeries</button>
 
-async function loadSourcePack(key){const pack=SOURCES[key]||[];let all=[];for(const s of pack){try{const items=await loadUrl(s.source,s.title);all.push(...items)}catch(e){console.log('โหลดไม่ได้',s.source,e)}}return all}
-async function loadFolder(item){setStatus('กำลังโหลด '+item.title+' ...');try{const items=await loadUrl(item.source,item.title);renderRows(makeRows(items),item.title);if(items.length){setStatus('โหลด '+item.title+' สำเร็จ '+items.length+' รายการ')}else{setStatus('โหลด '+item.title+' ได้ 0 รายการ')}}catch(e){setStatus('โหลดไม่สำเร็จ '+e.message)}}
-async function preloadSources(){for(const key of ['series-main','movie-main','tv-main']){if(state.preloaded[key])continue;state.preloaded[key]=true;loadSourcePack(key).then(items=>console.log('preload',key,items.length)).catch(()=>{})}}
-function makeRows(items){const order=['ดูซีรี่ย์ออนไลน์','ดูซีรี่ย์จีน','ดูซีรี่ย์เกาหลี','ดูซีรี่ย์ไทย','ซีรี่ย์ญี่ปุ่น','ดูหนังออนไลน์','ดูละครสั้น','ทีวี','กีฬา','อื่นๆ'];const map={};items.forEach(item=>{const cats=item.groups&&item.groups.length?item.groups:[item.group||'อื่นๆ'];cats.forEach(c=>{c=groupName(c);if(!map[c])map[c]=[];if(!map[c].some(x=>x.title===item.title))map[c].push(item)})});return Object.keys(map).sort((a,b)=>{const ia=order.indexOf(a)<0?99:order.indexOf(a),ib=order.indexOf(b)<0?99:order.indexOf(b);return ia-ib||a.localeCompare(b,'th')}).map(title=>({title,items:map[title]}))}
-function renderHome(){state.activeSource='home';setStatus('หน้าแรก • กำลังโหลด MySeries + หนัง + ทีวี');content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV FINAL MYSeries HARD CUT 2 ONLY v3</div><div class="hero-sub">หน้าอยู่ /tv/ • MySeries แสดงเฉพาะ 2 โฟลเดอร์: ดูหนังออนไลน์ / ดูซีรี่ย์ออนไลน์ และ VIP ไป Vip.html</div></div><div id="homeRows"></div>`;Promise.all([loadSourcePack('series-main').catch(()=>[]),loadSourcePack('movie-main').catch(()=>[]),loadSourcePack('tv-main').catch(()=>SAMPLE_TV.map(x=>normalize([x])[0]))]).then(([series,movies,tv])=>{ series=getMySeriesTwoFolders();const rows=[{title:'MySeries ทั้งหมด',items:getMySeriesTwoFolders()},{title:'ดูหนังออนไลน์',items:movies.slice(0,30)},{title:'ทีวีออนไลน์',items:(tv.length?tv:SAMPLE_TV.map(x=>normalize([x])[0])).slice(0,30)}].filter(r=>r.items.length);renderRows(rows,'หน้าแรก',document.getElementById('homeRows'));setStatus('พร้อมใช้งาน • โหลดหน้าแรกสำเร็จ')});preloadSources()}
-function renderRows(rows,title='รายการ',target=content){state.rows=rows;target.innerHTML='';rows.forEach(row=>{const sec=document.createElement('div');sec.className='section';sec.innerHTML=`<div class="section-head"><div class="section-title">${row.title}</div><div class="section-tools"><div class="badge">${row.items.length} รายการ</div><button class="see-all-btn">ดูทั้งหมด</button></div></div><div class="row"></div>`;const rowEl=sec.querySelector('.row');row.items.slice(0,18).forEach(item=>rowEl.appendChild(createCard(item)));sec.querySelector('.see-all-btn').onclick=()=>openModal(row.title,row.items);target.appendChild(sec)});if(!rows.length)target.innerHTML='<div class="hero"><div class="hero-title">ไม่พบรายการ</div><div class="hero-sub">ตรวจสอบชื่อไฟล์ JSON หรือโครงสร้างข้อมูลอีกครั้ง</div></div>';setTimeout(()=>document.querySelector('.card,.menu-btn.active')?.focus(),80)}
-function epText(item){if(item.latest_ep&&item.total_ep)return 'EP.'+item.latest_ep+'/'+item.total_ep;if(item.total_ep)return 'EP.1-'+item.total_ep;if(item.episodes?.length)return 'EP.'+item.episodes.length;return ''}
-function createCard(item){const btn=document.createElement('button'),isFolder=item.kind==='folder';btn.className='card'+(isFolder?' folder-card':'');btn.type='button';const image=isFolder?FOLDER_LOGO:imgOf(item),lang=item.language||'',ep=epText(item);let st=item.status||'';if(!st&&!isFolder&&item.kind==='series'){const le=Number(item.latest_ep||0),te=Number(item.total_ep||0);st=(te&&le&&le>=te)?'จบแล้ว':'ยังไม่จบ'}const done=String(st).includes('จบ')&&!String(st).includes('ยัง');btn.innerHTML=`<div class="card-glow"></div><div class="poster-wrap">${image?`<img class="thumb ${item.type==='tv'?'tv':''} ${isFolder?'folder-logo':''}" src="${image}" loading="lazy" onerror="this.onerror=null;this.outerHTML='<div class=&quot;thumb fallback&quot;>${isFolder?'📁':'🎬'}</div>'">`:`<div class="thumb fallback">${isFolder?'📁':'🎬'}</div>`}${(!isFolder&&lang)?`<div class="lang-ribbon">${lang}</div>`:''}${(!isFolder&&st)?`<div class="status-pill ${done?'done':''}">${st}</div>`:''}${(!isFolder&&ep)?`<div class="ep-pill">${ep}</div>`:''}</div><div class="card-body"><div class="card-title">${isFolder?'📁 ':''}${item.title||'ไม่มีชื่อ'}</div><div class="card-meta">${item.group?`<span class="tag">${item.group}</span>`:''}</div></div>`;btn.onclick=()=>openItem(item);btn.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openItem(item)}};return btn}
-function openItem(item){if(item.kind==='folder'){loadFolder(item);return}if(item.kind==='series'&&item.episodes?.length){openDetail(item);return}playItem(item,0)}
-function openDetail(item){const modal=$('modal');$('modalTitle').textContent=item.title;$('modalBody').innerHTML=`<div class="detail-box"><div class="detail-title">${item.title}</div><div class="detail-sub">${item.language?item.language+' • ':''}${item.status?item.status+' • ':''}${item.group||''}${item.total_ep?' • ทั้งหมด '+item.total_ep+' ตอน':''}</div></div><div class="episode-list"></div>`;const list=$('modalBody').querySelector('.episode-list');item.episodes.forEach((ep,i)=>{const b=document.createElement('button');b.className='episode-btn';b.textContent=ep.title||`EP${i+1}`;b.onclick=()=>{closeModal();playItem(ep,0,item.title+' '+b.textContent)};list.appendChild(b)});$('modalCount').textContent='ทั้งหมด '+item.episodes.length+' ตอน';$('pageInfo').textContent='เลือกตอน';$('prevPageBtn').style.display='none';$('nextPageBtn').style.display='none';modal.classList.add('show');setTimeout(()=>list.querySelector('.episode-btn')?.focus(),80)}
-function openModal(title,items){state.modalItems=items;state.page=1;$('modalTitle').textContent=title;$('prevPageBtn').style.display='';$('nextPageBtn').style.display='';renderModalPage();$('modal').classList.add('show')}
-function renderModalPage(){const total=state.modalItems.length,pages=Math.max(1,Math.ceil(total/state.perPage));state.page=Math.max(1,Math.min(state.page,pages));const start=(state.page-1)*state.perPage,items=state.modalItems.slice(start,start+state.perPage);$('modalBody').innerHTML='<div class="grid"></div>';const g=$('modalBody').querySelector('.grid');items.forEach(item=>g.appendChild(createCard(item)));$('modalCount').textContent='ทั้งหมด '+total+' รายการ';$('pageInfo').textContent='หน้า '+state.page+' / '+pages;$('prevPageBtn').disabled=state.page<=1;$('nextPageBtn').disabled=state.page>=pages;setTimeout(()=>g.querySelector('.card')?.focus(),80)}
-function closeModal(){$('modal').classList.remove('show');$('prevPageBtn').style.display='';$('nextPageBtn').style.display=''}
-function getUrl(item,serverIndex=0){return cleanUrl(item.servers?.[serverIndex]?.url||item.servers?.[0]?.url||item.url||item.link||item.stream||'')}
-function cleanupPlayer(){if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}if(state.hls){try{state.hls.destroy()}catch(e){}state.hls=null}if(state.dash){try{state.dash.destroy()}catch(e){}state.dash=null}try{video.pause()}catch(e){}video.removeAttribute('src');video.src='';video.load()}
-function playItem(item,serverIndex=0,displayTitle=''){const original=getUrl(item,serverIndex);if(!original){setStatus('ไม่พบลิงก์เล่น');return}cleanupPlayer();state.originalUrl=original;state.currentUrl=original;state.currentTitle=displayTitle||item.title||'กำลังเล่น';$('playerTitle').textContent=state.currentTitle;setStatus('กำลังเล่นผ่านเว็บก่อน • ถ้าไม่ขึ้นภาพให้กด PLAYER หรือ MX');playerPanel.classList.add('show');const preferProxy=item.type!=='tv';const candidates=preferProxy?[PROXY+encodeURIComponent(original),original]:[original,PROXY+encodeURIComponent(original)];playCandidate(candidates,item,serverIndex,0)}
-function playCandidate(candidates,item,serverIndex,idx){const url=candidates[idx]||candidates[0];state.currentUrl=url;const direct=getUrl(item,serverIndex);const next=()=>{if(idx+1<candidates.length){playCandidate(candidates,item,serverIndex,idx+1);return}if(item.servers?.length>serverIndex+1){playItem(item,serverIndex+1);return}openMx(direct)};cleanupPlayer();playerPanel.classList.add('show');state.playTimer=setTimeout(()=>{if(video.readyState<2||video.currentTime===0)openExternal(direct)},6500);['playing','loadeddata','canplay'].forEach(ev=>video.addEventListener(ev,()=>{if(state.playTimer)clearTimeout(state.playTimer)},{once:true}));const lower=url.toLowerCase();if(lower.includes('.mpd')){try{state.dash=dashjs.MediaPlayer().create();state.dash.initialize(video,url,true)}catch(e){next()}return}if(Hls.isSupported()&&lower.includes('.m3u8')){state.hls=new Hls({enableWorker:false,lowLatencyMode:false,maxBufferLength:14,maxMaxBufferLength:28,backBufferLength:12,maxBufferHole:.5,fragLoadingMaxRetry:3,manifestLoadingMaxRetry:2,levelLoadingMaxRetry:2,capLevelToPlayerSize:true,testBandwidth:false});state.hls.loadSource(url);state.hls.attachMedia(video);state.hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));state.hls.on(Hls.Events.ERROR,(e,d)=>{if(d?.fatal)next()});return}video.src=url;video.play().catch(()=>next())}
-function closePlayer(){cleanupPlayer();playerPanel.classList.remove('show')}
-function saveReturnState(obj){try{sessionStorage.setItem('tiea_return_state',JSON.stringify({activeSource:state.activeSource,scroll:content.scrollTop,time:Date.now(),...obj}))}catch(e){}}
-function restoreReturnState(){try{const raw=sessionStorage.getItem('tiea_return_state');if(!raw)return false;const data=JSON.parse(raw);sessionStorage.removeItem('tiea_return_state');if(data.activeSource&&data.activeSource!=='home'){loadMenuSource(data.activeSource).then(()=>setTimeout(()=>{content.scrollTop=data.scroll||0},500));return true}}catch(e){}return false}
-function safeIntent(url,mode){url=url||state.originalUrl||state.currentUrl;if(!url)return;saveReturnState({player:mode||'external',url:url});try{const u=new URL(url),scheme=u.protocol.replace(':',''),hostPath=u.host+u.pathname+(u.search||'');let intent='';if(mode==='mx'){intent='intent://'+hostPath+'#Intent;scheme='+scheme+';action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;S.browser_fallback_url='+encodeURIComponent(url)+';end'}else{intent='intent://'+hostPath+'#Intent;scheme='+scheme+';action=android.intent.action.VIEW;type=video/*;S.browser_fallback_url='+encodeURIComponent(url)+';end'}setTimeout(()=>{window.location.href=intent},80)}catch(e){window.location.href=url}}
-function openMx(url){safeIntent(url||state.originalUrl||state.currentUrl,'mx')}function openExternal(url){safeIntent(url||state.originalUrl||state.currentUrl,'external')}
-async function loadMenuSource(key){state.activeSource=key;const label=document.querySelector(`[data-source="${key}"]`)?.textContent?.trim()||'รายการ';setStatus('กำลังโหลด '+label+' ...');content.innerHTML='<div class="hero"><div class="hero-title">กำลังโหลด...</div><div class="hero-sub">'+label+'</div></div>';try{let items=await loadSourcePack(key);if(!items.length&&key==='tv-main')items=SAMPLE_TV.map(x=>normalize([x])[0]);if(key==='series-main'){
-   renderRows([{title:'MySeries',items:items}],label);
-  }else{
-   if(key==='series-main'){
-   renderRows([{title:'MySeries',items:items}],label);
-  }else{
-   if(key==='series-main'){renderRows([{title:'MySeries ทั้งหมด',items:getMySeriesTwoFolders()}],label);}else{renderRows(makeRows(items),label);}
-  }
-  }if(items.length){
-   setStatus('โหลดสำเร็จ '+items.length+' รายการ');
-  }else{
-   setStatus('ไม่พบรายการ • ไฟล์หลัก/ไฟล์สำรองยังโหลดไม่ได้');
-  }preloadSources()}catch(e){content.innerHTML='<div class="hero"><div class="hero-title">โหลดไม่สำเร็จ</div><div class="hero-sub">'+e.message+'</div></div>';setStatus('โหลดไม่สำเร็จ')}}
-document.querySelectorAll('.menu-btn').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(btn.dataset.link){location.href=btn.dataset.link;return}if(btn.dataset.action==='home'){renderHome();return}if(btn.dataset.action==='live-page'){location.href=LIVE_URL;return}if(btn.dataset.source){loadMenuSource(btn.dataset.source);return}}});
-$('homeBtn').onclick=()=>location.href=HOME_URL;$('reloadBtn').onclick=()=>{if(state.activeSource&&state.activeSource!=='home')loadMenuSource(state.activeSource);else renderHome()};$('liveBtn').onclick=()=>location.href=LIVE_URL;$('closePlayerBtn').onclick=closePlayer;$('playerHomeBtn').onclick=()=>location.href=HOME_URL;$('mxBtn').onclick=()=>openMx();$('extBtn').onclick=()=>openExternal();$('closeModalBtn').onclick=closeModal;$('prevPageBtn').onclick=()=>{state.page--;renderModalPage()};$('nextPageBtn').onclick=()=>{state.page++;renderModalPage()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'||e.keyCode===10009){e.preventDefault();if(playerPanel.classList.contains('show'))closePlayer();else if($('modal').classList.contains('show'))closeModal();else location.href=HOME_URL}});
-document.addEventListener('keydown',e=>{const active=document.activeElement;if(!active||!active.classList||!active.classList.contains('card'))return;if(e.key==='ArrowRight'){const n=active.nextElementSibling;if(n&&n.classList.contains('card')){e.preventDefault();n.focus();n.scrollIntoView({block:'nearest',inline:'center'})}}if(e.key==='ArrowLeft'){const p=active.previousElementSibling;if(p&&p.classList.contains('card')){e.preventDefault();p.focus();p.scrollIntoView({block:'nearest',inline:'center'})}}});
-window.addEventListener('pageshow',()=>{restoreReturnState()});if(!restoreReturnState())renderHome();
-</script>
+            <div class="group-title">อื่นๆ</div>
+            <button class="menu-btn" id="vipBtn">🔒 VIP</button>
+        </aside>
+
+        <main class="main" id="mainArea">
+            <div class="topbar">
+                <div>
+                    <div id="pageTitle" class="title">📺 ทีวีออนไลน์</div>
+                    <div class="sub" id="pageSub">ULTRA FINAL + AUTO FIX + แยกหมวด + รองรับรีโมท/เมาส์/มือถือ</div>
+                </div>
+                <div class="tools">
+                    <button id="reloadBtn" class="top-btn">รีโหลด</button>
+                    <button id="backBtn" class="top-btn">ย้อนกลับ</button>
+                </div>
+            </div>
+
+            <div id="statusBox" class="status"></div>
+
+            <div id="listView">
+                <div id="grid" class="grid"></div>
+            </div>
+
+            <div id="epsWrap" class="eps-wrap">
+                <div id="epsTitle" class="eps-title">ตอนทั้งหมด</div>
+                <div id="epsGrid" class="eps-grid"></div>
+            </div>
+        </main>
+    </div>
+
+    <div id="playerWrap">
+        <video id="videoPlayer" controls playsinline webkit-playsinline autoplay></video>
+        <iframe id="iframePlayer" allow="autoplay; fullscreen; picture-in-picture"
+            referrerpolicy="no-referrer"></iframe>
+        <div id="playerBar">
+            <button id="playerHomeBtn" class="player-btn btn-home">🏠 หน้าโฮม</button>
+            <button id="playerExternalBtn" class="player-btn btn-player">▶ PLAYER</button>
+            <button id="playerMxBtn" class="player-btn btn-mx">▶ MX</button>
+            <button id="playerRetryBtn" class="player-btn btn-retry">↻ ลองใหม่</button>
+            <button id="playerNextBtn" class="player-btn btn-next hidden">▶ server ถัดไป</button>
+            <button id="playerCloseBtn" class="player-btn btn-close">✕ ปิด</button>
+            <div class="player-note" id="playerNote">ถ้าไม่มีภาพให้กด PLAYER หรือ MX</div>
+        </div>
+    </div>
+
+    <script>
+        const grid = document.getElementById('grid');
+    const listView = document.getElementById('listView');
+    const epsWrap = document.getElementById('epsWrap');
+    const epsGrid = document.getElementById('epsGrid');
+    const epsTitle = document.getElementById('epsTitle');
+    const pageTitle = document.getElementById('pageTitle');
+    const pageSub = document.getElementById('pageSub');
+    const statusBox = document.getElementById('statusBox');
+    const mainArea = document.getElementById('mainArea');
+    const playerWrap = document.getElementById('playerWrap');
+    const playerBar = document.getElementById('playerBar');
+    const playerNote = document.getElementById('playerNote');
+    const video = document.getElementById('videoPlayer');
+    const iframePlayer = document.getElementById('iframePlayer');
+    const menuButtons = Array.from(document.querySelectorAll('.menu-btn'));
+    const vipBtn = document.getElementById('vipBtn');
+    const reloadBtn = document.getElementById('reloadBtn');
+    const backBtn = document.getElementById('backBtn');
+    const playerHomeBtn = document.getElementById('playerHomeBtn');
+    const playerExternalBtn = document.getElementById('playerExternalBtn');
+    const playerMxBtn = document.getElementById('playerMxBtn');
+    const playerRetryBtn = document.getElementById('playerRetryBtn');
+    const playerNextBtn = document.getElementById('playerNextBtn');
+    const playerCloseBtn = document.getElementById('playerCloseBtn');
+
+    const HOME_URL = 'https://tiea9999.github.io/tv/index.html';
+    const VIP_URL = 'https://tiea9999.github.io/tv/VIP.html';
+    const PROXY = 'https://iptv.tawatchai250958.workers.dev/?url=';
+    const RETURN_STATE_KEY = 'tiea_ultra_return_state_v3';
+    const INITIAL_LIMIT = 18;
+    const FOLDER_LOGO = 'https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54';
+    const MYSERIES_SERIES_URL = 'https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-series.json';
+    const IMAGE_FALLBACK = FOLDER_LOGO || 'https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54';
+    const SAMPLE_TV_SECTIONS = [
+      {
+        title: 'ทีวีแนะนำ',
+        items: [
+          { title: 'BEIN 01', icon: '📺', tags: ['ทีวี'], action: { link: 'https://love.sikoyo3159.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8' } },
+          { title: 'BEIN 02', icon: '📺', tags: ['ทีวี'], action: { link: 'https://love.sikoyo3159.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8' } },
+          { title: 'FOOTBALL03', icon: '📺', tags: ['กีฬา'], action: { link: 'https://love.sikoyo3159.workers.dev/vx-origin/epl-3_720/chunks.m3u8' } }
+        ]
+      },
+      {
+        title: 'หนังและซีรี่ย์',
+        items: [
+          { title: 'หนัง 24 HD', icon: '📺', tags: ['หนัง', 'เมนูย่อย'], action: { kind: 'movie', title: '🎬 หนัง 24HD', source: 'https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/movie24hd.json' } },
+        { title: 'ซีรี่ย์ 24 HD', icon: '📺', tags: ['ซีรีส์', 'เมนูย่อย'], action: { kind: 'series', title: '📺 ซีรี่ย์ 24 HD',
+        source: 'https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/series24hd.json' } },
+
+        { title: 'MySeriesHD', icon: '📺', tags: ['ซีรีส์', 'เมนูย่อย'], action: { kind: 'series', title: '📺 MySeries', source:
+        'https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-series.json' } }
+
+        ]
+      }
+    ];
+
+    let currentSource = document.querySelector('.menu-btn[data-source].active')?.dataset.source || '';
+    let currentTitle = document.querySelector('.menu-btn[data-source].active')?.dataset.title || '📺 ทีวีออนไลน์';
+    let currentKind = document.querySelector('.menu-btn[data-source].active')?.dataset.kind || 'tv';
+    let currentMode = 'list';
+    let currentSeries = null;
+    let currentItem = null;
+    let currentServerIndex = 0;
+    let currentPlayCandidates = [];
+    let hls = null;
+    let dash = null;
+    let playerUiTimer = null;
+    let movieFallbackTimer = null;
+    let historyStack = [];
+    let cache = {};
+    let sectionExpandState = {};
+    let focusIndex = 0;
+    let playWatchdog = null;
+    let lastVideoTime = 0;
+    let stuckCount = 0;
+
+    function setStatus(msg) {
+      statusBox.textContent = msg || '';
+      statusBox.style.display = msg ? 'block' : 'none';
+    }
+
+    function sanitize(text) {
+      return String(text || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function getThumb(item) {
+      return item?.image || item?.poster || item?.thumb || item?.logo || item?.cover || item?.poster_url || FOLDER_LOGO;
+    }
+
+    function mapServers(arr) {
+      if (!Array.isArray(arr)) return [];
+      return arr.map((s, i) => ({
+        name: s?.name || s?.title || `Server ${i + 1}`,
+        url: s?.url || s?.link || s?.file || s?.source || s?.stream || '',
+        drm: !!s?.drm || !!(s?.keyId || s?.kid || s?.key_id),
+        keyId: s?.keyId || s?.kid || s?.key_id || '',
+        key: s?.key || s?.clearkey || ''
+      })).filter(s => s.url);
+    }
+
+    function normalizeUrl(url) {
+      return String(url || '').trim();
+    }
+
+    function isMySeriesSource() {
+      return String(currentSource || '').includes('myseries-series.json');
+    }
+
+    function isFolderLike(item) {
+      const u = normalizeUrl(item?.url || item?.source || item?.link || item?.file || '');
+      return !!u && /\.json($|\?)/i.test(u);
+    }
+
+    function getPlayableUrl(item, idx = 0) {
+      if (!item) return '';
+      if (Array.isArray(item.servers) && item.servers.length) {
+        return normalizeUrl(item.servers[idx]?.url || item.servers[0]?.url || '');
+      }
+      return normalizeUrl(item.url || item.link || item.source || item.stream || item.file || '');
+    }
+
+    function buildPlayCandidates(url) {
+      const raw = normalizeUrl(url);
+      if (!raw) return [];
+      const lower = raw.toLowerCase();
+      const list = [raw];
+      const noProxy = lower.includes('.mpd') || lower.includes('thaicdn') || lower.includes('mux.dev') || lower.includes('byteark');
+      if (/^https?:/i.test(raw) && !raw.includes('iptv.tawatchai250958.workers.dev') && !noProxy) {
+        list.push(PROXY + encodeURIComponent(raw));
+      }
+      return [...new Set(list)];
+    }
+
+    function isHlsUrl(url) {
+      url = String(url || '');
+      return /\.(m3u8|txt)($|\?)/i.test(url) || /master\.txt($|\?)/i.test(url) || /type=m3u8|extension=m3u8/i.test(url);
+    }
+
+    function isDashUrl(url) {
+      return /\.mpd($|\?)/i.test(String(url || ''));
+    }
+
+    function isVideoFile(url) {
+      return /\.(mp4|mkv|webm|mov|m4v|avi)($|\?)/i.test(url);
+    }
+
+    function isProbablyIframe(url) {
+      return /player|embed|iframe|watch\//i.test(url) && !isHlsUrl(url) && !isDashUrl(url) && !isVideoFile(url);
+    }
+
+    function clearMovieFallbackTimer() {
+      if (movieFallbackTimer) {
+        clearTimeout(movieFallbackTimer);
+        movieFallbackTimer = null;
+      }
+    }
+
+    function destroyEngines() {
+      if (hls) {
+        try { hls.destroy(); } catch (e) {}
+        hls = null;
+      }
+      if (dash) {
+        try { dash.reset(); } catch (e) {}
+        dash = null;
+      }
+    }
+
+    function clearPlayer() {
+      stopPlayWatchdog();
+      clearMovieFallbackTimer();
+      destroyEngines();
+      try { video.pause(); } catch (e) {}
+      video.removeAttribute('src');
+      video.src = '';
+      video.load();
+      iframePlayer.src = 'about:blank';
+      iframePlayer.style.display = 'none';
+      video.style.display = 'block';
+      playerNextBtn.classList.add('hidden');
+    }
+
+    function showPlayerUi() {
+      playerBar.classList.remove('hide-ui');
+      if (playerUiTimer) clearTimeout(playerUiTimer);
+      playerUiTimer = setTimeout(() => {
+        if (playerWrap.style.display === 'block') playerBar.classList.add('hide-ui');
+      }, 2800);
+    }
+
+    function showPlayer() {
+      playerWrap.style.display = 'block';
+      showPlayerUi();
+      setTimeout(() => playerCloseBtn.focus(), 60);
+    }
+
+    function closePlayer() {
+      if (playerUiTimer) {
+        clearTimeout(playerUiTimer);
+        playerUiTimer = null;
+      }
+      clearPlayer();
+      playerWrap.style.display = 'none';
+      playerBar.classList.remove('hide-ui');
+      focusCurrentView();
+    }
+
+    function saveReturnState(extra = {}) {
+      try {
+        sessionStorage.setItem(RETURN_STATE_KEY, JSON.stringify({
+          source: currentSource || '',
+          title: currentTitle || '',
+          kind: currentKind || '',
+          mode: currentMode || 'list',
+          seriesTitle: currentSeries?.title || '',
+          expand: sectionExpandState || {},
+          focusIndex,
+          ...extra
+        }));
+      } catch (e) {}
+    }
+
+    function getReturnState() {
+      try {
+        const raw = sessionStorage.getItem(RETURN_STATE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function clearReturnState() {
+      try { sessionStorage.removeItem(RETURN_STATE_KEY); } catch (e) {}
+    }
+
+    function openLink(url) {
+      if (!url) return;
+      location.href = url;
+    }
+
+    function openExternalPlayer(url) {
+      if (!url) return;
+      saveReturnState();
+      try {
+        const u = new URL(url);
+        location.href = 'intent://' + u.host + u.pathname + u.search + '#Intent;scheme=' + u.protocol.replace(':','') + ';action=android.intent.action.VIEW;type=video/*;end';
+      } catch (e) {
+        location.href = url;
+      }
+    }
+
+    function openMx(url) {
+      if (!url) return;
+      saveReturnState();
+      location.href = 'intent:' + url + '#Intent;package=com.mxtech.videoplayer.ad;end';
+    }
+
+    function isMovieItem(item) {
+      return currentKind === 'movie' || item?.type === 'movie';
+    }
+
+    function categoryOrder(cat) {
+      const text = String(cat || '');
+      if (text.includes('2026')) return 1;
+      if (text.includes('2025')) return 2;
+      if (text.includes('ใหม่')) return 3;
+      if (text.includes('จีน')) return 4;
+      if (text.includes('เกาหลี')) return 5;
+      if (text.includes('ญี่ปุ่น')) return 6;
+      if (text.includes('ไทย')) return 7;
+      if (text.includes('ฝรั่ง')) return 8;
+      if (text.includes('พากย์ไทย')) return 9;
+      if (text.includes('ซับไทย')) return 10;
+      return 99;
+    }
+
+    function makeCategory(node, fallback = 'อื่นๆ') {
+      const cat = String(node?.category || node?.group || node?.genre || '').trim();
+      const sub = String(node?.subcategory || node?.sub_group || '').trim();
+      if (currentKind === 'series') return cat || sub || fallback;
+      if (cat && sub && cat !== sub) return `${cat} • ${sub}`;
+      return cat || sub || fallback;
+    }
+
+    function normalizeMovieOrSeries(input) {
+      const out = [];
+      const seen = new Set();
+
+      function add(item) {
+        if (!item) return;
+        const key = [item.type, item.title, item.url, item.category, item.year, item.episodes?.length || 0].join('|').toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        out.push(item);
+      }
+
+      function walk(node, inherited = {}) {
+        if (!node) return;
+        if (Array.isArray(node)) {
+          node.forEach(n => walk(n, inherited));
+          return;
+        }
+        if (typeof node !== 'object') return;
+
+        const image = getThumb(node) || inherited.image || '';
+        const title = node.title || node.name || node.movie_name || node.series_name || node.ep_name || node.episode || 'ไม่มีชื่อ';
+        const url = normalizeUrl(node.url || node.link || node.stream || node.source || node.file || '');
+        const servers = mapServers(node.servers || node.server || []);
+        const category = makeCategory(node, inherited.category || 'อื่นๆ');
+
+        if (Array.isArray(node.episodes) && node.episodes.length) {
+          add({
+            title,
+            image,
+            url,
+            servers: [],
+            type: 'series',
+            category,
+            status: node.status || '',
+            year: node.year || '',
+            language: node.language || node.lang || '',
+            episodes: node.episodes.map((ep, i) => ({
+              title: ep.title || ep.name || ep.ep_name || `EP${i + 1}`,
+              image: getThumb(ep) || image || '',
+              url: normalizeUrl(ep.url || ep.link || ep.stream || ep.source || ep.file || ''),
+              servers: mapServers(ep.servers || ep.server || []),
+              type: 'episode'
+            })).filter(ep => ep.url || ep.servers.length)
+          });
+          return;
+        }
+
+        if (Array.isArray(node.items) && node.items.length) {
+          const nextInherited = {
+            image,
+            category: makeCategory(node, inherited.category || title || 'อื่นๆ')
+          };
+          node.items.forEach(child => walk(child, nextInherited));
+          return;
+        }
+
+        if (node.type === 'menu' && Array.isArray(node.items)) {
+          node.items.forEach(child => walk(child, inherited));
+          return;
+        }
+
+        if (url && /\.json($|\?)/i.test(url) && title) {
+          add({
+            title,
+            image: image || FOLDER_LOGO,
+            url,
+            servers: [],
+            type: 'folder',
+            category,
+            status: node.status || '',
+            year: node.year || '',
+            language: node.language || node.lang || ''
+          });
+          return;
+        }
+
+        if ((url || servers.length) && title) {
+          add({
+            title,
+            image,
+            url: url || servers[0]?.url || '',
+            servers,
+            type: currentKind === 'movie' ? 'movie' : (node.type || 'video'),
+            category,
+            status: node.status || '',
+            year: node.year || '',
+            language: node.language || node.lang || ''
+          });
+          return;
+        }
+
+        Object.values(node).forEach(v => {
+          if (Array.isArray(v) || (v && typeof v === 'object')) walk(v, { image, category });
+        });
+      }
+
+      walk(input, {});
+      return out;
+    }
+
+    function normalizeTV(data) {
+      const out = [];
+      if (Array.isArray(data)) return normalizeMovieOrSeries(data);
+      if (Array.isArray(data?.items)) return normalizeMovieOrSeries(data.items);
+
+      if (Array.isArray(data?.groups)) {
+        data.groups.forEach(group => {
+          const groupName = group?.name || 'ทีวี';
+          const stations = Array.isArray(group?.stations) ? group.stations : [];
+          const subGroups = Array.isArray(group?.groups) ? group.groups : [];
+
+          stations.forEach((s, i) => {
+            const url = normalizeUrl(s?.url || s?.link || s?.file || s?.source || s?.stream || '');
+            if (!url) return;
+            out.push({
+              title: s?.name || `${groupName} ${i + 1}`,
+              image: s?.image || s?.logo || group?.image || '',
+              url,
+              servers: [{ name: s?.name || 'Main', url }],
+              type: 'video',
+              category: groupName,
+              language: s?.info || ''
+            });
+          });
+
+          subGroups.forEach(sub => {
+            const subStations = Array.isArray(sub?.stations) ? sub.stations : [];
+            subStations.forEach((s, i) => {
+              const url = normalizeUrl(s?.url || s?.link || s?.file || s?.source || s?.stream || '');
+              if (!url) return;
+              out.push({
+                title: s?.name || sub?.name || `${groupName} ${i + 1}`,
+                image: s?.image || s?.logo || sub?.image || group?.image || '',
+                url,
+                servers: [{ name: s?.name || 'Main', url }],
+                type: 'video',
+                category: sub?.name || groupName,
+                language: s?.info || ''
+              });
+            });
+          });
+        });
+      }
+
+      return out;
+    }
+
+    function normalizeM3U(text) {
+      const result = [];
+      const lines = String(text || '').split(/\r?\n/);
+      let current = null;
+      for (const raw of lines) {
+        const line = raw.trim();
+        if (!line) continue;
+        if (line.startsWith('#EXTINF:')) {
+          const logo = (line.match(/tvg-logo="([^"]*)"/i) || [])[1] || '';
+          const group = (line.match(/group-title="([^"]*)"/i) || [])[1] || 'ทีวี';
+          const name = line.split(',').pop()?.trim() || 'ไม่มีชื่อ';
+          current = {
+            title: name,
+            image: logo,
+            url: '',
+            servers: [],
+            type: 'video',
+            category: group,
+            language: ''
+          };
+        } else if (!line.startsWith('#') && current) {
+          current.url = line;
+          current.servers = [{ name: 'Main', url: line }];
+          result.push(current);
+          current = null;
+        }
+      }
+      return result;
+    }
+
+    async function fetchText(url) {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('โหลดไฟล์ไม่สำเร็จ: ' + res.status);
+      return await res.text();
+    }
+
+    async function loadSource(sourceUrl, kind = currentKind) {
+      const cacheKey = `${kind}|${sourceUrl}`;
+      if (cache[cacheKey]) return cache[cacheKey];
+      const lower = String(sourceUrl || '').toLowerCase();
+
+      if ((lower.includes('.m3u8') || lower.includes('master.txt') || lower.includes('.txt') || lower.includes('.mpd')) && !lower.includes('.json')) {
+        const direct = [{ title: 'Live Stream', image: '', url: sourceUrl, servers: [{ name: 'Main', url: sourceUrl }], type: 'video', category: 'ถ่ายทอดสด' }];
+        cache[cacheKey] = direct;
+        return direct;
+      }
+
+      const text = await fetchText(sourceUrl);
+      const trimmed = text.trim();
+      if (!trimmed) return [];
+
+      let result = [];
+      if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        const json = JSON.parse(trimmed);
+        if (kind === 'tv') result = normalizeTV(json);
+        else if (Array.isArray(json)) result = normalizeMovieOrSeries(json);
+        else if (Array.isArray(json?.items)) result = normalizeMovieOrSeries(json.items);
+        else result = normalizeMovieOrSeries(json);
+      } else if (trimmed.includes('#EXTM3U') || trimmed.includes('#EXTINF')) {
+        result = normalizeM3U(trimmed);
+      }
+
+      cache[cacheKey] = result;
+      return result;
+    }
+
+    function createThumbHtml(item, isTV) {
+      const thumb = (isMySeriesSource() && isFolderLike(item)) ? FOLDER_LOGO : getThumb(item);
+      if (thumb) {
+        return `<img src="${sanitize(thumb)}" alt="" loading="lazy" onerror="this.onerror=null;this.src=FOLDER_LOGO">`;
+      }
+      return `<div class="no-thumb" style="height:${isTV ? 145 : 205}px;">TIEA IPTV</div>`;
+    }
+
+    function createCard(item, isTV, onOpen) {
+      const card = document.createElement('button');
+      card.className = 'card' + (isTV ? ' tv' : '');
+      card.type = 'button';
+      card.tabIndex = 0;
+
+      const meta = [];
+      if (item.year) meta.push(item.year);
+      if (item.language) meta.push(item.language);
+      if (item.status) meta.push(item.status);
+      if (item.category && currentKind !== 'series') meta.push(item.category);
+      if (item.type === 'series' && item.episodes?.length) meta.push(`EP ${item.episodes.length}`);
+
+      card.innerHTML = `
+        ${createThumbHtml(item, isTV)}
+        <div class="card-title">${sanitize(item.title || 'ไม่มีชื่อ')}</div>
+        <div class="card-meta">${sanitize(meta.join(' • ')) || '&nbsp;'}</div>
+      `;
+
+      const run = () => onOpen(item);
+      card.onclick = run;
+      card.onmousedown = e => { e.preventDefault(); run(); };
+      card.ontouchstart = e => { e.preventDefault(); run(); };
+      card.onkeydown = e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          run();
+        }
+      };
+      return card;
+    }
+
+    function sortCategories(keys) {
+      return keys.sort((a, b) => {
+        const oa = categoryOrder(a);
+        const ob = categoryOrder(b);
+        if (oa !== ob) return oa - ob;
+        return a.localeCompare(b, 'th');
+      });
+    }
+
+    function groupedEntries(list) {
+      const groups = {};
+      list.forEach(item => {
+        const cat = item.category || 'อื่นๆ';
+        if (!groups[cat]) groups[cat] = [];
+        groups[cat].push(item);
+      });
+      return sortCategories(Object.keys(groups)).map(key => [key, groups[key]]);
+    }
+
+    function rememberFocus() {
+      const all = getCurrentFocusable();
+      const idx = all.indexOf(document.activeElement);
+      if (idx >= 0) focusIndex = idx;
+    }
+
+    function focusElementByIndex(index = 0) {
+      const all = getCurrentFocusable();
+      if (!all.length) return;
+      const i = Math.max(0, Math.min(index, all.length - 1));
+      focusIndex = i;
+      all[i].focus();
+      all[i].scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+
+    function focusFirstCard() {
+      const first = grid.querySelector('.card');
+      if (first) {
+        first.focus();
+        focusIndex = getCurrentFocusable().indexOf(first);
+      }
+    }
+
+    function focusCurrentView() {
+      setTimeout(() => {
+        if (currentMode === 'episodes') {
+          const first = epsGrid.querySelector('.ep-btn');
+          if (first) first.focus();
+        } else {
+          focusElementByIndex(focusIndex || 0);
+        }
+      }, 50);
+    }
+
+    function getCurrentFocusable() {
+      if (playerWrap.style.display === 'block') {
+        return Array.from(playerBar.querySelectorAll('button:not(.hidden)'));
+      }
+      if (currentMode === 'episodes') {
+        return Array.from(epsGrid.querySelectorAll('.ep-btn'));
+      }
+      return Array.from(grid.querySelectorAll('.card, .more-btn, .sample-card'));
+    }
+
+    async function runSampleAction(action = {}) {
+      if (action.link) {
+        playItem({
+          title: action.title || 'ทีวีแนะนำ',
+          image: FOLDER_LOGO,
+          url: action.link,
+          servers: [{ name: 'Main', url: action.link }],
+          type: 'video',
+          category: 'ทีวีแนะนำ'
+        }, 0);
+        return;
+      }
+      if (action.source) {
+        currentSource = action.source;
+        currentTitle = action.title || currentTitle;
+        currentKind = action.kind || currentKind;
+        currentSeries = null;
+        currentMode = 'list';
+        sectionExpandState = {};
+        historyStack = [];
+        const activeBtn = menuButtons.find(btn => btn.dataset.source === currentSource && btn.dataset.kind === currentKind);
+        setActiveMenu(activeBtn || null);
+        await loadCurrentMenu();
+      }
+    }
+
+    function renderSampleSections() {
+      SAMPLE_TV_SECTIONS.forEach(sectionData => {
+        const section = document.createElement('div');
+        section.className = 'section';
+
+        const head = document.createElement('div');
+        head.className = 'section-head';
+
+        const title = document.createElement('div');
+        title.className = 'section-title';
+        title.textContent = sectionData.title;
+
+        head.appendChild(title);
+        section.appendChild(head);
+
+        const wrap = document.createElement('div');
+        wrap.className = 'sample-grid';
+
+        sectionData.items.forEach(item => {
+          const card = document.createElement('button');
+          card.type = 'button';
+          card.className = 'sample-card';
+          card.innerHTML = `
+            <div class="sample-thumb"><img src="${FOLDER_LOGO}" alt="" onerror="this.onerror=null;this.src=IMAGE_FALLBACK"></div>
+            <div class="sample-body">
+              <div class="sample-title">${sanitize(item.title || '')}</div>
+              <div class="sample-tags">${(item.tags || []).map(tag => `<span class="sample-tag">${sanitize(tag)}</span>`).join('')}</div>
+            </div>
+          `;
+          const run = async () => { await runSampleAction({ ...(item.action || {}), title: item.title || '' }); };
+          card.onclick = run;
+          card.onmousedown = e => { e.preventDefault(); run(); };
+          card.ontouchstart = e => { e.preventDefault(); run(); };
+          card.onkeydown = e => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              run();
+            }
+          };
+          wrap.appendChild(card);
+        });
+
+        section.appendChild(wrap);
+        grid.appendChild(section);
+      });
+    }
+
+    function renderGrid(list) {
+      currentMode = 'list';
+      currentSeries = null;
+      listView.style.display = 'block';
+      epsWrap.style.display = 'none';
+      grid.innerHTML = '';
+
+      if (!list.length) {
+        if (currentKind === 'tv') {
+          grid.className = '';
+          renderSampleSections();
+          return;
+        }
+        grid.className = 'grid';
+        grid.innerHTML = '<div style="padding:22px;color:#aaa">ไม่พบรายการ</div>';
+        return;
+      }
+
+      if (currentKind === 'tv') {
+        grid.className = '';
+        renderSampleSections();
+      }
+
+      const hasCategory = list.some(item => item.category);
+      if (!hasCategory) {
+        const onlyGrid = document.createElement('div');
+        onlyGrid.className = 'grid';
+        list.forEach(item => onlyGrid.appendChild(createCard(item, currentKind === 'tv', openItem)));
+        grid.appendChild(onlyGrid);
+        setTimeout(focusFirstCard, 60);
+        return;
+      }
+
+      groupedEntries(list).forEach(([cat, items]) => {
+        const section = document.createElement('div');
+        section.className = 'section';
+
+        const head = document.createElement('div');
+        head.className = 'section-head';
+
+        const title = document.createElement('div');
+        title.className = 'section-title';
+        title.textContent = cat;
+
+        const moreBtn = document.createElement('button');
+        moreBtn.className = 'more-btn';
+        moreBtn.type = 'button';
+
+        const sectionGrid = document.createElement('div');
+        sectionGrid.className = 'grid';
+
+        function drawItems() {
+          const expanded = !!sectionExpandState[cat];
+          const visible = expanded ? items : items.slice(0, INITIAL_LIMIT);
+          sectionGrid.innerHTML = '';
+          visible.forEach(item => sectionGrid.appendChild(createCard(item, currentKind === 'tv', openItem)));
+          moreBtn.textContent = expanded ? 'ดูน้อยลง' : `ดูทั้งหมด (${items.length})`;
+          moreBtn.style.display = items.length > INITIAL_LIMIT ? 'block' : 'none';
+        }
+
+        moreBtn.onclick = () => {
+          sectionExpandState[cat] = !sectionExpandState[cat];
+          drawItems();
+        };
+
+        head.appendChild(title);
+        head.appendChild(moreBtn);
+        section.appendChild(head);
+        section.appendChild(sectionGrid);
+        grid.appendChild(section);
+        drawItems();
+      });
+
+      setTimeout(focusFirstCard, 60);
+    }
+
+    function showEpisodes(seriesItem, save = true) {
+      currentSeries = seriesItem;
+      currentMode = 'episodes';
+      listView.style.display = 'none';
+      epsWrap.style.display = 'block';
+      epsTitle.textContent = seriesItem.title || 'ตอนทั้งหมด';
+      epsGrid.innerHTML = '';
+
+      if (save) saveReturnState({ mode: 'episodes', seriesTitle: seriesItem.title || '' });
+
+      const episodes = Array.isArray(seriesItem.episodes) ? seriesItem.episodes : [];
+      if (!episodes.length) {
+        epsGrid.innerHTML = '<div style="padding:20px;color:#aaa">ไม่พบตอน</div>';
+        return;
+      }
+
+      episodes.forEach((ep, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'ep-btn';
+        btn.type = 'button';
+        btn.textContent = ep.title || `EP ${i + 1}`;
+        const run = () => playItem(ep, 0);
+        btn.onclick = run;
+        btn.onmousedown = e => { e.preventDefault(); run(); };
+        btn.ontouchstart = e => { e.preventDefault(); run(); };
+        btn.onkeydown = e => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            run();
+          }
+        };
+        epsGrid.appendChild(btn);
+      });
+
+      setTimeout(() => {
+        const first = epsGrid.querySelector('.ep-btn');
+        if (first) first.focus();
+      }, 60);
+    }
+
+    async function openItem(item) {
+      if (isMySeriesSource() && isFolderLike(item)) {
+        const folderUrl = normalizeUrl(item.url || item.source || item.link || item.file);
+        historyStack.push({ title: currentTitle, source: currentSource, kind: currentKind, mode: 'list' });
+        currentSource = folderUrl;
+        currentTitle = item.title || item.name || 'MySeries';
+        currentKind = 'series';
+        sectionExpandState = {};
+        await loadCurrentMenu();
+        return;
+      }
+
+      if (item.type === 'series' && item.episodes?.length) {
+        historyStack.push({ title: currentTitle, source: currentSource, kind: currentKind, mode: 'list' });
+        showEpisodes(item, true);
+        return;
+      }
+      playItem(item, 0);
+    }
+
+    function getPlayableServer(item, serverIndex = 0) {
+      if (!item) return null;
+      if (Array.isArray(item.servers) && item.servers.length) {
+        return item.servers[serverIndex] || item.servers[0] || null;
+      }
+      const u = getPlayableUrl(item, serverIndex);
+      return u ? { name: 'Main', url: u } : null;
+    }
+
+    function stopPlayWatchdog() {
+      if (playWatchdog) {
+        clearInterval(playWatchdog);
+        playWatchdog = null;
+      }
+    }
+
+    function startPlayWatchdog() {
+      stopPlayWatchdog();
+      lastVideoTime = 0;
+      stuckCount = 0;
+      playWatchdog = setInterval(() => {
+        if (playerWrap.style.display !== 'block' || video.style.display === 'none') return;
+        try {
+          if (video.paused && video.readyState >= 2) video.play().catch(() => {});
+          const now = video.currentTime || 0;
+          if (Math.abs(now - lastVideoTime) < 0.05 && !video.paused) stuckCount++;
+          else stuckCount = 0;
+          lastVideoTime = now;
+          if (stuckCount >= 6) {
+            stuckCount = 0;
+            if (hls) {
+              hls.stopLoad();
+              setTimeout(() => {
+                try {
+                  hls.startLoad(Math.max(0, (video.currentTime || 0) - 1));
+                  video.play().catch(() => {});
+                } catch(e) {}
+              }, 900);
+            } else if (dash) {
+              video.play().catch(() => {});
+            }
+          }
+        } catch(e) {}
+      }, 5000);
+    }
+
+    function attachPlaybackSuccessHandlers() {
+      const ok = () => clearMovieFallbackTimer();
+      video.addEventListener('playing', ok, { once: true });
+      video.addEventListener('loadeddata', ok, { once: true });
+      video.addEventListener('canplay', ok, { once: true });
+    }
+
+    function createStableHls(isMovie = false) {
+      return new Hls({
+        enableWorker: false,
+        autoStartLoad: true,
+        startPosition: -1,
+        lowLatencyMode: false,
+        maxBufferLength: isMovie ? 35 : 22,
+        maxMaxBufferLength: isMovie ? 60 : 36,
+        backBufferLength: isMovie ? 30 : 10,
+        maxBufferHole: 0.7,
+        highBufferWatchdogPeriod: 4,
+        manifestLoadingTimeOut: 25000,
+        levelLoadingTimeOut: 25000,
+        fragLoadingTimeOut: 30000,
+        manifestLoadingMaxRetry: 6,
+        levelLoadingMaxRetry: 6,
+        fragLoadingMaxRetry: 8,
+        capLevelToPlayerSize: true,
+        testBandwidth: false,
+        liveSyncDurationCount: 3,
+        liveMaxLatencyDurationCount: 7
+      });
+    }
+
+    function tryStartVideoWithSound(fallbackFn) {
+      video.muted = false;
+      video.volume = 1;
+      const p = video.play();
+      if (p && typeof p.then === 'function') {
+        p.catch(() => {
+          video.muted = true;
+          video.play().then(() => {
+            setTimeout(() => {
+              video.muted = false;
+              video.volume = 1;
+            }, 300);
+          }).catch(() => {
+            if (fallbackFn) fallbackFn();
+          });
+        });
+      }
+    }
+
+    function startMovieFallback(url) {
+      clearMovieFallbackTimer();
+      movieFallbackTimer = setTimeout(() => {
+        openExternalPlayer(url);
+      }, 2200);
+    }
+
+    function showIframe(url) {
+      showPlayer();
+      video.style.display = 'none';
+      iframePlayer.style.display = 'block';
+      iframePlayer.src = url;
+      clearMovieFallbackTimer();
+    }
+
+    function updateNextServerButton() {
+      const hasMulti = Array.isArray(currentItem?.servers) && currentItem.servers.length > 1;
+      if (hasMulti) playerNextBtn.classList.remove('hidden');
+      else playerNextBtn.classList.add('hidden');
+    }
+
+    async function playItem(item, serverIndex = 0) {
+      currentItem = item;
+      currentServerIndex = serverIndex;
+      clearPlayer();
+      const playServer = getPlayableServer(item, serverIndex);
+      const directUrl = normalizeUrl(playServer?.url || getPlayableUrl(item, serverIndex));
+      if (!directUrl) {
+        setStatus('❌ ไม่พบลิงก์เล่น');
+        return;
+      }
+
+      const candidates = buildPlayCandidates(directUrl);
+      currentPlayCandidates = candidates;
+      const playUrl = candidates[0] || directUrl;
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      const movieMode = isMovieItem(item);
+      playerNote.textContent = item.title || 'กำลังเล่น';
+      updateNextServerButton();
+
+      try {
+        if (isProbablyIframe(playUrl)) {
+          showIframe(playUrl);
+          return;
+        }
+
+        showPlayer();
+        startPlayWatchdog();
+        attachPlaybackSuccessHandlers();
+        if (movieMode) startMovieFallback(directUrl);
+
+        if (isHlsUrl(playUrl)) {
+          if (Hls.isSupported()) {
+            hls = createStableHls(movieMode);
+            hls.loadSource(playUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, () => tryStartVideoWithSound(() => openExternalPlayer(directUrl)));
+            hls.on(Hls.Events.ERROR, (event, data) => {
+              if (data?.fatal) {
+                try {
+                  if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+                  else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+                  else openExternalPlayer(directUrl);
+                } catch (e) {
+                  openExternalPlayer(directUrl);
+                }
+              }
+            });
+            return;
+          }
+          video.src = playUrl;
+          tryStartVideoWithSound(() => openExternalPlayer(directUrl));
+          return;
+        }
+
+        if (isDashUrl(playUrl)) {
+          dash = dashjs.MediaPlayer().create();
+          try {
+            dash.updateSettings({
+              streaming: {
+                buffer: { stableBufferTime: 18, bufferTimeAtTopQuality: 25 },
+                retryAttempts: { MPD: 3, MediaSegment: 4 },
+                retryIntervals: { MPD: 1500, MediaSegment: 1800 }
+              }
+            });
+          } catch(e) {}
+
+          if (playServer?.drm && playServer?.keyId && playServer?.key) {
+            try {
+              dash.setProtectionData({
+                "org.w3.clearkey": {
+                  "clearkeys": { [playServer.keyId]: playServer.key }
+                }
+              });
+            } catch(e) {}
+          }
+
+          dash.initialize(video, playUrl, true);
+          video.muted = true;
+          video.play().then(() => {
+            setTimeout(() => {
+              video.muted = false;
+              video.volume = 1;
+            }, 300);
+          }).catch(() => openExternalPlayer(directUrl));
+          return;
+        }
+
+        video.src = playUrl;
+        tryStartVideoWithSound(() => openExternalPlayer(directUrl));
+      } catch (e) {
+        console.error(e);
+        openExternalPlayer(directUrl);
+      }
+    }
+
+    async function loadCurrentMenu() {
+      setStatus('กำลังโหลด...');
+      pageTitle.textContent = currentTitle;
+      pageSub.textContent = currentKind === 'tv'
+        ? 'ทีวีออนไลน์ + รีโมท + PLAYER/MX'
+        : currentKind === 'movie'
+          ? 'หนัง 24HD + เล่นในกล่อง/โปรเจคเตอร์'
+          : 'ซีรีส์ + แยกหมวด + กดเข้าไปถึงเห็นตอน';
+
+      try {
+        const list = await loadSource(currentSource, currentKind);
+        renderGrid(list);
+        setStatus('');
+      } catch (e) {
+        console.error(e);
+        setStatus('❌ โหลดไม่สำเร็จ\n' + (e?.message || e));
+        grid.innerHTML = '';
+      }
+    }
+
+    function setActiveMenu(button) {
+      menuButtons.forEach(btn => btn.classList.remove('active'));
+      if (button) button.classList.add('active');
+    }
+
+    async function activateDataMenu(button) {
+      rememberFocus();
+      setActiveMenu(button);
+      currentSource = button.dataset.source || currentSource;
+      currentTitle = button.dataset.title || currentTitle;
+      currentKind = button.dataset.kind || currentKind;
+      currentSeries = null;
+      currentMode = 'list';
+      sectionExpandState = {};
+      historyStack = [];
+      await loadCurrentMenu();
+    }
+
+    async function restoreReturnState() {
+      const state = getReturnState();
+      if (!state?.source) return false;
+      try {
+        currentSource = state.source;
+        currentTitle = state.title || currentTitle;
+        currentKind = state.kind || currentKind;
+        sectionExpandState = state.expand || {};
+        focusIndex = state.focusIndex || 0;
+        const activeBtn = menuButtons.find(btn => btn.dataset.source === currentSource && btn.dataset.kind === currentKind);
+        setActiveMenu(activeBtn || null);
+        const list = await loadSource(currentSource, currentKind);
+        renderGrid(list);
+        if (state.mode === 'episodes' && state.seriesTitle) {
+          const found = list.find(item => item.type === 'series' && item.title === state.seriesTitle);
+          if (found) showEpisodes(found, false);
+        }
+        clearReturnState();
+        return true;
+      } catch (e) {
+        console.error(e);
+        clearReturnState();
+        return false;
+      }
+    }
+
+    menuButtons.forEach(btn => {
+      const run = async () => {
+        const link = btn.dataset.link;
+        if (link) {
+          openLink(link);
+          return;
+        }
+        if (btn.dataset.source) await activateDataMenu(btn);
+      };
+      btn.onclick = run;
+      btn.onmousedown = e => { e.preventDefault(); run(); };
+      btn.ontouchstart = e => { e.preventDefault(); run(); };
+    });
+
+    vipBtn.onclick = () => {
+      const pass = prompt('รหัส VIP');
+      if (pass === null) return;
+      openLink(VIP_URL);
+    };
+
+    reloadBtn.onclick = async () => {
+      cache = {};
+      await loadCurrentMenu();
+    };
+
+    backBtn.onclick = async () => {
+      if (playerWrap.style.display === 'block') {
+        closePlayer();
+        return;
+      }
+      if (currentMode === 'episodes') {
+        currentMode = 'list';
+        currentSeries = null;
+        listView.style.display = 'block';
+        epsWrap.style.display = 'none';
+        focusCurrentView();
+        return;
+      }
+      const prev = historyStack.pop();
+      if (prev?.source) {
+        currentSource = prev.source;
+        currentTitle = prev.title;
+        currentKind = prev.kind;
+        await loadCurrentMenu();
+        return;
+      }
+      openLink(HOME_URL);
+    };
+
+    playerHomeBtn.onclick = () => openLink(HOME_URL);
+    playerCloseBtn.onclick = closePlayer;
+    playerRetryBtn.onclick = () => currentItem && playItem(currentItem, currentServerIndex);
+    playerExternalBtn.onclick = () => {
+      const url = getPlayableUrl(currentItem, currentServerIndex) || currentPlayCandidates[0] || '';
+      openExternalPlayer(url);
+    };
+    playerMxBtn.onclick = () => {
+      const url = getPlayableUrl(currentItem, currentServerIndex) || currentPlayCandidates[0] || '';
+      openMx(url);
+    };
+    playerNextBtn.onclick = () => {
+      if (!currentItem?.servers?.length) return;
+      currentServerIndex = (currentServerIndex + 1) % currentItem.servers.length;
+      playItem(currentItem, currentServerIndex);
+    };
+
+    ['mousemove','click','touchstart'].forEach(ev => {
+      document.addEventListener(ev, () => {
+        if (playerWrap.style.display === 'block') showPlayerUi();
+      }, { passive: true });
+    });
+
+    document.addEventListener('keydown', async (e) => {
+      if (e.key === 'Escape' || e.key === 'Backspace') {
+        e.preventDefault();
+        if (playerWrap.style.display === 'block') {
+          closePlayer();
+          return;
+        }
+        if (currentMode === 'episodes') {
+          currentMode = 'list';
+          currentSeries = null;
+          listView.style.display = 'block';
+          epsWrap.style.display = 'none';
+          focusCurrentView();
+          return;
+        }
+      }
+
+      if (playerWrap.style.display === 'block') {
+        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) showPlayerUi();
+        if (e.key === 'Enter' && document.activeElement === playerCloseBtn) closePlayer();
+        return;
+      }
+
+      const focusables = getCurrentFocusable();
+      if (!focusables.length) return;
+      const current = document.activeElement;
+      let idx = focusables.indexOf(current);
+      if (idx < 0) idx = 0;
+
+      const cols = currentMode === 'episodes'
+        ? Math.max(1, Math.floor(epsGrid.clientWidth / 150))
+        : Math.max(1, Math.floor(mainArea.clientWidth / (currentKind === 'tv' ? 150 : 165)));
+
+      if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        focusElementByIndex(Math.min(idx + 1, focusables.length - 1));
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        focusElementByIndex(Math.max(idx - 1, 0));
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        focusElementByIndex(Math.min(idx + cols, focusables.length - 1));
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        focusElementByIndex(Math.max(idx - cols, 0));
+      }
+    });
+
+    window.addEventListener('pageshow', async () => {
+      const restored = await restoreReturnState();
+      if (!restored) await loadCurrentMenu();
+    });
+    </script>
 </body>
+
 </html>
