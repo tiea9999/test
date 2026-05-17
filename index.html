@@ -6,323 +6,107 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TIEA IPTV ULTRA FINAL MPD MASTER TXT MYSERIES</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest">
-/* ===== HARD FIX: REMOTE LEFT TO SIDEBAR ===== */
+
+/* ===== FINAL OVERRIDE: TV REMOTE + TOUCH SAFE ===== */
 (function(){
-  if (window.__TIEA_REMOTE_LEFT_HARD_FIX__) return;
-  window.__TIEA_REMOTE_LEFT_HARD_FIX__ = true;
+  if (window.__TIEA_FINAL_REMOTE_TOUCH_CLEAN__) return;
+  window.__TIEA_FINAL_REMOTE_TOUCH_CLEAN__ = true;
 
-  function isPlayerOpen(){
-    const p = document.getElementById('playerWrap');
-    return p && p.style.display === 'block';
-  }
-
-  function sidebarWidth(){
-    const s = document.getElementById('sidebar') || document.querySelector('.sidebar');
-    return s ? s.getBoundingClientRect().right : 235;
-  }
-
-  function firstVisibleCard(){
-    const list = Array.from(document.querySelectorAll('.card,.sample-card,.ep-btn,#epBackBtn,.more-btn'))
-      .filter(el => el.offsetParent !== null);
-    return list[0] || null;
-  }
-
-  function activeMenu(){
-    return document.querySelector('.menu-btn.active') || document.querySelector('.menu-btn');
-  }
-
-  function focusMenu(){
-    const m = activeMenu();
-    if (!m) return false;
-    m.focus({preventScroll:false});
-    try { m.scrollIntoView({block:'nearest', behavior:'smooth'}); } catch(e) {}
-    return true;
-  }
-
-  function focusFirstContent(){
-    const c = firstVisibleCard();
-    if (!c) return false;
-    c.focus({preventScroll:false});
-    try { c.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'}); } catch(e) {}
-    return true;
-  }
-
-  document.addEventListener('keydown', function(e){
-    if (isPlayerOpen()) return;
-
-    const key = e.key || '';
-    const code = e.keyCode || e.which;
-    const active = document.activeElement;
-
-    if (!active) return;
-
-    const isLeft = key === 'ArrowLeft' || code === 37;
-    const isRight = key === 'ArrowRight' || code === 39;
-
-    if (!isLeft && !isRight) return;
-
-    const inMenu = active.classList && active.classList.contains('menu-btn');
-    const inContent =
-      active.classList &&
-      (
-        active.classList.contains('card') ||
-        active.classList.contains('sample-card') ||
-        active.classList.contains('ep-btn') ||
-        active.classList.contains('more-btn') ||
-        active.id === 'epBackBtn'
-      );
-
-    // เมนูซ้าย -> เข้ารายการ
-    if (inMenu && isRight) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      focusFirstContent();
-      return false;
-    }
-
-    // รายการ -> เมนูซ้าย
-    if (inContent && isLeft) {
-      const rect = active.getBoundingClientRect();
-      const leftEdge = sidebarWidth() + 80;
-
-      // ถ้าอยู่ใกล้ซ้าย หรือเป็น ep/list ให้กลับเมนูได้ทันที
-      if (rect.left <= leftEdge || active.classList.contains('ep-btn') || active.id === 'epBackBtn') {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        focusMenu();
-        return false;
-      }
-    }
-  }, true);
-})();
-
-
-/* ===== TOUCH MOVE PREVENT CLICK ===== */
-(function(){
-  let moved = false;
-
-  document.addEventListener('touchstart', () => {
-    moved = false;
-  }, {passive:true});
-
-  document.addEventListener('touchmove', () => {
-    moved = true;
-  }, {passive:true});
-
-  document.addEventListener('touchend', (e) => {
-    if(moved){
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  }, {passive:false});
-
-  document.addEventListener('click', (e) => {
-    if(moved){
-      e.preventDefault();
-      e.stopPropagation();
-      moved = false;
-      return false;
-    }
-  }, true);
-})();
-
-
-/* ===== PLAYER BUTTON REMOTE FIX ===== */
-(function(){
-
-  function playerOpen(){
-    const p = document.getElementById('playerWrap');
-    return p && p.style.display === 'block';
-  }
-
-  function playerBtns(){
-    return Array.from(document.querySelectorAll('#playerBar .player-btn'))
-      .filter(el => el.offsetParent !== null);
-  }
-
-  document.addEventListener('keydown', function(e){
-
-    if(!playerOpen()) return;
-
-    const key = e.key || '';
-    const code = e.keyCode || e.which;
-
-    const isLeft  = key === 'ArrowLeft'  || code === 37;
-    const isRight = key === 'ArrowRight' || code === 39;
-    const isUp    = key === 'ArrowUp'    || code === 38;
-
-    const active = document.activeElement;
-    const btns = playerBtns();
-
-    if(!btns.length) return;
-
-    // ขึ้นบน = แสดงปุ่ม
-    if(isUp){
-      const bar = document.getElementById('playerBar');
-      const wrap = document.getElementById('playerWrap');
-
-      if(bar) bar.classList.remove('hide-ui');
-      if(wrap) wrap.classList.add('show-ui');
-
-      if(!active || !active.classList.contains('player-btn')){
-        btns[0].focus();
-      }
-
-      e.preventDefault();
-      e.stopPropagation();
-      return;
-    }
-
-    // เลื่อนซ้าย/ขวาระหว่างปุ่ม
-    if(
-      active &&
-      active.classList &&
-      active.classList.contains('player-btn')
-    ){
-
-      let idx = btns.indexOf(active);
-
-      if(isLeft){
-        idx = Math.max(0, idx - 1);
-        btns[idx].focus();
-
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-
-      if(isRight){
-        idx = Math.min(btns.length - 1, idx + 1);
-        btns[idx].focus();
-
-        e.preventDefault();
-        e.stopPropagation();
-        return;
-      }
-    }
-
-  }, true);
-
-})();
-
-
-/* ===== TIEA SMOOTH REMOTE NAV FINAL - KEEP SAME UI ===== */
-(function(){
-  if (window.__TIEA_SMOOTH_REMOTE_FINAL__) return;
-  window.__TIEA_SMOOTH_REMOTE_FINAL__ = true;
-
-  const q = (s, root=document) => Array.from(root.querySelectorAll(s));
-
-  function isVisible(el){
-    if (!el) return false;
+  function visible(el){
+    if(!el) return false;
     const r = el.getBoundingClientRect();
     return el.offsetParent !== null && r.width > 0 && r.height > 0;
   }
 
-  function playerOpen(){
-    return playerWrap && playerWrap.style.display === 'block';
+  function isPlayerOpen(){
+    return typeof playerWrap !== 'undefined' && playerWrap && playerWrap.style.display === 'block';
   }
 
-  function modalOpen(){
-    const m = document.querySelector('.modal.show');
-    return !!m;
+  function getMenus(){
+    return Array.from(document.querySelectorAll('.sidebar .menu-btn')).filter(visible);
   }
 
-  function currentContentItems(){
-    if (currentMode === 'episodes') {
-      return q('#epBackBtn, #epsGrid .ep-btn').filter(isVisible);
+  function getContentItems(){
+    if (typeof currentMode !== 'undefined' && currentMode === 'episodes') {
+      return Array.from(document.querySelectorAll('#epBackBtn, #epsGrid .ep-btn')).filter(visible);
     }
-
-    return q('#grid .card, #grid .sample-card, #grid .more-btn, .card, .sample-card, .more-btn')
-      .filter(isVisible);
+    return Array.from(document.querySelectorAll('#grid .sample-card, #grid .card, #grid .more-btn, #grid button.card, #grid button.sample-card')).filter(visible);
   }
 
-  function menuItems(){
-    return q('.sidebar .menu-btn').filter(isVisible);
+  function getPlayerButtons(){
+    return Array.from(document.querySelectorAll('#playerBar button, #playerBar .player-btn')).filter(visible);
   }
 
-  function playerButtons(){
-    return q('#playerBar .player-btn, #playerBar button').filter(isVisible);
-  }
-
-  function focusEl(el){
-    if (!el) return false;
-    try {
-      el.focus({ preventScroll: true });
-    } catch(e) {
-      try { el.focus(); } catch(err) {}
-    }
-    try {
-      el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
-    } catch(e) {}
+  function focusIt(el){
+    if(!el) return false;
+    try { el.focus({preventScroll:true}); } catch(e) { try{el.focus()}catch(_){} }
+    try { el.scrollIntoView({block:'nearest', inline:'nearest', behavior:'smooth'}); } catch(e){}
     return true;
   }
 
-  function focusMenuActive(){
-    const active = document.querySelector('.sidebar .menu-btn.active') || menuItems()[0];
-    return focusEl(active);
+  function focusMenu(){
+    return focusIt(document.querySelector('.sidebar .menu-btn.active') || getMenus()[0]);
   }
 
-  function focusFirstContent(){
-    return focusEl(currentContentItems()[0]);
+  function focusContentFirst(){
+    return focusIt(getContentItems()[0]);
   }
 
-  function colsForContent(){
-    const items = currentContentItems();
-    if (items.length < 2) return 1;
-
-    const first = items[0].getBoundingClientRect();
-    let cols = 1;
-
-    for (let i = 1; i < items.length; i++) {
-      const r = items[i].getBoundingClientRect();
-      if (Math.abs(r.top - first.top) < 12) cols++;
+  function rowCols(items){
+    if(!items || items.length < 2) return 1;
+    const top = items[0].getBoundingClientRect().top;
+    let c = 1;
+    for(let i=1;i<items.length;i++){
+      if(Math.abs(items[i].getBoundingClientRect().top - top) < 18) c++;
       else break;
     }
-
-    return Math.max(1, cols);
+    return Math.max(1,c);
   }
 
-  function moveInList(list, delta){
-    if (!list.length) return;
-    let idx = list.indexOf(document.activeElement);
-    if (idx < 0) idx = 0;
-    idx = Math.max(0, Math.min(list.length - 1, idx + delta));
-    focusEl(list[idx]);
+  function move(list, delta){
+    if(!list.length) return false;
+    let i = list.indexOf(document.activeElement);
+    if(i < 0) i = 0;
+    i = Math.max(0, Math.min(list.length - 1, i + delta));
+    return focusIt(list[i]);
+  }
+
+  function stop(e){
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+  }
+
+  function closeEpisodes(){
+    try{
+      currentMode = 'list';
+      currentSeries = null;
+      listView.style.display = 'block';
+      epsWrap.style.display = 'none';
+      setTimeout(()=>focusContentFirst(),80);
+    }catch(e){}
   }
 
   function requestFull(){
-    try {
-      if (playerWrap.requestFullscreen) playerWrap.requestFullscreen();
-      else if (playerWrap.webkitRequestFullscreen) playerWrap.webkitRequestFullscreen();
-    } catch(e) {}
+    try{
+      if(playerWrap.requestFullscreen) playerWrap.requestFullscreen();
+      else if(playerWrap.webkitRequestFullscreen) playerWrap.webkitRequestFullscreen();
+    }catch(e){}
   }
 
   function seek(sec){
-    try {
-      video.currentTime = Math.max(0, (video.currentTime || 0) + sec);
-    } catch(e) {}
+    try{ video.currentTime = Math.max(0,(video.currentTime||0)+sec); }catch(e){}
   }
 
   function showPlayerButtons(focusFirst){
-    try {
-      showPlayerUi(!!focusFirst);
-    } catch(e) {
-      try {
-        playerBar.classList.remove('hide-ui');
-        playerWrap.classList.add('show-ui');
-      } catch(err) {}
-    }
-
-    if (focusFirst) {
-      setTimeout(() => focusEl(playerButtons()[0]), 50);
-    }
+    try{ showPlayerUi(!!focusFirst); }catch(e){}
+    if(focusFirst) setTimeout(()=>focusIt(getPlayerButtons()[0]),60);
   }
 
-  document.addEventListener('keydown', function(e){
+  // Window capture runs before old document capture handlers.
+  window.addEventListener('keydown', function(e){
     const key = e.key || '';
     const code = e.keyCode || e.which;
-
     const LEFT = key === 'ArrowLeft' || code === 37;
     const RIGHT = key === 'ArrowRight' || code === 39;
     const UP = key === 'ArrowUp' || code === 38;
@@ -330,163 +114,106 @@
     const OK = key === 'Enter' || key === 'OK' || code === 13 || code === 23;
     const BACK = key === 'Escape' || key === 'Backspace' || key === 'BrowserBack' || code === 10009;
 
-    if (!(LEFT || RIGHT || UP || DOWN || OK || BACK)) return;
+    if(!(LEFT||RIGHT||UP||DOWN||OK||BACK)) return;
 
     const active = document.activeElement;
 
-    // PLAYER MODE
-    if (playerOpen()) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
+    if(isPlayerOpen()){
+      stop(e);
+      const btns = getPlayerButtons();
+      const onBtn = active && btns.includes(active);
 
-      const btns = playerButtons();
-      const activeIsPlayerBtn = active && btns.includes(active);
+      if(UP){ showPlayerButtons(true); return false; }
+      if(BACK){ closePlayer(); return false; }
 
-      if (UP) {
-        showPlayerButtons(true);
-        return false;
+      if(onBtn){
+        if(LEFT){ move(btns,-1); return false; }
+        if(RIGHT){ move(btns,1); return false; }
+        if(DOWN){ try{active.blur()}catch(_){ } showPlayerButtons(false); return false; }
+        if(OK){ try{active.click()}catch(_){ } return false; }
       }
 
-      if (activeIsPlayerBtn) {
-        if (LEFT) { moveInList(btns, -1); return false; }
-        if (RIGHT) { moveInList(btns, 1); return false; }
-        if (DOWN) {
-          try { active.blur(); } catch(e) {}
-          showPlayerButtons(false);
-          return false;
-        }
-        if (OK) {
-          try { active.click(); } catch(e) {}
-          return false;
-        }
-      }
-
-      if (LEFT) { showPlayerButtons(false); seek(-10); return false; }
-      if (RIGHT) { showPlayerButtons(false); seek(10); return false; }
-      if (OK) { showPlayerButtons(false); requestFull(); return false; }
-      if (BACK) { closePlayer(); return false; }
-
+      if(LEFT){ showPlayerButtons(false); seek(-10); return false; }
+      if(RIGHT){ showPlayerButtons(false); seek(10); return false; }
+      if(OK){ showPlayerButtons(false); requestFull(); return false; }
       return false;
     }
 
-    // MODAL: let modal buttons work, but Back closes modal
-    if (modalOpen()) {
-      if (BACK) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        try { closeModal(); } catch(err) {}
-        return false;
-      }
-      // For grids inside modal, use same content motion below
-    }
-
-    // BACK: never exit app unexpectedly
-    if (BACK) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-
-      if (currentMode === 'episodes') {
-        currentMode = 'list';
-        currentSeries = null;
-        listView.style.display = 'block';
-        epsWrap.style.display = 'none';
-        setTimeout(() => focusFirstContent(), 80);
-        return false;
-      }
-
-      // Stay in app; focus active menu instead of navigating away
-      focusMenuActive();
+    if(BACK){
+      stop(e);
+      if(typeof currentMode !== 'undefined' && currentMode === 'episodes'){ closeEpisodes(); return false; }
+      focusMenu();
       return false;
     }
 
-    const menus = menuItems();
-    const content = currentContentItems();
+    const menus = getMenus();
+    const contents = getContentItems();
     const inMenu = active && menus.includes(active);
-    const inContent = active && content.includes(active);
+    const inContent = active && contents.includes(active);
 
-    // MENU MODE
-    if (inMenu) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-
-      if (UP) { moveInList(menus, -1); return false; }
-      if (DOWN) { moveInList(menus, 1); return false; }
-      if (RIGHT) { focusFirstContent(); return false; }
-      if (OK) { try { active.click(); } catch(err) {} return false; }
-      if (LEFT) { focusEl(active); return false; }
-
+    if(inMenu){
+      stop(e);
+      if(UP){ move(menus,-1); return false; }
+      if(DOWN){ move(menus,1); return false; }
+      if(RIGHT){ focusContentFirst(); return false; }
+      if(OK){ try{active.click()}catch(_){ } return false; }
+      if(LEFT){ focusIt(active); return false; }
       return false;
     }
 
-    // CONTENT MODE
-    if (inContent) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
+    if(inContent){
+      stop(e);
+      let idx = contents.indexOf(active);
+      if(idx < 0) idx = 0;
+      const cols = rowCols(contents);
 
-      let idx = content.indexOf(active);
-      if (idx < 0) idx = 0;
-      const cols = colsForContent();
-
-      if (LEFT) {
-        const rect = active.getBoundingClientRect();
-        const side = document.querySelector('.sidebar')?.getBoundingClientRect();
-        const sidebarRight = side ? side.right : 235;
-
-        // If near first column, jump to sidebar. This fixes "cannot go left to menu".
-        if (idx % cols === 0 || rect.left <= sidebarRight + 80 || currentMode === 'episodes') {
-          focusMenuActive();
-        } else {
-          focusEl(content[Math.max(0, idx - 1)]);
+      if(LEFT){
+        // Always allow left to menu from first card in row and from episode screen.
+        if(idx % cols === 0 || (typeof currentMode !== 'undefined' && currentMode === 'episodes')){
+          focusMenu();
+        }else{
+          focusIt(contents[Math.max(0,idx-1)]);
         }
         return false;
       }
-
-      if (RIGHT) { focusEl(content[Math.min(content.length - 1, idx + 1)]); return false; }
-      if (UP) { focusEl(content[Math.max(0, idx - cols)]); return false; }
-      if (DOWN) { focusEl(content[Math.min(content.length - 1, idx + cols)]); return false; }
-      if (OK) { try { active.click(); } catch(err) {} return false; }
-
+      if(RIGHT){ focusIt(contents[Math.min(contents.length-1,idx+1)]); return false; }
+      if(UP){ focusIt(contents[Math.max(0,idx-cols)]); return false; }
+      if(DOWN){ focusIt(contents[Math.min(contents.length-1,idx+cols)]); return false; }
+      if(OK){ try{active.click()}catch(_){ } return false; }
       return false;
     }
 
-    // Fallback focus
-    if (RIGHT || DOWN || UP) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      if (!focusFirstContent()) focusMenuActive();
-      return false;
-    }
-
-    if (LEFT) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      focusMenuActive();
-      return false;
-    }
+    // Fallback: choose a sensible focus target.
+    if(LEFT){ stop(e); focusMenu(); return false; }
+    if(RIGHT||UP||DOWN){ stop(e); if(!focusContentFirst()) focusMenu(); return false; }
 
   }, true);
 
-  // Touch: scrolling won't trigger open; tap still opens.
-  let sx = 0, sy = 0, moved = false;
-  document.addEventListener('touchstart', function(e){
-    const t = e.touches && e.touches[0];
-    if (!t) return;
-    sx = t.clientX; sy = t.clientY; moved = false;
-  }, {passive:true});
+  // Touch safe: scroll should not trigger open; tap still opens.
+  let sx=0, sy=0, moved=false, touchStartedOnInteractive=false;
 
-  document.addEventListener('touchmove', function(e){
+  window.addEventListener('touchstart', function(e){
     const t = e.touches && e.touches[0];
-    if (!t) return;
-    if (Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) moved = true;
-  }, {passive:true});
+    if(!t) return;
+    sx=t.clientX; sy=t.clientY; moved=false;
+    touchStartedOnInteractive = !!e.target.closest('.card,.sample-card,.ep-btn,.menu-btn,.more-btn');
+  }, {passive:true, capture:true});
 
-  document.addEventListener('click', function(e){
-    if (moved) {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-      moved = false;
+  window.addEventListener('touchmove', function(e){
+    const t = e.touches && e.touches[0];
+    if(!t) return;
+    if(Math.abs(t.clientX-sx)>10 || Math.abs(t.clientY-sy)>10) moved=true;
+  }, {passive:true, capture:true});
+
+  window.addEventListener('click', function(e){
+    if(moved && touchStartedOnInteractive){
+      stop(e);
+      moved=false;
+      touchStartedOnInteractive=false;
       return false;
     }
+    moved=false;
+    touchStartedOnInteractive=false;
   }, true);
 
 })();
@@ -1055,6 +782,16 @@
 
         #playerWrap, #playerBar, #playerBar button {
             -webkit-tap-highlight-color: transparent;
+        }
+
+
+        /* ===== TOUCH + REMOTE CLEAN FIX ===== */
+        .card, .sample-card, .ep-btn, .menu-btn, .more-btn, .player-btn, #epBackBtn {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .sidebar, .main, #grid, #epsGrid {
+            scroll-behavior: smooth;
         }
 
 </style>
@@ -1687,8 +1424,6 @@
 
       const run = () => onOpen(item);
       card.onclick = run;
-      card.onmousedown = e => { e.preventDefault(); run(); };
-      card.ontouchstart = e => { e.preventDefault(); run(); };
       card.onkeydown = e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -1818,8 +1553,6 @@
           `;
           const run = async () => { await runSampleAction({ ...(item.action || {}), title: item.title || '' }); };
           card.onclick = run;
-          card.onmousedown = e => { e.preventDefault(); run(); };
-          card.ontouchstart = e => { e.preventDefault(); run(); };
           card.onkeydown = e => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault();
