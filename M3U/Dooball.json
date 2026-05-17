@@ -1,12 +1,13 @@
 [
+
   {
     "title": "hd-monobkp",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-monobkp.png",
     "servers": [
       {
         "name": "Main",
-        "url": "https://love.sikoyo3159.workers.dev/lx-origin/hd-monobkp_720/chunks.m3u8"
+        "url": "https://love.sayob28681.workers.dev/lx-origin/hd-monobkp_720/chunks.m3u8"
       },
       {
         "name": "Backup 1",
@@ -18,13 +19,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-monobkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-monobkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-altv4",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/sd-altv4.png",
     "servers": [
       {
@@ -41,13 +43,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-altv4_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-altv4_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-nbt",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/sd-nbt.png",
     "servers": [
       {
@@ -64,13 +67,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-nbt_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-nbt_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-amarin",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-amarin.png",
     "servers": [
       {
@@ -87,13 +91,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-amarin_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-amarin_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-ch3",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-ch3.png",
     "servers": [
       {
@@ -110,13 +115,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-ch3_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-ch3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-ch5",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-ch5.png",
     "servers": [
       {
@@ -133,13 +139,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-ch5_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-ch5_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-ch7",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-ch7.png",
     "servers": [
       {
@@ -156,13 +163,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-ch7_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-ch7_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-ch8",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-ch8.png",
     "servers": [
       {
@@ -179,13 +187,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-ch8_480/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-ch8_480/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-gmmone",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-gmmone.png",
     "servers": [
       {
@@ -202,13 +211,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-gmmone_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-gmmone_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-mcot",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-mcot.png",
     "servers": [
       {
@@ -225,13 +235,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-mcot_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-mcot_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-mono",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-mono.png",
     "servers": [
       {
@@ -248,13 +259,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-mono_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-mono_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-pptv",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-pptv.png",
     "servers": [
       {
@@ -271,13 +283,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-pptv_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-pptv_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-thairath",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-thairath.png",
     "servers": [
       {
@@ -294,13 +307,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-thairath_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-thairath_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-tpbs",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-tpbs.png",
     "servers": [
       {
@@ -317,13 +331,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-tpbs_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-tpbs_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-workpoint",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/hd-workpoint.png",
     "servers": [
       {
@@ -340,13 +355,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-workpoint_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-workpoint_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-24u",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/sd-24u.png",
     "servers": [
       {
@@ -363,13 +379,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-24u_480/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-24u_480/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-gmmchannel",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/sd-gmmchannel.png",
     "servers": [
       {
@@ -386,13 +403,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-gmmchannel_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-gmmchannel_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-nation",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/sd-nation.png",
     "servers": [
       {
@@ -409,13 +427,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-nation_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-nation_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-new",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/sd-new.png",
     "servers": [
       {
@@ -432,13 +451,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-new_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-new_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-tnn24",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/sd-tnn24.png",
     "servers": [
       {
@@ -455,13 +475,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-tnn24_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-tnn24_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-tptv",
-    "group": "Dooball",
+    "group": "ฟรีทีวี",
     "logo": "https://api.bananamuffin.org/images/png/sd-tptv.png",
     "servers": [
       {
@@ -478,13 +499,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-tptv_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-tptv_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-hbo",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://www.fileinwtv.site/postor/20240418201334HBO.jpg",
     "servers": [
       {
@@ -502,12 +524,29 @@
       {
         "name": "Backup 3",
         "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-hbo_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 4",
+        "url": "https://love.r95lvvlb9o.workers.dev/lx-origin/th-hbo_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 5",
+        "url": "https://love.sayob28681.workers.dev/lx-origin/th-hbo_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 6",
+        "url": "https://love.bebin98399.workers.dev/lx-origin/th-hbo_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 7",
+        "url": "https://love.pifipa2974.workers.dev/lx-origin/th-hbo_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-hbohits",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://www.fileinwtv.site/postor/20240418201343HBO_Hits.jpg",
     "servers": [
       {
@@ -524,13 +563,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-hbohits_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-hbohits_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-hbosignature",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://www.fileinwtv.site/postor/20240418201358HBO_Signature.jpg",
     "servers": [
       {
@@ -547,13 +587,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-hbosignature_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-hbosignature_720/chunks.m3u8",
+        "drm": false
       }
     ]
-  },  
+  },
   {
     "title": "hd-hbofamily",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://www.fileinwtv.site/postor/20240418201412HBO_Family.jpg",
     "servers": [
       {
@@ -570,13 +611,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-hbofamily_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-hbofamily_720/chunks.m3u8",
+        "drm": false
       }
     ]
-  },  
+  },
   {
     "title": "hd-cinemax",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://www.fileinwtv.site/postor/20240418201426cinemax.jpg",
     "servers": [
       {
@@ -593,13 +635,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-cinemax_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-cinemax_720/chunks.m3u8",
+        "drm": false
       }
     ]
-  },  
+  },
   {
     "title": "hd-asianmore",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://api.bananamuffin.org/images/png/hd-asianmore.png",
     "servers": [
       {
@@ -617,12 +660,29 @@
       {
         "name": "Backup 3",
         "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-asianmore_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 4",
+        "url": "https://love.r95lvvlb9o.workers.dev/lx-origin/hd-asianmore_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 5",
+        "url": "https://love.sayob28681.workers.dev/lx-origin/hd-asianmore_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 6",
+        "url": "https://love.bebin98399.workers.dev/lx-origin/hd-asianmore_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 7",
+        "url": "https://love.pifipa2974.workers.dev/lx-origin/hd-asianmore_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-dreamworks",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://api.bananamuffin.org/images/png/hd-dreamworks.png",
     "servers": [
       {
@@ -639,13 +699,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-dreamworks_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-dreamworks_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-tfilm",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://api.bananamuffin.org/images/png/hd-tfilm.png",
     "servers": [
       {
@@ -662,36 +723,15 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-tfilm_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-tfilm_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
-  {
-    "title": "hd-tfilm2",
-    "group": "Dooball",
-    "logo": "https://api.bananamuffin.org/images/png/hd-tfilm2.png",
-    "servers": [
-      {
-        "name": "Main",
-        "url": "https://love.sikoyo3159.workers.dev/lx-origin/hd-tfilm2_720/chunks.m3u8"
-      },
-      {
-        "name": "Backup 1",
-        "url": "https://love.tivov68423.workers.dev/lx-origin/hd-tfilm2_720/chunks.m3u8"
-      },
-      {
-        "name": "Backup 2",
-        "url": "https://love.tecobo5568.workers.dev/lx-origin/hd-tfilm2_720/chunks.m3u8"
-      },
-      {
-        "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-tfilm2_720/chunks.m3u8"
-      }
-    ]
-  },
+
   {
     "title": "hd-warnertv",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://api.bananamuffin.org/images/png/hd-warnertv.png",
     "servers": [
       {
@@ -708,13 +748,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-warnertv_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-warnertv_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-xzyte",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://api.bananamuffin.org/images/png/hd-xzyte.png",
     "servers": [
       {
@@ -731,13 +772,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-xzyte_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-xzyte_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-filmasia",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://api.bananamuffin.org/images/png/sd-filmasia.png",
     "servers": [
       {
@@ -754,13 +796,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-filmasia_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-filmasia_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-moviehits",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://api.bananamuffin.org/images/png/sd-moviehits.png",
     "servers": [
       {
@@ -777,13 +820,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-moviehits_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-moviehits_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-series",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://api.bananamuffin.org/images/png/sd-series.png",
     "servers": [
       {
@@ -800,13 +844,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-series_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-series_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-thaifilm",
-    "group": "Dooball",
+    "group": "หนัง",
     "logo": "https://api.bananamuffin.org/images/png/sd-thaifilm.png",
     "servers": [
       {
@@ -823,13 +868,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-thaifilm_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-thaifilm_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-asianfood",
-    "group": "Dooball",
+    "group": "สารคดี",
     "logo": "https://api.bananamuffin.org/images/png/sd-asianfood.png",
     "servers": [
       {
@@ -846,36 +892,15 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-asianfood_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-asianfood_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
-  {
-    "title": "sd-explife",
-    "group": "Dooball",
-    "logo": "https://api.bananamuffin.org/images/png/sd-explife.png",
-    "servers": [
-      {
-        "name": "Main",
-        "url": "https://love.sikoyo3159.workers.dev/lx-origin/sd-explife_720/chunks.m3u8"
-      },
-      {
-        "name": "Backup 1",
-        "url": "https://love.tivov68423.workers.dev/lx-origin/sd-explife_720/chunks.m3u8"
-      },
-      {
-        "name": "Backup 2",
-        "url": "https://love.tecobo5568.workers.dev/lx-origin/sd-explife_720/chunks.m3u8"
-      },
-      {
-        "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-explife_720/chunks.m3u8"
-      }
-    ]
-  },
+
   {
     "title": "sd-expsci",
-    "group": "Dooball",
+    "group": "สารคดี",
     "logo": "https://api.bananamuffin.org/images/png/sd-expsci.png",
     "servers": [
       {
@@ -892,14 +917,93 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-expsci_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-expsci_720/chunks.m3u8",
+        "drm": false
+      }
+    ]
+  },
+    {
+    "title": "สำรวจโลก",
+    "group": "สารคดี",
+    "logo": "https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon///SamRujLok.png",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://love.sikoyo3159.workers.dev/lx-origin/streamx-samrujlok_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 1",
+        "url": "https://love.tivov68423.workers.dev/lx-origin/streamx-samrujlok_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 2",
+        "url": "https://love.tecobo5568.workers.dev/lx-origin/streamx-samrujlok_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 3",
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/streamx-samrujlok_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 4",
+        "url": "https://love.r95lvvlb9o.workers.dev/lx-origin/streamx-samrujlok_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 5",
+        "url": "https://love.sayob28681.workers.dev/lx-origin/streamx-samrujlok_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 6",
+        "url": "https://love.bebin98399.workers.dev/lx-origin/streamx-samrujlok_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 7",
+        "url": "https://love.pifipa2974.workers.dev/lx-origin/streamx-samrujlok_720/chunks.m3u8"
+      }
+    ]
+  },
+  {
+    "title": "animalshow",
+    "group": "สารคดี",
+    "logo": "https://dookeela4.live/uploads/1705537126.png",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://love.sikoyo3159.workers.dev/lx-origin/streamx-animalshow_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 1",
+        "url": "https://love.tivov68423.workers.dev/lx-origin/streamx-animalshow_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 2",
+        "url": "https://love.tecobo5568.workers.dev/lx-origin/streamx-animalshow_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 3",
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/streamx-animalshow_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 4",
+        "url": "https://love.r95lvvlb9o.workers.dev/lx-origin/streamx-animalshow_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 5",
+        "url": "https://love.sayob28681.workers.dev/lx-origin/streamx-animalshow_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 6",
+        "url": "https://love.bebin98399.workers.dev/lx-origin/streamx-animalshow_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 7",
+        "url": "https://love.pifipa2974.workers.dev/lx-origin/streamx-animalshow_720/chunks.m3u8"
       }
     ]
   },
   {
     "title": "sd-discovery",
-    "group": "Dooball",
-    "logo": "https://api.bananamuffin.org/images/png/sd-discovery.png",
+    "group": "สารคดี",
+    "logo": "https://www.fileinwtv.site/postor/20240418210226Discovery.jpg",
     "servers": [
       {
         "name": "Main",
@@ -915,14 +1019,53 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-discovery_720/chunks.m3u8"
-
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-discovery_720/chunks.m3u8",
+        "drm": false
+      }
+    ]
+  },
+    {
+    "title": "history",
+    "group": "สารคดี",
+    "logo": "https://dookeela.live/uploads/1713231372.png",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://love.sikoyo3159.workers.dev/vx-origin/hd-history_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 1",
+        "url": "https://love.tivov68423.workers.dev/vx-origin/hd-history_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 2",
+        "url": "https://love.tecobo5568.workers.dev/vx-origin/hd-history_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 3",
+        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/hd-history_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 4",
+        "url": "https://love.r95lvvlb9o.workers.dev/vx-origin/hd-history_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 5",
+        "url": "https://love.sayob28681.workers.dev/vx-origin/hd-history_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 6",
+        "url": "https://love.bebin98399.workers.dev/vx-origin/hd-history_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 7",
+        "url": "https://love.pifipa2974.workers.dev/vx-origin/hd-history_720/chunks.m3u8"
       }
     ]
   },
   {
     "title": "sd-cartoonnetwork",
-    "group": "Dooball",
+    "group": "การ์ตูน",
     "logo": "https://www.fileinwtv.site/postor/20240418202927CN.jpg",
     "servers": [
       {
@@ -939,14 +1082,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-cartoonnetwork_720/chunks.m3u8"
-
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-cartoonnetwork_720/chunks.m3u8",
+        "drm": false
       }
     ]
-  }, 
+  },
   {
     "title": "sd-boomerang",
-    "group": "Dooball",
+    "group": "การ์ตูน",
     "logo": "https://www.fileinwtv.site/postor/20240418202911Boomerang.jpg",
     "servers": [
       {
@@ -963,14 +1106,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-boomerang_480/chunks.m3u8"
-
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-boomerang_480/chunks.m3u8",
+        "drm": false
       }
     ]
-  },  
-    {
+  },
+  {
     "title": "sd-nickjr",
-    "group": "Dooball",
+    "group": "การ์ตูน",
     "logo": "https://www.fileinwtv.site/postor/20240418203048Nickjr.jpg",
     "servers": [
       {
@@ -987,14 +1130,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-nickjr_720/chunks.m3u8"
-
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-nickjr_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
-   {
+  {
     "title": "sd-nickelodeon",
-    "group": "Dooball",
+    "group": "การ์ตูน",
     "logo": "https://www.fileinwtv.site/postor/20240418203048Nickjr.jpg",
     "servers": [
       {
@@ -1011,15 +1154,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-nickelodeon_720/chunks.m3u8"
-
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-nickelodeon_720/chunks.m3u8",
+        "drm": false
       }
     ]
-  }, 
-  
+  },
   {
     "title": "th-monomax01",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax01.png",
     "servers": [
       {
@@ -1036,13 +1178,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax01_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax01_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax01bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax01bkp.png",
     "servers": [
       {
@@ -1059,13 +1202,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax01bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax01bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax02",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax02.png",
     "servers": [
       {
@@ -1082,13 +1226,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax02_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax02_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax02bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax02bkp.png",
     "servers": [
       {
@@ -1105,13 +1250,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax02bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax02bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax02eng",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax02eng.png",
     "servers": [
       {
@@ -1128,13 +1274,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax02eng_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax02eng_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax03",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax03.png",
     "servers": [
       {
@@ -1151,13 +1298,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax03_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax03_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax03bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax03bkp.png",
     "servers": [
       {
@@ -1174,13 +1322,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax03bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax03bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax04bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax04bkp.png",
     "servers": [
       {
@@ -1197,13 +1346,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax04bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax04bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax05",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax05.png",
     "servers": [
       {
@@ -1220,13 +1370,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax05_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax05_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax05bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax05bkp.png",
     "servers": [
       {
@@ -1243,13 +1394,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax05bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax05bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax06",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax06.png",
     "servers": [
       {
@@ -1266,13 +1418,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax06_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax06_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax06bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax06bkp.png",
     "servers": [
       {
@@ -1289,13 +1442,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax06bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax06bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax07",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax07.png",
     "servers": [
       {
@@ -1312,13 +1466,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax07_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax07_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax07bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax07bkp.png",
     "servers": [
       {
@@ -1335,13 +1490,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax07bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax07bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax08",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax08.png",
     "servers": [
       {
@@ -1358,13 +1514,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax08_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax08_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax08bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax08bkp.png",
     "servers": [
       {
@@ -1381,13 +1538,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax08bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax08bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax09",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax09.png",
     "servers": [
       {
@@ -1404,13 +1562,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax09_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax09_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax09bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax09bkp.png",
     "servers": [
       {
@@ -1427,13 +1586,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax09bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax09bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax10",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax10.png",
     "servers": [
       {
@@ -1450,13 +1610,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax10_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax10_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax10bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax10bkp.png",
     "servers": [
       {
@@ -1473,13 +1634,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax10bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax10bkp_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax11",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax11.png",
     "servers": [
       {
@@ -1496,13 +1658,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax11_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax11_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-monomax11bkp",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-monomax11bkp.png",
     "servers": [
       {
@@ -1519,13 +1682,174 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax11bkp_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-monomax11bkp_720/chunks.m3u8",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Football03",
+    "group": "กีฬา",
+    "logo": "https://cms.dmpcdn.com/livetv/2025/10/27/ebbad850-b303-11f0-b265-23dfa726a2d7_webp_original.webp",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://love.sikoyo3159.workers.dev/vx-origin/epl-3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 1",
+        "url": "https://love.tivov68423.workers.dev/vx-origin/epl-3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 2",
+        "url": "https://love.tecobo5568.workers.dev/vx-origin/epl-3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 3",
+        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/epl-3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 4",
+        "url": "https://love.r95lvvlb9o.workers.dev/vx-origin/epl-3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 5",
+        "url": "https://love.sayob28681.workers.dev/vx-origin/epl-3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 6",
+        "url": "https://love.bebin98399.workers.dev/vx-origin/epl-3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 7",
+        "url": "https://love.pifipa2974.workers.dev/vx-origin/epl-3_720/chunks.m3u8",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein01",
+    "group": "กีฬา",
+    "logo": "https://www.scoremun.com/channels-logo/bein1.png",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://love.sikoyo3159.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 1",
+        "url": "https://love.tivov68423.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 2",
+        "url": "https://love.tecobo5568.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 3",
+        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 4",
+        "url": "https://love.r95lvvlb9o.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 5",
+        "url": "https://love.sayob28681.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 6",
+        "url": "https://love.bebin98399.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 7",
+        "url": "https://love.pifipa2974.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein02",
+    "group": "กีฬา",
+    "logo": "https://www.scoremun.com/channels-logo/bein2.png",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://love.sikoyo3159.workers.dev/vx-origin/epl-bein2_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 1",
+        "url": "https://love.tivov68423.workers.dev/vx-origin/epl-bein2_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 2",
+        "url": "https://love.tecobo5568.workers.dev/vx-origin/epl-bein2_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 3",
+        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/epl-bein2_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 4",
+        "url": "https://love.r95lvvlb9o.workers.dev/vx-origin/epl-bein2_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 5",
+        "url": "https://love.sayob28681.workers.dev/vx-origin/epl-bein2_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 6",
+        "url": "https://love.bebin98399.workers.dev/vx-origin/epl-bein2_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 7",
+        "url": "https://love.pifipa2974.workers.dev/vx-origin/epl-bein2_720/chunks.m3u8",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein03",
+    "group": "กีฬา",
+    "logo": "https://www.scoremun.com/channels-logo/bein3.png",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://love.sikoyo3159.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 1",
+        "url": "https://love.tivov68423.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 2",
+        "url": "https://love.tecobo5568.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 3",
+        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 4",
+        "url": "https://love.r95lvvlb9o.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 5",
+        "url": "https://love.sayob28681.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 6",
+        "url": "https://love.bebin98399.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8"
+      },
+      {
+        "name": "Backup 7",
+        "url": "https://love.pifipa2974.workers.dev/vx-origin/epl-bein3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-tsporthd1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-tsporthd1.png",
     "servers": [
       {
@@ -1542,13 +1866,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-tsporthd1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-tsporthd1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-tsporthd2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-tsporthd2.png",
     "servers": [
       {
@@ -1565,13 +1890,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-tsporthd2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/th-tsporthd2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "th-tsporthd3",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/th-tsporthd3.png",
     "servers": [
       {
@@ -1588,13 +1914,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/th-tsporthd3_480/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/th-tsporthd3_480/chunks.m3u8",
+        "drm": false
       }
     ]
   },
-{
+  {
     "title": "hd-tsport4",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-tsport4.png",
     "servers": [
       {
@@ -1611,13 +1938,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-tsport4_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-tsport4_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "True Sport5",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://www.fileinwtv.site/postor/20240418193030TrueSport5.jpg",
     "servers": [
       {
@@ -1634,13 +1962,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/sd-tsport5_480/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/sd-tsport5_480/chunks.m3u8",
+        "drm": false
       }
     ]
-  }, 
-    {
+  },
+  {
     "title": "True Sport7",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://www.fileinwtv.site/postor/20240418193050TrueSport7.jpg",
     "servers": [
       {
@@ -1657,13 +1986,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/sd-tsport7_480/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/sd-tsport7_480/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-golf2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-golf2.png",
     "servers": [
       {
@@ -1680,13 +2010,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-golf2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-golf2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
-{
+  {
     "title": "hd-tennis",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://www.fileinwtv.site/postor/20240418193113Tennis.jpg",
     "servers": [
       {
@@ -1703,13 +2034,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/hd-tennis_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/vx-origin/hd-tennis_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sd-tsports",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/sd-tsports.png",
     "servers": [
       {
@@ -1726,13 +2058,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-tsports_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sd-tsports_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "uk-btsport1hd",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/uk-btsport1hd.png",
     "servers": [
       {
@@ -1749,13 +2082,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/uk-btsport1hd_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/uk-btsport1hd_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "uk-btsport2hd",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/uk-btsport2hd.png",
     "servers": [
       {
@@ -1772,13 +2106,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/uk-btsport2hd_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/uk-btsport2hd_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "uk-btsport3hd",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/uk-btsport3hd.png",
     "servers": [
       {
@@ -1795,13 +2130,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/uk-btsport3hd_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/uk-btsport3hd_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "au-fox501",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/au-fox501.png",
     "servers": [
       {
@@ -1818,13 +2154,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox501_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox501_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "au-fox502",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/au-fox502.png",
     "servers": [
       {
@@ -1841,13 +2178,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox502_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox502_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "au-fox503",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/au-fox503.png",
     "servers": [
       {
@@ -1864,13 +2202,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox503_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox503_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "au-fox504",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/au-fox504.png",
     "servers": [
       {
@@ -1887,13 +2226,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox504_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox504_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "au-fox505",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/au-fox505.png",
     "servers": [
       {
@@ -1910,13 +2250,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox505_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox505_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "au-fox506",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/au-fox506.png",
     "servers": [
       {
@@ -1933,13 +2274,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox506_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox506_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "au-fox507",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/au-fox507.png",
     "servers": [
       {
@@ -1956,13 +2298,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox507_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-fox507_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "au-racing",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/au-racing.png",
     "servers": [
       {
@@ -1979,13 +2322,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-racing_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-racing_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "au-skyracing2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/au-skyracing2.png",
     "servers": [
       {
@@ -2002,13 +2346,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-skyracing2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/au-skyracing2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "ca-tsn1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/ca-tsn1.png",
     "servers": [
       {
@@ -2025,13 +2370,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "ca-tsn2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/ca-tsn2.png",
     "servers": [
       {
@@ -2048,13 +2394,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "ca-tsn3",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/ca-tsn3.png",
     "servers": [
       {
@@ -2071,13 +2418,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn3_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "ca-tsn4",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/ca-tsn4.png",
     "servers": [
       {
@@ -2094,13 +2442,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn4_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn4_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "ca-tsn5",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/ca-tsn5.png",
     "servers": [
       {
@@ -2117,13 +2466,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn5_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ca-tsn5_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "fr-bein2hd",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/fr-bein2hd.png",
     "servers": [
       {
@@ -2140,13 +2490,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/fr-bein2hd_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/fr-bein2hd_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "fr-bein3hd",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/fr-bein3hd.png",
     "servers": [
       {
@@ -2163,13 +2514,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/fr-bein3hd_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/fr-bein3hd_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "fr-canalsport",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/fr-canalsport.png",
     "servers": [
       {
@@ -2186,13 +2538,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/fr-canalsport_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/fr-canalsport_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "fr-infosport",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/fr-infosport.png",
     "servers": [
       {
@@ -2209,13 +2562,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/fr-infosport_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/fr-infosport_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "de-sportdigital",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/de-sportdigital.png",
     "servers": [
       {
@@ -2232,13 +2586,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/de-sportdigital_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/de-sportdigital_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-arena1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-arena1.png",
     "servers": [
       {
@@ -2255,13 +2610,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-arena1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-arena1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-arena2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-arena2.png",
     "servers": [
       {
@@ -2278,13 +2634,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-arena2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-arena2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-astro-football",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-astro-football.png",
     "servers": [
       {
@@ -2301,13 +2658,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-astro-football_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-astro-football_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-astro-grandstand",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-astro-grandstand.png",
     "servers": [
       {
@@ -2324,13 +2682,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-astro-grandstand_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-astro-grandstand_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-astro-sportsplus",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-astro-sportsplus.png",
     "servers": [
       {
@@ -2347,13 +2706,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-astro-sportsplus_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-astro-sportsplus_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-bein1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-bein1.png",
     "servers": [
       {
@@ -2370,13 +2730,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-bein1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-bein1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-bein2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-bein2.png",
     "servers": [
       {
@@ -2393,13 +2754,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-bein2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-bein2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-bein3",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-bein3.png",
     "servers": [
       {
@@ -2416,13 +2778,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-bein3_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-bein3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-nbcgolf",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-nbcgolf.png",
     "servers": [
       {
@@ -2439,13 +2802,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-nbcgolf_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-nbcgolf_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-premiersports",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-premiersports.png",
     "servers": [
       {
@@ -2462,13 +2826,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-premiersports_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-premiersports_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-spotv1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-spotv1.png",
     "servers": [
       {
@@ -2485,13 +2850,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-spotv1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-spotv1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "my-spotv2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/my-spotv2.png",
     "servers": [
       {
@@ -2508,13 +2874,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-spotv2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/my-spotv2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-espn1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-espn1.png",
     "servers": [
       {
@@ -2531,13 +2898,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-espn1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-espn1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-espn2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-espn2.png",
     "servers": [
       {
@@ -2554,13 +2922,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-espn2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-espn2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-espn3",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-espn3.png",
     "servers": [
       {
@@ -2577,13 +2946,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-espn3_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-espn3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-espn4",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-espn4.png",
     "servers": [
       {
@@ -2600,13 +2970,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-espn4_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-espn4_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-ziggosport1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-ziggosport1.png",
     "servers": [
       {
@@ -2623,13 +2994,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-ziggosport2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-ziggosport2.png",
     "servers": [
       {
@@ -2646,13 +3018,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-ziggosport3",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-ziggosport3.png",
     "servers": [
       {
@@ -2669,13 +3042,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport3_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-ziggosport4",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-ziggosport4.png",
     "servers": [
       {
@@ -2692,13 +3066,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport4_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport4_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-ziggosport5",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-ziggosport5.png",
     "servers": [
       {
@@ -2715,13 +3090,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport5_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport5_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nl-ziggosport6",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nl-ziggosport6.png",
     "servers": [
       {
@@ -2738,13 +3114,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport6_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nl-ziggosport6_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nz-skysport2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nz-skysport2.png",
     "servers": [
       {
@@ -2761,13 +3138,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nz-skysport3",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nz-skysport3.png",
     "servers": [
       {
@@ -2784,13 +3162,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport3_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nz-skysport4",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nz-skysport4.png",
     "servers": [
       {
@@ -2807,13 +3186,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport4_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport4_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nz-skysport5",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nz-skysport5.png",
     "servers": [
       {
@@ -2830,13 +3210,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport5_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport5_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nz-skysport6",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nz-skysport6.png",
     "servers": [
       {
@@ -2853,13 +3234,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport6_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport6_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nz-skysport7",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nz-skysport7.png",
     "servers": [
       {
@@ -2876,13 +3258,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport7_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport7_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nz-skysport8",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nz-skysport8.png",
     "servers": [
       {
@@ -2899,13 +3282,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport8_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport8_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "nz-skysport9",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/nz-skysport9.png",
     "servers": [
       {
@@ -2922,13 +3306,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport9_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/nz-skysport9_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein1.png",
     "servers": [
       {
@@ -2945,13 +3330,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein10",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein10.png",
     "servers": [
       {
@@ -2968,13 +3354,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein10_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein10_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein11",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein11.png",
     "servers": [
       {
@@ -2991,13 +3378,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein11_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein11_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein2.png",
     "servers": [
       {
@@ -3014,13 +3402,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein3",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein3.png",
     "servers": [
       {
@@ -3037,13 +3426,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein3_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein4",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein4.png",
     "servers": [
       {
@@ -3060,13 +3450,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein4_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein4_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein5",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein5.png",
     "servers": [
       {
@@ -3083,13 +3474,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein5_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein5_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein6",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein6.png",
     "servers": [
       {
@@ -3106,13 +3498,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein6_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein6_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein7",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein7.png",
     "servers": [
       {
@@ -3129,13 +3522,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein7_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein7_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "hd-bein8",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/hd-bein8.png",
     "servers": [
       {
@@ -3152,13 +3546,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein8_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/hd-bein8_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "ru-matchfutbol1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/ru-matchfutbol1.png",
     "servers": [
       {
@@ -3175,13 +3570,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ru-matchfutbol1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ru-matchfutbol1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "ru-matchfutbol2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/ru-matchfutbol2.png",
     "servers": [
       {
@@ -3198,13 +3594,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ru-matchfutbol2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ru-matchfutbol2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "ru-matchfutbol3",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/ru-matchfutbol3.png",
     "servers": [
       {
@@ -3221,13 +3618,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ru-matchfutbol3_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/ru-matchfutbol3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sg-bein1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/sg-bein1.png",
     "servers": [
       {
@@ -3244,13 +3642,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-bein1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-bein1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sg-bein2",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/sg-bein2.png",
     "servers": [
       {
@@ -3267,13 +3666,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-bein2_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-bein2_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sg-bein3",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/sg-bein3.png",
     "servers": [
       {
@@ -3290,13 +3690,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-bein3_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-bein3_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sg-hubsport01",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/sg-hubsport01.png",
     "servers": [
       {
@@ -3313,13 +3714,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-hubsport01_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-hubsport01_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sg-hubsport02",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/sg-hubsport02.png",
     "servers": [
       {
@@ -3336,13 +3738,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-hubsport02_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-hubsport02_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sg-hubsport03",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/sg-hubsport03.png",
     "servers": [
       {
@@ -3359,13 +3762,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-hubsport03_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sg-hubsport03_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "sk-arena1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/sk-arena1.png",
     "servers": [
       {
@@ -3382,13 +3786,14 @@
       },
       {
         "name": "Backup 3",
-        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sk-arena1_720/chunks.m3u8"
+        "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/sk-arena1_720/chunks.m3u8",
+        "drm": false
       }
     ]
   },
   {
     "title": "es-movistar-laliga1",
-    "group": "Dooball",
+    "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/es-movistar-laliga1.png",
     "servers": [
       {
@@ -3406,8 +3811,10 @@
       {
         "name": "Backup 3",
         "url": "https://love.uh6wzyncw9.workers.dev/lx-origin/es-movistar-laliga1_720/chunks.m3u8"
-
       }
     ]
   }
 ]
+
+
+
