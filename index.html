@@ -205,6 +205,292 @@
 
 })();
 
+
+/* ===== TIEA SMOOTH REMOTE NAV FINAL - KEEP SAME UI ===== */
+(function(){
+  if (window.__TIEA_SMOOTH_REMOTE_FINAL__) return;
+  window.__TIEA_SMOOTH_REMOTE_FINAL__ = true;
+
+  const q = (s, root=document) => Array.from(root.querySelectorAll(s));
+
+  function isVisible(el){
+    if (!el) return false;
+    const r = el.getBoundingClientRect();
+    return el.offsetParent !== null && r.width > 0 && r.height > 0;
+  }
+
+  function playerOpen(){
+    return playerWrap && playerWrap.style.display === 'block';
+  }
+
+  function modalOpen(){
+    const m = document.querySelector('.modal.show');
+    return !!m;
+  }
+
+  function currentContentItems(){
+    if (currentMode === 'episodes') {
+      return q('#epBackBtn, #epsGrid .ep-btn').filter(isVisible);
+    }
+
+    return q('#grid .card, #grid .sample-card, #grid .more-btn, .card, .sample-card, .more-btn')
+      .filter(isVisible);
+  }
+
+  function menuItems(){
+    return q('.sidebar .menu-btn').filter(isVisible);
+  }
+
+  function playerButtons(){
+    return q('#playerBar .player-btn, #playerBar button').filter(isVisible);
+  }
+
+  function focusEl(el){
+    if (!el) return false;
+    try {
+      el.focus({ preventScroll: true });
+    } catch(e) {
+      try { el.focus(); } catch(err) {}
+    }
+    try {
+      el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+    } catch(e) {}
+    return true;
+  }
+
+  function focusMenuActive(){
+    const active = document.querySelector('.sidebar .menu-btn.active') || menuItems()[0];
+    return focusEl(active);
+  }
+
+  function focusFirstContent(){
+    return focusEl(currentContentItems()[0]);
+  }
+
+  function colsForContent(){
+    const items = currentContentItems();
+    if (items.length < 2) return 1;
+
+    const first = items[0].getBoundingClientRect();
+    let cols = 1;
+
+    for (let i = 1; i < items.length; i++) {
+      const r = items[i].getBoundingClientRect();
+      if (Math.abs(r.top - first.top) < 12) cols++;
+      else break;
+    }
+
+    return Math.max(1, cols);
+  }
+
+  function moveInList(list, delta){
+    if (!list.length) return;
+    let idx = list.indexOf(document.activeElement);
+    if (idx < 0) idx = 0;
+    idx = Math.max(0, Math.min(list.length - 1, idx + delta));
+    focusEl(list[idx]);
+  }
+
+  function requestFull(){
+    try {
+      if (playerWrap.requestFullscreen) playerWrap.requestFullscreen();
+      else if (playerWrap.webkitRequestFullscreen) playerWrap.webkitRequestFullscreen();
+    } catch(e) {}
+  }
+
+  function seek(sec){
+    try {
+      video.currentTime = Math.max(0, (video.currentTime || 0) + sec);
+    } catch(e) {}
+  }
+
+  function showPlayerButtons(focusFirst){
+    try {
+      showPlayerUi(!!focusFirst);
+    } catch(e) {
+      try {
+        playerBar.classList.remove('hide-ui');
+        playerWrap.classList.add('show-ui');
+      } catch(err) {}
+    }
+
+    if (focusFirst) {
+      setTimeout(() => focusEl(playerButtons()[0]), 50);
+    }
+  }
+
+  document.addEventListener('keydown', function(e){
+    const key = e.key || '';
+    const code = e.keyCode || e.which;
+
+    const LEFT = key === 'ArrowLeft' || code === 37;
+    const RIGHT = key === 'ArrowRight' || code === 39;
+    const UP = key === 'ArrowUp' || code === 38;
+    const DOWN = key === 'ArrowDown' || code === 40;
+    const OK = key === 'Enter' || key === 'OK' || code === 13 || code === 23;
+    const BACK = key === 'Escape' || key === 'Backspace' || key === 'BrowserBack' || code === 10009;
+
+    if (!(LEFT || RIGHT || UP || DOWN || OK || BACK)) return;
+
+    const active = document.activeElement;
+
+    // PLAYER MODE
+    if (playerOpen()) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const btns = playerButtons();
+      const activeIsPlayerBtn = active && btns.includes(active);
+
+      if (UP) {
+        showPlayerButtons(true);
+        return false;
+      }
+
+      if (activeIsPlayerBtn) {
+        if (LEFT) { moveInList(btns, -1); return false; }
+        if (RIGHT) { moveInList(btns, 1); return false; }
+        if (DOWN) {
+          try { active.blur(); } catch(e) {}
+          showPlayerButtons(false);
+          return false;
+        }
+        if (OK) {
+          try { active.click(); } catch(e) {}
+          return false;
+        }
+      }
+
+      if (LEFT) { showPlayerButtons(false); seek(-10); return false; }
+      if (RIGHT) { showPlayerButtons(false); seek(10); return false; }
+      if (OK) { showPlayerButtons(false); requestFull(); return false; }
+      if (BACK) { closePlayer(); return false; }
+
+      return false;
+    }
+
+    // MODAL: let modal buttons work, but Back closes modal
+    if (modalOpen()) {
+      if (BACK) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        try { closeModal(); } catch(err) {}
+        return false;
+      }
+      // For grids inside modal, use same content motion below
+    }
+
+    // BACK: never exit app unexpectedly
+    if (BACK) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      if (currentMode === 'episodes') {
+        currentMode = 'list';
+        currentSeries = null;
+        listView.style.display = 'block';
+        epsWrap.style.display = 'none';
+        setTimeout(() => focusFirstContent(), 80);
+        return false;
+      }
+
+      // Stay in app; focus active menu instead of navigating away
+      focusMenuActive();
+      return false;
+    }
+
+    const menus = menuItems();
+    const content = currentContentItems();
+    const inMenu = active && menus.includes(active);
+    const inContent = active && content.includes(active);
+
+    // MENU MODE
+    if (inMenu) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      if (UP) { moveInList(menus, -1); return false; }
+      if (DOWN) { moveInList(menus, 1); return false; }
+      if (RIGHT) { focusFirstContent(); return false; }
+      if (OK) { try { active.click(); } catch(err) {} return false; }
+      if (LEFT) { focusEl(active); return false; }
+
+      return false;
+    }
+
+    // CONTENT MODE
+    if (inContent) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      let idx = content.indexOf(active);
+      if (idx < 0) idx = 0;
+      const cols = colsForContent();
+
+      if (LEFT) {
+        const rect = active.getBoundingClientRect();
+        const side = document.querySelector('.sidebar')?.getBoundingClientRect();
+        const sidebarRight = side ? side.right : 235;
+
+        // If near first column, jump to sidebar. This fixes "cannot go left to menu".
+        if (idx % cols === 0 || rect.left <= sidebarRight + 80 || currentMode === 'episodes') {
+          focusMenuActive();
+        } else {
+          focusEl(content[Math.max(0, idx - 1)]);
+        }
+        return false;
+      }
+
+      if (RIGHT) { focusEl(content[Math.min(content.length - 1, idx + 1)]); return false; }
+      if (UP) { focusEl(content[Math.max(0, idx - cols)]); return false; }
+      if (DOWN) { focusEl(content[Math.min(content.length - 1, idx + cols)]); return false; }
+      if (OK) { try { active.click(); } catch(err) {} return false; }
+
+      return false;
+    }
+
+    // Fallback focus
+    if (RIGHT || DOWN || UP) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      if (!focusFirstContent()) focusMenuActive();
+      return false;
+    }
+
+    if (LEFT) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      focusMenuActive();
+      return false;
+    }
+
+  }, true);
+
+  // Touch: scrolling won't trigger open; tap still opens.
+  let sx = 0, sy = 0, moved = false;
+  document.addEventListener('touchstart', function(e){
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    sx = t.clientX; sy = t.clientY; moved = false;
+  }, {passive:true});
+
+  document.addEventListener('touchmove', function(e){
+    const t = e.touches && e.touches[0];
+    if (!t) return;
+    if (Math.abs(t.clientX - sx) > 12 || Math.abs(t.clientY - sy) > 12) moved = true;
+  }, {passive:true});
+
+  document.addEventListener('click', function(e){
+    if (moved) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      moved = false;
+      return false;
+    }
+  }, true);
+
+})();
+
 </script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -752,6 +1038,24 @@
   touch-action: pan-y pan-x !important;
   -webkit-tap-highlight-color: transparent;
 }
+
+
+        /* ===== SMOOTH TV REMOTE NAV OVERRIDE ===== */
+        .menu-btn, .card, .sample-card, .ep-btn, .more-btn, .player-btn, #epBackBtn {
+            scroll-margin: 18px;
+        }
+
+        .sidebar {
+            scroll-behavior: smooth;
+        }
+
+        .main {
+            scroll-behavior: smooth;
+        }
+
+        #playerWrap, #playerBar, #playerBar button {
+            -webkit-tap-highlight-color: transparent;
+        }
 
 </style>
 </head>
