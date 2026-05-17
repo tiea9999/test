@@ -5,7 +5,207 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>TIEA IPTV ULTRA FINAL MPD MASTER TXT MYSERIES</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest">
+/* ===== HARD FIX: REMOTE LEFT TO SIDEBAR ===== */
+(function(){
+  if (window.__TIEA_REMOTE_LEFT_HARD_FIX__) return;
+  window.__TIEA_REMOTE_LEFT_HARD_FIX__ = true;
+
+  function isPlayerOpen(){
+    const p = document.getElementById('playerWrap');
+    return p && p.style.display === 'block';
+  }
+
+  function sidebarWidth(){
+    const s = document.getElementById('sidebar') || document.querySelector('.sidebar');
+    return s ? s.getBoundingClientRect().right : 235;
+  }
+
+  function firstVisibleCard(){
+    const list = Array.from(document.querySelectorAll('.card,.sample-card,.ep-btn,#epBackBtn,.more-btn'))
+      .filter(el => el.offsetParent !== null);
+    return list[0] || null;
+  }
+
+  function activeMenu(){
+    return document.querySelector('.menu-btn.active') || document.querySelector('.menu-btn');
+  }
+
+  function focusMenu(){
+    const m = activeMenu();
+    if (!m) return false;
+    m.focus({preventScroll:false});
+    try { m.scrollIntoView({block:'nearest', behavior:'smooth'}); } catch(e) {}
+    return true;
+  }
+
+  function focusFirstContent(){
+    const c = firstVisibleCard();
+    if (!c) return false;
+    c.focus({preventScroll:false});
+    try { c.scrollIntoView({block:'nearest', inline:'center', behavior:'smooth'}); } catch(e) {}
+    return true;
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (isPlayerOpen()) return;
+
+    const key = e.key || '';
+    const code = e.keyCode || e.which;
+    const active = document.activeElement;
+
+    if (!active) return;
+
+    const isLeft = key === 'ArrowLeft' || code === 37;
+    const isRight = key === 'ArrowRight' || code === 39;
+
+    if (!isLeft && !isRight) return;
+
+    const inMenu = active.classList && active.classList.contains('menu-btn');
+    const inContent =
+      active.classList &&
+      (
+        active.classList.contains('card') ||
+        active.classList.contains('sample-card') ||
+        active.classList.contains('ep-btn') ||
+        active.classList.contains('more-btn') ||
+        active.id === 'epBackBtn'
+      );
+
+    // เมนูซ้าย -> เข้ารายการ
+    if (inMenu && isRight) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      focusFirstContent();
+      return false;
+    }
+
+    // รายการ -> เมนูซ้าย
+    if (inContent && isLeft) {
+      const rect = active.getBoundingClientRect();
+      const leftEdge = sidebarWidth() + 80;
+
+      // ถ้าอยู่ใกล้ซ้าย หรือเป็น ep/list ให้กลับเมนูได้ทันที
+      if (rect.left <= leftEdge || active.classList.contains('ep-btn') || active.id === 'epBackBtn') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        focusMenu();
+        return false;
+      }
+    }
+  }, true);
+})();
+
+
+/* ===== TOUCH MOVE PREVENT CLICK ===== */
+(function(){
+  let moved = false;
+
+  document.addEventListener('touchstart', () => {
+    moved = false;
+  }, {passive:true});
+
+  document.addEventListener('touchmove', () => {
+    moved = true;
+  }, {passive:true});
+
+  document.addEventListener('touchend', (e) => {
+    if(moved){
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, {passive:false});
+
+  document.addEventListener('click', (e) => {
+    if(moved){
+      e.preventDefault();
+      e.stopPropagation();
+      moved = false;
+      return false;
+    }
+  }, true);
+})();
+
+
+/* ===== PLAYER BUTTON REMOTE FIX ===== */
+(function(){
+
+  function playerOpen(){
+    const p = document.getElementById('playerWrap');
+    return p && p.style.display === 'block';
+  }
+
+  function playerBtns(){
+    return Array.from(document.querySelectorAll('#playerBar .player-btn'))
+      .filter(el => el.offsetParent !== null);
+  }
+
+  document.addEventListener('keydown', function(e){
+
+    if(!playerOpen()) return;
+
+    const key = e.key || '';
+    const code = e.keyCode || e.which;
+
+    const isLeft  = key === 'ArrowLeft'  || code === 37;
+    const isRight = key === 'ArrowRight' || code === 39;
+    const isUp    = key === 'ArrowUp'    || code === 38;
+
+    const active = document.activeElement;
+    const btns = playerBtns();
+
+    if(!btns.length) return;
+
+    // ขึ้นบน = แสดงปุ่ม
+    if(isUp){
+      const bar = document.getElementById('playerBar');
+      const wrap = document.getElementById('playerWrap');
+
+      if(bar) bar.classList.remove('hide-ui');
+      if(wrap) wrap.classList.add('show-ui');
+
+      if(!active || !active.classList.contains('player-btn')){
+        btns[0].focus();
+      }
+
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+
+    // เลื่อนซ้าย/ขวาระหว่างปุ่ม
+    if(
+      active &&
+      active.classList &&
+      active.classList.contains('player-btn')
+    ){
+
+      let idx = btns.indexOf(active);
+
+      if(isLeft){
+        idx = Math.max(0, idx - 1);
+        btns[idx].focus();
+
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+
+      if(isRight){
+        idx = Math.min(btns.length - 1, idx + 1);
+        btns[idx].focus();
+
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+    }
+
+  }, true);
+
+})();
+
+</script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
         * {
@@ -542,7 +742,18 @@
             pointer-events: none !important;
         }
 
-    </style>
+    
+/* ===== TOUCH FIX ===== */
+.card,
+.sample-card,
+.ep-btn,
+.menu-btn,
+.more-btn{
+  touch-action: pan-y pan-x !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+</style>
 </head>
 
 <body>
@@ -813,11 +1024,7 @@
           playerBar.classList.add('hide-ui');
           playerWrap.classList.remove('show-ui');
 
-          try {
-            if (document.activeElement && playerBar.contains(document.activeElement)) {
-              document.activeElement.blur();
-            }
-          } catch(e) {}
+          // ไม่ blur focus รีโมท เพื่อให้เลื่อนไปปุ่มอื่นได้
         }
       }, 3200);
     }
