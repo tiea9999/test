@@ -755,9 +755,9 @@
             <div class="group-title">ทีวีออนไลน์</div>
             <button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/sport.html">🏆 SPORT TV</button>
             <div class="group-title">หนัง</div>
-            <button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button>
+            <button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button>
             <div class="group-title">ซีรีส์</div>
-            <button class="menu-btn" data-source="series-main">📚 MySeries แยกหมวด</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button>
+            <button class="menu-btn" data-source="series-main">📚 MySeries แยกหมวด</button><button <button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button>
             <div class="group-title">ระบบ</div>
             <button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button>
         </aside>
@@ -798,11 +798,24 @@
         </div>
     </div>
     <script>
-        const HOME_URL='https://tiea9999.github.io/tv/index.html',LIVE_URL='https://tiea9999.github.io/tv/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
-const MY_CHINA=RAW+'myseries-china.json',MY_KOREA=RAW+'myseries-korea.json',MY_THAI=RAW+'myseries-thai.json',MY_JAPAN=RAW+'myseries-japan.json',MY_SHORT=RAW+'myseries-short.json',MY_MOVIE=RAW+'myseries-movie.json';
+        const HOME_URL='https://tiea9999.github.io/tv/index.html',LIVE_URL='https://tiea9999.github.io/tv/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
+const MY_SERIES=RAW+'myseries-series.json';
 const TV_LINKS=[{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/3bb.html',group:'ทีวีออนไลน์'},{kind:'link',title:'SPORT TV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/sport.html',group:'ทีวีออนไลน์'},{kind:'link',title:'DOOBALL66',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-online/ball66.html',group:'ทีวีออนไลน์'}];
-const MYSERIES_FOLDERS=[{kind:'folder',title:'ดูซีรี่ย์จีน',image:FOLDER_LOGO,source:MY_CHINA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์เกาหลี',image:FOLDER_LOGO,source:MY_KOREA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์ไทย',image:FOLDER_LOGO,source:MY_THAI,group:'MySeries'},{kind:'folder',title:'ซีรี่ย์ญี่ปุ่น',image:FOLDER_LOGO,source:MY_JAPAN,group:'MySeries'},{kind:'folder',title:'ดูละครสั้น',image:FOLDER_LOGO,source:MY_SHORT,group:'MySeries'},{kind:'folder',title:'ดูหนังออนไลน์',image:FOLDER_LOGO,source:MY_MOVIE,group:'MySeries'}];
-const SOURCES={'movie-main':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],'movie-24hd':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],'series-main':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA},{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ดูซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ดูละครสั้น',source:MY_SHORT},{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-china':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA}],'series-korea':[{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA}],'series-thai':[{title:'ดูซีรี่ย์ไทย',source:MY_THAI}],'series-japan':[{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN}],'series-short':[{title:'ดูละครสั้น',source:MY_SHORT}],'series-movie':[{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]};
+const MYSERIES_FOLDERS=[{kind:'folder',title:'MySeries',image:FOLDER_LOGO,source:MY_SERIES,group:'MySeries'}];
+const SOURCES={
+'movie-main':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],
+'movie-24hd':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],
+
+'series-main':[{title:'MySeries',source:MY_SERIES}],
+'series-china':[{title:'MySeries',source:MY_SERIES}],
+'series-korea':[{title:'MySeries',source:MY_SERIES}],
+'series-thai':[{title:'MySeries',source:MY_SERIES}],
+'series-japan':[{title:'MySeries',source:MY_SERIES}],
+'series-short':[{title:'MySeries',source:MY_SERIES}],
+'series-movie':[{title:'MySeries',source:MY_SERIES}],
+
+'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]
+};
 const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null};
 const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel');
 function setStatus(t){statusText.textContent=t||'พร้อมใช้งาน'}function cleanUrl(u){return String(u||'').trim()}function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
