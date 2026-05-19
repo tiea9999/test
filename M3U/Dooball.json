@@ -6,7 +6,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "http://v3tv.live:80/play/live.php?mac=00:1A:79:05:8B:80&stream=1776136&extension=m3u8",
+        "url": "https://www.livedoomovies.com:4431/02_epl1_720p/playlist.m3u8",
         "drm": false
       }
     ]
