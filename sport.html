@@ -16,7 +16,7 @@ html,body{margin:0;width:100%;min-height:100%;background:#000;color:#fff;font-fa
 }
 .home-btn:hover,.home-btn:focus{outline:none;box-shadow:0 0 0 4px cyan}
 h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0 8px #000;font-size:22px;line-height:1.2}
-#load-status{text-align:center;color:#9ff;font-size:14px;margin:8px 10px;line-height:1.5}
+#load-status{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
 .tools{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px 8px}
 .tool-btn,.file-label{
   background:#1b1b1b;color:#fff;border:1px solid #555;border-radius:999px;
@@ -69,13 +69,24 @@ h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0
   .channel-row{grid-template-columns:repeat(2,1fr)}
   .player-btn{font-size:11px;padding:6px 7px}
 }
+
+#load-status{
+  display:none!important;
+  visibility:hidden!important;
+  opacity:0!important;
+  height:0!important;
+  min-height:0!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:hidden!important;
+}
 </style>
 </head>
 <body>
 
 <a class="home-btn" href="index.html">⬅ กลับหน้าหลัก</a>
 <h2>TIEA SPORT TV SAFE FINAL</h2>
-<div id="load-status">กำลังโหลด JSON...</div>
+<div id="load-status"></div>
 
 <div class="tools">
   <button class="tool-btn" onclick="loadDefaultJson()">↻ โหลด JSON ใหม่</button>
@@ -110,7 +121,7 @@ const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo4
 
 const app=document.getElementById("app");
 const player=document.getElementById("player");
-const loadStatus=document.getElementById("load-status");
+const loadStatus=document.getElementById("load-status");try{loadStatus.style.display="none";try{loadStatus.textContent="";loadStatus.style.display="none";}catch(e){}}catch(e){}
 
 let hls=null,shakaPlayer=null,currentChannel=null,currentServerIndex=0,currentElement=null;
 
@@ -187,12 +198,12 @@ function renderFromJson(json, label){
   });
 
   if(!channels.length){
-    loadStatus.innerHTML="โหลดได้ แต่ไม่พบช่องใน JSON<br>ลองตรวจชื่อ field: title/logo/group/servers/url";
+    try{loadStatus.textContent="";loadStatus.style.display="none";}catch(e){}
     app.innerHTML='<div class="empty">ไม่พบรายการ</div>';
     return;
   }
 
-  loadStatus.textContent="โหลดสำเร็จ "+channels.length+" รายการ จาก "+label;
+  try{loadStatus.textContent="";loadStatus.style.display="none";}catch(e){}
   render(channels);
 }
 
@@ -211,11 +222,11 @@ async function fetchWithTimeout(url, ms){
 
 async function loadDefaultJson(){
   app.innerHTML="";
-  loadStatus.textContent="กำลังโหลด JSON...";
+  try{loadStatus.textContent="";loadStatus.style.display="none";}catch(e){}
   let lastErr="";
   for(const u of JSON_URLS){
     try{
-      loadStatus.textContent="กำลังโหลด: "+u;
+      try{loadStatus.textContent="";loadStatus.style.display="none";}catch(e){}
       const res=await fetchWithTimeout(u,12000);
       if(!res.ok)throw new Error("HTTP "+res.status);
       const json=await res.json();
@@ -225,7 +236,7 @@ async function loadDefaultJson(){
       lastErr=e.message||String(e);
     }
   }
-  loadStatus.innerHTML="โหลด JSON ไม่สำเร็จ: "+lastErr+"<br>ถ้าเปิดจากไฟล์ในเครื่อง ให้กด “เลือกไฟล์ JSON จากเครื่อง”";
+  try{loadStatus.textContent="";loadStatus.style.display="none";}catch(e){}
   app.innerHTML='<div class="empty">ยังไม่มีรายการ</div>';
 }
 
@@ -563,12 +574,12 @@ document.getElementById("jsonFile").addEventListener("change",async e=>{
   const file=e.target.files&&e.target.files[0];
   if(!file)return;
   try{
-    loadStatus.textContent="กำลังอ่านไฟล์ "+file.name+"...";
+    try{loadStatus.textContent="";loadStatus.style.display="none";}catch(e){}
     const txt=await file.text();
     const json=JSON.parse(txt);
     renderFromJson(json,file.name);
   }catch(err){
-    loadStatus.textContent="อ่าน JSON ไม่สำเร็จ: "+(err.message||err);
+    try{loadStatus.textContent="";loadStatus.style.display="none";}catch(e){}
   }
 });
 
