@@ -6,7 +6,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "http://v3tv.live:80/165377933209746/t9qn9irjyf/1776240",
+        "url": "http://v3tv.live:80/play/live.php?mac=00:1A:79:05:8B:80&stream=1776136&extension=m3u8",
         "drm": false
       }
     ]
