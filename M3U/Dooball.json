@@ -1334,7 +1334,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://love.sikoyo3159.workers.dev/lx-origin/th-monomax04bkp_720/chunks.m3u8"
+        "url": "https://d2uwysbzxhz9oq.cloudfront.net/v2/lx-origin/91/sIYSrCabwVh3H1r_CP80PQ/b08612ac269bc158771f5aff08ff343d/1779028163/th-monomax04_480/chunks.m3u8"
       },
       {
         "name": "Backup 1",
@@ -1358,7 +1358,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://love.sikoyo3159.workers.dev/lx-origin/th-monomax05_720/chunks.m3u8"
+        "url": "https://d2xj4zvlmettky.cloudfront.net/v2/lx-origin/02/7B38vSBA_5ai7hMldBlb7g/ec1dfcbd2040ff96a2ee132574195bee/1779036262/th-monomax05_480/chunks.m3u8"
       },
       {
         "name": "Backup 1",
@@ -1454,7 +1454,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://love.sikoyo3159.workers.dev/lx-origin/th-monomax07_720/chunks.m3u8"
+        "url": "https://d26004t7f6f1l0.cloudfront.net/v2/lx-origin/03/bFHEY0x0OlWadXztnsXK_w/6c51c4634c743a559a757ced9ec5caff/1779036371/th-monomax07_480/chunks.m3u8"
       },
       {
         "name": "Backup 1",
@@ -3815,6 +3815,9 @@
     ]
   }
 ]
+
+
+
 
 
 
