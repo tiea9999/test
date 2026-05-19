@@ -1,12 +1,12 @@
 [
   {
-    "title": "test1",
+    "title": "test2",
     "group": "กีฬา",
     "logo": "https://api.bananamuffin.org/images/png/es-movistar-laliga1.png",
     "servers": [
       {
         "name": "Main",
-        "url": "http://ultratv.one:2095/hCPtsREFtA/Xj25tg0ZXi/115297.m3u8",
+        "url": "http://v3tv.live:80/165377933209746/t9qn9irjyf/1776240",
         "drm": false
       }
     ]
