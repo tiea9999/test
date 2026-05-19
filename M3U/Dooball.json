@@ -1,16 +1,5 @@
 [
-  {
-    "title": "test",
-    "group": "กีฬา",
-    "logo": "https://api.bananamuffin.org/images/png/es-movistar-laliga1.png",
-    "servers": [
-      {
-        "name": "Main",
-        "url": "https://iptv.tawatchai250958.workers.dev/?url=http://ch-4k-top.org/play/live.php?mac=00:1A:79:B4:0C:A1&stream=1776089&extension=m3u8"
-        "drm": false
-      }
-    ]
-  },
+
   {
     "title": "hd-monobkp",
     "group": "ฟรีทีวี",
