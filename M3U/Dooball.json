@@ -6,7 +6,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://iptv.tawatchai250958.workers.dev/?url=http://v3tv.live:80/165377933209746/t9qn9irjyf/1776086.ts",
+        "url": "http://v3tv.live:80/165377933209746/t9qn9irjyf/1776086.ts",
         "drm": false
       }
     ]
