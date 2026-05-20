@@ -16,7 +16,7 @@ html,body{margin:0;width:100%;min-height:100%;background:#000;color:#fff;font-fa
 }
 .home-btn:hover,.home-btn:focus{outline:none;box-shadow:0 0 0 4px cyan}
 h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0 8px #000;font-size:22px;line-height:1.2}
-#load-status{text-align:center;color:#9ff;font-size:14px;margin:8px 10px;line-height:1.5}
+#load-status{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
 .tools{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px 8px}
 .tool-btn,.file-label{
   background:#1b1b1b;color:#fff;border:1px solid #555;border-radius:999px;
@@ -75,7 +75,7 @@ h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0
 
 <a class="home-btn" href="index.html">⬅ กลับหน้าหลัก</a>
 <h2>TIEA SPORT TV SAFE FINAL</h2>
-<div id="load-status">กำลังโหลด JSON...</div>
+<div id="load-status"></div>
 
 <div class="tools">
   <button class="tool-btn" onclick="loadDefaultJson()">↻ โหลด JSON ใหม่</button>
@@ -119,6 +119,7 @@ function pick(o,keys){for(const k of keys){if(o&&o[k]!==undefined&&o[k]!==null&&
 function setStatus(t){document.getElementById("status").textContent=t||""}
 function isJsonUrl(u){u=clean(u).toLowerCase();return u.includes(".json")}
 function isM3U8Url(u){u=clean(u).toLowerCase();return u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")}
+function isTSUrl(u){u=clean(u).toLowerCase();return u.includes(".ts")||u.includes("extension=ts")}
 
 function normalize(item,parentGroup=""){
   let servers=[];
@@ -293,6 +294,7 @@ async function tryServer(){
   const s=currentChannel.servers[currentServerIndex];
   setStatus("กำลังลอง "+(s.name||("Server "+(currentServerIndex+1)))+"...");
   if(s.url.toLowerCase().includes(".mpd"))playMPD(s);
+  else if(isTSUrl(s.url))playTS(s);
   else playHLS(s);
 }
 
@@ -307,6 +309,27 @@ function forceMaxVolume(){
     player.muted=false;
     player.volume=1.0;
   }catch(e){}
+}
+
+function playTS(s){
+  const url=s.url;
+  try{
+    setStatus("กำลังเล่น TS "+(s.name||"Server "+(currentServerIndex+1)));
+    player.src=url;
+    try{player.type="video/mp2t"}catch(e){}
+    forceMaxVolume();
+    const p=player.play();
+    if(p&&p.catch){
+      p.catch(()=>{
+        setStatus("TS เล่นในเว็บไม่ได้ ให้กด PLAYER หรือ MX");
+      });
+    }
+    player.onerror=()=>{
+      setStatus("TS เล่นในเว็บไม่ได้ ให้กด PLAYER หรือ MX");
+    };
+  }catch(e){
+    setStatus("TS เล่นในเว็บไม่ได้ ให้กด PLAYER หรือ MX");
+  }
 }
 
 function playMPD(s){
@@ -334,21 +357,21 @@ function playHLS(s){
     hls=new Hls({
       // TIEA SPORT TV SAFE FINAL
       // ลดอาการเด้งออก-กลับซ้ำ ไม่รีโหลดถี่เกิน
-      enableWorker:false,
+      enableWorker:true,
       lowLatencyMode:false,
 
-      maxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?28:18),
-      maxMaxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?42:26),
-      backBufferLength:8,
+      maxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?110:75),
+      maxMaxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?170:120),
+      backBufferLength:40,
 
       maxBufferHole:3,
-      highBufferWatchdogPeriod:4,
+      highBufferWatchdogPeriod:8,
       nudgeOffset:0.35,
       nudgeMaxRetry:10,
 
       manifestLoadingTimeOut:25000,
       levelLoadingTimeOut:25000,
-      fragLoadingTimeOut:45000,
+      fragLoadingTimeOut:30000,
 
       manifestLoadingMaxRetry:10,
       levelLoadingMaxRetry:10,
@@ -356,22 +379,19 @@ function playHLS(s){
 
       manifestLoadingRetryDelay:2000,
       levelLoadingRetryDelay:2000,
-      fragLoadingRetryDelay:3000,
+      fragLoadingRetryDelay:2000,
 
       startFragPrefetch:true,
-      startLevel:-1,
+      startLevel:0,
       capLevelToPlayerSize:true,
       testBandwidth:false,
-      autoStartLoad:true,
-      maxLiveSyncPlaybackRate:1,
-      liveDurationInfinity:false,
 
-      abrEwmaDefaultEstimate:450000,
+      abrEwmaDefaultEstimate:650000,
       abrBandWidthFactor:0.9,
       abrBandWidthUpFactor:0.7,
 
-      liveSyncDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?3:3),
-      liveMaxLatencyDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?6:5),
+      liveSyncDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?9:7),
+      liveMaxLatencyDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?24:18),
 
       progressive:true,
       liveDurationInfinity:true
@@ -386,22 +406,6 @@ function playHLS(s){
       player.play().catch(()=>{});
       setStatus("กำลังเล่น "+(s.name||"Server "+(currentServerIndex+1)));
     });
-    player.addEventListener('stalled',()=>{
-      try{
-        setStatus("สัญญาณสะดุด กำลังกู้คืน...");
-        if(hls) hls.startLoad();
-        player.play().catch(()=>{});
-      }catch(e){}
-    });
-
-    player.addEventListener('waiting',()=>{
-      try{
-        if(player.readyState>=2){
-          player.play().catch(()=>{});
-        }
-      }catch(e){}
-    });
-
 
     hls.on(Hls.Events.ERROR,(ev,data)=>{
       if(!data || !hls) return;
@@ -464,55 +468,24 @@ function playHLS(s){
 
       lastTime=player.currentTime||0;
 
-      // AUTO RECOVER FOR ANDROID TV / PROJECTOR
-      if((stuck>=6 || noData>=6) && !recovering){
+      // รอให้นานพอ ลดการเด้งออก-กลับซ้ำ
+      if((stuck>=10 || noData>=10) && !recovering){
         recovering=true;
-
-        setStatus("สัญญาณค้าง กำลังกู้คืน...");
-
+        setStatus("สัญญาณสะดุด กำลังประคองเส้นเดิม...");
         try{
           if(hls){
-            hls.stopLoad();
-
-            setTimeout(()=>{
-              try{
-                hls.startLoad(Math.max(0,(player.currentTime||0)-1));
-
-                if(player.readyState>=2){
-                  player.play().catch(()=>{});
-                }
-              }catch(err){}
-            },1200);
+            hls.startLoad(Math.max(0,(player.currentTime||0)-0.5));
           }
-
           if(player.readyState>=2){
             player.play().catch(()=>{});
           }
         }catch(e){}
 
-        if(stuck>=12 || noData>=12){
-          try{
-            setStatus("รีโหลดสตรีมอัตโนมัติ...");
-            const currentUrl = activeUrl();
-
-            if(currentUrl && hls){
-              hls.loadSource(currentUrl);
-              hls.attachMedia(player);
-
-              setTimeout(()=>{
-                try{
-                  player.play().catch(()=>{});
-                }catch(err){}
-              },1500);
-            }
-          }catch(err){}
-        }
-
         setTimeout(()=>{
           recovering=false;
           stuck=0;
           noData=0;
-        },6000);
+        },9000);
       }
     },5000);
     setTimeout(()=>{
@@ -520,14 +493,20 @@ function playHLS(s){
         setStatus("ยังโหลดอยู่ กำลังรอเส้นหลักอีกนิด...");
         try{ if(hls) hls.startLoad(); }catch(e){}
       }
-    },30000);
+    },22000);
 
   }else{
     player.src=url;
+    if(isTSUrl(url)){
+      try{player.type="video/mp2t"}catch(e){}
+    }
     forceMaxVolume();
     player.play().then(()=>{
       setStatus("กำลังเล่น "+(s.name||"Server "+(currentServerIndex+1)));
-    }).catch(()=>nextServer());
+    }).catch(()=>{
+      if(isTSUrl(url))setStatus("TS เล่นในเว็บไม่ได้ ให้กด PLAYER หรือ MX");
+      else nextServer();
+    });
   }
 }
 
