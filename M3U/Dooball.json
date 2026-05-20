@@ -126,7 +126,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_SPOTV01_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2FSPOTV01_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
         "drm": false
       }
     ]
@@ -138,7 +138,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_SPOTV02_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2FSPOTV02_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
         "drm": false
       }
     ]
