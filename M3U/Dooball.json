@@ -6,7 +6,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://cdn1.googlecdnforstreaming.live/live/bein1/playlist.m3u8?wmsAuth=&referer=https://warpdooball.net/",
+        "url": "https://cdn1.googlecdnforstreaming.live/live/bein1/playlist.m3u8&referer=https://warpdooball.net/",
         "drm": false
       }
     ]
