@@ -1,14 +1,13 @@
 [
-  
   {
-    "title": "Bein01",
+    "title": "test2",
     "group": "กีฬา",
-    "logo": "https://www.scoremun.com/channels-logo/bein1.png",
+    "logo": "https://api.bananamuffin.org/images/png/es-movistar-laliga1.png",
     "servers": [
       {
         "name": "Main",
-         "url": "https://www.livedoomovies.com:4431/02_epl1_720p/playlist.m3u8",
-         "drm": false
+"url": "https://www.livedoomovies.com:4431/02_epl1_720p/playlist.m3u8"
+        "drm": false
       }
     ]
   }
