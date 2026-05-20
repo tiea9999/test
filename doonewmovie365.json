@@ -1,0 +1,244 @@
+[
+  {
+    "title": "Bein01",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/epl-bein1.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://cdn1.googlecdnforstreaming.live/live/bein1/playlist.m3u8&referer=https://warpdooball.net/",
+        "drm": false
+      }
+    ]
+  },
+  
+  {
+    "title": "Bein01",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/epl-bein1.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_epl1_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein02",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/epl-bein2.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_epl2_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein03",
+    "group": "กีฬา",
+    "logo": "https://www.imgx02.xyz/assets/img/ch_logo/epl-bein3.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_epl3_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein04",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/epl-bein4.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_epl4_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein05",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/epl-bein05.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_epl5_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein06",
+    "group": "กีฬา",
+    "logo": "https://www.imgx02.xyz/assets/img/ch_logo/epl-bein06.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_epl6_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein07",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/epl-bein07.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_epl7_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "Bein08",
+    "group": "กีฬา",
+    "logo": "https://www.imgx02.xyz/assets/img/ch_logo/epl-bein08.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_epl8_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "TENNIS",
+    "group": "กีฬา",
+    "logo": "https://www.imgx02.xyz/assets/img/ch_logo/hd-tennis.png",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_TennisHD_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "GOLF CHANNEL",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/hd-golf.png",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_GOLFHD_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "SPOTV1",
+    "group": "กีฬา",
+    "logo": "https://www.imgx02.xyz/assets/img/ch_logo/SPOTV1.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https://www.livedoomovies.com:4431/SPOTV01_720p/playlist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "SPOTV2",
+    "group": "กีฬา",
+    "logo": "https://www.imgx02.xyz/assets/img/ch_logo/SPOTV2.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https://www.livedoomovies.com:4431/SPOTV02_720p/playlist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "TRUE SPORT 1",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/TrueSport01.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_sport1_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "TRUE SPORT 2",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/TrueSport2.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_sport2_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "TRUE SPORT 3",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/TrueSport3.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_sport3_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "TRUE SPORT 4",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/TrueSport4.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_sport4_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "TRUE SPORT 5",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/TrueSport5.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_sport5_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "TRUE SPORT 7",
+    "group": "กีฬา",
+    "logo": "https://www.imgx01.xyz/assets/img/ch_logo/TrueSport7.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fwww.livedoomovies.com%3A4431%2F02_sport7_720p%2Fplaylist.m3u8&referer=https%3A%2F%2Fwww.doonewmovie365.com%2F",
+        "drm": false
+
+      }
+    ]
+  },
+  {
+    "title": "MONOMAX01",
+    "group": "กีฬา",
+    "logo": "https://www.imgx02.xyz/assets/img/ch_logo/PL_Mono1.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "https://a5emkyz3w7.montionz8935.top/xstream/monomax-1/playlist.m3u8?wmsAuthSign=c2VydmVyX3RpbWU9NS8yMC8yMDI2IDQ6MDI6MTEgQU0maGFzaF92YWx1ZT1oYXBOSjhxZVZaUVByZHp2WEFMKzZ3PT0mdmFsaWRtaW51dGVzPTM2MCZpZD0x&referer=https://demo-live.siamzeed.com/",
+        "drm": false        
+      }
+    ]
+  }
+]
