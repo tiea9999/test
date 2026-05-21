@@ -757,7 +757,7 @@
             <div class="group-title">หนัง</div>
             <button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button>
             <div class="group-title">ซีรีส์</div>
-            <button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ ฝรั่ง</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button>
+            <button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ ฝรั่ง</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button>
             <div class="group-title">ระบบ</div>
             <button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button>
         </aside>
@@ -803,12 +803,13 @@ const MY_SERIES=RAW+'myseries-series.json',MY_CHINA=RAW+'myseries-china.json',MY
 const TV_LINKS=[{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/3bb.html',group:'ทีวีออนไลน์'},{kind:'link',title:'SPORT TV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/sport.html',group:'ทีวีออนไลน์'},{kind:'link',title:'DOOBALL66',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-online/ball66.html',group:'ทีวีออนไลน์'}];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'MySeries',image:FOLDER_LOGO,source:MY_SERIES,group:'MySeries'}];
 const MYSERIES_FILTERS={
-'series-china':['จีน','ดูซีรี่ย์จีน'],
-'series-korea':['เกาหลี','ดูซีรี่ย์เกาหลี'],
-'series-thai':['ไทย','ดูซีรี่ย์ไทย'],
-'series-japan':['ญี่ปุ่น','ซีรี่ย์ญี่ปุ่น'],
-'series-short':['ละครสั้น','หนังสั้น','ดูละครสั้น'],
-'series-movie':['หนัง','ดูหนังออนไลน์']
+'series-update':['ซีรี่ย์อัพเดทใหม่','series-update'],
+'series-china':['ซีรี่ย์จีน','series-china'],
+'series-korea':['ซีรี่ย์เกาหลี','series-korea'],
+'series-thai':['ซีรี่ย์ไทย','series-thai'],
+'series-japan':['ซีรี่ย์ญี่ปุ่น','series-japan'],
+'series-short':['ซีรี่ย์สั้น','series-short'],
+'series-movie':['หนัง MySeries','series-movie']
 };
 const SOURCES={
 'movie-main':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],
@@ -833,8 +834,44 @@ const SOURCES={
 };
 const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null};
 const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel');
-function setStatus(t){statusText.textContent=t||'พร้อมใช้งาน'}function cleanUrl(u){return String(u||'').trim()}function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
-function groupName(g){let t=String(g||'').trim(),m={'series':'ดูซีรี่ย์ออนไลน์','series-online':'ดูซีรี่ย์ออนไลน์','series-china':'ดูซีรี่ย์จีน','series-korea':'ดูซีรี่ย์เกาหลี','series-thai':'ดูซีรี่ย์ไทย','series-japan':'ซีรี่ย์ญี่ปุ่น','movie':'ดูหนังออนไลน์','short':'ดูละครสั้น','tv':'ทีวี','sport':'กีฬา'};if(m[t])return m[t];if(t.includes('ละครสั้น')||t.includes('หนังสั้น'))return'ดูละครสั้น';if(t.includes('ดูหนัง')||t==='หนัง'||t.includes('หนังออนไลน์'))return'ดูหนังออนไลน์';if(t.includes('จีน'))return'ดูซีรี่ย์จีน';if(t.includes('เกาหลี'))return'ดูซีรี่ย์เกาหลี';if(t.includes('ญี่ปุ่น'))return'ซีรี่ย์ญี่ปุ่น';if(t.includes('ไทย'))return'ดูซีรี่ย์ไทย';if(t.includes('ซีรี่ย์')||t.includes('ซีรีย์')||t.includes('ออนไลน์'))return'ดูซีรี่ย์ออนไลน์';return t||'อื่นๆ'}
+function setStatus(t){
+  t=String(t||'พร้อมใช้งาน');
+  if(t.includes('โหลดสำเร็จ')||t.includes(' รายการ จาก ')||t.includes('githubusercontent.com')||t.includes('http'))t='พร้อมใช้งาน';
+  statusText.textContent=t;
+}function cleanUrl(u){return String(u||'').trim()}function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
+function groupName(g){
+  let raw=String(g||'').trim();
+  let t=raw.toLowerCase();
+  const map={
+    'series':'ซีรี่ย์อัพเดทใหม่',
+    'series-update':'ซีรี่ย์อัพเดทใหม่',
+    'series-online':'ซีรี่ย์อัพเดทใหม่',
+    'series-china':'ซีรี่ย์จีน',
+    'series-korea':'ซีรี่ย์เกาหลี',
+    'series-west':'ซีรี่ย์ฝรั่ง',
+    'series-farang':'ซีรี่ย์ฝรั่ง',
+    'series-inter':'ซีรี่ย์ฝรั่ง',
+    'series-thai':'ซีรี่ย์ไทย',
+    'series-japan':'ซีรี่ย์ญี่ปุ่น',
+    'series-short':'ซีรี่ย์สั้น',
+    'short':'ซีรี่ย์สั้น',
+    'series-movie':'หนัง MySeries',
+    'movie':'ดูหนังออนไลน์',
+    'tv':'ทีวี',
+    'sport':'กีฬา'
+  };
+  if(map[t])return map[t];
+  if(raw.includes('อัพเดท')||raw.includes('มาใหม่'))return'ซีรี่ย์อัพเดทใหม่';
+  if(raw.includes('จีน'))return'ซีรี่ย์จีน';
+  if(raw.includes('เกาหลี'))return'ซีรี่ย์เกาหลี';
+  if(raw.includes('ฝรั่ง')||raw.includes('อินเตอร์'))return'ซีรี่ย์ฝรั่ง';
+  if(raw.includes('ญี่ปุ่น'))return'ซีรี่ย์ญี่ปุ่น';
+  if(raw.includes('ไทย'))return'ซีรี่ย์ไทย';
+  if(raw.includes('ละครสั้น')||raw.includes('หนังสั้น')||raw.includes('ซีรี่ย์สั้น'))return'ซีรี่ย์สั้น';
+  if(raw.includes('หนัง'))return'ดูหนังออนไลน์';
+  if(raw.includes('ซีรี่ย์')||raw.includes('ซีรีย์')||raw.includes('series'))return'ซีรี่ย์อัพเดทใหม่';
+  return raw||'อื่นๆ';
+}
 function groupsOf(item,parent=''){let a=[];if(Array.isArray(item.groups))a.push(...item.groups.map(groupName));if(typeof item.groups==='string')a.push(groupName(item.groups));if(item.group)a.push(groupName(item.group));if(item.category)a.push(groupName(item.category));if(!a.length&&parent)a.push(groupName(parent));if(!a.length)a.push('อื่นๆ');return[...new Set(a.filter(Boolean))]}
 function serversOf(item){let o=[];if(Array.isArray(item.servers))item.servers.forEach(s=>{let u=cleanUrl(s.url||s.link||s.file||s.source);if(u)o.push({name:s.name||'Main',url:u})});let one=cleanUrl(item.url||item.link||item.stream||item.file);if(one&&!isJsonUrl(one))o.push({name:'Main',url:one});return o}
 function episodesOf(item,img=''){if(!Array.isArray(item.episodes))return[];return item.episodes.map((ep,i)=>({title:ep.title||ep.name||ep.ep_name||`EP${i+1}`,image:imgOf(ep)||img,servers:serversOf(ep),type:'episode'})).filter(e=>e.servers.length)}
@@ -845,7 +882,7 @@ async function fetchText(url){if(state.cache[url])return state.cache[url];let se
 async function loadUrl(url,parent=''){let text=await fetchText(url),trim=text.trim();if(trim.startsWith('{')||trim.startsWith('['))return normalize(JSON.parse(text),parent);if(trim.includes('#EXTM3U')||trim.includes('#EXTINF'))return parseM3U(text,parent);return[]}
 async function loadSourcePack(key){if(key==='tv-main')return TV_LINKS;let pack=SOURCES[key]||[],all=[];for(const s of pack){try{all.push(...await loadUrl(s.source,s.title))}catch(e){console.log('โหลดไม่ได้',s.source,e)}}return all}
 async function loadFolder(item){setStatus('กำลังโหลด '+item.title+' ...');try{let items=await loadUrl(item.source,item.title);renderRows(makeRows(items),item.title);setStatus(items.length?'โหลด '+item.title+' สำเร็จ '+items.length+' รายการ':'โหลด '+item.title+' ได้ 0 รายการ')}catch(e){setStatus('โหลดไม่สำเร็จ '+e.message)}}
-function makeRows(items){let order=['ดูซีรี่ย์ออนไลน์','ดูซีรี่ย์จีน','ดูซีรี่ย์เกาหลี','ดูซีรี่ย์ไทย','ซีรี่ย์ญี่ปุ่น','ดูหนังออนไลน์','ดูละครสั้น','ทีวีออนไลน์','ทีวี','กีฬา','อื่นๆ'],map={};items.forEach(item=>{let cats=item.groups&&item.groups.length?item.groups:[item.group||'อื่นๆ'];cats.forEach(c=>{c=groupName(c);if(!map[c])map[c]=[];if(!map[c].some(x=>x.title===item.title))map[c].push(item)})});return Object.keys(map).sort((a,b)=>{let ia=order.indexOf(a)<0?99:order.indexOf(a),ib=order.indexOf(b)<0?99:order.indexOf(b);return ia-ib||a.localeCompare(b,'th')}).map(title=>({title,items:map[title]}))}
+function makeRows(items){let order=['ซีรี่ย์อัพเดทใหม่','ซีรี่ย์จีน','ซีรี่ย์เกาหลี','ซีรี่ย์ฝรั่ง','ซีรี่ย์ไทย','ซีรี่ย์ญี่ปุ่น','ซีรี่ย์สั้น','หนัง MySeries','ดูหนังออนไลน์','ทีวีออนไลน์','ทีวี','กีฬา','อื่นๆ'],map={};items.forEach(item=>{let cats=item.groups&&item.groups.length?item.groups:[item.group||'อื่นๆ'];cats.forEach(c=>{c=groupName(c);if(!map[c])map[c]=[];if(!map[c].some(x=>x.title===item.title))map[c].push(item)})});return Object.keys(map).sort((a,b)=>{let ia=order.indexOf(a)<0?99:order.indexOf(a),ib=order.indexOf(b)<0?99:order.indexOf(b);return ia-ib||a.localeCompare(b,'th')}).map(title=>({title,items:map[title]}))}
 function renderHome(){state.activeSource='home';setStatus('หน้าแรก • MySeries แยกหมวด + หนัง + ทีวี');content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV FINAL 1080P TV STABLE</div><div class="hero-sub">แยกหมวดซีรี่ย์ชัดเจน • เล่นไวขึ้น • มีระบบกันหมุนค้างอัตโนมัติ</div></div><div id="homeRows"></div>`;Promise.all([loadSourcePack('movie-main').catch(()=>[]),loadSourcePack('series-24hd').catch(()=>[])]).then(([movies,series24])=>{let rows=[
 {title:'ทีวีแนะนำ',items:[
 {kind:'play',title:'BEIN 01',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://love.sayob28681.workers.dev/vx-origin/epl-bein1_720/chunks.m3u8'}]},
@@ -872,40 +909,30 @@ function playItem(item,serverIndex=0,displayTitle=''){if(!displayTitle)state.ret
 function playCandidate(candidates,item,serverIndex,idx){let url=candidates[idx]||candidates[0];state.currentUrl=url;let direct=getUrl(item,serverIndex);let next=()=>{if(idx+1<candidates.length){playCandidate(candidates,item,serverIndex,idx+1);return}if(item.servers?.length>serverIndex+1){playItem(item,serverIndex+1);return}openMx(direct)};cleanupPlayer();playerPanel.classList.add('show');showPlayerUI();forceFullSound();startWatchdog();state.playTimer=setTimeout(()=>{if(video.readyState<2||video.currentTime===0)openExternal(direct)},18000);['playing','loadeddata','canplay'].forEach(ev=>video.addEventListener(ev,()=>{if(state.playTimer)clearTimeout(state.playTimer);state.stuckCount=0;forceFullSound()},{once:true}));let lower=url.toLowerCase();if(lower.includes('.mpd')){try{state.dash=dashjs.MediaPlayer().create();state.dash.initialize(video,url,true);setTimeout(forceFullSound,500)}catch(e){next()}return}if(Hls.isSupported()&&(lower.includes('.m3u8')||lower.includes('master.txt')||lower.includes('.txt')||lower.includes('type=m3u8')||lower.includes('extension=m3u8'))){state.hls=new Hls({
 enableWorker:false,
 lowLatencyMode:false,
-
-// 1080p ANDROID TV STABLE
-maxBufferLength:95,
-maxMaxBufferLength:150,
-backBufferLength:45,
-
-maxBufferHole:2.5,
-highBufferWatchdogPeriod:8,
-nudgeOffset:0.35,
-nudgeMaxRetry:10,
-
-fragLoadingTimeOut:35000,
-manifestLoadingTimeOut:25000,
-levelLoadingTimeOut:25000,
-
-fragLoadingMaxRetry:14,
-manifestLoadingMaxRetry:10,
-levelLoadingMaxRetry:10,
-
-fragLoadingRetryDelay:1800,
-manifestLoadingRetryDelay:1800,
-levelLoadingRetryDelay:1800,
-
+maxBufferLength:30,
+maxMaxBufferLength:60,
+backBufferLength:15,
+maxBufferHole:1.5,
+highBufferWatchdogPeriod:4,
+nudgeOffset:0.25,
+nudgeMaxRetry:6,
+manifestLoadingTimeOut:20000,
+levelLoadingTimeOut:20000,
+fragLoadingTimeOut:25000,
+manifestLoadingMaxRetry:4,
+levelLoadingMaxRetry:4,
+fragLoadingMaxRetry:6,
+manifestLoadingRetryDelay:1500,
+levelLoadingRetryDelay:1500,
+fragLoadingRetryDelay:1500,
 startFragPrefetch:true,
 capLevelToPlayerSize:true,
 testBandwidth:false,
-
-abrEwmaDefaultEstimate:800000,
+abrEwmaDefaultEstimate:500000,
 abrBandWidthFactor:0.8,
 abrBandWidthUpFactor:0.55,
-
-liveSyncDurationCount:7,
-liveMaxLatencyDurationCount:18,
-
+liveSyncDurationCount:5,
+liveMaxLatencyDurationCount:10,
 progressive:true,
 liveDurationInfinity:true
 });state.hls.loadSource(url);state.hls.attachMedia(video);state.hls.on(Hls.Events.MANIFEST_PARSED,()=>{forceFullSound();startWatchdog();video.play().catch(()=>{})});state.hls.on(Hls.Events.ERROR,(e,d)=>{if(!d)return;if(!d.fatal){if(d.type===Hls.ErrorTypes.NETWORK_ERROR){try{state.hls.startLoad()}catch(err){}}return}if(d.type===Hls.ErrorTypes.NETWORK_ERROR){setStatus('network ค้าง • ต่อสัญญาณใหม่');try{state.hls.startLoad(Math.max(0,video.currentTime-1));video.play().catch(()=>{})}catch(err){next()}return}if(d.type===Hls.ErrorTypes.MEDIA_ERROR){setStatus('media ค้าง • ซ่อม player');try{state.hls.recoverMediaError();video.play().catch(()=>{})}catch(err){next()}return}next()});return}video.src=url;forceFullSound();startWatchdog();video.play().catch(()=>next())}
