@@ -116,7 +116,11 @@ let hls=null,shakaPlayer=null,currentChannel=null,currentServerIndex=0,currentEl
 
 function clean(v){return String(v||"").trim()}
 function pick(o,keys){for(const k of keys){if(o&&o[k]!==undefined&&o[k]!==null&&clean(o[k])!=="")return o[k]}return ""}
-function setStatus(t){document.getElementById("status").textContent=t||""}
+function setStatus(t){
+  t=String(t||"");
+  if(t.includes("โหลดสำเร็จ")||t.includes(" รายการ จาก ")||t.includes("githubusercontent.com")||t.includes("http"))t="";
+  document.getElementById("status").textContent=t;
+}
 function isJsonUrl(u){u=clean(u).toLowerCase();return u.includes(".json")}
 function isM3U8Url(u){u=clean(u).toLowerCase();return u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")}
 function isTSUrl(u){u=clean(u).toLowerCase();return u.includes(".ts")||u.includes("extension=ts")}
@@ -355,44 +359,33 @@ function playHLS(s){
 
   if(window.Hls&&Hls.isSupported()&&isM3U8Url(url)){
     hls=new Hls({
-      // TIEA SPORT TV SAFE FINAL
-      // ลดอาการเด้งออก-กลับซ้ำ ไม่รีโหลดถี่เกิน
-      enableWorker:true,
+      enableWorker:false,
       lowLatencyMode:false,
-
-      maxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?110:75),
-      maxMaxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?170:120),
-      backBufferLength:40,
-
-      maxBufferHole:3,
-      highBufferWatchdogPeriod:8,
-      nudgeOffset:0.35,
-      nudgeMaxRetry:10,
-
-      manifestLoadingTimeOut:25000,
-      levelLoadingTimeOut:25000,
-      fragLoadingTimeOut:30000,
-
-      manifestLoadingMaxRetry:10,
-      levelLoadingMaxRetry:10,
-      fragLoadingMaxRetry:14,
-
-      manifestLoadingRetryDelay:2000,
-      levelLoadingRetryDelay:2000,
-      fragLoadingRetryDelay:2000,
-
+      maxBufferLength:30,
+      maxMaxBufferLength:60,
+      backBufferLength:15,
+      maxBufferHole:1.5,
+      highBufferWatchdogPeriod:4,
+      nudgeOffset:0.25,
+      nudgeMaxRetry:6,
+      manifestLoadingTimeOut:20000,
+      levelLoadingTimeOut:20000,
+      fragLoadingTimeOut:25000,
+      manifestLoadingMaxRetry:4,
+      levelLoadingMaxRetry:4,
+      fragLoadingMaxRetry:6,
+      manifestLoadingRetryDelay:1500,
+      levelLoadingRetryDelay:1500,
+      fragLoadingRetryDelay:1500,
       startFragPrefetch:true,
       startLevel:0,
       capLevelToPlayerSize:true,
       testBandwidth:false,
-
-      abrEwmaDefaultEstimate:650000,
-      abrBandWidthFactor:0.9,
-      abrBandWidthUpFactor:0.7,
-
-      liveSyncDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?9:7),
-      liveMaxLatencyDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?24:18),
-
+      abrEwmaDefaultEstimate:500000,
+      abrBandWidthFactor:0.8,
+      abrBandWidthUpFactor:0.55,
+      liveSyncDurationCount:5,
+      liveMaxLatencyDurationCount:10,
       progressive:true,
       liveDurationInfinity:true
     });
