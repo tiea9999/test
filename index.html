@@ -888,6 +888,20 @@ async function fetchText(url){if(state.cache[url])return state.cache[url];let se
 async function loadUrl(url,parent=''){let text=await fetchText(url),trim=text.trim();if(trim.startsWith('{')||trim.startsWith('['))return normalize(JSON.parse(text),parent);if(trim.includes('#EXTM3U')||trim.includes('#EXTINF'))return parseM3U(text,parent);return[]}
 async function loadSourcePack(key){if(key==='tv-main')return TV_LINKS;let pack=SOURCES[key]||[],all=[];for(const s of pack){try{all.push(...await loadUrl(s.source,s.title))}catch(e){console.log('โหลดไม่ได้',s.source,e)}}return all}
 async function loadFolder(item){setStatus('กำลังโหลด '+item.title+' ...');try{let items=await loadUrl(item.source,item.title);renderRows(makeRows(items),item.title);setStatus(items.length?'โหลด '+item.title+' สำเร็จ '+items.length+' รายการ':'โหลด '+item.title+' ได้ 0 รายการ')}catch(e){setStatus('โหลดไม่สำเร็จ '+e.message)}}
+
+function getUpdateTime(item){
+  let raw=item.updated||item.update||item.last_update||item.date||item.added||item.created||'';
+  if(!raw)return 0;
+  let t=Date.parse(raw);
+  return isNaN(t)?0:t;
+}
+function sortByUpdated(items){
+  return (items||[]).slice().sort((a,b)=>{
+    let db=getUpdateTime(b),da=getUpdateTime(a);
+    if(db!==da)return db-da;
+    return String(a.title||'').localeCompare(String(b.title||''),'th');
+  });
+}
 function makeRows(items){let order=['ซีรี่ย์อัพเดทใหม่','ซีรี่ย์จีน','ซีรี่ย์เกาหลี','ซีรี่ย์ฝรั่ง','ซีรี่ย์ไทย','ซีรี่ย์ญี่ปุ่น','ซีรี่ย์สั้น','หนัง MySeries','ดูหนังออนไลน์','ทีวีออนไลน์','ทีวี','กีฬา','อื่นๆ'],map={};items.forEach(item=>{let cats=item.groups&&item.groups.length?item.groups:[item.group||'อื่นๆ'];cats.forEach(c=>{c=groupName(c);if(!map[c])map[c]=[];if(!map[c].some(x=>x.title===item.title))map[c].push(item)})});return Object.keys(map).sort((a,b)=>{let ia=order.indexOf(a)<0?99:order.indexOf(a),ib=order.indexOf(b)<0?99:order.indexOf(b);return ia-ib||a.localeCompare(b,'th')}).map(title=>({title,items:map[title]}))}
 function renderHome(){state.activeSource='home';setStatus('หน้าแรก • MySeries แยกหมวด + หนัง + ทีวี');content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV FINAL 1080P TV STABLE</div><div class="hero-sub">แยกหมวดซีรี่ย์ชัดเจน • เล่นไวขึ้น • มีระบบกันหมุนค้างอัตโนมัติ</div></div><div id="homeRows"></div>`;Promise.all([loadSourcePack('movie-main').catch(()=>[]),loadSourcePack('series-24hd').catch(()=>[])]).then(([movies,series24])=>{let rows=[
 {title:'ทีวีแนะนำ',items:[
