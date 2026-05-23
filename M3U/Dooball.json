@@ -3,11 +3,14 @@
     "title": "Bein01",
     "group": "กีฬา",
     "logo": "https://www.imgx01.xyz/assets/img/ch_logo/epl-bein1.jpg",
-    "servers": [
-      {
-        "name": "Main",
-        "url": "https://cdn1.googlecdnforstreaming.live/live/bein1/playlist.m3u8&referer=https://warpdooball.net/",
-        "drm": false
+    "servers":[
+  {
+    "name":"480P",
+    "url":"https://love.nagonof558.workers.dev/vx-ej227ediuvbd/epl-bein1_480/chunks.m3u8"
+  },
+  {
+    "name":"720P",
+    "url":"https://love.nagonof558.workers.dev/vx-ej227ediuvbd/epl-bein1_720/chunks.m3u8",
       }
     ]
   },
