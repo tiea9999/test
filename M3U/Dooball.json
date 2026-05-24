@@ -511,7 +511,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://love.mayos28968.workers.dev/lx-origin/th-hbo_480/chunks.m3u8"
+        "url": "https://love.tivov68423.workers.dev/lx-origin/th-hbo_480/chunks.m3u8"
       },
       {
         "name": "Backup 1",
