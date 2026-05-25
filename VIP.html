@@ -361,6 +361,7 @@
   {name:"avpung18+",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_avpung.json"},
   {name:"jav24 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_jav24.json"}
 ];
+];
 const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 
 const app=document.getElementById("app");
@@ -1052,68 +1053,6 @@ function setupAutoHideUI(){
     }
   });
 }
-
-
-// SEEK REMOTE ANDROID TV
-document.addEventListener("keydown",e=>{
-  const box=document.getElementById("player-container");
-
-  if(box.style.display!=="block") return;
-
-  const k=e.key||"";
-  const c=e.keyCode||0;
-
-  // LEFT = -15s
-  if(
-    k==="ArrowLeft" ||
-    k==="MediaRewind" ||
-    c===21
-  ){
-    e.preventDefault();
-
-    try{
-      player.currentTime=Math.max(0,(player.currentTime||0)-15);
-      setStatus("⏪ ย้อนกลับ 15 วิ");
-      showPlayerUI();
-    }catch(err){}
-  }
-
-  // RIGHT = +15s
-  if(
-    k==="ArrowRight" ||
-    k==="MediaFastForward" ||
-    c===22
-  ){
-    e.preventDefault();
-
-    try{
-      player.currentTime=(player.currentTime||0)+15;
-      setStatus("⏩ เดินหน้า 15 วิ");
-      showPlayerUI();
-    }catch(err){}
-  }
-
-  // PLAY/PAUSE
-  if(
-    k==="MediaPlayPause" ||
-    c===179
-  ){
-    e.preventDefault();
-
-    try{
-      if(player.paused){
-        player.play().catch(()=>{});
-        setStatus("▶ เล่น");
-      }else{
-        player.pause();
-        setStatus("⏸ หยุด");
-      }
-
-      showPlayerUI();
-    }catch(err){}
-  }
-});
-
 
 document.addEventListener("DOMContentLoaded",()=>{setupAutoHideUI();loadDefaultJson();});
     </script>
