@@ -321,7 +321,42 @@
                 padding: 6px 7px
             }
         }
-    </style>
+    
+/* ===== FULLSCREEN PLAYER AUTO HIDE FINAL ===== */
+#player-container{
+  position:fixed!important;
+  inset:0!important;
+  width:100vw!important;
+  height:100vh!important;
+  background:#000!important;
+  z-index:99999!important;
+}
+#player{
+  width:100vw!important;
+  height:100vh!important;
+  max-width:none!important;
+  object-fit:contain!important;
+  background:#000!important;
+}
+.player-controls,
+.status{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transition:opacity .22s ease,visibility .22s ease!important;
+}
+#player-container.show-ui .player-controls{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+#player-container.show-status .status{
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:auto!important;
+}
+
+</style>
 </head>
 
 <body>
@@ -360,7 +395,6 @@
   {name:"pornxxx",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornxxx.json"},
   {name:"avpung18+",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_avpung.json"},
   {name:"jav24 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_jav24.json"}
-
 ];
 const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 
@@ -375,7 +409,23 @@ let OVERLAY_KEY='';
 
 function clean(v){return String(v||"").trim()}
 function pick(o,keys){for(const k of keys){if(o&&o[k]!==undefined&&o[k]!==null&&clean(o[k])!=="")return o[k]}return ""}
-function setStatus(t){document.getElementById("status").textContent=t||""}
+function setStatus(t){
+  t=String(t||"");
+  if(t.includes("กำลังเล่น")){
+    t="";
+  }
+  const el=document.getElementById("status");
+  if(el)el.textContent=t;
+  const box=document.getElementById("player-container");
+  if(box){
+    if(t){
+      box.classList.add("show-status");
+      setTimeout(()=>box.classList.remove("show-status"),1800);
+    }else{
+      box.classList.remove("show-status");
+    }
+  }
+}
 function isJsonUrl(u){u=clean(u).toLowerCase();return u.includes(".json")}
 function isM3U8Url(u){u=clean(u).toLowerCase();return u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")}
 
@@ -526,13 +576,34 @@ async function loadDefaultJson(){
   loadStatus.innerHTML="โหลดสำเร็จ "+total+" รายการ จาก "+success+" JSON";
 }
 
+
+function displayCategoryName(name){
+  name=String(name||"").trim();
+
+  const map={
+    "movie24hd.json":"🎬 หนัง 24HD",
+    "myseries-china.json":"🇨🇳 ซีรี่ย์จีน",
+    "myseries-korea.json":"🇰🇷 ซีรี่ย์เกาหลี",
+    "myseries-thai.json":"🇹🇭 ซีรี่ย์ไทย",
+    "myseries-japan.json":"🇯🇵 ซีรี่ย์ญี่ปุ่น",
+    "myseries-short.json":"🎞️ ซีรี่ย์สั้น",
+    "myseries-series.json":"🔥 ซีรี่ย์อัพเดทใหม่"
+  };
+
+  for(const k in map){
+    if(name.includes(k)) return map[k];
+  }
+
+  return name;
+}
+
 function renderJsonRow(name,items){
   const rowKey="jsonrow_"+safeKey(name);
   const wrap=document.createElement("div");
   wrap.className="json-section";
   wrap.innerHTML=
     '<div class="group-title" style="display:flex;align-items:center;justify-content:space-between;gap:10px;">'+
-      '<span>'+name+'</span>'+
+      '<span>'+displayCategoryName(name)+'</span>'+
       '<button class="tool-btn" onclick="showAllJsonRow(\''+escapeJs(name)+'\')">ดูทั้งหมด</button>'+
     '</div>'+
     '<div class="channel-row" id="'+rowKey+'"></div>';
@@ -591,7 +662,7 @@ function renderAllJsonPage(){
 
   app.innerHTML=
     '<div style="padding:12px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">'+
-      '<h2 style="padding:0;margin:0;color:orange;">'+OVERLAY_KEY+'</h2>'+
+      '<h2 style="padding:0;margin:0;color:orange;">'+displayCategoryName(OVERLAY_KEY)+'</h2>'+
       '<div style="display:flex;gap:8px;flex-wrap:wrap;">'+
         '<button class="tool-btn" onclick="prevAllJsonPage()">◀ ก่อนหน้า</button>'+
         '<button class="tool-btn" onclick="nextAllJsonPage()">ถัดไป ▶</button>'+
@@ -671,7 +742,7 @@ async function playChannel(ch,el){
   document.querySelectorAll(".channel").forEach(x=>x.classList.remove("active"));
   if(el)el.classList.add("active");
   document.getElementById("player-container").style.display="block";
-  showPlayerUI();
+  showPlayerUI(false);
   setTimeout(()=>document.getElementById("closeBtn")?.focus(),200);
   await tryServer();
 }
@@ -714,7 +785,7 @@ function playMPD(s){
     shakaPlayer.load(s.url).then(()=>{
       forceMaxVolume();
       player.play().catch(()=>{});
-      setStatus("กำลังเล่น "+(s.name||"Server "+(currentServerIndex+1)));
+      setStatus("");
     }).catch(()=>nextServer());
   }catch(e){nextServer()}
 }
@@ -777,7 +848,7 @@ function playHLS(s){
       started=true;
       forceMaxVolume();
       player.play().catch(()=>{});
-      setStatus("กำลังเล่น "+(s.name||"Server "+(currentServerIndex+1)));
+      setStatus("");
     });
     player.addEventListener('stalled',()=>{
       try{
@@ -919,7 +990,7 @@ function playHLS(s){
     player.src=url;
     forceMaxVolume();
     player.play().then(()=>{
-      setStatus("กำลังเล่น "+(s.name||"Server "+(currentServerIndex+1)));
+      setStatus("");
     }).catch(()=>nextServer());
   }
 }
@@ -1018,15 +1089,25 @@ document.getElementById("jsonFile").addEventListener("change",async e=>{
 
 let uiTimer=null;
 
-function showPlayerUI(){
+function showPlayerUI(showStatus=false){
   const box=document.getElementById("player-container");
+  if(!box)return;
 
+  box.classList.add("show-ui");
   box.classList.remove("hide-ui");
+
+  if(showStatus){
+    box.classList.add("show-status");
+  }else{
+    box.classList.remove("show-status");
+  }
 
   if(uiTimer) clearTimeout(uiTimer);
 
   uiTimer=setTimeout(()=>{
     if(box.style.display==="block"){
+      box.classList.remove("show-ui");
+      box.classList.remove("show-status");
       box.classList.add("hide-ui");
     }
   },3000);
@@ -1049,10 +1130,72 @@ function setupAutoHideUI(){
 
   document.addEventListener("keydown",()=>{
     if(box.style.display==="block"){
-      showPlayerUI();
+      showPlayerUI(false);
     }
   });
 }
+
+
+// SEEK REMOTE ANDROID TV
+document.addEventListener("keydown",e=>{
+  const box=document.getElementById("player-container");
+
+  if(box.style.display!=="block") return;
+
+  const k=e.key||"";
+  const c=e.keyCode||0;
+
+  // LEFT = -15s
+  if(
+    k==="ArrowLeft" ||
+    k==="MediaRewind" ||
+    c===21
+  ){
+    e.preventDefault();
+
+    try{
+      player.currentTime=Math.max(0,(player.currentTime||0)-15);
+      setStatus("⏪ ย้อนกลับ 15 วิ");
+      showPlayerUI(false);
+    }catch(err){}
+  }
+
+  // RIGHT = +15s
+  if(
+    k==="ArrowRight" ||
+    k==="MediaFastForward" ||
+    c===22
+  ){
+    e.preventDefault();
+
+    try{
+      player.currentTime=(player.currentTime||0)+15;
+      setStatus("⏩ เดินหน้า 15 วิ");
+      showPlayerUI(false);
+    }catch(err){}
+  }
+
+  // PLAY/PAUSE
+  if(
+    k==="MediaPlayPause" ||
+    c===179
+  ){
+    e.preventDefault();
+
+    try{
+      if(player.paused){
+        player.play().catch(()=>{});
+        setStatus("▶ เล่น");
+      }else{
+        player.pause();
+        setStatus("⏸ หยุด");
+      }
+
+      showPlayerUI(false);
+    }catch(err){}
+  }
+});
+
 
 document.addEventListener("DOMContentLoaded",()=>{setupAutoHideUI();loadDefaultJson();});
     </script>
