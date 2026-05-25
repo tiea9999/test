@@ -269,6 +269,15 @@
     <script>
         const PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 
+        function proxyWithReferer(url, referer = "") {
+            let out = PROXY + encodeURIComponent(url || "");
+            if (referer) {
+                out += "&ref=" + encodeURIComponent(referer);
+                out += "&referer=" + encodeURIComponent(referer);
+            }
+            return out;
+        }
+
         const SOURCES = [
 {name: "EZ 18+",
 type: "json",
@@ -373,6 +382,7 @@ url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornx
 
                     if (s && typeof s === "object") {
                         return {
+                            name: s.name || s.title || "Main",
                             url:
                                 s.url ||
                                 s.file ||
@@ -386,6 +396,12 @@ url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornx
                                 s.player ||
                                 s.embed ||
                                 s.stream_url ||
+                                "",
+                            referer:
+                                s.referer ||
+                                s.ref ||
+                                s.origin ||
+                                s.host ||
                                 ""
                         };
                     }
@@ -591,7 +607,7 @@ url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornx
             }
 
             if (url) {
-                startPlay([{ url }]);
+                startPlay([{ url, referer: item.referer || item.ref || item.origin || item.host || '' }]);
                 return;
             }
 
@@ -628,7 +644,7 @@ url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornx
                     if (servers.length) {
                         startPlay(servers);
                     } else if (single) {
-                        startPlay([{ url: single }]);
+                        startPlay([{ url: single, referer: ep.referer || ep.ref || ep.origin || ep.host || item.referer || item.ref || '' }]);
                     } else {
                         alert("❌ ตอนนี้ไม่มีลิงก์เล่น");
                     }
@@ -660,11 +676,12 @@ url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornx
                 currentIndex = i;
                 const item = list[i];
                 const url = typeof item === "string" ? item : item.url;
+                const referer = typeof item === "string" ? "" : (item.referer || item.ref || item.origin || "");
 
                 if (!url) continue;
 
                 try {
-                    await play(url);
+                    await play(url, referer);
                     return;
                 } catch (e) {
                     console.warn("server เล่นไม่ได้:", url, e);
@@ -703,16 +720,16 @@ url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornx
             return /youtube\.com|youtu\.be|vk\.com|ok\.ru|dailymotion\.com|player|embed/i.test(url);
         }
 
-        async function play(url) {
+        async function play(url, referer = "") {
             cleanupPlayers();
 
             if (isHls(url)) {
                 try {
-                    await playHlsWithFallback(url);
+                    await playHlsWithFallback(url, referer);
                     return;
                 } catch (e) {
                     try {
-                        await playNativeVideo(PROXY + encodeURIComponent(url));
+                        await playNativeVideo(proxyWithReferer(url, referer));
                         return;
                     } catch (_) {
                         throw e;
@@ -788,8 +805,8 @@ url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornx
             });
         }
 
-        function playHlsWithFallback(url) {
-            const tryUrls = [url, PROXY + encodeURIComponent(url)];
+        function playHlsWithFallback(url, referer = "") {
+            const tryUrls = [url, proxyWithReferer(url, referer)];
 
             return new Promise(async (resolve, reject) => {
                 for (const testUrl of tryUrls) {
@@ -876,14 +893,26 @@ url: "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornx
                     video.load();
                 } else if (Hls.isSupported()) {
                     hls = new Hls({
-                        enableWorker: true,
+                        enableWorker: false,
                         lowLatencyMode: false,
-                        backBufferLength: 30,
-                        maxBufferLength: 20,
-                        maxMaxBufferLength: 30,
+                        backBufferLength: 15,
+                        maxBufferLength: 30,
+                        maxMaxBufferLength: 60,
+                        maxBufferHole: 1.5,
+                        highBufferWatchdogPeriod: 4,
                         startLevel: -1,
-                        fragLoadingTimeOut: 20000,
-                        manifestLoadingTimeOut: 20000
+                        capLevelToPlayerSize: true,
+                        testBandwidth: false,
+                        abrEwmaDefaultEstimate: 500000,
+                        fragLoadingTimeOut: 25000,
+                        manifestLoadingTimeOut: 20000,
+                        levelLoadingTimeOut: 20000,
+                        fragLoadingMaxRetry: 6,
+                        manifestLoadingMaxRetry: 4,
+                        levelLoadingMaxRetry: 4,
+                        fragLoadingRetryDelay: 1500,
+                        manifestLoadingRetryDelay: 1500,
+                        levelLoadingRetryDelay: 1500
                     });
 
                     video.addEventListener("loadedmetadata", ok, { once: true });
