@@ -178,7 +178,17 @@
       {
         "name": "Main",
     "url": "https://cdn2.turboviplay.com/data1/6a118898794ce/6a118898794ce.m3u8"
-    
+      }
+    ]
+  },        
+  {
+    "title": "[Reducing Mosaic]JUR-737",
+    "group": "supj",
+    "poster": "https://img.supjav.com/images/2026/05/jur737pl.jpg!320x216.jpg",
+    "servers": [
+      {
+        "name": "Main",
+    "url": "https://cdn2.turboviplay.com/data1/6a1188574c271/6a1188574c271.m3u8"    
       }
     ]
   }
