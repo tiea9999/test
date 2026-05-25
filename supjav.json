@@ -177,8 +177,8 @@
     "servers": [
       {
         "name": "Main",
-    "url": "https://cdn2.turboviplay.com/data1/6a118898794ce/6a118898794ce.m3u8",
-    "referer": "https://fc2stream.tv/"
+    "url": "https://cdn2.turboviplay.com/data1/6a118898794ce/6a118898794ce.m3u8"
+    
       }
     ]
   }
