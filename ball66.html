@@ -2,286 +2,359 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-
-<!-- 🔥 สำคัญมาก -->
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-<title>TIEA IPTV</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>TIEA SIMPLE M3U FINAL</title>
 
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
-<script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
-<script>jwplayer.key="XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo";</script>
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.10.9/shaka-player.compiled.min.js"></script>
 
 <style>
-
 body{
-margin:0;
-background:#0b0b0b;
-color:#fff;
-font-family:sans-serif;
-overflow-x:hidden;
+  margin:0;
+  background:#000;
+  color:#fff;
+  font-family:Arial,sans-serif;
 }
-
-/* 🔥 GRID AUTO ไม่ล้น */
-.movie-grid{
-display:grid;
-grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-gap:8px;
-padding:10px;
+.top{
+  position:sticky;
+  top:0;
+  z-index:999;
+  background:#111;
+  padding:10px;
 }
-
-@media(max-width:500px){
-.movie-grid{grid-template-columns:repeat(2,1fr);}
+input{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #555;
+  background:#000;
+  color:#fff;
+  box-sizing:border-box;
 }
-@media(min-width:501px) and (max-width:900px){
-.movie-grid{grid-template-columns:repeat(3,1fr);}
+button{
+  margin-top:8px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:0;
+  background:orange;
+  color:#000;
+  font-weight:bold;
 }
-@media(min-width:901px){
-.movie-grid{grid-template-columns:repeat(5,1fr);}
+#status{
+  padding:8px;
+  color:#9ff;
+  font-size:13px;
 }
-
-.movie-card{
-background:#1b1b1b;
-border-radius:10px;
-cursor:pointer;
+.group{
+  color:cyan;
+  font-size:18px;
+  font-weight:bold;
+  padding:10px;
 }
-
-.movie-card img{
-width:100%;
-height:120px;
-object-fit:contain;
-background:#000;
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(130px,1fr));
+  gap:10px;
+  padding:10px;
 }
-
-.movie-title{
-text-align:center;
-padding:5px;
-font-size:13px;
+.card{
+  background:#1a1a1a;
+  border:2px solid #333;
+  border-radius:12px;
+  padding:8px;
+  text-align:center;
 }
-
-/* PLAYER เต็มจอจริง */
-#player-container{
-position:fixed;
-top:0;
-left:0;
-width:100vw;
-height:100vh;
-background:#000;
-display:none;
-z-index:9999;
-overflow:hidden;
+.card img{
+  width:100%;
+  height:170px;
+  object-fit:cover;
+  border-radius:10px;
 }
-
-/* ปุ่ม */
-.close-btn{
-position:fixed;
-top:env(safe-area-inset-top,20px);
-right:15px;
-background:red;
-color:#fff;
-border:none;
-width:45px;
-height:45px;
-border-radius:50%;
-font-size:18px;
-cursor:pointer;
-z-index:99999;
+.card div{
+  margin-top:6px;
+  font-size:12px;
 }
-
-.home-btn{
-position:fixed;
-top:env(safe-area-inset-top,20px);
-left:15px;
-background:#2196f3;
-color:#fff;
-border:none;
-padding:10px 16px;
-border-radius:12px;
-cursor:pointer;
-z-index:99999;
-font-size:14px;
+#playerBox{
+  position:fixed;
+  inset:0;
+  background:#000;
+  z-index:9999;
+  display:none;
 }
-
-/* video ไม่ล้น */
-video,#jw-player{
-width:100%;
-height:100%;
-object-fit:contain;
+video{
+  width:100%;
+  height:100%;
+  background:#000;
 }
-
+.ctrl{
+  position:absolute;
+  top:10px;
+  left:10px;
+  z-index:10000;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.ctrl button{
+  margin:0;
+}
 </style>
 </head>
-
 <body>
 
-<div id="movieGrid" class="movie-grid"></div>
+<div class="top">
+<input id="m3u" value="https://www.dropbox.com/scl/fi/p7ce77polkqconjm0xbj7/tv_channels_iptv591-gmail.com_plus.m3u?rlkey=aebh95dzko8z59d9d8cxpdnao&dl=1">
+<button onclick="loadM3U()">โหลด M3U</button>
+<div id="status">พร้อมโหลด</div>
+</div>
 
-<div id="player-container">
+<div id="app"></div>
 
-<button id="homeBtn" class="home-btn">🏠 หน้าโฮม</button>
-<button id="closePlayerBtn" class="close-btn">✕</button>
-
-<video id="videoPlayer" controls playsinline autoplay muted></video>
-<div id="jw-player" style="display:none;"></div>
-
+<div id="playerBox">
+  <div class="ctrl">
+    <button onclick="closePlayer()">X ปิด</button>
+    <button onclick="openExternal()">▶ PLAYER</button>
+    <button onclick="openMX()">▶ MX</button>
+  </div>
+  <video id="video" controls autoplay playsinline webkit-playsinline></video>
 </div>
 
 <script>
-
-let video=document.getElementById("videoPlayer");
-let jwInstance=null;
+const WORKER="https://iptv.tawatchai250958.workers.dev/?url=";
+let currentUrl="";
 let hls=null;
+let tsPlayer=null;
+let shakaPlayer=null;
 
-/* 🔊 เสียงดัง */
-function setDefaultVolumeHTML5(){
-video.muted=true;
-video.volume=1.0;
-setTimeout(()=>{video.muted=false},300);
-}
-function setDefaultVolumeJW(){
-if(jwInstance) jwInstance.setVolume(100);
+function setStatus(t){
+ document.getElementById('status').textContent=t;
 }
 
-/* RESET */
-function resetPlayers(){
-if(hls){try{hls.destroy()}catch(e){} hls=null;}
-if(jwInstance){try{jwInstance.stop();jwInstance.remove()}catch(e){} jwInstance=null;}
-video.pause();
-video.src="";
-video.load();
-video.style.display="block";
-document.getElementById("jw-player").style.display="none";
+function worker(url){
+ return WORKER+encodeURIComponent(url);
 }
 
-/* PLAY */
-function playStream(ch){
+async function loadM3U(){
+  try{
+    setStatus("กำลังโหลดรายการ...");
+    const raw=document.getElementById('m3u').value.trim()
+      .replace("www.dropbox.com","dl.dropboxusercontent.com")
+      .replace("?dl=1","")
+      .replace("&dl=1","");
 
-resetPlayers();
-document.getElementById("player-container").style.display="block";
+    let text="";
 
-let url=ch.url||ch.stream;
-if(!url && ch.servers?.length) url=ch.servers[0].url;
-if(!url) return;
+    try{
+      text=await fetch(raw).then(r=>r.text());
+    }catch(e){
+      text=await fetch(worker(raw)).then(r=>r.text());
+    }
 
-const lower=url.toLowerCase();
+    if(!text.includes("#EXTM3U")){
+      throw new Error("ไม่ใช่ไฟล์ M3U");
+    }
 
-/* MP4 */
-if(lower.includes(".mp4")){
-video.src=url;
-setDefaultVolumeHTML5();
-video.play().catch(()=>{});
-return;
+    render(parseM3U(text));
+  }catch(e){
+    console.log(e);
+    setStatus("โหลดไม่สำเร็จ");
+  }
 }
 
-/* HLS */
-if(lower.includes(".m3u8")){
-if(Hls.isSupported()){
-hls=new Hls({manifestLoadingMaxRetry:6});
-hls.loadSource(url);
-hls.attachMedia(video);
-hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-setDefaultVolumeHTML5();
-video.play().catch(()=>{});
-});
-}else{
-video.src=url;
-setDefaultVolumeHTML5();
-video.play().catch(()=>{});
-}
-return;
-}
+function parseM3U(text){
+  const lines=text.split("\n");
+  const out=[];
+  let meta=null;
 
-/* DASH */
-if(lower.includes(".mpd")){
-const dash=dashjs.MediaPlayer().create();
-dash.initialize(video,url,true);
-setDefaultVolumeHTML5();
-return;
-}
+  for(let i=0;i<lines.length;i++){
+    const line=lines[i].trim();
 
-/* fallback JW */
-startJW(url);
-}
+    if(line.startsWith("#EXTINF")){
+      meta=line;
+      continue;
+    }
 
-/* JW */
-function startJW(url){
-video.style.display="none";
-document.getElementById("jw-player").style.display="block";
+    if(meta && line.startsWith("http")){
+      const name=(meta.split(",")[1]||"ไม่มีชื่อ").trim();
+      const logo=(meta.match(/tvg-logo="([^"]+)"/)||[])[1]||"";
+      const group=(meta.match(/group-title="([^"]+)"/)||[])[1]||"อื่นๆ";
 
-jwInstance=jwplayer("jw-player").setup({
-file:url,
-autostart:true,
-width:"100%",
-height:"100%"
-});
+      out.push({
+        name,logo,group,url:line
+      });
 
-jwInstance.on('ready',()=>setDefaultVolumeJW());
+      meta=null;
+    }
+  }
+
+  return out;
 }
 
-/* ปิด */
+function render(list){
+  const app=document.getElementById('app');
+  app.innerHTML="";
+
+  const groups={};
+
+  list.forEach(ch=>{
+    if(!groups[ch.group]) groups[ch.group]=[];
+    groups[ch.group].push(ch);
+  });
+
+  Object.keys(groups).forEach(g=>{
+    const title=document.createElement('div');
+    title.className='group';
+    title.textContent=g;
+    app.appendChild(title);
+
+    const grid=document.createElement('div');
+    grid.className='grid';
+
+    groups[g].forEach(ch=>{
+      const c=document.createElement('div');
+      c.className='card';
+      c.innerHTML=`
+        <img src="${ch.logo}" onerror="this.src='https://via.placeholder.com/300x450?text=TV'">
+        <div>${ch.name}</div>
+      `;
+      c.onclick=()=>play(ch.url);
+      grid.appendChild(c);
+    });
+
+    app.appendChild(grid);
+  });
+
+  setStatus("โหลดสำเร็จ "+list.length+" ช่อง");
+}
+
+async function stopAll(){
+  try{ if(hls){hls.destroy();hls=null;} }catch(e){}
+  try{ if(tsPlayer){tsPlayer.destroy();tsPlayer=null;} }catch(e){}
+  try{ if(shakaPlayer){await shakaPlayer.destroy();shakaPlayer=null;} }catch(e){}
+}
+
+async function play(url){
+  currentUrl=url;
+  document.getElementById('playerBox').style.display='block';
+
+  const v=document.getElementById('video');
+  await stopAll();
+
+  const low=url.toLowerCase();
+
+  if(low.includes(".mpd")){
+    playMPD(url);
+    return;
+  }
+
+  if(low.includes(".m3u8")){
+    playHLS(url);
+    return;
+  }
+
+  playTS(url);
+}
+
+function playHLS(url){
+  const v=document.getElementById('video');
+
+  if(Hls.isSupported()){
+    hls=new Hls({
+      maxBufferLength:30,
+      maxMaxBufferLength:60,
+      backBufferLength:10,
+      enableWorker:false
+    });
+
+    hls.loadSource(url);
+    hls.attachMedia(v);
+
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+      v.play().catch(()=>{});
+    });
+
+    hls.on(Hls.Events.ERROR,()=>{
+      if(!url.includes("workers.dev")){
+        playHLS(worker(url));
+      }
+    });
+  }else{
+    v.src=url;
+    v.play().catch(()=>{});
+  }
+}
+
+function playTS(url){
+  const v=document.getElementById('video');
+
+  if(window.mpegts && mpegts.getFeatureList().mseLivePlayback){
+    tsPlayer=mpegts.createPlayer({
+      type:'mpegts',
+      url:url,
+      isLive:true
+    },{
+      enableStashBuffer:true,
+      stashInitialSize:1024*512
+    });
+
+    tsPlayer.attachMediaElement(v);
+    tsPlayer.load();
+
+    setTimeout(()=>{
+      v.play().catch(()=>{});
+    },300);
+
+    tsPlayer.on(mpegts.Events.ERROR,()=>{
+      if(!url.includes("workers.dev")){
+        playTS(worker(url));
+      }
+    });
+  }else{
+    v.src=url;
+    v.play().catch(()=>{});
+  }
+}
+
+async function playMPD(url){
+  const v=document.getElementById('video');
+
+  shaka.polyfill.installAll();
+
+  shakaPlayer=new shaka.Player(v);
+
+  try{
+    await shakaPlayer.load(url);
+    v.play().catch(()=>{});
+  }catch(e){
+    if(!url.includes("workers.dev")){
+      playMPD(worker(url));
+    }
+  }
+}
+
 function closePlayer(){
-resetPlayers();
-document.getElementById("player-container").style.display="none";
+  stopAll();
+  document.getElementById('playerBox').style.display='none';
 }
 
-/* EVENTS */
-document.getElementById("closePlayerBtn").onclick=(e)=>{
-e.stopPropagation();
-closePlayer();
-};
-
-document.getElementById("homeBtn").onclick=(e)=>{
-e.stopPropagation();
-closePlayer();
-window.location.href="https://tiea9999.github.io/tv/index.html";
-};
-
-document.getElementById("player-container").onclick=()=>{
-closePlayer();
-};
-
-/* LOAD */
-async function load(){
-
-const res=await fetch("https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/M3U/Dooball.json");
-const data=await res.json();
-
-const grid=document.getElementById("movieGrid");
-let list=[];
-
-if(data.groups){
-data.groups.forEach(g=>{
-g.stations.forEach(s=>{
-list.push({
-title:s.name,
-logo:s.image||g.image,
-url:s.url
-});
-});
-});
-}else{
-list=data;
+function openExternal(){
+  window.location.href=currentUrl;
 }
 
-list.forEach(ch=>{
-const card=document.createElement("div");
-card.className="movie-card";
-
-card.innerHTML=`
-<img src="${ch.logo||''}">
-<div class="movie-title">${ch.title}</div>
-`;
-
-card.onclick=()=>playStream(ch);
-
-grid.appendChild(card);
-});
-
+function openMX(){
+  try{
+    const u=new URL(currentUrl);
+    const scheme=u.protocol.replace(":","");
+    const host=u.host+u.pathname+(u.search||"");
+    const intent='intent://'+host+'#Intent;scheme='+scheme+';package=com.mxtech.videoplayer.ad;action=android.intent.action.VIEW;type=video/*;end';
+    location.href=intent;
+  }catch(e){
+    openExternal();
+  }
 }
 
-load();
-
+loadM3U();
 </script>
 
 </body>
