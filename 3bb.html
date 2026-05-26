@@ -4,214 +4,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV WORKERS TS BUFFER SMOOTH FINAL</title>
+    <title>TIEA IPTV MPD HOME BASE HIDE FIX</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
         jwplayer.key = 'XSuP4qMl+9tK17QNb+4+th2Pm9AWgMO/cYH8CI0HGGr7bdjo';
     </script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.10.9/shaka-player.compiled.min.js"></script>
 
     <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center
-        }
-
-        #channel-list {
-            margin: 10px auto;
-            max-width: 1200px;
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 10px;
-            overflow-x: auto;
-            padding: 10px
-        }
-
-        .channel {
-            cursor: pointer;
-            padding: 5px 3px;
-            background: #222;
-            border: 2px solid #444;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            min-height: 80px;
-            transition: all .2s
-        }
-
-        .channel img {
-            width: 65px;
-            height: 65px;
-            margin-bottom: 5px;
-            object-fit: contain
-        }
-
-        .channel:hover,
-        .channel:focus {
-            background: #000;
-            border-color: orange;
-            outline: none;
-            box-shadow: 0 0 0 4px cyan
-        }
-
-        .channel.active {
-            background: orange;
-            color: black;
-            border-color: yellow
-        }
-
-        .back-home {
-            position: fixed;
-            top: 15px;
-            left: 15px;
-            padding: 10px 18px;
-            border-radius: 50px;
-            font-weight: 600;
-            cursor: pointer;
-            z-index: 9999;
-            background: rgba(255, 255, 255, .15);
-            border: 1px solid rgba(255, 255, 255, .3);
-            color: #fff
-        }
-
-        #player-container {
-            position: fixed;
-            inset: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-            z-index: 99999;
-            display: none;
-            overflow: hidden
-        }
-
-        #jw-player,
-        #html5-player {
-            width: 100% !important;
-            height: 100% !important;
-            background: #000
-        }
-
-        .player-controls {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            right: 12px;
-            z-index: 100000;
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-            transition: opacity .25s ease, visibility .25s ease, transform .25s ease
-        }
-
-        #player-container.controls-hidden .player-controls {
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-18px);
-            pointer-events: none
-        }
-
-        #player-container.controls-hidden .status {
-            opacity: 0;
-            visibility: hidden
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap
-        }
-
-        .player-btn {
-            background: rgba(0, 0, 0, .75);
-            color: #fff;
-            border: 2px solid #fff;
-            border-radius: 12px;
-            padding: 10px 18px;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer
-        }
-
-        .player-btn:focus {
-            outline: none;
-            box-shadow: 0 0 0 4px cyan
-        }
-
-        .status {
-            position: fixed;
-            bottom: 15px;
-            left: 15px;
-            right: 15px;
-            z-index: 100001;
-            text-align: center;
-            color: #fff;
-            background: rgba(0, 0, 0, .7);
-            padding: 8px 12px;
-            border-radius: 10px;
-            display: none;
-            font-size: 14px;
-            border: 1px solid rgba(0, 255, 255, .35)
-        }
-
-        @media(max-width:768px) {
-            #channel-list {
-                grid-template-columns: repeat(5, 1fr)
-            }
-
-            .player-btn {
-                font-size: 16px;
-                padding: 8px 12px
-            }
-        }
-
-        @media(max-width:480px) {
-            #channel-list {
-                grid-template-columns: repeat(3, 1fr)
-            }
-
-            .channel img {
-                width: 52px;
-                height: 52px
-            }
-
-            .channel {
-                font-size: 10px;
-                min-height: 60px
-            }
-        }
+        body{margin:0;padding:0;background:#000;color:#fff;font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center}
+        #channel-list{margin:10px auto;max-width:1200px;display:grid;grid-template-columns:repeat(7,1fr);gap:10px;overflow-x:auto;padding:10px}
+        .channel{cursor:pointer;padding:5px 3px;background:#222;border:2px solid #444;border-radius:8px;text-align:center;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:80px;transition:all .2s}
+        .channel img{width:65px;height:65px;margin-bottom:5px;object-fit:contain}
+        .channel:hover,.channel:focus{background:#000;border-color:orange;outline:none;box-shadow:0 0 0 4px cyan}
+        .channel.active{background:orange;color:black;border-color:yellow}
+        .back-home{position:fixed;top:15px;left:15px;padding:10px 18px;border-radius:50px;font-weight:600;cursor:pointer;z-index:9999;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff}
+        #player-container{position:fixed;inset:0;width:100vw;height:100vh;background:#000;z-index:99999;display:none;overflow:hidden}
+        #jw-player,#html5-player{width:100%!important;height:100%!important;background:#000}
+        .player-controls{position:absolute;top:12px;left:12px;right:12px;z-index:100000;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+        .left-buttons,.right-buttons{display:flex;gap:10px;flex-wrap:wrap}
+        .player-btn{background:rgba(0,0,0,.75);color:#fff;border:2px solid #fff;border-radius:12px;padding:10px 18px;font-size:20px;font-weight:bold;cursor:pointer}
+        .player-btn:focus{outline:none;box-shadow:0 0 0 4px cyan}
+        .status{position:fixed;bottom:15px;left:15px;right:15px;z-index:100001;text-align:center;color:#fff;background:rgba(0,0,0,.72);padding:8px 12px;border-radius:10px;display:none;font-size:14px;border:1px solid rgba(0,255,255,.35)}
+        @media(max-width:768px){#channel-list{grid-template-columns:repeat(5,1fr)}.player-btn{font-size:16px;padding:8px 12px}}
+        @media(max-width:480px){#channel-list{grid-template-columns:repeat(3,1fr)}.channel img{width:52px;height:52px}.channel{font-size:10px;min-height:60px}}
     </style>
+
+<style id="force-autohide-style">
+#player-container.force-hide-controls .player-controls,
+#player-container.force-hide-controls .status{
+  opacity:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  transform:translateY(-22px)!important;
+}
+#player-container .player-controls{
+  opacity:1;
+  visibility:visible;
+  transition:opacity .22s ease, visibility .22s ease, transform .22s ease;
+}
+</style>
+
 </head>
 
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA IPTV WORKERS TS BUFFER SMOOTH FINAL</h2>
+    <h2 style="color:orange;text-align:center;">TIEA IPTV MPD HOME BASE HIDE FIX</h2>
 
     <div id="player-container">
         <div class="player-controls">
-            <div class="btn-row">
+            <div class="left-buttons">
                 <button class="player-btn" id="closeBtn" onclick="closePlayer()">X</button>
                 <button class="player-btn" onclick="restartCurrent()">↻ รีโหลด</button>
             </div>
-            <div class="btn-row">
+            <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
+                <button class="player-btn" onclick="openMX()">▶ MX</button>
                 <button class="player-btn" onclick="goHome()">🏠 HOME</button>
             </div>
         </div>
@@ -223,26 +74,64 @@
     <div id="channel-list"></div>
 
     <script>
-        const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
+const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 
 const channels = [
+{name:"TV5HD",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/ch5new.logo.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
+{name:"NBT",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/0001.png",file:"https://cdn-edge.iiptvcdn.com/live_event/smil:f180-054a-38d7-ce66-f7cf.smil/playlist.m3u8",drm:false},
+{name:"ThaiPBS",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0014.png",file:"https://thaipbs-ophctt.cdn.byteark.com/live/playlist.m3u8",drm:false},
+{name:"T-SPorts 7",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/T-SPorts_7_Final.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/7/7.mpd",keyId:"6187523f92b9475bb5b192f70cef1342",key:"5119311f482144d58dacabc5bc1fa4ba",drm:true},
+{name:"TPTV",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0048.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/10/10.mpd",keyId:"5da46688fd1e4ed5b085a12519b9dc4e",key:"fd07bcf33823447180f53f6540f74ccb",drm:true},
+{name:"TNN16",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/R2_0053.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/16/16.mpd",keyId:"9ebedc957e934d2b9023e4e60b97af73",key:"7bcb4363df74457bbafedec1a864e6b6",drm:true},
+{name:"Nation22",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0021.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/22/22.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
+{name:"Workpoint",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0015_R.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/23/23.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
+{name:"True4U",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0054.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/24/24.mpd",keyId:"4eabd5db684248a98c5124fbb0687bde",key:"d2f7a6f45b3c48678ca69c91d7823c25",drm:true},
+{name:"GMM 25",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0019.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/25/25.mpd",keyId:"ae986b6dd3d84b2bb868c8765c604815",key:"89bf3c85580249d5bac4d3edaec019ec",drm:true},
+{name:"CH 8",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//0006.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/27/27.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
+{name:"Mono 29",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0016.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/29/29.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
+{name:"MCOT HD",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/MCOT_new.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/30/30.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
+{name:"ONE31",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0012.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/31/31.mpd",keyId:"6529c8cd99db4489bd237f616f37124b",key:"b9d299ba9ea94fd2ac4a77e8966dd91e",drm:true},
+{name:"Thairath TV",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0013_R.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/32/32.mpd",keyId:"9d76aea451d441a4913d4d70c4e586ab",key:"051027a6ff54494b949ba792928e9008",drm:true},
+{name:"CH3 HD",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/LOGO3HD.PNG",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/33/33.mpd",keyId:"9d76aea451d441a4913d4d70c4e586ab",key:"051027a6ff54494b949ba792928e9008",drm:true},
+{name:"CH7 HD",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/0018.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/35/35.mpd",keyId:"4d4426a505f64382a9841155d721cee6",key:"0f4770219ccb4be5836a7517057e51c3",drm:true},
+{name:"AmarinTV",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/AmarinTV_NEW512.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/34/34.mpd",keyId:"4d4426a505f64382a9841155d721cee6",key:"0f4770219ccb4be5836a7517057e51c3",drm:true},
+{name:"PPTV",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon/PPTV_2024e.jpg",file:"https://lb-gmmz.sky-cdn.com/gmm/pptv.m3u8",drm:false},
 
-
-{name:"HBO",logo:"https://www.dropbox.com/scl/fi/ndoy26p71sq6yv0e5kohs/hbo.png?rlkey=mcbfqd7ghrh9dtw42qwtphk2i&dl=1",file:"http://6395online.com:8080/live/iptv591@gmail.com/456672/133.m3u8",drm:false},
-{name:"CINEMAX",logo:"https://www.dropbox.com/scl/fi/ik69630wne6juek3a8hm7/cinemax.png?rlkey=znavyaub34rpncebij8a2jpfc&dl=1",file:"http://6395online.com:8080/live/iptv591@gmail.com/456672/138.m3u8",drm:false},
-{name:"CARTOONNETWORK",logo:"https://49-231-37-237-rewriter.ais-vidnt.com/ais/play/origin/LIVE///channelicon//0171.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/301/301.mpd",keyId:"f140b94c73ab4ef5b96da7f49afb1154",key:"85e4ef232c6e460f888eb20f651d66e3",drm:true},
-{name:"HBOHITS",logo:"https://www.dropbox.com/scl/fi/z36fzstmus6gpzxd0vh4n/hbohits.png?rlkey=rxzmkvmnvh6rpnrrsnu359ajq&dl=1",file:"http://6395online.com:8080/live/iptv591@gmail.com/456672/134.m3u8",drm:false},
-{name:"HBOSIGNATURE",logo:"https://www.dropbox.com/scl/fi/zk9hoe0luld3m6n9ize57/hbosig.png?rlkey=ya002r3y0nrqsyjgkulx2irpk&dl=1",file:"http://6395online.com:8080/live/iptv591@gmail.com/456672/135.m3u8",drm:false},
-{name:"HBOFAMILY",logo:"https://www.dropbox.com/scl/fi/yz3pasgpqi9yllse8jctv/hbofamily.png?rlkey=der8hjts306h0p93xi857suii&dl=1",file:"http://6395online.com:8080/live/iptv591@gmail.com/456672/136.m3u8",drm:false}
+{name:"hd-hbo",logo:"https://www.fileinwtv.site/postor/20240418201334HBO.jpg",file:"https://love.koladel299.workers.dev/lx-origin/th-hbo_720/chunks.m3u8",drm:false},
+{name:"hd-hbohits",logo:"https://www.fileinwtv.site/postor/20240418201343HBO_Hits.jpg",file:"https://love.koladel299.workers.dev/lx-origin/th-hbohits_720/chunks.m3u8",drm:false},
+{name:"hd-hbosignature",logo:"https://www.fileinwtv.site/postor/20240418201358HBO_Signature.jpg",file:"https://love.koladel299.workers.dev/lx-origin/th-hbosignature_720/chunks.m3u8",drm:false},
+{name:"hd-hbofamily",logo:"https://www.fileinwtv.site/postor/20240418201412HBO_Family.jpg",file:"https://love.koladel299.workers.dev/lx-origin/th-hbofamily_720/chunks.m3u8",keyId:"07b138f30ad3441ca5a2f476e550af25",key:"826ee4deef4b45cfafd5f79a591b15c6",drm:true},
+{name:"hd-cinemax",logo:"https://www.fileinwtv.site/postor/20240418201426cinemax.jpg",file:"https://cri-streamer1.cdn.3bbtv.com:8443/3bb/live/107/107.mpd",keyId:"f48caba466394e93b50780f21798787a",key:"9a074a10db4342e7937076b3e52f6029",drm:true},
+{name:"hd-asianmore",logo:"https://api.bananamuffin.org/images/png/hd-asianmore.png",file:"https://love.koladel299.workers.dev/lx-origin/hd-asianmore_720/chunks.m3u8",drm:false},
+{name:"hd-dreamworks",logo:"https://api.bananamuffin.org/images/png/hd-dreamworks.png",file:"https://love.koladel299.workers.dev/lx-origin/hd-dreamworks_720/chunks.m3u8",drm:false},
+{name:"hd-tfilm",logo:"https://api.bananamuffin.org/images/png/hd-tfilm.png",file:"https://love.koladel299.workers.dev/lx-origin/hd-tfilm_720/chunks.m3u8",drm:false},
+{name:"hd-warnertv",logo:"https://api.bananamuffin.org/images/png/hd-warnertv.png",file:"https://love.koladel299.workers.dev/lx-origin/hd-warnertv_720/chunks.m3u8",drm:false},
+{name:"sd-filmasia",logo:"https://api.bananamuffin.org/images/png/sd-filmasia.png",file:"https://love.koladel299.workers.dev/lx-origin/sd-filmasia_720/chunks.m3u8",drm:false},
+{name:"sd-moviehits",logo:"https://api.bananamuffin.org/images/png/sd-moviehits.png",file:"https://love.koladel299.workers.dev/lx-origin/sd-moviehits_720/chunks.m3u8",drm:false},
+{name:"sd-series",logo:"https://api.bananamuffin.org/images/png/sd-series.png",file:"https://love.koladel299.workers.dev/lx-origin/sd-series_720/chunks.m3u8",drm:false},
+{name:"cmm ",logo:"https://www.fileinwtv.site/postor/20240421154338CCM.jpg",file:"https://love.koladel299.workers.dev/vx-origin/sd-celestial_720/chunks.m3u8",drm:false},
+{name:"sd-thaifilm",logo:"https://api.bananamuffin.org/images/png/sd-thaifilm.png",file:"https://love.koladel299.workers.dev/lx-origin/sd-thaifilm_720/chunks.m3u8",drm:false},
+{name:"Asian Hits",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//3BBAsian_new.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/101/101.mpd",keyId:"dac6cbd9d17a451bb76386f52469e0e9",key:"2e2ac52cadf843459915eaa1a9b95e48",drm:true},
+{name:"Mono29Plus",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE///channelicon//Mono29Plus_new.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/109/109.mpd",keyId:"072eeb02f6744f838fcc8f0ef36b312e",key:"b797c12f2dd64728aae23fd3c8ef275c",drm:true},
+{name:"sd-asianfood",logo:"https://api.bananamuffin.org/images/png/sd-asianfood.png",file:"https://love.koladel299.workers.dev/lx-origin/sd-asianfood_720/chunks.m3u8",drm:false},
+{name:"sd-explife",logo:"https://api.bananamuffin.org/images/png/sd-explife.png",file:"https://love.koladel299.workers.dev/lx-origin/sd-explife_720/chunks.m3u8",drm:false},
+{name:"sd-expsci",logo:"https://api.bananamuffin.org/images/png/sd-expsci.png",file:"https://love.koladel299.workers.dev/lx-origin/sd-expsci_720/chunks.m3u8",drm:false},
+{name:"sd-discovery",logo:"https://api.bananamuffin.org/images/png/sd-discovery.png",file:"https://love.koladel299.workers.dev/lx-origin/sd-discovery_720/chunks.m3u8",drm:false},
+{name:"sd-boomerang",logo:"https://www.fileinwtv.site/postor/20240418202911Boomerang.jpg",file:"https://love.koladel299.workers.dev/lx-origin/sd-boomerang_480/chunks.m3u8",drm:false},
+{name:"CARTOON NETWORK",logo:"https://49-231-37-237-rewriter.ais-vidnt.com/ais/play/origin/LIVE///channelicon//0171.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/301/301.mpd",keyId:"f140b94c73ab4ef5b96da7f49afb1154",key:"85e4ef232c6e460f888eb20f651d66e3",drm:true},
+{name:"CARTOONITO",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE/channelicon//Cartoonito.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/302/302.mpd",keyId:"ad2371259d34404cb89d54a4dc88dcd3",key:"1ba155e345c4456ba891cbee9b3e1c4c",drm:true},
+{name:"NICKELODEON",logo:"https://49-231-37-237-rewriter.ais-vidnt.com/ais/play/origin/LIVE//channelicon/LOGO_Nickelodeon2.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/303/303.mpd",keyId:"9130a6448a74430794d355b48b56a64c",key:"c2f4d3288cdb43cf81e519ceb414dd6f",drm:true},
+{name:"NICK JR",logo:"https://ais-s.ais-vidnt.com/ais/play/origin/LIVE//channelicon/Nickjr_2024.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/304/304.mpd",keyId:"641c3f0e676d49d18c2082e093380e69",key:"e06f3a2e327643249c3831ab199c4015",drm:true},
+{name:"Mr.Bean",logo:"https://i.postimg.cc/yWqNWZf5/Mr-Bean.png",file:"https://amg00627-amg00627c30-rakuten-es-3990.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanescc-rakutenes/playlist.m3u8",drm:false},
+{name:"PBS Kids",logo:"https://i.postimg.cc/HkkPhhWS/pbskids.png",file:"https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8",drm:false}
 ];
 
 let currentHls = null;
-let mpegTsPlayer = null;
 let shakaPlayer = null;
+let hlsWatchdog = null;
 let activeChannel = null;
 let activeElement = null;
 let activeUrl = "";
-let hlsWatchdog = null;
 
 function setStatus(text, autoHide=true){
   const box = document.getElementById("status");
@@ -251,27 +140,13 @@ function setStatus(text, autoHide=true){
   box.style.display = text ? "block" : "none";
   if(autoHide && text){
     clearTimeout(setStatus._timer);
-    setStatus._timer = setTimeout(()=>{ box.style.display = "none"; }, 4500);
+    setStatus._timer = setTimeout(()=>{ box.style.display = "none"; }, 5000);
   }
 }
 
-function isWorkerUrl(url){
-  return String(url || "").includes("workers.dev");
-}
-
 function proxyUrl(url){
-  url = String(url || "").trim();
-
-  // ผ่าน workers.dev ล้วนๆ:
-  // ถ้าเป็น workers อยู่แล้วใช้ตรง
-  if(isWorkerUrl(url)) return url;
-
-  // ถ้าไม่ใช่ workers ให้บังคับผ่าน Worker กลาง
-  return WORKER_PROXY + encodeURIComponent(url);
-}
-
-function directUrl(url){
-  return String(url || "").trim();
+  // ลิงก์ workers.dev เล่นตรง ห้าม proxy ซ้อน
+  return url;
 }
 
 function forceAudio100(){
@@ -284,13 +159,33 @@ function forceAudio100(){
 }
 
 function openExternal(url){
-  url = url || (activeChannel ? activeChannel.file : "") || activeUrl;
+  url = url || activeUrl || (activeChannel ? activeChannel.file : "");
   if(!url) return;
   try{
     const u = new URL(url);
     const scheme = u.protocol.replace(":","");
     const hostPath = u.host + u.pathname + (u.search || "");
-    const intent = "intent://" + hostPath + "#Intent;scheme=" + scheme + ";action=android.intent.action.VIEW;type=video/*;S.browser_fallback_url=" + encodeURIComponent(url) + ";end";
+    const intent = "intent://" + hostPath +
+      "#Intent;scheme=" + scheme +
+      ";action=android.intent.action.VIEW;type=video/*;S.browser_fallback_url=" +
+      encodeURIComponent(url) + ";end";
+    window.location.href = intent;
+  }catch(e){
+    window.location.href = url;
+  }
+}
+
+function openMX(url){
+  url = url || activeUrl || (activeChannel ? activeChannel.file : "");
+  if(!url) return;
+  try{
+    const u = new URL(url);
+    const scheme = u.protocol.replace(":","");
+    const hostPath = u.host + u.pathname + (u.search || "");
+    const intent = "intent://" + hostPath +
+      "#Intent;scheme=" + scheme +
+      ";action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;S.browser_fallback_url=" +
+      encodeURIComponent(url) + ";end";
     window.location.href = intent;
   }catch(e){
     window.location.href = url;
@@ -308,11 +203,6 @@ async function stopAllPlayers(){
   if(currentHls){
     try{ currentHls.destroy(); }catch(e){}
     currentHls = null;
-  }
-
-  if(mpegTsPlayer){
-    try{ mpegTsPlayer.destroy(); }catch(e){}
-    mpegTsPlayer = null;
   }
 
   if(shakaPlayer){
@@ -341,21 +231,14 @@ async function loadChannel(channel, element){
   if(element) element.classList.add("active");
 
   document.getElementById("player-container").style.display = "block";
-  showPlayerControls();
+  forceShowControls();
   await stopAllPlayers();
 
-  const original = directUrl(channel.file);
-  let url = proxyUrl(channel.file);
-
-  // TS Live ใช้ลิงก์ตรงก่อน เพราะ Worker อาจทำให้ stream ค้าง
-  if(original.toLowerCase().includes(".ts") && !original.toLowerCase().includes(".m3u8")){
-    url = original;
-  }
-
+  const url = proxyUrl(channel.file);
   activeUrl = url;
 
-  if(original.includes(".mpd")){
-    playMPD(channel, url);
+  if(url.includes(".mpd")){
+    playMPDNotice(channel, url);
   }else{
     useHLS_STABLE(url);
   }
@@ -366,222 +249,54 @@ async function loadChannel(channel, element){
   },300);
 }
 
-/* ================= MPD ผ่าน workers.dev ================= */
-async function playMPD(channel, url){
+/* ================= MPD =================
+   หมายเหตุ: MPD/DRM หลายช่องไม่เล่นใน WebView/Smart TV browser
+   เพราะเครื่องไม่รองรับ EME/ClearKey หรือ header/DRM ไม่ผ่าน
+   เวอร์ชันนี้ไม่ฝืนเล่นในเว็บ เพื่อไม่ให้ค้าง/จอดำ
+*/
+function playMPDNotice(channel, url){
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
-
   if(jwBox) jwBox.style.display = "none";
   video.style.display = "block";
   video.controls = true;
   forceAudio100();
 
-  if(!window.shaka){
-    setStatus("เครื่องนี้โหลด Shaka Player ไม่ได้", false);
-    return;
-  }
+  setStatus("ไฟล์ MPD/DRM เล่นในเว็บนี้ไม่ได้ในบางเครื่อง ให้กด PLAYER หรือ MX", false);
 
-  shaka.polyfill.installAll();
-
-  if(!shaka.Player.isBrowserSupported()){
-    setStatus("เครื่องนี้ไม่รองรับ MPD/DRM ผ่านเว็บ", false);
-    return;
-  }
-
-  shakaPlayer = new shaka.Player(video);
-
-  shakaPlayer.configure({
-    streaming:{
-      bufferingGoal: 35,
-      rebufferingGoal: 5,
-      bufferBehind: 20,
-      retryParameters:{
-        maxAttempts: 6,
-        baseDelay: 1000,
-        backoffFactor: 1.5,
-        fuzzFactor: 0.5,
-        timeout: 30000
-      }
-    }
-  });
-
-  if(channel.drm){
-    shakaPlayer.configure({
-      drm:{
-        clearKeys:{
-          [channel.keyId]: channel.key
-        }
-      }
-    });
-  }
-
-  shakaPlayer.addEventListener("error", function(e){
-    console.log("MPD ERROR:", e.detail);
-    setStatus("MPD เล่นในเว็บนี้ไม่ได้ ให้กด PLAYER สำรอง", false);
-  });
-
+  // ลองด้วย Shaka แบบไม่บังคับ ถ้าเครื่องรองรับจะเล่นได้ ถ้าไม่รองรับจะไม่ค้าง
   try{
-    setStatus("กำลังโหลด MPD ผ่าน workers.dev...");
-    await shakaPlayer.load(url);
-    forceAudio100();
-    video.play().catch(()=>{});
-    setTimeout(()=>{ forceAudio100(); video.play().catch(()=>{}); },300);
-    setStatus("กำลังเล่น MPD ผ่าน workers.dev");
-  }catch(e){
-    console.log("MPD LOAD ERROR:", e);
-    setStatus("MPD เล่นไม่ได้บนเครื่องนี้ / ให้กด PLAYER", false);
-  }
-}
-
-
-function playSingleTsAsHls(tsUrl){
-  const video = document.getElementById("html5-player");
-
-  setStatus("กำลังโหลด TS Live Smooth...");
-
-  if(currentHls){
-    try{ currentHls.destroy(); }catch(e){}
-    currentHls = null;
-  }
-
-  if(mpegTsPlayer){
-    try{ mpegTsPlayer.destroy(); }catch(e){}
-    mpegTsPlayer = null;
-  }
-
-  if(hlsWatchdog){
-    clearInterval(hlsWatchdog);
-    hlsWatchdog = null;
-  }
-
-  if(window.mpegts && mpegts.getFeatureList().mseLivePlayback){
-    try{
-      mpegTsPlayer = mpegts.createPlayer({
-        type: "mpegts",
-        isLive: true,
-        url: tsUrl,
-        cors: true,
-        withCredentials: false
-      },{
-        // TS BUFFER SMOOTH FINAL
-        // หน่วงเพิ่มนิด แต่ไหลลื่นกว่าแบบเร็ว
-        enableWorker: false,
-        enableStashBuffer: true,
-        stashInitialSize: 1024 * 1024,
-
-        lazyLoad: false,
-        deferLoadAfterSourceOpen: false,
-
-        autoCleanupSourceBuffer: true,
-        autoCleanupMaxBackwardDuration: 60,
-        autoCleanupMinBackwardDuration: 20,
-
-        liveBufferLatencyChasing: true,
-        liveBufferLatencyMaxLatency: 8,
-        liveBufferLatencyMinRemain: 2,
-
-        fixAudioTimestampGap: true,
-        accurateSeek: false
-      });
-
-      mpegTsPlayer.attachMediaElement(video);
-      mpegTsPlayer.load();
-
-      const tryPlay = ()=>{
-        forceAudio100();
-        video.play().then(()=>{
-          setStatus("กำลังเล่น TS Live Smooth");
-        }).catch(()=>{
-          setStatus("กด ▶ บนจอ 1 ครั้ง ถ้าเครื่องบล็อก autoplay", false);
+    if(window.shaka){
+      shaka.polyfill.installAll();
+      if(shaka.Player.isBrowserSupported()){
+        shakaPlayer = new shaka.Player(video);
+        shakaPlayer.configure({
+          streaming:{
+            bufferingGoal: 30,
+            rebufferingGoal: 5,
+            bufferBehind: 15,
+            retryParameters:{maxAttempts:4,baseDelay:1000,backoffFactor:1.5,timeout:25000}
+          }
         });
-      };
-
-      setTimeout(tryPlay, 600);
-      setTimeout(tryPlay, 1800);
-      setTimeout(tryPlay, 3500);
-
-      let lastTime = 0;
-      let stuck = 0;
-      let reloadLock = false;
-
-      hlsWatchdog = setInterval(()=>{
-        if(document.getElementById("player-container").style.display !== "block"){
-          clearInterval(hlsWatchdog);
-          hlsWatchdog = null;
-          return;
+        if(channel.drm){
+          shakaPlayer.configure({drm:{clearKeys:{[channel.keyId]:channel.key}}});
         }
-
-        forceAudio100();
-
-        // ถ้าหยุดเอง ให้เล่นต่อก่อน ยังไม่รีโหลดทันที
-        if(video.paused){
-          setStatus("เล่นต่ออัตโนมัติ...");
+        shakaPlayer.load(url).then(()=>{
+          forceAudio100();
           video.play().catch(()=>{});
-          return;
-        }
-
-        if(video.readyState < 2){
-          setStatus("กำลังเติมบัฟเฟอร์ TS...");
-          return;
-        }
-
-        if(Math.abs(video.currentTime - lastTime) < 0.05){
-          stuck++;
-        }else{
-          stuck = 0;
-        }
-
-        lastTime = video.currentTime;
-
-        // รอให้นานขึ้นก่อน reload เพื่อลดอาการหมุนถี่
-        if(stuck >= 10 && !reloadLock){
-          reloadLock = true;
-          setStatus("TS ค้างนาน กำลังต่อสัญญาณใหม่...");
-
-          try{
-            mpegTsPlayer.pause && mpegTsPlayer.pause();
-          }catch(e){}
-
-          try{
-            mpegTsPlayer.unload();
-          }catch(e){}
-
-          setTimeout(()=>{
-            try{
-              mpegTsPlayer.load();
-              video.play().catch(()=>{});
-            }catch(e){}
-            stuck = 0;
-            reloadLock = false;
-          },1200);
-        }
-      },3000);
-
-      mpegTsPlayer.on(mpegts.Events.ERROR,function(type,detail,info){
-        console.log("MPEGTS ERROR",type,detail,info);
-
-        // อย่า reload รัว ให้รอแล้วค่อยต่อใหม่
-        setStatus("TS สะดุด กำลังรอสัญญาณกลับมา...");
-        setTimeout(()=>{
-          try{
-            mpegTsPlayer.unload();
-            mpegTsPlayer.load();
-            video.play().catch(()=>{});
-          }catch(e){}
-        },1500);
-      });
-
-      return;
-    }catch(e){
-      console.log("MPEGTS INIT ERROR",e);
+          setStatus("กำลังเล่น MPD");
+        }).catch(e=>{
+          console.log("MPD เล่นในเว็บไม่ได้:", e);
+          setStatus("MPD เล่นในเว็บนี้ไม่ได้ ให้กด PLAYER/MX", false);
+        });
+      }
     }
+  }catch(e){
+    console.log("MPD ERROR:", e);
   }
-
-  setStatus("เครื่องนี้ไม่รองรับ TS Live ในเว็บ ให้กด PLAYER", false);
-  openExternal(tsUrl);
 }
 
-/* ================= HLS นิ่งๆ ผ่าน workers.dev ================= */
+/* ================= HLS STABLE CLASSIC ================= */
 function useHLS_STABLE(url){
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
@@ -591,14 +306,6 @@ function useHLS_STABLE(url){
   video.controls = true;
   forceAudio100();
 
-  // DIRECT TS SUPPORT FIX
-  // .ts เดี่ยวเล่นตรงใน browser หลายเครื่องไม่ได้
-  // จึงแปลงเป็น m3u8 ชั่วคราว แล้วให้ hls.js เล่น
-  if(url.toLowerCase().includes(".ts") && !url.toLowerCase().includes(".m3u8")){
-    playSingleTsAsHls(url);
-    return;
-  }
-
   if(currentHls){
     try{ currentHls.destroy(); }catch(e){}
     currentHls = null;
@@ -609,45 +316,34 @@ function useHLS_STABLE(url){
     hlsWatchdog = null;
   }
 
-  if(Hls.isSupported() && (url.includes(".m3u8") || url.toLowerCase().includes("extension=m3u8"))){
-    setStatus("กำลังโหลด HLS ผ่าน workers.dev...");
+  if(Hls.isSupported() && url.includes(".m3u8")){
+    setStatus("กำลังโหลด HLS...");
 
     currentHls = new Hls({
-      // WORKERS SPORT STABLE FINAL
       enableWorker: true,
       lowLatencyMode: false,
 
-      // เพิ่ม buffer ให้นิ่งขึ้น
-      maxBufferLength: 120,
-      maxMaxBufferLength: 180,
-      backBufferLength: 60,
+      // สูตรเดิมที่นิ่งกว่า: ไม่ล็อกคุณภาพแข็งเกินไป
+      maxBufferLength: 30,
+      maxMaxBufferLength: 60,
+      backBufferLength: 20,
+      maxBufferHole: 0.5,
+      highBufferWatchdogPeriod: 3,
 
-      // ลดภาพหมุน
-      maxBufferHole: 2.5,
-      highBufferWatchdogPeriod: 5,
-      nudgeOffset: 0.3,
-      nudgeMaxRetry: 8,
-
-      // retry สูงขึ้น
-      manifestLoadingMaxRetry: 10,
-      manifestLoadingRetryDelay: 2000,
-      manifestLoadingMaxRetryTimeout: 20000,
-
-      levelLoadingMaxRetry: 10,
-      levelLoadingRetryDelay: 2000,
-      levelLoadingMaxRetryTimeout: 20000,
-
-      fragLoadingMaxRetry: 12,
-      fragLoadingRetryDelay: 2000,
-      fragLoadingMaxRetryTimeout: 25000,
+      manifestLoadingMaxRetry: 5,
+      manifestLoadingRetryDelay: 1000,
+      manifestLoadingMaxRetryTimeout: 8000,
+      levelLoadingMaxRetry: 5,
+      levelLoadingRetryDelay: 1000,
+      levelLoadingMaxRetryTimeout: 8000,
+      fragLoadingMaxRetry: 6,
+      fragLoadingRetryDelay: 1000,
+      fragLoadingMaxRetryTimeout: 10000,
 
       startFragPrefetch: true,
       capLevelToPlayerSize: true,
       testBandwidth: false,
-      abrEwmaDefaultEstimate: 700000,
-
-      liveSyncDurationCount: 5,
-      liveMaxLatencyDurationCount: 12
+      abrEwmaDefaultEstimate: 1200000
     });
 
     currentHls.loadSource(url);
@@ -662,7 +358,6 @@ function useHLS_STABLE(url){
 
     currentHls.on(Hls.Events.BUFFER_STALLED, function(){
       setStatus("กำลังเติมบัฟเฟอร์...", true);
-      try{ currentHls.startLoad(); }catch(e){}
     });
 
     currentHls.on(Hls.Events.ERROR, function(event, data){
@@ -671,13 +366,13 @@ function useHLS_STABLE(url){
 
       if(data.fatal){
         if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
-          setStatus("เน็ตเวิร์กสะดุด กำลังต่อใหม่...");
+          setStatus("เน็ตเวิร์กสะดุด กำลังโหลดต่อ...");
           try{ currentHls.startLoad(); }catch(e){}
         }else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
           setStatus("สัญญาณวิดีโอสะดุด กำลังกู้คืน...");
           try{ currentHls.recoverMediaError(); }catch(e){}
         }else{
-          setStatus("โหลดใหม่เพื่อความนิ่ง...", false);
+          setStatus("เล่นไม่ได้ กำลังลองโหลดใหม่...", false);
           try{
             currentHls.destroy();
             currentHls = null;
@@ -687,7 +382,36 @@ function useHLS_STABLE(url){
       }
     });
 
-    startWatchdog(url);
+    // watchdog แบบเบา ไม่รีโหลดถี่เกินไป
+    let lastTime = 0;
+    let stuckCount = 0;
+    hlsWatchdog = setInterval(()=>{
+      if(document.getElementById("player-container").style.display !== "block") return;
+      if(!currentHls) return;
+
+      forceAudio100();
+
+      if(video.paused || video.readyState < 2){
+        try{ currentHls.startLoad(); }catch(e){}
+        video.play().catch(()=>{});
+        return;
+      }
+
+      if(Math.abs(video.currentTime - lastTime) < 0.05){
+        stuckCount++;
+      }else{
+        stuckCount = 0;
+      }
+
+      lastTime = video.currentTime;
+
+      if(stuckCount >= 4){
+        setStatus("ภาพค้าง กำลังกู้คืน...");
+        try{ currentHls.startLoad(); }catch(e){}
+        video.play().catch(()=>{});
+        stuckCount = 0;
+      }
+    }, 3000);
 
   }else{
     video.src = url;
@@ -698,103 +422,72 @@ function useHLS_STABLE(url){
   }
 }
 
-function startWatchdog(url){
-  const video = document.getElementById("html5-player");
-  let lastTime = 0;
-  let stuckCount = 0;
-
-  hlsWatchdog = setInterval(()=>{
-    if(document.getElementById("player-container").style.display !== "block") return;
-    if(!currentHls) return;
-
-    forceAudio100();
-
-    if(video.paused || video.readyState < 2){
-      try{ currentHls.startLoad(); }catch(e){}
-      video.play().catch(()=>{});
-      return;
-    }
-
-    if(Math.abs(video.currentTime - lastTime) < 0.05){
-      stuckCount++;
-    }else{
-      stuckCount = 0;
-    }
-
-    lastTime = video.currentTime;
-
-    if(stuckCount >= 7){
-      setStatus("ภาพค้าง กำลังกู้คืน...");
-      try{ currentHls.startLoad(); }catch(e){}
-      video.play().catch(()=>{});
-      stuckCount = 0;
-    }
-  }, 4000);
-}
-
 function restartCurrent(){
   if(activeChannel) loadChannel(activeChannel, activeElement);
 }
 
 
-/* ================= AUTO HIDE PLAYER CONTROLS ================= */
+
+/* ================= FORCE AUTO HIDE PLAYER CONTROLS ================= */
 let controlsTimer = null;
 
-function showPlayerControls(){
-  const container = document.getElementById("player-container");
-  if(!container) return;
+function forceShowControls(){
+  const box = document.getElementById("player-container");
+  if(!box) return;
 
-  container.classList.remove("controls-hidden");
+  box.classList.remove("force-hide-controls");
+  box.classList.remove("controls-hidden");
 
-  if(controlsTimer){
-    clearTimeout(controlsTimer);
-    controlsTimer = null;
-  }
+  if(controlsTimer) clearTimeout(controlsTimer);
 
-  controlsTimer = setTimeout(()=>{
-    if(container.style.display === "block"){
-      try{
-        const active = document.activeElement;
-        if(active && active.classList && active.classList.contains("player-btn")){
-          active.blur();
-        }
-      }catch(e){}
-      container.classList.add("controls-hidden");
-    }
+  controlsTimer = setTimeout(function(){
+    forceHideControls();
   }, 3000);
 }
 
-function setupAutoHideControls(){
-  const container = document.getElementById("player-container");
-  if(!container || container.dataset.autohideReady === "1") return;
-  container.dataset.autohideReady = "1";
+function forceHideControls(){
+  const box = document.getElementById("player-container");
+  if(!box) return;
+  if(box.style.display !== "none"){
+    try{
+      const active = document.activeElement;
+      if(active && active.blur) active.blur();
+    }catch(e){}
+    box.classList.add("force-hide-controls");
+    box.classList.add("controls-hidden");
+  }
+}
 
-  ["mousemove","mousedown","touchstart","touchmove","click"].forEach(ev=>{
-    container.addEventListener(ev, showPlayerControls, {passive:true});
+function setupForceAutoHide(){
+  const box = document.getElementById("player-container");
+  if(!box || box.dataset.forceHideReady === "1") return;
+  box.dataset.forceHideReady = "1";
+
+  ["mousemove","mousedown","touchstart","touchmove","click","pointermove","pointerdown"].forEach(function(ev){
+    box.addEventListener(ev, forceShowControls, {passive:true});
   });
 
   document.addEventListener("keydown", function(){
-    if(container.style.display === "block"){
-      showPlayerControls();
+    if(box.style.display !== "none"){
+      forceShowControls();
     }
   });
 }
 
-/* ================= CLOSE ================= */
 async function closePlayer(){
   await stopAllPlayers();
   document.getElementById("player-container").classList.remove("controls-hidden");
+  document.getElementById("player-container").classList.remove("force-hide-controls");
+  document.getElementById("player-container").classList.remove("force-hide-controls");
   document.getElementById("player-container").style.display = "none";
 }
 
 function goHome(){
-  window.location.href = "https://tiea9999.github.io/tv-online/index.html";
+  window.location.href = "https://tiea9999.github.io/tv/index.html";
 }
 
-/* ================= REMOTE ================= */
 document.addEventListener("keydown",function(e){
   const container = document.getElementById("player-container");
-
   if(container.style.display === "block"){
     if(e.key === "Escape" || e.key === "Backspace" || e.key === "BrowserBack"){
       e.preventDefault();
@@ -803,9 +496,8 @@ document.addEventListener("keydown",function(e){
   }
 });
 
-/* ================= INIT ================= */
 document.addEventListener("DOMContentLoaded",function(){
-  setupAutoHideControls();
+  setupForceAutoHide();
   const listContainer = document.getElementById("channel-list");
 
   channels.forEach(ch=>{
@@ -815,7 +507,6 @@ document.addEventListener("DOMContentLoaded",function(){
     div.innerHTML = `<img src="${ch.logo}"><span>${ch.name}</span>`;
 
     div.onclick = ()=>loadChannel(ch,div);
-
     div.onkeydown = e=>{
       if(e.key === "Enter" || e.key === "OK"){
         e.preventDefault();
@@ -829,5 +520,4 @@ document.addEventListener("DOMContentLoaded",function(){
     </script>
 
 </body>
-
 </html>
