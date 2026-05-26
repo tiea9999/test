@@ -3,9 +3,57 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
-  <title>TIEA AUTO M3U TS NO JUMP FINAL</title>
+  <title>TIEA AUTO M3U LIVE REMOTE FINAL</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest">
+/* ===== LIVE REMOTE NAVIGATION FINAL =====
+   รายการสด: ปิดย้อน/เดินหน้า 15 วิ เพื่อให้รีโมทเลื่อนหา X/HOME/PLAYER ได้
+*/
+function getFocusablePlayerButtons(){
+  return Array.from(document.querySelectorAll('#player-container .player-btn'))
+    .filter(el=>el.offsetParent!==null);
+}
+function focusPlayerButtonByStep(step){
+  const buttons=getFocusablePlayerButtons();
+  if(!buttons.length) return;
+  let idx=buttons.indexOf(document.activeElement);
+  if(idx<0) idx=0;
+  else idx=(idx+step+buttons.length)%buttons.length;
+  buttons[idx].focus();
+}
+document.addEventListener('keydown',function(e){
+  const box=document.getElementById('player-container');
+  if(!box || box.style.display!=='block') return;
+
+  if(e.key==='ArrowLeft' || e.keyCode===21){
+    e.preventDefault();
+    showUI();
+    focusPlayerButtonByStep(-1);
+    return;
+  }
+  if(e.key==='ArrowRight' || e.keyCode===22){
+    e.preventDefault();
+    showUI();
+    focusPlayerButtonByStep(1);
+    return;
+  }
+  if(e.key==='ArrowUp' || e.keyCode===19){
+    e.preventDefault();
+    showUI();
+    const closeBtn=document.getElementById('closeBtn');
+    if(closeBtn) closeBtn.focus();
+    return;
+  }
+  if(e.key==='ArrowDown' || e.keyCode===20){
+    e.preventDefault();
+    showUI();
+    const buttons=getFocusablePlayerButtons();
+    if(buttons.length) buttons[buttons.length-1].focus();
+    return;
+  }
+},true);
+
+</script>
   <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.10.9/shaka-player.compiled.min.js"></script>
 
@@ -42,7 +90,7 @@
 
 <body>
   <button class="home-btn" onclick="goHome()">🏠 โฮม</button>
-  <h2>TIEA AUTO M3U TS NO JUMP FINAL</h2>
+  <h2>TIEA AUTO M3U LIVE REMOTE FINAL</h2>
   <div id="load-status">กำลังโหลดรายการ...</div>
 
   <div class="tools">
@@ -254,7 +302,7 @@ async function loadChannel(ch,el){
     playTS(activeOriginalUrl,false);
   }
 
-  setTimeout(()=>document.getElementById("closeBtn")?.focus(),250);
+  setTimeout(()=>{showUI();document.getElementById("closeBtn")?.focus()},250);
 }
 function playHLS(url,usedProxy){
   activeUrl=url;
@@ -510,7 +558,7 @@ function openExternal(){openIntent(activeOriginalUrl||activeUrl,"")}
 function openMX(){openIntent(activeOriginalUrl||activeUrl,"com.mxtech.videoplayer.ad")}
 function restartCurrent(){if(activeChannel)loadChannel(activeChannel,activeElement)}
 async function closePlayer(){await stopAll();const box=document.getElementById("player-container");box.style.display="none";box.classList.remove("show-ui","show-status","show-fallback");setTimeout(()=>activeElement?.focus(),150)}
-function goHome(){window.location.href="https://tiea9999.github.io/tv-online/index.html"}
+function goHome(){window.location.href="https://tiea9999.github.io/tv/index.html"}
 
 ["mousemove","mousedown","touchstart","touchmove","pointermove","pointerdown","click"].forEach(ev=>{
   document.getElementById("player-container").addEventListener(ev,showUI,{passive:true});
@@ -520,8 +568,8 @@ document.addEventListener("keydown",e=>{
   if(box.style.display==="block"){
     showUI();
     if(e.key==="Escape"||e.key==="Backspace"||e.key==="BrowserBack"||e.keyCode===10009){e.preventDefault();closePlayer();return}
-    if(e.key==="ArrowLeft"||e.keyCode===21){try{video.currentTime=Math.max(0,(video.currentTime||0)-15);setStatus("⏪ ย้อนกลับ 15 วิ")}catch(err){}}
-    if(e.key==="ArrowRight"||e.keyCode===22){try{video.currentTime=(video.currentTime||0)+15;setStatus("⏩ เดินหน้า 15 วิ")}catch(err){}}
+    /* LIVE MODE: ArrowLeft ไม่ seek */
+    /* LIVE MODE: ArrowRight ไม่ seek */
     if(e.key==="Enter"||e.key==="OK"||e.key===" "||e.keyCode===23||e.keyCode===66||e.keyCode===179){
       e.preventDefault();
       try{if(video.paused){video.play().catch(()=>{});setStatus("▶ เล่น")}else{video.pause();setStatus("⏸ หยุด")}}catch(err){}
