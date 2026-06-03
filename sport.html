@@ -16,7 +16,7 @@ html,body{margin:0;width:100%;min-height:100%;background:#000;color:#fff;font-fa
 }
 .home-btn:hover,.home-btn:focus{outline:none;box-shadow:0 0 0 4px cyan}
 h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0 8px #000;font-size:22px;line-height:1.2}
-#load-status{display:none!important;visibility:hidden!important;height:0!important;margin:0!important;padding:0!important;overflow:hidden!important}
+#load-status{text-align:center;color:#9ff;font-size:14px;margin:8px 10px;line-height:1.5}
 .tools{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px 8px}
 .tool-btn,.file-label{
   background:#1b1b1b;color:#fff;border:1px solid #555;border-radius:999px;
@@ -73,9 +73,9 @@ h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0
 </head>
 <body>
 
-<a class="home-btn" href="https://tiea9999.github.io/tv/index.html">⬅ กลับหน้าหลัก</a>
+<a class="home-btn" href="index.html">⬅ กลับหน้าหลัก</a>
 <h2>TIEA SPORT TV SAFE FINAL</h2>
-<div id="load-status"></div>
+<div id="load-status">กำลังโหลด JSON...</div>
 
 <div class="tools">
   <button class="tool-btn" onclick="loadDefaultJson()">↻ โหลด JSON ใหม่</button>
@@ -103,8 +103,8 @@ h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0
 
 <script>
 const JSON_URLS=[
-  "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/hbo.json",
-  "https://raw.githubusercontent.com/tiea9999/tv/main/hbo.json"
+  "https://raw.githubusercontent.com/tiea9999/tv-online/main/M3U/Dooball.json",
+  "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/M3U/Dooball.json"
 ];
 const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 
@@ -119,7 +119,6 @@ function pick(o,keys){for(const k of keys){if(o&&o[k]!==undefined&&o[k]!==null&&
 function setStatus(t){document.getElementById("status").textContent=t||""}
 function isJsonUrl(u){u=clean(u).toLowerCase();return u.includes(".json")}
 function isM3U8Url(u){u=clean(u).toLowerCase();return u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")}
-function isTSUrl(u){u=clean(u).toLowerCase();return u.includes(".ts")||u.includes("extension=ts")}
 
 function normalize(item,parentGroup=""){
   let servers=[];
@@ -294,7 +293,6 @@ async function tryServer(){
   const s=currentChannel.servers[currentServerIndex];
   setStatus("กำลังลอง "+(s.name||("Server "+(currentServerIndex+1)))+"...");
   if(s.url.toLowerCase().includes(".mpd"))playMPD(s);
-  else if(isTSUrl(s.url))playTS(s);
   else playHLS(s);
 }
 
@@ -330,38 +328,27 @@ function playMPD(s){
 
 function playHLS(s){
   const url=s.url;
-
-  // HBO HTTP บน GitHub HTTPS: เล่นในเว็บไม่ได้ ให้เปิด PLAYER อัตโนมัติ
-  if(
-    location.protocol==="https:" &&
-    url.startsWith("http://tiea1.3bbddns.com")
-  ){
-    setStatus("กำลังเปิด PLAYER...");
-    openIntentPlayer(url,false);
-    return;
-  }
-
   let started=false;
 
   if(window.Hls&&Hls.isSupported()&&isM3U8Url(url)){
     hls=new Hls({
       // TIEA SPORT TV SAFE FINAL
       // ลดอาการเด้งออก-กลับซ้ำ ไม่รีโหลดถี่เกิน
-      enableWorker:true,
+      enableWorker:false,
       lowLatencyMode:false,
 
-      maxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?110:75),
-      maxMaxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?170:120),
-      backBufferLength:40,
+      maxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?55:35),
+      maxMaxBufferLength:(navigator.userAgent.toLowerCase().includes('android tv')?80:55),
+      backBufferLength:20,
 
       maxBufferHole:3,
-      highBufferWatchdogPeriod:8,
+      highBufferWatchdogPeriod:4,
       nudgeOffset:0.35,
       nudgeMaxRetry:10,
 
       manifestLoadingTimeOut:25000,
       levelLoadingTimeOut:25000,
-      fragLoadingTimeOut:30000,
+      fragLoadingTimeOut:45000,
 
       manifestLoadingMaxRetry:10,
       levelLoadingMaxRetry:10,
@@ -369,19 +356,19 @@ function playHLS(s){
 
       manifestLoadingRetryDelay:2000,
       levelLoadingRetryDelay:2000,
-      fragLoadingRetryDelay:2000,
+      fragLoadingRetryDelay:3000,
 
       startFragPrefetch:true,
       startLevel:0,
       capLevelToPlayerSize:true,
       testBandwidth:false,
 
-      abrEwmaDefaultEstimate:650000,
+      abrEwmaDefaultEstimate:450000,
       abrBandWidthFactor:0.9,
       abrBandWidthUpFactor:0.7,
 
-      liveSyncDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?9:7),
-      liveMaxLatencyDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?24:18),
+      liveSyncDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?5:4),
+      liveMaxLatencyDurationCount:(navigator.userAgent.toLowerCase().includes('android tv')?10:8),
 
       progressive:true,
       liveDurationInfinity:true
@@ -396,6 +383,22 @@ function playHLS(s){
       player.play().catch(()=>{});
       setStatus("กำลังเล่น "+(s.name||"Server "+(currentServerIndex+1)));
     });
+    player.addEventListener('stalled',()=>{
+      try{
+        setStatus("สัญญาณสะดุด กำลังกู้คืน...");
+        if(hls) hls.startLoad();
+        player.play().catch(()=>{});
+      }catch(e){}
+    });
+
+    player.addEventListener('waiting',()=>{
+      try{
+        if(player.readyState>=2){
+          player.play().catch(()=>{});
+        }
+      }catch(e){}
+    });
+
 
     hls.on(Hls.Events.ERROR,(ev,data)=>{
       if(!data || !hls) return;
@@ -458,24 +461,55 @@ function playHLS(s){
 
       lastTime=player.currentTime||0;
 
-      // รอให้นานพอ ลดการเด้งออก-กลับซ้ำ
-      if((stuck>=10 || noData>=10) && !recovering){
+      // AUTO RECOVER FOR ANDROID TV / PROJECTOR
+      if((stuck>=6 || noData>=6) && !recovering){
         recovering=true;
-        setStatus("สัญญาณสะดุด กำลังประคองเส้นเดิม...");
+
+        setStatus("สัญญาณค้าง กำลังกู้คืน...");
+
         try{
           if(hls){
-            hls.startLoad(Math.max(0,(player.currentTime||0)-0.5));
+            hls.stopLoad();
+
+            setTimeout(()=>{
+              try{
+                hls.startLoad(Math.max(0,(player.currentTime||0)-1));
+
+                if(player.readyState>=2){
+                  player.play().catch(()=>{});
+                }
+              }catch(err){}
+            },1200);
           }
+
           if(player.readyState>=2){
             player.play().catch(()=>{});
           }
         }catch(e){}
 
+        if(stuck>=12 || noData>=12){
+          try{
+            setStatus("รีโหลดสตรีมอัตโนมัติ...");
+            const currentUrl = activeUrl();
+
+            if(currentUrl && hls){
+              hls.loadSource(currentUrl);
+              hls.attachMedia(player);
+
+              setTimeout(()=>{
+                try{
+                  player.play().catch(()=>{});
+                }catch(err){}
+              },1500);
+            }
+          }catch(err){}
+        }
+
         setTimeout(()=>{
           recovering=false;
           stuck=0;
           noData=0;
-        },9000);
+        },6000);
       }
     },5000);
     setTimeout(()=>{
@@ -483,20 +517,14 @@ function playHLS(s){
         setStatus("ยังโหลดอยู่ กำลังรอเส้นหลักอีกนิด...");
         try{ if(hls) hls.startLoad(); }catch(e){}
       }
-    },22000);
+    },30000);
 
   }else{
     player.src=url;
-    if(isTSUrl(url)){
-      try{player.type="video/mp2t"}catch(e){}
-    }
     forceMaxVolume();
     player.play().then(()=>{
       setStatus("กำลังเล่น "+(s.name||"Server "+(currentServerIndex+1)));
-    }).catch(()=>{
-      if(isTSUrl(url))setStatus("TS เล่นในเว็บไม่ได้ ให้กด PLAYER หรือ MX");
-      else nextServer();
-    });
+    }).catch(()=>nextServer());
   }
 }
 
@@ -506,7 +534,7 @@ function closePlayer(){
   setTimeout(()=>currentElement?.focus(),150);
 }
 function reloadPlayer(){if(currentChannel){currentServerIndex=0;tryServer()}}
-function goHome(){window.location.href="https://tiea9999.github.io/tv/index.html"}
+function goHome(){window.location.href="index.html"}
 function activeUrl(){
   if(!currentChannel||!currentChannel.servers[currentServerIndex])return "";
   return currentChannel.servers[currentServerIndex].url;
@@ -634,3 +662,4 @@ document.addEventListener("DOMContentLoaded",()=>{setupAutoHideUI();loadDefaultJ
 </script>
 </body>
 </html>
+
