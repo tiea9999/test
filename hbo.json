@@ -1,0 +1,39 @@
+[
+
+  {
+    "title": "hbo",
+    "group": "hbo",
+    "logo": "https://www.fileinwtv.site/postor/20240418201334HBO.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "http://tiea1.3bbddns.com:28470/4.m3u8",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "hbo-hits",
+    "group": "hbo",
+    "logo": "https://www.fileinwtv.site/postor/20240418201343HBO_Hits.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "http://tiea1.3bbddns.com:28470/8.m3u8",
+        "drm": false
+      }
+    ]
+  },
+  {
+    "title": "hbo-signature",
+    "group": "hbo",
+    "logo": "https://www.fileinwtv.site/postor/20240418201334HBO.jpg",
+    "servers": [
+      {
+        "name": "Main",
+        "url": "http://tiea1.3bbddns.com:28470/0.m3u8",
+        "drm": false
+      }
+    ]
+  }
+]
