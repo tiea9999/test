@@ -526,7 +526,7 @@
       },
       {
         "name": "Backup 1",
-        "url": "https://love.tivov68423.workers.dev/lx-origin/th-hbo_480/chunks.m3u8"
+        "url": "https://love.tivov68423.workers.dev/lx-origin/th-hbo_720/chunks.m3u8"
       },
       {
         "name": "Backup 2",
@@ -566,7 +566,7 @@
       },
       {
         "name": "Backup 1",
-        "url": "https://love.tivov68423.workers.dev/lx-origin/th-hbohits_480/chunks.m3u8"
+        "url": "https://love.tivov68423.workers.dev/lx-origin/th-hbohits_720/chunks.m3u8"
       },
       {
         "name": "Backup 2",
@@ -634,7 +634,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://love.mayos28968.workers.dev/lx-origin/th-cinemax_480/chunks.m3u8"
+        "url": "https://love.mayos28968.workers.dev/lx-origin/th-cinemax_720/chunks.m3u8"
       },
       {
         "name": "Backup 1",
@@ -698,7 +698,7 @@
     "servers": [
       {
         "name": "Main",
-        "url": "https://love.mayos28968.workers.dev/lx-origin/hd-dreamworks_480/chunks.m3u8"
+        "url": "https://love.mayos28968.workers.dev/lx-origin/hd-dreamworks_720/chunks.m3u8"
       },
       {
         "name": "Backup 1",
