@@ -73,7 +73,7 @@ h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0
 </head>
 <body>
 
-<a class="home-btn" href="index.html">⬅ กลับหน้าหลัก</a>
+<a class="home-btn" href="https://tiea9999.github.io/tv/index.html">⬅ กลับหน้าหลัก</a>
 <h2>TIEA SPORT TV SAFE FINAL</h2>
 <div id="load-status"></div>
 
@@ -103,8 +103,8 @@ h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0
 
 <script>
 const JSON_URLS=[
-  "https://raw.githubusercontent.com/tiea9999/tv/main/M3U/Dooball.json",
-  "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/M3U/Dooball.json"
+  "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/hbo.json",
+  "https://raw.githubusercontent.com/tiea9999/tv/main/hbo.json"
 ];
 const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 
@@ -311,22 +311,6 @@ function forceMaxVolume(){
   }catch(e){}
 }
 
-function playHLS(s){
-
-  const url=s.url;
-
-  // HBO HTTP บน GitHub HTTPS
-  if(
-    location.protocol==="https:" &&
-    url.startsWith("http://tiea1.3bbddns.com")
-  ){
-    setStatus("กำลังเปิด PLAYER...");
-    openIntentPlayer(url,false);
-    return;
-  }
-
-  let started=false;
-
 function playMPD(s){
   try{
     if(!window.shaka){nextServer();return}
@@ -346,6 +330,17 @@ function playMPD(s){
 
 function playHLS(s){
   const url=s.url;
+
+  // HBO HTTP บน GitHub HTTPS: เล่นในเว็บไม่ได้ ให้เปิด PLAYER อัตโนมัติ
+  if(
+    location.protocol==="https:" &&
+    url.startsWith("http://tiea1.3bbddns.com")
+  ){
+    setStatus("กำลังเปิด PLAYER...");
+    openIntentPlayer(url,false);
+    return;
+  }
+
   let started=false;
 
   if(window.Hls&&Hls.isSupported()&&isM3U8Url(url)){
@@ -511,7 +506,7 @@ function closePlayer(){
   setTimeout(()=>currentElement?.focus(),150);
 }
 function reloadPlayer(){if(currentChannel){currentServerIndex=0;tryServer()}}
-function goHome(){window.location.href="index.html"}
+function goHome(){window.location.href="https://tiea9999.github.io/tv/index.html"}
 function activeUrl(){
   if(!currentChannel||!currentChannel.servers[currentServerIndex])return "";
   return currentChannel.servers[currentServerIndex].url;
