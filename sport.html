@@ -311,26 +311,21 @@ function forceMaxVolume(){
   }catch(e){}
 }
 
-function playTS(s){
+function playHLS(s){
+
   const url=s.url;
-  try{
-    setStatus("กำลังเล่น TS "+(s.name||"Server "+(currentServerIndex+1)));
-    player.src=url;
-    try{player.type="video/mp2t"}catch(e){}
-    forceMaxVolume();
-    const p=player.play();
-    if(p&&p.catch){
-      p.catch(()=>{
-        setStatus("TS เล่นในเว็บไม่ได้ ให้กด PLAYER หรือ MX");
-      });
-    }
-    player.onerror=()=>{
-      setStatus("TS เล่นในเว็บไม่ได้ ให้กด PLAYER หรือ MX");
-    };
-  }catch(e){
-    setStatus("TS เล่นในเว็บไม่ได้ ให้กด PLAYER หรือ MX");
+
+  // HBO HTTP บน GitHub HTTPS
+  if(
+    location.protocol==="https:" &&
+    url.startsWith("http://tiea1.3bbddns.com")
+  ){
+    setStatus("กำลังเปิด PLAYER...");
+    openIntentPlayer(url,false);
+    return;
   }
-}
+
+  let started=false;
 
 function playMPD(s){
   try{
