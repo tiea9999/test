@@ -48,8 +48,8 @@
     <button class="tool-btn" onclick="loadDefaultM3U()">↻ โหลดรายการใหม่</button>
     <button class="tool-btn" onclick="focusFirstChannel()">🎯 ช่องแรก</button>
     <button class="tool-btn" id="modeBtn" onclick="togglePlayMode()">⚽ กีฬา/สดไว</button>
-    <label class="tool-btn" for="m3uFile">📁 เลือกไฟล์ M3U</label>
-    <input id="m3uFile" type="file" accept=".m3u,.m3u8,text/plain" style="display:none">
+    <label class="tool-btn" for="m3uFile">📁 เลือกไฟล์ JSON/M3U</label>
+    <input id="m3uFile" type="file" accept=".json,.m3u,.m3u8,application/json,text/plain" style="display:none">
   </div>
 
   <div id="app"></div>
@@ -71,7 +71,7 @@
   </div>
 
 <script>
-const DEFAULT_M3U_URL="https://www.dropbox.com/scl/fi/p7ce77polkqconjm0xbj7/tv_channels_iptv591-gmail.com_plus.m3u?rlkey=aebh95dzko8z59d9d8cxpdnao&dl=1";
+const DEFAULT_M3U_URL="https://raw.githubusercontent.com/tiea9999/tv-online/main/M3U/Dooball.json";
 const WORKER_PROXY="https://iptv.tawatchai250958.workers.dev/?url=";
 const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 
@@ -162,18 +162,28 @@ async function loadM3U(url){
     try{
       setLoad("กำลังโหลดรายการ... "+(i+1)+"/"+tries.length);
       const txt=await fetchText(tries[i],12000);
+      const trim=String(txt||"").trim();
+
+      if(trim.startsWith("{") || trim.startsWith("[")){
+        channels=parseJSONChannels(txt);
+        renderChannels(channels);
+        setLoad("โหลด JSON สำเร็จ "+channels.length+" ช่อง • "+(playMode==="sports"?"กีฬา/สดไว":playMode==="movie"?"หนังสดนิ่ง":"โปรเจคเตอร์นิ่ง"));
+        return;
+      }
+
       if(txt.includes("#EXTINF")){
         channels=parseM3U(txt);
         renderChannels(channels);
-        setLoad("โหลดสำเร็จ "+channels.length+" ช่อง • โหมดโปรเจคเตอร์");
+        setLoad("โหลด M3U สำเร็จ "+channels.length+" ช่อง • "+(playMode==="sports"?"กีฬา/สดไว":playMode==="movie"?"หนังสดนิ่ง":"โปรเจคเตอร์นิ่ง"));
         return;
       }
-      lastErr=new Error("ไม่ใช่ไฟล์ M3U");
+      lastErr=new Error("ไม่ใช่ไฟล์ JSON/M3U");
     }catch(e){lastErr=e;console.log("load fail",i,e)}
   }
-  setLoad("โหลดรายการไม่สำเร็จ ลองกดเลือกไฟล์ M3U จากเครื่อง");
-  app.innerHTML='<div class="empty">โหลดรายการไม่สำเร็จ<br>ถ้า Dropbox ไม่มา ให้กด “เลือกไฟล์ M3U” จากเครื่อง</div>';
+  setLoad("โหลดรายการไม่สำเร็จ ลองกดเลือกไฟล์ JSON/M3U จากเครื่อง");
+  app.innerHTML='<div class="empty">โหลดรายการไม่สำเร็จ<br>ถ้าโหลดไม่มา ให้กด “เลือกไฟล์ JSON/M3U” จากเครื่อง</div>';
 }
+
 function loadDefaultM3U(){loadM3U(DEFAULT_M3U_URL)}
 
 function parseExtinf(line){
@@ -203,6 +213,72 @@ function parseM3U(txt){
     }
   }
   return out;
+}
+
+function pick(obj,keys){
+  for(const k of keys){
+    if(obj && obj[k]!==undefined && obj[k]!==null && clean(obj[k])!=="") return obj[k];
+  }
+  return "";
+}
+function normalizeJsonChannel(item,parentGroup){
+  if(!item || typeof item!=="object") return null;
+
+  const title=pick(item,["title","name","channel","label"]) || "ไม่มีชื่อ";
+  const logo=pick(item,["logo","poster","image","thumb","cover","icon"]) || FALLBACK_LOGO;
+  const group=pick(item,["group","group-title","category","cat"]) || parentGroup || "อื่นๆ";
+
+  let url="";
+  if(Array.isArray(item.servers) && item.servers.length){
+    for(const s of item.servers){
+      url=pick(s,["url","file","stream","link","source","src"]);
+      if(url) break;
+    }
+  }
+  if(!url){
+    url=pick(item,["url","file","stream","link","source","src"]);
+  }
+
+  if(!url) return null;
+  url=normalizeStreamUrl(url);
+
+  return {
+    name:title,
+    logo:logo,
+    group:group,
+    file:url,
+    drm:false
+  };
+}
+function collectJsonChannels(data,parentGroup,out){
+  out=out||[];
+  if(Array.isArray(data)){
+    data.forEach(x=>collectJsonChannels(x,parentGroup,out));
+    return out;
+  }
+  if(!data || typeof data!=="object") return out;
+
+  const groupTitle=pick(data,["group","group-title","category","title","name"]) || parentGroup || "";
+
+  const one=normalizeJsonChannel(data,parentGroup);
+  if(one) out.push(one);
+
+  ["items","channels","data","list","rows","videos","episodes"].forEach(k=>{
+    if(Array.isArray(data[k])) data[k].forEach(x=>collectJsonChannels(x,groupTitle,out));
+  });
+
+  return out;
+}
+function parseJSONChannels(txt){
+  const json=JSON.parse(txt);
+  const arr=collectJsonChannels(json,"",[]);
+  const seen=new Set();
+  return arr.filter(ch=>{
+    const key=(ch.name+"|"+ch.file).toLowerCase();
+    if(seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 function normalizeStreamUrl(url){
   url=clean(url);
@@ -724,7 +800,7 @@ async function closePlayer(){
   try{document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}catch(e){}
   setTimeout(()=>activeElement?.focus(),150);
 }
-function goHome(){window.location.href="https://tiea9999.github.io/tv-online/index.html"}
+function goHome(){window.location.href="https://tiea9999.github.io/tv/index.html"}
 
 ["mousemove","mousedown","touchstart","touchmove","pointermove","pointerdown","click"].forEach(ev=>{
   document.getElementById("player-container").addEventListener(ev,showUI,{passive:true});
@@ -805,10 +881,20 @@ document.getElementById("m3uFile").addEventListener("change",async e=>{
   try{
     setLoad("กำลังอ่านไฟล์...");
     const txt=await file.text();
-    channels=parseM3U(txt);
-    renderChannels(channels);
-    setLoad("อ่านไฟล์สำเร็จ "+channels.length+" ช่อง");
-  }catch(err){setLoad("อ่านไฟล์ไม่สำเร็จ")}
+    const trim=String(txt||"").trim();
+    if(trim.startsWith("{") || trim.startsWith("[")){
+      channels=parseJSONChannels(txt);
+      renderChannels(channels);
+      setLoad("อ่าน JSON สำเร็จ "+channels.length+" ช่อง");
+    }else{
+      channels=parseM3U(txt);
+      renderChannels(channels);
+      setLoad("อ่าน M3U สำเร็จ "+channels.length+" ช่อง");
+    }
+  }catch(err){
+    console.log(err);
+    setLoad("อ่านไฟล์ไม่สำเร็จ");
+  }
 });
 document.addEventListener("DOMContentLoaded",()=>{
   applyModeLabel();
