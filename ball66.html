@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
-  <title>TIEA AUTO M3U FAST + STABLE FINAL</title>
+  <title>TIEA AUTO M3U MOVIE LIVE SPORTS FINAL</title>
 
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
@@ -41,13 +41,13 @@
 
 <body>
   <button class="home-btn" onclick="goHome()">🏠 โฮม</button>
-  <h2>TIEA AUTO M3U FAST + STABLE FINAL</h2>
+  <h2>TIEA AUTO M3U MOVIE LIVE SPORTS FINAL</h2>
   <div id="load-status">กำลังโหลดรายการ...</div>
 
   <div class="tools">
     <button class="tool-btn" onclick="loadDefaultM3U()">↻ โหลดรายการใหม่</button>
     <button class="tool-btn" onclick="focusFirstChannel()">🎯 ช่องแรก</button>
-    <button class="tool-btn" id="modeBtn" onclick="togglePlayMode()">📱 FAST</button>
+    <button class="tool-btn" id="modeBtn" onclick="togglePlayMode()">⚽ กีฬา/สดไว</button>
     <label class="tool-btn" for="m3uFile">📁 เลือกไฟล์ M3U</label>
     <input id="m3uFile" type="file" accept=".m3u,.m3u8,text/plain" style="display:none">
   </div>
@@ -71,14 +71,14 @@
   </div>
 
 <script>
-const DEFAULT_M3U_URL="https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/lnwthailive.m3u";
+const DEFAULT_M3U_URL="https://www.dropbox.com/scl/fi/p7ce77polkqconjm0xbj7/tv_channels_iptv591-gmail.com_plus.m3u?rlkey=aebh95dzko8z59d9d8cxpdnao&dl=1";
 const WORKER_PROXY="https://iptv.tawatchai250958.workers.dev/?url=";
 const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 
 let channels=[];
 let activeChannel=null,activeElement=null,activeUrl="",activeOriginalUrl="";
 let hls=null,tsPlayer=null,shakaPlayer=null,watchdog=null,uiTimer=null,playStartedTimer=null;
-let playMode = localStorage.getItem("TIEA_PLAY_MODE") || "fast"; // fast = มือถือ/คอม, stable = โปรเจคเตอร์
+let playMode = localStorage.getItem("TIEA_PLAY_MODE") || "sports"; // sports = กีฬา/สดไว, movie = หนังสดนิ่ง, projector = โปรเจคเตอร์นิ่งสุด
 
 const app=document.getElementById("app");
 const video=document.getElementById("html5-player");
@@ -86,16 +86,27 @@ const video=document.getElementById("html5-player");
 function applyModeLabel(){
   const btn=document.getElementById("modeBtn");
   if(btn){
-    btn.textContent = playMode === "fast" ? "📱 FAST" : "📽 STABLE";
+    if(playMode === "sports") btn.textContent = "⚽ กีฬา/สดไว";
+    else if(playMode === "movie") btn.textContent = "🎬 หนังสดนิ่ง";
+    else btn.textContent = "📽 โปรเจคเตอร์นิ่ง";
   }
-  setLoad(playMode === "fast" ? "โหมด FAST: เข้าไวสำหรับมือถือ/คอม" : "โหมด STABLE: นิ่งสำหรับโปรเจคเตอร์");
+
+  if(playMode === "sports"){
+    setLoad("โหมด ⚽ กีฬา/สดไว: เหมาะกับกีฬา/ทีวีสด เข้าไวกว่า");
+  }else if(playMode === "movie"){
+    setLoad("โหมด 🎬 หนังสดนิ่ง: เหมาะกับช่องหนังสด เช่น HBO/CINEMAX ลดหมุน");
+  }else{
+    setLoad("โหมด 📽 โปรเจคเตอร์นิ่ง: บัฟเฟอร์ลึกสุด สำหรับโปรเจคเตอร์");
+  }
 }
 function togglePlayMode(){
-  playMode = playMode === "fast" ? "stable" : "fast";
+  if(playMode === "sports") playMode = "movie";
+  else if(playMode === "movie") playMode = "projector";
+  else playMode = "sports";
+
   localStorage.setItem("TIEA_PLAY_MODE", playMode);
   applyModeLabel();
 }
-
 function clean(v){return String(v||"").trim()}
 function setLoad(t){document.getElementById("load-status").textContent=t||""}
 
@@ -325,13 +336,13 @@ function playHLS(url,usedProxy){
 
   if(window.Hls&&Hls.isSupported()){
     let started=false;
-    const cfg = playMode === "fast" ? {
+    const cfg = playMode === "sports" ? {
       enableWorker:true,
       lowLatencyMode:false,
       startFragPrefetch:true,
       progressive:true,
 
-      // FAST: มือถือ/คอม เข้าไว
+      // ⚽ กีฬา/สดไว: เข้าไว เหมาะกับบอล/กีฬา/ข่าวสด
       maxBufferLength:35,
       maxMaxBufferLength:60,
       backBufferLength:20,
@@ -353,32 +364,60 @@ function playHLS(url,usedProxy){
       abrBandWidthUpFactor:.65,
       capLevelToPlayerSize:true,
       testBandwidth:false
+    } : playMode === "movie" ? {
+      enableWorker:true,
+      lowLatencyMode:false,
+      startFragPrefetch:true,
+      progressive:true,
+
+      // 🎬 หนังสดนิ่ง: ช่องหนังสดยอมหน่วงมากขึ้น ลดหมุนหนัก
+      maxBufferLength:180,
+      maxMaxBufferLength:260,
+      backBufferLength:90,
+      maxBufferHole:7,
+      highBufferWatchdogPeriod:12,
+      liveSyncDurationCount:24,
+      liveMaxLatencyDurationCount:60,
+
+      fragLoadingMaxRetry:14,
+      levelLoadingMaxRetry:12,
+      manifestLoadingMaxRetry:12,
+      fragLoadingTimeOut:35000,
+      levelLoadingTimeOut:28000,
+      manifestLoadingTimeOut:28000,
+
+      startLevel:0,
+      abrEwmaDefaultEstimate:350000,
+      abrBandWidthFactor:.55,
+      abrBandWidthUpFactor:.35,
+      capLevelToPlayerSize:true,
+      testBandwidth:false
     } : {
       enableWorker:true,
       lowLatencyMode:false,
       startFragPrefetch:true,
       progressive:true,
 
-      // STABLE: โปรเจคเตอร์ บัฟเฟอร์ลึก ลดหมุนระหว่างดู
-      maxBufferLength:120,
-      maxMaxBufferLength:180,
-      backBufferLength:60,
-      maxBufferHole:5,
-      highBufferWatchdogPeriod:10,
-      liveSyncDurationCount:14,
-      liveMaxLatencyDurationCount:32,
+      // 📽 โปรเจคเตอร์นิ่ง: บัฟเฟอร์ลึกมากสุด
+      maxBufferLength:220,
+      maxMaxBufferLength:320,
+      backBufferLength:120,
+      maxBufferHole:8,
+      highBufferWatchdogPeriod:14,
+      liveSyncDurationCount:30,
+      liveMaxLatencyDurationCount:75,
 
-      fragLoadingMaxRetry:12,
-      levelLoadingMaxRetry:10,
-      manifestLoadingMaxRetry:10,
-      fragLoadingTimeOut:30000,
-      levelLoadingTimeOut:22000,
-      manifestLoadingTimeOut:22000,
+      fragLoadingMaxRetry:16,
+      levelLoadingMaxRetry:14,
+      manifestLoadingMaxRetry:14,
+      fragLoadingTimeOut:42000,
+      levelLoadingTimeOut:32000,
+      manifestLoadingTimeOut:32000,
 
       startLevel:0,
-      abrEwmaDefaultEstimate:450000,
-      abrBandWidthFactor:.65,
-      abrBandWidthUpFactor:.45,
+      abrEwmaDefaultEstimate:300000,
+      abrBandWidthFactor:.5,
+      abrBandWidthUpFactor:.3,
       capLevelToPlayerSize:true,
       testBandwidth:false
     };
@@ -391,7 +430,7 @@ function playHLS(url,usedProxy){
     hls.on(Hls.Events.MANIFEST_PARSED,()=>{
       started=true;
 
-      if(playMode === "stable"){
+      if(playMode === "movie" || playMode === "projector"){
         try{
           if(hls.levels&&hls.levels.length>1){
             hls.currentLevel=0;
@@ -401,18 +440,19 @@ function playHLS(url,usedProxy){
         }catch(e){}
 
         forceAudio();
-        setStatus("กำลังเติมบัฟเฟอร์โปรเจคเตอร์...");
+        setStatus(playMode === "movie" ? "🎬 หนังสดนิ่ง: เติมบัฟเฟอร์ก่อนเล่น..." : "📽 โปรเจคเตอร์นิ่ง: เติมบัฟเฟอร์ก่อนเล่น...");
+
         setTimeout(()=>{
           forceAudio();
           video.play().catch(()=>{});
-          setStatus("กำลังเล่น HLS โหมด STABLE");
-        },1500);
+          setStatus(playMode === "movie" ? "กำลังเล่นโหมด 🎬 หนังสดนิ่ง" : "กำลังเล่นโหมด 📽 โปรเจคเตอร์นิ่ง");
+        }, playMode === "movie" ? 2500 : 3500);
 
-        setTimeout(()=>{try{if(hls) hls.currentLevel=-1}catch(e){}},25000);
+        setTimeout(()=>{try{if(hls) hls.currentLevel=-1}catch(e){}}, playMode === "movie" ? 35000 : 45000);
       }else{
         forceAudio();
         video.play().catch(()=>{});
-        setStatus("กำลังเล่น HLS โหมด FAST");
+        setStatus("กำลังเล่นโหมด ⚽ กีฬา/สดไว");
       }
     });
 
@@ -420,7 +460,7 @@ function playHLS(url,usedProxy){
       if(!started&&!usedProxy){
         playHLS(makeProxyUrl(url),true);
       }
-    }, playMode === "fast" ? 3000 : 6500);
+    }, playMode === "sports" ? 3000 : (playMode === "movie" ? 8000 : 10000));
 
     hls.on(Hls.Events.BUFFER_STALLED,()=>{
       setStatus("กำลังบัฟเฟอร์โปรเจคเตอร์...",true);
@@ -484,8 +524,8 @@ function playTS(url,usedProxy=false){
   };
 
   setTimeout(goNative,150);
-  setTimeout(goNative, playMode === "fast" ? 450 : 800);
-  setTimeout(goNative, playMode === "fast" ? 1000 : 1800);
+  setTimeout(goNative, playMode === "sports" ? 450 : (playMode === "movie" ? 1000 : 1300));
+  setTimeout(goNative, playMode === "sports" ? 1000 : (playMode === "movie" ? 2200 : 2800));
 
   setTimeout(()=>{
     if(isStarted()){
@@ -556,7 +596,7 @@ function playTS(url,usedProxy=false){
     }else{
       if(!fallbackWorker()) showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX ด้านบน");
     }
-  }, playMode === "fast" ? 1800 : 3200);
+  }, playMode === "sports" ? 1800 : (playMode === "movie" ? 4200 : 5200));
 }
 
 function startTsNoJumpWatchdog(usingTsEngine,fallbackWorker){
@@ -684,7 +724,7 @@ async function closePlayer(){
   try{document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}catch(e){}
   setTimeout(()=>activeElement?.focus(),150);
 }
-function goHome(){window.location.href="https://tiea9999.github.io/tv/index.html"}
+function goHome(){window.location.href="https://tiea9999.github.io/tv-online/index.html"}
 
 ["mousemove","mousedown","touchstart","touchmove","pointermove","pointerdown","click"].forEach(ev=>{
   document.getElementById("player-container").addEventListener(ev,showUI,{passive:true});
