@@ -77,7 +77,7 @@ const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo4
 
 let channels=[];
 let activeChannel=null,activeElement=null,activeUrl="",activeOriginalUrl="";
-let hls=null,tsPlayer=null,shakaPlayer=null,watchdog=null,uiTimer=null,playStartedTimer=null;
+let hls=null,tsPlayer=null,shakaPlayer=null,watchdog=null,uiTimer=null,playStartedTimer=null,noPictureTimer=null;
 let playMode = localStorage.getItem("TIEA_PLAY_MODE") || "sports"; // sports = กีฬา/สดไว, movie = หนังสดนิ่ง, projector = โปรเจคเตอร์นิ่งสุด
 
 const app=document.getElementById("app");
@@ -279,17 +279,38 @@ function setStatus(t,auto=true){
   if(t){box.classList.add("show-status");showUI()}else box.classList.remove("show-status");
   if(auto&&t){clearTimeout(setStatus._t);setStatus._t=setTimeout(()=>box.classList.remove("show-status"),3600)}
 }
+function hasPicture(){
+  try{
+    return video.readyState>=2 || (video.videoWidth>0 && video.videoHeight>0) || (video.currentTime||0)>0.5;
+  }catch(e){return false}
+}
+
+function scheduleNoPictureHint(ms){
+  if(noPictureTimer) clearTimeout(noPictureTimer);
+  noPictureTimer=setTimeout(()=>{
+    noPictureTimer=null;
+    const box=document.getElementById("player-container");
+    if(box && box.style.display==="block" && !hasPicture()){
+      showFallback("ถ้าเว็บไม่ขึ้นภาพ ให้กด PLAYER/MX ด้านบน");
+    }
+  }, ms || 15000);
+}
+
 function showFallback(msg){
+  if(hasPicture()) return;
   setStatus(msg || "ถ้าเว็บไม่ขึ้นภาพ ให้กด PLAYER/MX ด้านบน", false);
   showUI();
 }
 function hideFallback(){
+  if(noPictureTimer){clearTimeout(noPictureTimer);noPictureTimer=null}
   const box=document.getElementById("player-container");
   if(box) box.classList.remove("show-fallback");
+  if(hasPicture()) setStatus("");
 }
 
 async function stopAll(){
   if(playStartedTimer){clearTimeout(playStartedTimer);playStartedTimer=null}
+  if(noPictureTimer){clearTimeout(noPictureTimer);noPictureTimer=null}
   if(watchdog){clearInterval(watchdog);watchdog=null}
   try{if(hls){hls.destroy();hls=null}}catch(e){}
   try{if(tsPlayer){tsPlayer.destroy();tsPlayer=null}}catch(e){}
@@ -313,7 +334,7 @@ async function loadChannel(ch,el){
 
   const u=activeOriginalUrl.toLowerCase();
 
-  setTimeout(()=>showFallback("ถ้าเว็บไม่ขึ้นภาพ ให้กด PLAYER/MX ด้านบน"),7000);
+  scheduleNoPictureHint(playMode === "sports" ? 12000 : (playMode === "movie" ? 18000 : 22000));
 
   if(u.includes(".mpd")){
     playMPD(activeOriginalUrl);
@@ -343,20 +364,20 @@ function playHLS(url,usedProxy){
       progressive:true,
 
       // ⚽ กีฬา/สดไว: เข้าไว เหมาะกับบอล/กีฬา/ข่าวสด
-      maxBufferLength:35,
-      maxMaxBufferLength:60,
-      backBufferLength:20,
-      maxBufferHole:2,
-      highBufferWatchdogPeriod:5,
-      liveSyncDurationCount:6,
-      liveMaxLatencyDurationCount:12,
+      maxBufferLength:55,
+      maxMaxBufferLength:90,
+      backBufferLength:30,
+      maxBufferHole:4,
+      highBufferWatchdogPeriod:8,
+      liveSyncDurationCount:8,
+      liveMaxLatencyDurationCount:20,
 
-      fragLoadingMaxRetry:6,
-      levelLoadingMaxRetry:5,
-      manifestLoadingMaxRetry:5,
-      fragLoadingTimeOut:16000,
-      levelLoadingTimeOut:12000,
-      manifestLoadingTimeOut:12000,
+      fragLoadingMaxRetry:10,
+      levelLoadingMaxRetry:8,
+      manifestLoadingMaxRetry:8,
+      fragLoadingTimeOut:28000,
+      levelLoadingTimeOut:22000,
+      manifestLoadingTimeOut:22000,
 
       startLevel:-1,
       abrEwmaDefaultEstimate:900000,
@@ -371,13 +392,13 @@ function playHLS(url,usedProxy){
       progressive:true,
 
       // 🎬 หนังสดนิ่ง: ช่องหนังสดยอมหน่วงมากขึ้น ลดหมุนหนัก
-      maxBufferLength:180,
-      maxMaxBufferLength:260,
-      backBufferLength:90,
-      maxBufferHole:7,
-      highBufferWatchdogPeriod:12,
-      liveSyncDurationCount:24,
-      liveMaxLatencyDurationCount:60,
+      maxBufferLength:140,
+      maxMaxBufferLength:220,
+      backBufferLength:80,
+      maxBufferHole:8,
+      highBufferWatchdogPeriod:14,
+      liveSyncDurationCount:20,
+      liveMaxLatencyDurationCount:55,
 
       fragLoadingMaxRetry:14,
       levelLoadingMaxRetry:12,
@@ -399,13 +420,13 @@ function playHLS(url,usedProxy){
       progressive:true,
 
       // 📽 โปรเจคเตอร์นิ่ง: บัฟเฟอร์ลึกมากสุด
-      maxBufferLength:220,
-      maxMaxBufferLength:320,
-      backBufferLength:120,
-      maxBufferHole:8,
-      highBufferWatchdogPeriod:14,
-      liveSyncDurationCount:30,
-      liveMaxLatencyDurationCount:75,
+      maxBufferLength:180,
+      maxMaxBufferLength:280,
+      backBufferLength:100,
+      maxBufferHole:9,
+      highBufferWatchdogPeriod:16,
+      liveSyncDurationCount:26,
+      liveMaxLatencyDurationCount:70,
 
       fragLoadingMaxRetry:16,
       levelLoadingMaxRetry:14,
@@ -445,6 +466,7 @@ function playHLS(url,usedProxy){
         setTimeout(()=>{
           forceAudio();
           video.play().catch(()=>{});
+          hideFallback();
           setStatus(playMode === "movie" ? "กำลังเล่นโหมด 🎬 หนังสดนิ่ง" : "กำลังเล่นโหมด 📽 โปรเจคเตอร์นิ่ง");
         }, playMode === "movie" ? 2500 : 3500);
 
@@ -452,18 +474,19 @@ function playHLS(url,usedProxy){
       }else{
         forceAudio();
         video.play().catch(()=>{});
+        hideFallback();
         setStatus("กำลังเล่นโหมด ⚽ กีฬา/สดไว");
       }
     });
 
     playStartedTimer=setTimeout(()=>{
-      if(!started&&!usedProxy){
+      if(!started && !usedProxy && !hasPicture()){
         playHLS(makeProxyUrl(url),true);
       }
     }, playMode === "sports" ? 3000 : (playMode === "movie" ? 8000 : 10000));
 
     hls.on(Hls.Events.BUFFER_STALLED,()=>{
-      setStatus("กำลังบัฟเฟอร์โปรเจคเตอร์...",true);
+      if(!hasPicture()) setStatus("กำลังบัฟเฟอร์...",true);
       setTimeout(()=>{try{if(video.paused)video.play().catch(()=>{})}catch(e){}},1500);
     });
 
@@ -672,7 +695,7 @@ function startWatchdog(recover){
 
     if(video.readyState<2){
       lowReady++;
-      setStatus("กำลังบัฟเฟอร์โปรเจคเตอร์...");
+      if(!hasPicture()) setStatus("กำลังบัฟเฟอร์...");
       const now=Date.now();
       if(lowReady>=8 && now-lastRecover>30000){
         lastRecover=now;
