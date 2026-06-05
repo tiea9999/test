@@ -165,7 +165,7 @@ async function loadM3U(url){
       if(txt.includes("#EXTINF")){
         channels=parseM3U(txt);
         renderChannels(channels);
-        setLoad("โหลดสำเร็จ "+channels.length+" ช่อง • โหมดโปรเจคเตอร์");
+        setLoad("โหลดสำเร็จ "+channels.length+" ช่อง • โหมด "+(playMode === "sports" ? "กีฬา/สดไว" : (playMode === "movie" ? "หนังสดนิ่ง" : "โปรเจคเตอร์นิ่ง")));
         return;
       }
       lastErr=new Error("ไม่ใช่ไฟล์ M3U");
@@ -334,7 +334,7 @@ async function loadChannel(ch,el){
 
   const u=activeOriginalUrl.toLowerCase();
 
-  scheduleNoPictureHint(playMode === "sports" ? 12000 : (playMode === "movie" ? 18000 : 22000));
+  scheduleNoPictureHint(playMode === "sports" ? 20000 : (playMode === "movie" ? 25000 : 30000));
 
   if(u.includes(".mpd")){
     playMPD(activeOriginalUrl);
@@ -364,8 +364,8 @@ function playHLS(url,usedProxy){
       progressive:true,
 
       // ⚽ กีฬา/สดไว: เข้าไว เหมาะกับบอล/กีฬา/ข่าวสด
-      maxBufferLength:55,
-      maxMaxBufferLength:90,
+      maxBufferLength:80,
+      maxMaxBufferLength:120,
       backBufferLength:30,
       maxBufferHole:4,
       highBufferWatchdogPeriod:8,
@@ -392,8 +392,8 @@ function playHLS(url,usedProxy){
       progressive:true,
 
       // 🎬 หนังสดนิ่ง: ช่องหนังสดยอมหน่วงมากขึ้น ลดหมุนหนัก
-      maxBufferLength:140,
-      maxMaxBufferLength:220,
+      maxBufferLength:200,
+      maxMaxBufferLength:300,
       backBufferLength:80,
       maxBufferHole:8,
       highBufferWatchdogPeriod:14,
@@ -420,8 +420,8 @@ function playHLS(url,usedProxy){
       progressive:true,
 
       // 📽 โปรเจคเตอร์นิ่ง: บัฟเฟอร์ลึกมากสุด
-      maxBufferLength:180,
-      maxMaxBufferLength:280,
+      maxBufferLength:260,
+      maxMaxBufferLength:380,
       backBufferLength:100,
       maxBufferHole:9,
       highBufferWatchdogPeriod:16,
@@ -483,7 +483,7 @@ function playHLS(url,usedProxy){
       if(!started && !usedProxy && !hasPicture()){
         playHLS(makeProxyUrl(url),true);
       }
-    }, playMode === "sports" ? 3000 : (playMode === "movie" ? 8000 : 10000));
+    }, playMode === "sports" ? 8000 : (playMode === "movie" ? 12000 : 15000));
 
     hls.on(Hls.Events.BUFFER_STALLED,()=>{
       if(!hasPicture()) setStatus("กำลังบัฟเฟอร์...",true);
