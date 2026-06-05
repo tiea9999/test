@@ -742,6 +742,45 @@
             align-items: center !important;
             justify-content: center !important;
         }
+    
+
+        /* ===== MOBILE TOUCH SEEK CONTROLS ===== */
+        .mobile-seek-controls {
+            position: absolute !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 18px !important;
+            z-index: 10060 !important;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            pointer-events: auto;
+        }
+        .mobile-seek-btn {
+            min-width: 74px;
+            min-height: 48px;
+            border: 2px solid rgba(255,255,255,.85);
+            border-radius: 999px;
+            background: rgba(0,0,0,.68);
+            color: #fff;
+            font-size: 18px;
+            font-weight: 900;
+            cursor: pointer;
+        }
+        .mobile-seek-btn:active {
+            transform: scale(.96);
+        }
+        .player-panel.hide-ui .mobile-seek-controls {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        @media (hover:none), (pointer:coarse), (max-width:900px) {
+            .player-panel.show .mobile-seek-controls {
+                display: flex;
+            }
+        }
     </style>
 </head>
 
@@ -778,6 +817,11 @@
         </div>
         <div class="player-wrap">
             <div class="video-shell"><video id="video" controls playsinline webkit-playsinline autoplay></video></div>
+            <div class="mobile-seek-controls" id="mobileSeekControls">
+                <button class="mobile-seek-btn" id="mobileBackBtn" type="button">⏪ 15s</button>
+                <button class="mobile-seek-btn" id="mobilePlayBtn" type="button">▶/⏸</button>
+                <button class="mobile-seek-btn" id="mobileForwardBtn" type="button">15s ⏩</button>
+            </div>
             <div class="player-hint"></div>
         </div>
     </div>
@@ -1107,12 +1151,9 @@ function setupPlayerAutoHide(){
 
   document.addEventListener('keydown',(e)=>{
     if(!playerPanel.classList.contains('show'))return;
-    // กดขึ้นบนตอนดูหนัง = แสดงปุ่มและโฟกัส X
-    if(e.key==='ArrowUp'||e.keyCode===38){
-      showPlayerUI(true);
-    }else{
-      showPlayerUI(false);
-    }
+    // REMOTE TV FINAL: แค่ปลุกแถบปุ่ม ไม่ดึงโฟกัสไป X ที่นี่
+    // ให้ setupRemoteSeekControl เป็นคนจัดการ ▲ ครั้งแรก/ครั้งที่สอง
+    showPlayerUI(false);
   },true);
 }
 
@@ -1210,9 +1251,60 @@ document.querySelectorAll('.menu-btn').forEach(btn=>{btn.onclick=()=>{document.q
 $('homeBtn').onclick=()=>location.href=HOME_URL;$('reloadBtn').onclick=()=>{state.cache={};if(state.activeSource&&state.activeSource!=='home')loadMenuSource(state.activeSource);else renderHome()};$('liveBtn').onclick=()=>location.href=LIVE_URL;$('closePlayerBtn').onclick=closePlayer;$('playerHomeBtn').onclick=()=>location.href=HOME_URL;$('mxBtn').onclick=()=>openMx();$('extBtn').onclick=()=>openExternal();$('closeModalBtn').onclick=closeModal;$('prevPageBtn').onclick=()=>{state.page--;renderModalPage()};$('nextPageBtn').onclick=()=>{state.page++;renderModalPage()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'||e.keyCode===10009){e.preventDefault();if(playerPanel.classList.contains('show'))closePlayer();else if($('modal').classList.contains('show'))closeModal();else location.href=HOME_URL}});document.addEventListener('keydown',e=>{let a=document.activeElement;if(!a||!a.classList||!a.classList.contains('card'))return;if(e.key==='ArrowRight'){let n=a.nextElementSibling;if(n&&n.classList.contains('card')){e.preventDefault();n.focus();n.scrollIntoView({block:'nearest',inline:'center'})}}if(e.key==='ArrowLeft'){let p=a.previousElementSibling;if(p&&p.classList.contains('card')){e.preventDefault();p.focus();p.scrollIntoView({block:'nearest',inline:'center'})}}});
 
+
+function seekVideoBy(sec){
+  try{
+    const v=document.getElementById('video');
+    if(!v)return;
+    const cur=v.currentTime||0;
+    if(isFinite(v.duration)) v.currentTime=Math.max(0,Math.min(v.duration,cur+sec));
+    else v.currentTime=Math.max(0,cur+sec);
+    showPlayerUI(false);
+  }catch(e){}
+}
+function toggleVideoPlay(){
+  try{
+    const v=document.getElementById('video');
+    if(!v)return;
+    if(v.paused)v.play().catch(()=>{});
+    else v.pause();
+    showPlayerUI(false);
+  }catch(e){}
+}
+function setupMobileSeekControls(){
+  if(setupMobileSeekControls._ready)return;
+  setupMobileSeekControls._ready=true;
+  const back=document.getElementById('mobileBackBtn');
+  const play=document.getElementById('mobilePlayBtn');
+  const forward=document.getElementById('mobileForwardBtn');
+  if(back) back.onclick=(e)=>{e.preventDefault();e.stopPropagation();seekVideoBy(-15)};
+  if(forward) forward.onclick=(e)=>{e.preventDefault();e.stopPropagation();seekVideoBy(15)};
+  if(play) play.onclick=(e)=>{e.preventDefault();e.stopPropagation();toggleVideoPlay()};
+}
+
 function setupRemoteSeekControl(){
   if(setupRemoteSeekControl._ready)return;
   setupRemoteSeekControl._ready=true;
+  setupRemoteSeekControl._upArmed=false;
+
+  try{
+    const v=document.getElementById('video');
+    if(v && !v.hasAttribute('tabindex')) v.setAttribute('tabindex','-1');
+  }catch(e){}
+
+  function visibleButtons(panel){
+    return Array.from(panel.querySelectorAll('.player-btn')).filter(b=>b.offsetParent!==null&&!b.disabled);
+  }
+
+  function focusVideoAndHide(panel,v){
+    try{
+      if(v && !v.hasAttribute('tabindex')) v.setAttribute('tabindex','-1');
+      if(v) v.focus({preventScroll:true});
+    }catch(err){try{v.focus()}catch(e){}}
+    setupRemoteSeekControl._upArmed=false;
+    panel.classList.add('hide-ui');
+  }
+
   document.addEventListener('keydown',function(e){
     const panel=document.getElementById('playerPanel');
     const v=document.getElementById('video');
@@ -1223,9 +1315,10 @@ function setupRemoteSeekControl(){
     const active=document.activeElement;
     const activeIsBtn=active&&active.classList&&active.classList.contains('player-btn');
 
+    // ขณะโฟกัสอยู่บนแถบปุ่ม: ซ้าย/ขวา = เลื่อนปุ่ม, ลง = กลับไปคุมวิดีโอ
     if(activeIsBtn && (key==='ArrowRight'||code===39||code===22)){
       e.preventDefault();e.stopPropagation();
-      const btns=Array.from(panel.querySelectorAll('.player-btn')).filter(b=>b.offsetParent!==null&&!b.disabled);
+      const btns=visibleButtons(panel);
       const i=btns.indexOf(active);
       const next=btns[Math.min(btns.length-1,i+1)]||active;
       showPlayerUI(false);
@@ -1234,48 +1327,67 @@ function setupRemoteSeekControl(){
     }
     if(activeIsBtn && (key==='ArrowLeft'||code===37||code===21)){
       e.preventDefault();e.stopPropagation();
-      const btns=Array.from(panel.querySelectorAll('.player-btn')).filter(b=>b.offsetParent!==null&&!b.disabled);
+      const btns=visibleButtons(panel);
       const i=btns.indexOf(active);
       const prev=btns[Math.max(0,i-1)]||active;
       showPlayerUI(false);
       prev.focus();
       return;
     }
+    if(activeIsBtn && (key==='ArrowDown'||code===40||code===20)){
+      e.preventDefault();e.stopPropagation();
+      focusVideoAndHide(panel,v);
+      return;
+    }
+
+    // ขณะคุมวิดีโอ: ซ้าย/ขวา = ถอย/เดินหน้า 15 วินาที
     if(!activeIsBtn && (key==='ArrowRight'||code===39||code===22)){
       e.preventDefault();e.stopPropagation();
-      try{v.currentTime=isFinite(v.duration)?Math.min(v.duration,(v.currentTime||0)+10):(v.currentTime||0)+10}catch(err){}
+      setupRemoteSeekControl._upArmed=false;
+      seekVideoBy(15)
       return;
     }
     if(!activeIsBtn && (key==='ArrowLeft'||code===37||code===21)){
       e.preventDefault();e.stopPropagation();
-      try{v.currentTime=Math.max(0,(v.currentTime||0)-10)}catch(err){}
+      setupRemoteSeekControl._upArmed=false;
+      seekVideoBy(-15)
       return;
     }
+
+    // OK = เล่น/หยุด เฉพาะตอนโฟกัสไม่ได้อยู่บนปุ่ม
     if((key==='Enter'||key==='OK'||code===13||code===23||code===66)&&!activeIsBtn){
       e.preventDefault();e.stopPropagation();
-      try{if(v.paused)v.play().catch(()=>{});else v.pause()}catch(err){}
+      toggleVideoPlay()
       return;
     }
+
+    // ▲ ครั้งแรก = แสดงแถบบน, ▲ ครั้งที่สอง = ไปปุ่ม X
     if(key==='ArrowUp'||code===38||code===19){
-      e.preventDefault();
-      e.stopPropagation();
-      // ขึ้นบน = แสดงปุ่มและโฟกัสปุ่มปิด X เสมอ หลังจากกดเดินหน้า/ถอยหลัง
-      showPlayerUI(true);
-      setTimeout(()=>{
-        const closeBtn=document.getElementById('closePlayerBtn') || document.querySelector('.player-btn.close');
-        if(closeBtn) closeBtn.focus();
-      },30);
+      e.preventDefault();e.stopPropagation();
+      showPlayerUI(false);
+      const topHidden=panel.classList.contains('hide-ui');
+      if(topHidden || !setupRemoteSeekControl._upArmed){
+        panel.classList.remove('hide-ui');
+        setupRemoteSeekControl._upArmed=true;
+        try{v.focus({preventScroll:true});}catch(err){try{v.focus()}catch(e){}}
+        return;
+      }
+      const closeBtn=document.getElementById('closePlayerBtn') || document.querySelector('.player-btn.close');
+      if(closeBtn) closeBtn.focus();
+      setupRemoteSeekControl._upArmed=false;
       return;
     }
+
+    // ▼ = กลับลงมาคุมวิดีโอ และซ่อนแถบปุ่ม
     if(key==='ArrowDown'||code===40||code===20){
       e.preventDefault();e.stopPropagation();
-      try{v.volume=Math.max(0,(v.volume||0)-0.1)}catch(err){}
+      focusVideoAndHide(panel,v);
       return;
     }
   },true);
 }
 
-window.addEventListener('pageshow',()=>{restoreReturnState()});setupPlayerAutoHide();setupRemoteSeekControl();if(!restoreReturnState())renderHome();
+window.addEventListener('pageshow',()=>{restoreReturnState()});setupPlayerAutoHide();setupRemoteSeekControl();setupMobileSeekControls();if(!restoreReturnState())renderHome();
     </script>
 </body>
 
