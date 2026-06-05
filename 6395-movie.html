@@ -724,7 +724,7 @@ async function closePlayer(){
   try{document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}catch(e){}
   setTimeout(()=>activeElement?.focus(),150);
 }
-function goHome(){window.location.href="https://tiea9999.github.io/tv-online/index.html"}
+function goHome(){window.location.href="https://tiea9999.github.io/tv/index.html"}
 
 ["mousemove","mousedown","touchstart","touchmove","pointermove","pointerdown","click"].forEach(ev=>{
   document.getElementById("player-container").addEventListener(ev,showUI,{passive:true});
