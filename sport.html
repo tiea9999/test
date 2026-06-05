@@ -75,7 +75,7 @@ h2{padding:60px 12px 8px;margin:0;color:orange;text-align:center;text-shadow:0 0
 </head>
 <body>
 
-<a class="home-btn" href="index.html">⬅ กลับหน้าหลัก</a>
+<a class="home-btn" href="https://tiea9999.github.io/tv/index.html">⬅ กลับหน้าหลัก</a>
 <h2>TIEA SPORT TV SAFE FINAL</h2>
 <div id="load-status">กำลังโหลด JSON...</div>
 
@@ -536,7 +536,9 @@ function closePlayer(){
   setTimeout(()=>currentElement?.focus(),150);
 }
 function reloadPlayer(){if(currentChannel){currentServerIndex=0;tryServer()}}
-function goHome(){window.location.href="index.html"}
+function goHome(){
+  window.location.href="https://tiea9999.github.io/tv/index.html";
+}
 function activeUrl(){
   if(!currentChannel||!currentChannel.servers[currentServerIndex])return "";
   return currentChannel.servers[currentServerIndex].url;
