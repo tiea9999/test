@@ -269,7 +269,17 @@
         }
     </style>
 </head>
+<script type="module">
+import { auth } from "./member/firebase-config.js";
+import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
+onAuthStateChanged(auth,(user)=>{
+    if(!user){
+        location.href="./member/login.html";
+        return;
+    }
+});
+</script>
 <body>
     <button class="home-btn" onclick="goHome()">🏠 โฮม</button>
     <h2>TIEA AUTO M3U MOVIE LIVE SPORTS FINAL</h2>
