@@ -108,7 +108,7 @@
 
         #player {
             background: #000;
-            z-index: 1000
+            z-index: 10000
         }
 
         video,
@@ -125,7 +125,7 @@
             top: 10px;
             left: 10px;
             right: 10px;
-            z-index: 1003;
+            z-index: 10003;
             display: flex;
             justify-content: space-between;
             gap: 8px;
@@ -174,6 +174,10 @@
             border-radius: 8px;
             font-size: 13px;
             color: #fff
+        }
+
+        .statusbar:empty {
+            display: none
         }
 
         .status {
@@ -285,12 +289,12 @@
     <div id="overlay"></div>
     <div id="player">
         <div class="topBtns">
-            <div class="btnBox"><button class="btn green" onclick="goHome()">🏠 HOME</button></div>
+            <div class="btnBox"><button class="btn red" onclick="goHome()">✕ ปิด</button><button class="btn green" onclick="goHome()">🏠 HOME</button></div>
             <div class="btnBox">
-                <button class="btn purple" onclick="copyCurrentLink()">คัดลอก</button><button class="btn blue" onclick="openSystemPlayer()">▶ PLAYER</button><button class="btn blue" onclick="openExternal()">▶ MX</button><button class="btn red" onclick="goHome()">×</button>
+                <button class="btn purple" onclick="copyCurrentLink()">คัดลอก</button><button class="btn blue" onclick="openSystemPlayer()">▶ PLAYER</button><button class="btn blue" onclick="openExternal()">▶ MX</button>
             </div>
         </div>
-        <video id="video" playsinline webkit-playsinline x5-playsinline controls autoplay preload="auto"></video>
+        <video id="video" tabindex="0" playsinline webkit-playsinline x5-playsinline controls autoplay preload="auto"></video>
         <iframe id="frame" allowfullscreen referrerpolicy="no-referrer"></iframe>
         <div id="statusbar" class="statusbar">AUTO GROUP UNLIMITED • Main + Worker พร้อมเล่น</div>
     </div>
@@ -310,7 +314,7 @@ const SOURCES=[
 const FALLBACK_IMG="data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450"><rect width="100%" height="100%" fill="#1a1a1a"/><text x="50%" y="50%" fill="#fff" font-size="22" text-anchor="middle" dy=".3em">NO IMAGE</text></svg>`);
 let grid=document.getElementById('grid'),overlay=document.getElementById('overlay'),video=document.getElementById('video'),frame=document.getElementById('frame'),player=document.getElementById('player'),statusbar=document.getElementById('statusbar');
 let hls=null,store={},allView={active:false,name:'',page:1},currentList=[],currentIndex=0,currentUrl='',lastFocus=null;
-function setStatus(t){statusbar.textContent=t||''}
+function setStatus(t){t=String(t||'');if(t.includes('กำลังเล่น Main ผ่าน Worker'))t='';statusbar.textContent=t}
 function safeId(t){return String(t).replace(/[^\wก-๙-]/g,'_')}
 function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
 function getTitle(item){return item.title||item.name||item.ep_name||'ไม่มีชื่อ'}
@@ -430,7 +434,7 @@ function openItem(item){lastFocus=document.activeElement;if(Array.isArray(item.e
 function showEP(item){overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between"><h2 style="margin:0">${esc(getTitle(item))}</h2><button class="seeall" onclick="backToListOrGrid()">← กลับ</button></div><div class="ep-wrap" id="epBox"></div>`;const box=document.getElementById('epBox');item.episodes.forEach((ep,i)=>{const d=document.createElement('div');d.className='ep-card';d.tabIndex=0;d.textContent=ep.name||ep.title||`EP ${i+1}`;d.onclick=()=>{lastFocus=d;const servers=pickMainOnly(ep.servers||ep.sources||ep.links||ep.files||ep.playlist||[]);const single=getDirectUrl(ep);startPlay(servers.length?servers:[{name:'Main',url:single}])};d.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();d.click()}};box.appendChild(d)});setTimeout(()=>box.querySelector('.ep-card')?.focus(),100)}
 function startPlay(list){currentList=(list||[]).filter(x=>x&&x.url);currentIndex=0;if(!currentList.length){alert('❌ ไม่พบลิงก์ Main');return}overlay.style.display='none';player.style.display='block';showPlayerUI();setTimeout(()=>document.querySelector('#player .btn.blue')?.focus(),200);playMain(currentList[0])}
 function cleanupPlayers(){if(hls){try{hls.destroy()}catch(e){}hls=null}try{video.pause();video.removeAttribute('src');video.load()}catch(e){}video.style.display='none';frame.src='';frame.style.display='none'}
-async function playMain(item){cleanupPlayers();const url=item.url;currentUrl=url;setStatus('Main เท่านั้น • กำลังหาไฟล์เล่นจาก Main...');try{const playable=await resolveMainUrl(url,item.referer);if(isHls(playable)){await playHlsMain(playable,item.referer||getAutoReferer(url));setStatus('กำลังเล่น Main ผ่าน Worker');return}if(isVideoFile(playable)){await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('กำลังเล่น Main ผ่าน Worker');return}await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('กำลังเล่น Main ผ่าน Worker');return}catch(e){console.warn(e);setStatus('Main ยังไม่ขึ้นภาพ • ไม่สลับ Backup • ให้กด MX หรือคัดลอกลิงก์');}}
+async function playMain(item){cleanupPlayers();const url=item.url;currentUrl=url;setStatus('Main เท่านั้น • กำลังหาไฟล์เล่นจาก Main...');try{const playable=await resolveMainUrl(url,item.referer);if(isHls(playable)){await playHlsMain(playable,item.referer||getAutoReferer(url));setStatus('');return}if(isVideoFile(playable)){await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}catch(e){console.warn(e);setStatus('Main ยังไม่ขึ้นภาพ • ไม่สลับ Backup • ให้กด MX หรือคัดลอกลิงก์');}}
 async function resolveMainUrl(url,referer){if(isHls(url)||isVideoFile(url))return url;const cached=getCachedMain(url);if(cached){setStatus('Main เท่านั้น • ใช้ลิงก์ที่จำไว้ กำลังเล่นเร็วขึ้น...');return cached}try{const txt=await fetchText(proxyUrl(url,referer||getAutoReferer(url)),12000);const found=extractPlayable(txt,url);if(found){setCachedMain(url,found);return found}}catch(e){console.warn('resolve fail',e)}return url}
 async function fetchText(url,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||10000);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}catch(e){clearTimeout(t);throw e}}
 function extractPlayable(txt,base){txt=String(txt||'');const abs=txt.match(/https?:[^'"\s<>]+\.m3u8[^'"\s<>]*/i);if(abs)return abs[0].replace(/\\\//g,'/');const file=txt.match(/["']([^"']+\.m3u8[^"']*)["']/i);if(file){try{return new URL(file[1].replace(/\\\//g,'/'),base).toString()}catch(e){return file[1]}}return''}
@@ -442,8 +446,25 @@ async function copyCurrentLink(){const item=currentList[currentIndex];const url=
 function backToListOrGrid(){if(allView.active)renderAllPage();else backToGrid()}
 function backToGrid(){overlay.style.display='none';overlay.innerHTML='';grid.style.display='block';allView={active:false,name:'',page:1};setTimeout(()=>lastFocus?.focus?.(),100)}
 function goHome(){cleanupPlayers();player.style.display='none';overlay.style.display='none';overlay.innerHTML='';grid.style.display='block';currentList=[];currentIndex=0;window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>lastFocus?.focus?.(),100)}
+function seekVideoBy(sec){
+  try{
+    if(!video || video.style.display==='none')return;
+    const cur=Number(video.currentTime||0);
+    const dur=Number(video.duration||0);
+    let next=cur+sec;
+    if(Number.isFinite(dur)&&dur>0) next=Math.max(0,Math.min(dur,next));
+    else next=Math.max(0,next);
+    video.currentTime=next;
+    showPlayerUI();
+  }catch(e){}
+}
 document.getElementById('homeBtn').onclick=()=>{cleanupPlayers();window.location.href='https://tiea9999.github.io/tv/index.html'};
-document.addEventListener('keydown',e=>{const key=e.key;if(player.style.display==='block')showPlayerUI();if(key==='ArrowRight'||e.keyCode===22){e.preventDefault();moveFocus('right');return}if(key==='ArrowLeft'||e.keyCode===21){e.preventDefault();moveFocus('left');return}if(key==='ArrowDown'||e.keyCode===20){e.preventDefault();moveFocus('down');return}if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();moveFocus('up');return}if(key==='Escape'||key==='Backspace'||key==='GoBack'||e.keyCode===10009){e.preventDefault();if(player.style.display==='block'){goHome();return}if(overlay.style.display==='block'){backToListOrGrid();return}}if((key==='Enter'||key==='OK'||e.keyCode===23||e.keyCode===66)&&document.activeElement&&typeof document.activeElement.click==='function'){e.preventDefault();document.activeElement.click()}});
+document.addEventListener('keydown',e=>{const key=e.key;if(player.style.display==='block')showPlayerUI();
+if(player.style.display==='block' && video.style.display!=='none'){
+  if(key==='ArrowRight'||key==='MediaFastForward'||e.keyCode===22){e.preventDefault();seekVideoBy(15);return}
+  if(key==='ArrowLeft'||key==='MediaRewind'||e.keyCode===21){e.preventDefault();seekVideoBy(-15);return}
+}
+if(key==='ArrowRight'||e.keyCode===22){e.preventDefault();moveFocus('right');return}if(key==='ArrowLeft'||e.keyCode===21){e.preventDefault();moveFocus('left');return}if(key==='ArrowDown'||e.keyCode===20){e.preventDefault();moveFocus('down');return}if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();moveFocus('up');return}if(key==='Escape'||key==='Backspace'||key==='GoBack'||e.keyCode===10009){e.preventDefault();if(player.style.display==='block'){goHome();return}if(overlay.style.display==='block'){backToListOrGrid();return}}if((key==='Enter'||key==='OK'||e.keyCode===23||e.keyCode===66)&&document.activeElement&&typeof document.activeElement.click==='function'){e.preventDefault();document.activeElement.click()}});
 
 let uiTimer=null;
 function showPlayerUI(){
