@@ -794,7 +794,7 @@
             <div class="group-title">ทีวีออนไลน์</div>
             <button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/sport.html">🏆 SPORT TV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/ball66.html">🏆 DooBall66</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/6395-movie.html">🏆 DooBall6395</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/animegood.html">🏆 Animegood</button>
             <div class="group-title">หนัง</div>
-            <button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button>
+            <button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/037hd.html">🎬 Movie 037HD</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button>
             <div class="group-title">ซีรีส์</div>
             <button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ ฝรั่ง</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button>
             <div class="group-title">ระบบ</div>
@@ -1057,6 +1057,7 @@ function closeModal(){$('modal').classList.remove('show');$('prevPageBtn').style
 function getAutoReferer(url){
   const u=String(url||'').toLowerCase();
   if(u.includes('ok-hd.com')) return 'https://ok-hd.com/';
+  if(u.includes('037hddmovie.com')||u.includes('037hdmovie.com')||u.includes('master.streamhls.com')||u.includes('stream1689.com')) return 'https://www.037hddmovie.com/';
   if(u.includes('fc2stream')) return 'https://fc2stream.tv/';
   if(u.includes('doonewmovie')) return 'https://doonewmovie365.com/';
   if(u.includes('livedoomovies')) return 'https://www.doonewmovie365.com/';
@@ -1070,16 +1071,63 @@ function makePlayProxyUrl(url){
 }
 function preferProxyFirst(url){
   const u=String(url||'').toLowerCase();
-  return u.includes('ok-hd.com') || u.includes('fc2stream') || u.includes('doonewmovie') || u.includes('livedoomovies');
+  return u.includes('ok-hd.com') || u.includes('037hddmovie.com') || u.includes('037hdmovie.com') || u.includes('master.streamhls.com') || u.includes('stream1689.com') || u.includes('fc2stream') || u.includes('doonewmovie') || u.includes('livedoomovies');
 }
 
 function forceFullSound(){try{video.muted=false;video.defaultMuted=false;video.volume=1;video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
 function startWatchdog(){stopWatchdog();state.lastTime=0;state.stuckCount=0;state.recoverCount=0;state.lastRecoverAt=0;state.watchdog=setInterval(()=>{if(!playerPanel.classList.contains('show'))return;forceFullSound();if(video.paused&&video.readyState>=2)video.play().catch(()=>{});let moved=Math.abs((video.currentTime||0)-(state.lastTime||0))>.25;if(moved){state.stuckCount=0;state.recoverCount=0}else if(!video.paused){state.stuckCount++}state.lastTime=video.currentTime||0;if(state.stuckCount>=12&&Date.now()-state.lastRecoverAt>35000){state.stuckCount=0;state.recoverCount++;state.lastRecoverAt=Date.now();setStatus('สัญญาณค้าง • กำลังต่อใหม่ครั้งที่ '+state.recoverCount);try{if(state.hls){state.hls.stopLoad();setTimeout(()=>{try{state.hls.startLoad(Math.max(0,video.currentTime-1));video.play().catch(()=>{})}catch(e){}},500);return}if(state.dash){video.play().catch(()=>{});return}}catch(e){}if(state.recoverCount>=3)setStatus('สัญญาณยังไม่กลับมา • กดรีโหลดหรือ PLAYER/MX เอง')}},7000)}
 function cleanupPlayer(){stopWatchdog();if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}if(state.hls){try{state.hls.destroy()}catch(e){}state.hls=null}if(state.dash){try{state.dash.destroy()}catch(e){}state.dash=null}try{video.pause()}catch(e){}video.removeAttribute('src');video.src='';video.load()}
-function playItem(item,serverIndex=0,displayTitle=''){if(!displayTitle)state.returnEpisodeItem=null;let original=getUrl(item,serverIndex);if(!original){setStatus('ไม่พบลิงก์เล่น');return}cleanupPlayer();state.originalUrl=original;state.currentUrl=original;state.currentTitle=displayTitle||item.title||'กำลังเล่น';$('playerTitle').textContent=state.currentTitle;setStatus('กำลังเล่น • ULTRA MOVIE SERIES STABLE');playerPanel.classList.add('show');showPlayerUI();let lower=original.toLowerCase(),isMpd=lower.includes('.mpd'),noProxy=isMpd||lower.includes('thaicdn')||lower.includes('mux.dev')||lower.includes('byteark');
-let proxied=makePlayProxyUrl(original);
-let candidates=noProxy?[original]:(preferProxyFirst(original)?[proxied,original]:[original,proxied]);
-playCandidate(candidates,item,serverIndex,0)}
+function isAlreadyPlayableUrl(url){
+  const u=String(url||'').toLowerCase();
+  return u.includes('.m3u8')||u.includes('.mp4')||u.includes('.m4v')||u.includes('.webm')||u.includes('.mpd')||u.includes('type=m3u8')||u.includes('extension=m3u8');
+}
+function extractPlayableFromHtml(txt,base){
+  txt=String(txt||'');
+  let m=txt.match(/https?:[^'"\s<>]+\.m3u8[^'"\s<>]*/i);
+  if(m)return m[0].replace(/\\\//g,'/');
+  m=txt.match(/["']([^"']+\.m3u8[^"']*)["']/i);
+  if(m){
+    let u=m[1].replace(/\\\//g,'/');
+    try{return new URL(u,base).toString()}catch(e){return u}
+  }
+  m=txt.match(/https?:[^'"\s<>]+\.(mp4|m4v|webm)[^'"\s<>]*/i);
+  if(m)return m[0].replace(/\\\//g,'/');
+  return '';
+}
+async function resolveMovieUrl(original){
+  original=cleanUrl(original);
+  if(!original || isAlreadyPlayableUrl(original))return original;
+  try{
+    setStatus('กำลังดึงลิงก์เล่นจริงจากหน้าเว็บ...');
+    const txt=await fetchText(makePlayProxyUrl(original));
+    const found=extractPlayableFromHtml(txt,original);
+    if(found)return found;
+  }catch(e){console.log('resolve movie failed',e)}
+  return original;
+}
+async function playItem(item,serverIndex=0,displayTitle=''){
+  if(!displayTitle)state.returnEpisodeItem=null;
+  let original=getUrl(item,serverIndex);
+  if(!original){setStatus('ไม่พบลิงก์เล่น');return}
+  cleanupPlayer();
+  state.originalUrl=original;
+  state.currentUrl=original;
+  state.currentTitle=displayTitle||item.title||'กำลังเล่น';
+  $('playerTitle').textContent=state.currentTitle;
+  setStatus('กำลังเตรียมเล่น...');
+  playerPanel.classList.add('show');
+  showPlayerUI();
+
+  let finalUrl=await resolveMovieUrl(original);
+  state.originalUrl=finalUrl;
+  state.currentUrl=finalUrl;
+
+  let lower=finalUrl.toLowerCase(),isMpd=lower.includes('.mpd'),noProxy=isMpd||lower.includes('thaicdn')||lower.includes('mux.dev')||lower.includes('byteark');
+  let proxied=makePlayProxyUrl(finalUrl);
+  let candidates=noProxy?[finalUrl]:(preferProxyFirst(finalUrl)?[proxied,finalUrl]:[finalUrl,proxied]);
+  let playObj=Object.assign({},item,{servers:[{name:'Main',url:finalUrl}]});
+  playCandidate(candidates,playObj,0,0)
+}
 function playCandidate(candidates,item,serverIndex,idx){let url=candidates[idx]||candidates[0];state.currentUrl=url;let direct=getUrl(item,serverIndex);let next=()=>{if(idx+1<candidates.length){playCandidate(candidates,item,serverIndex,idx+1);return}if(item.servers?.length>serverIndex+1){playItem(item,serverIndex+1);return}openMx(direct)};cleanupPlayer();playerPanel.classList.add('show');showPlayerUI();forceFullSound();startWatchdog();state.playTimer=setTimeout(()=>{if(video.readyState<2 && (video.currentTime||0)===0)setStatus('ถ้าภาพไม่ขึ้น ให้กด PLAYER/MX ด้านบน')},30000);['playing','loadeddata','canplay'].forEach(ev=>video.addEventListener(ev,()=>{if(state.playTimer)clearTimeout(state.playTimer);state.stuckCount=0;forceFullSound()},{once:true}));let lower=url.toLowerCase();if(lower.includes('.mpd')){try{state.dash=dashjs.MediaPlayer().create();state.dash.initialize(video,url,true);setTimeout(forceFullSound,500)}catch(e){next()}return}if(Hls.isSupported()&&(lower.includes('.m3u8')||lower.includes('master.txt')||lower.includes('.txt')||lower.includes('type=m3u8')||lower.includes('extension=m3u8'))){state.hls=new Hls({
 enableWorker:false,
 lowLatencyMode:false,
