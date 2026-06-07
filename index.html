@@ -965,15 +965,15 @@ function sortByUpdated(items){
 }
 
 function makeRows(items){let order=['ซีรี่ย์อัพเดทใหม่','ซีรี่ย์จีน','ซีรี่ย์เกาหลี','ซีรี่ย์ฝรั่ง','ซีรี่ย์ไทย','ซีรี่ย์ญี่ปุ่น','ซีรี่ย์สั้น','หนัง MySeries','ดูหนังออนไลน์','ทีวีออนไลน์','ทีวี','กีฬา','อื่นๆ'],map={};items.forEach(item=>{let cats=item.groups&&item.groups.length?item.groups:[item.group||'อื่นๆ'];cats.forEach(c=>{c=groupName(c);if(!map[c])map[c]=[];if(!map[c].some(x=>x.title===item.title))map[c].push(item)})});return Object.keys(map).sort((a,b)=>{let ia=order.indexOf(a)<0?99:order.indexOf(a),ib=order.indexOf(b)<0?99:order.indexOf(b);return ia-ib||a.localeCompare(b,'th')}).map(title=>({title,items:map[title]}))}
-function renderHome(){state.activeSource='home';setStatus('หน้าแรก • MySeries แยกหมวด + หนัง + ทีวี');content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV FINAL 1080P TV STABLE</div><div class="hero-sub">แยกหมวดซีรี่ย์ชัดเจน • เล่นไวขึ้น • มีระบบกันหมุนค้างอัตโนมัติ</div></div><div id="homeRows"></div>`;Promise.all([loadSourcePack('movie-main').catch(()=>[]),loadSourcePack('series-24hd').catch(()=>[])]).then(([movies,series24])=>{let rows=[
+function renderHome(){state.activeSource='home';setStatus('หน้าแรก • ซีรี่ย์อัพเดทใหม่ + ดูหนังออนไลน์ + ทีวี');content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV FINAL 1080P TV STABLE</div><div class="hero-sub">หน้าแรกใหม่ • ซีรี่ย์อัพเดทใหม่ • ดูหนังออนไลน์จาก 037HD หนังใหม่ 2026 • เล่นไวขึ้น</div></div><div id="homeRows"></div>`;Promise.all([loadSeriesUpdateDirect().catch(()=>[]),loadUrl('https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%202026.json','ดูหนังออนไลน์').catch(()=>[])]).then(([seriesUpdate,movieOnline])=>{let rows=[
 {title:'ทีวีแนะนำ',items:[
 {kind:'play',title:'BEIN 01',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/203.m3u8'}]},
 {kind:'play',title:'BEIN 02',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/204.m3u8'}]},
 {kind:'play',title:'BEIN 03',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/205.m3u8'}]},
 {kind:'play',title:'FOOTBALL03',image:FOLDER_LOGO,group:'กีฬา',groups:['กีฬา'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/391722.m3u8'}]}
 ]},
-{title:'ซีรีส์ 24HD',items:series24.slice(0,30)},
-{title:'ดูหนังออนไลน์',items:movies.slice(0,30)},
+{title:'ซีรี่ย์อัพเดทใหม่',items:seriesUpdate.slice(0,30)},
+{title:'ดูหนังออนไลน์',items:movieOnline.slice(0,30)},
 {title:'ทีวีออนไลน์',items:TV_LINKS}
 ].filter(r=>r.items.length);renderRows(rows,'หน้าแรก',document.getElementById('homeRows'));setStatus('พร้อมใช้งาน • โหลดหน้าแรกสำเร็จ')})}
 
