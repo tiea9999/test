@@ -76,7 +76,7 @@ async function copyCurrentLink(){const item=currentList[currentIndex];const url=
 function backToListOrGrid(){if(allView.active)renderAllPage();else backToGrid()}
 function backToGrid(){overlay.style.display='none';overlay.innerHTML='';grid.style.display='block';allView={active:false,name:'',page:1};setTimeout(()=>lastFocus?.focus?.(),100)}
 function goHome(){cleanupPlayers();player.style.display='none';overlay.style.display='none';overlay.innerHTML='';grid.style.display='block';currentList=[];currentIndex=0;window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>lastFocus?.focus?.(),100)}
-document.getElementById('homeBtn').onclick=()=>{cleanupPlayers();window.location.href='https://tiea9999.github.io/tv-online/index.html'};
+document.getElementById('homeBtn').onclick=()=>{cleanupPlayers();window.location.href='https://tiea9999.github.io/tv/index.html'};
 document.addEventListener('keydown',e=>{const key=e.key;if(player.style.display==='block')showPlayerUI();if(key==='ArrowRight'||e.keyCode===22){e.preventDefault();moveFocus('right');return}if(key==='ArrowLeft'||e.keyCode===21){e.preventDefault();moveFocus('left');return}if(key==='ArrowDown'||e.keyCode===20){e.preventDefault();moveFocus('down');return}if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();moveFocus('up');return}if(key==='Escape'||key==='Backspace'||key==='GoBack'||e.keyCode===10009){e.preventDefault();if(player.style.display==='block'){goHome();return}if(overlay.style.display==='block'){backToListOrGrid();return}}if((key==='Enter'||key==='OK'||e.keyCode===23||e.keyCode===66)&&document.activeElement&&typeof document.activeElement.click==='function'){e.preventDefault();document.activeElement.click()}});
 
 let uiTimer=null;
