@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>TIEA IPTV 037HD MAIN PRO CACHE FIXED</title>
+    <title>TIEA IPTV 037HD AUTO GROUP UNLIMITED FINAL</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         * {
@@ -292,7 +292,7 @@
         </div>
         <video id="video" playsinline webkit-playsinline x5-playsinline controls autoplay preload="auto"></video>
         <iframe id="frame" allowfullscreen referrerpolicy="no-referrer"></iframe>
-        <div id="statusbar" class="statusbar">Main เท่านั้น • Cache + Worker พร้อมเล่น</div>
+        <div id="statusbar" class="statusbar">AUTO GROUP UNLIMITED • Main + Worker พร้อมเล่น</div>
     </div>
     <script>
         const PROXY="https://iptv.tawatchai250958.workers.dev/?url=";
@@ -326,7 +326,99 @@ function isVideoFile(url){return /\.(mp4|m4v|webm|ogg|ogv|mov)(\?|$)/i.test(url)
 function isEmbeddable(url){return /youtube\.com|youtu\.be|vk\.com|ok\.ru|dailymotion\.com|player|embed/i.test(url)}
 function normalizeServers(servers){if(!Array.isArray(servers))return[];return servers.map((s,i)=>{if(typeof s==='string')return{name:'',url:s,idx:i};if(s&&typeof s==='object')return{name:String(s.name||s.title||s.label||s.server||s.quality||''),url:getDirectUrl(s),referer:s.referer||s.referrer||s.origin||'',idx:i};return{name:'',url:'',idx:i}}).filter(s=>s.url)}
 function pickMainOnly(list){const arr=normalizeServers(list);if(!arr.length)return[];let main=arr.find(s=>/^(main|หลัก)$/i.test(s.name.trim()))||arr.find(s=>/main|หลัก|server\s*1|สำรอง\s*0/i.test(s.name))||arr[0];return[main]}
-async function loadAll(){grid.innerHTML='<div class="status">⚡ LOADING...</div>';let rows=[];for(const s of SOURCES){try{const res=await fetch(s.url+'?t='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error(res.status);const data=await res.json();let list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));store[s.name]={data:list,page:1,error:''}}catch(e){store[s.name]={data:[],page:1,error:'โหลดรายการไม่ได้'}}rows.push(s.name)}grid.innerHTML='';rows.forEach(renderRow);setTimeout(()=>document.getElementById('homeBtn')?.focus(),250)}
+function normalizeGroupName(g, fallback){
+  g=String(g||'').trim();
+  if(!g) g=String(fallback||'อื่นๆ').trim()||'อื่นๆ';
+  const compact=g.replace(/\s+/g,'');
+  const aliases={
+    'หนังใหม่2026':'หนังใหม่2026',
+    'หนังใหม่ 2026':'หนังใหม่2026',
+    'หนังใหม่2025':'หนังใหม่2025',
+    'หนังใหม่ 2025':'หนังใหม่2025',
+    'netflix':'Netflix',
+    'NETFLIX':'Netflix'
+  };
+  return aliases[g]||aliases[compact]||g;
+}
+function getItemGroups(item, fallback){
+  let gs=[];
+  if(Array.isArray(item.groups)) gs.push(...item.groups);
+  if(item.group) gs.push(item.group);
+  if(item.category) gs.push(item.category);
+  if(item.type_group) gs.push(item.type_group);
+  if(!gs.length) gs=[fallback||'อื่นๆ'];
+  return [...new Set(gs.map(x=>normalizeGroupName(x,fallback)).filter(Boolean))];
+}
+function getUpdatedTime(item){
+  const raw=String(item.updated||item.update||item.date||item.added||item.created||item.last_update||'').trim();
+  if(!raw) return 0;
+  let t=Date.parse(raw);
+  if(!Number.isNaN(t)) return t;
+  const m=raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if(m) return new Date(Number(m[3]),Number(m[2])-1,Number(m[1])).getTime();
+  return 0;
+}
+function dedupeKey(item){
+  const title=String(getTitle(item)||'').trim().toLowerCase();
+  let url='';
+  try{url=(item.servers&&item.servers[0]&&(item.servers[0].url||item.servers[0].link||item.servers[0].file))||getDirectUrl(item)||'';}catch(e){}
+  return title+'|'+String(url).trim().toLowerCase();
+}
+async function loadAll(){
+  grid.innerHTML='<div class="status">⚡ LOADING AUTO GROUP...</div>';
+  store={};
+  const groupMap={};
+  const latest=[];
+  const seen=new Set();
+  const sourceNames=SOURCES.map(s=>s.name);
+  const groupOrder=[...sourceNames];
+
+  for(const s of SOURCES){
+    try{
+      const res=await fetch(s.url+'?t='+Date.now(),{cache:'no-store'});
+      if(!res.ok)throw new Error(res.status);
+      const data=await res.json();
+      let list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));
+      for(const item of list){
+        if(!item||typeof item!=='object') continue;
+        const key=dedupeKey(item);
+        if(seen.has(key)) continue;
+        seen.add(key);
+        const groups=getItemGroups(item,s.name);
+        const t=getUpdatedTime(item);
+        if(t>0) latest.push({...item,__updatedTime:t});
+        for(const g of groups){
+          if(!groupMap[g]){groupMap[g]=[]; if(!groupOrder.includes(g)) groupOrder.push(g);}
+          groupMap[g].push(item);
+        }
+      }
+    }catch(e){
+      const g=normalizeGroupName(s.name);
+      if(!groupMap[g]) groupMap[g]=[];
+      store[g]={data:[],page:1,error:'โหลดรายการไม่ได้'};
+      if(!groupOrder.includes(g)) groupOrder.push(g);
+    }
+  }
+
+  const rows=[];
+  if(latest.length){
+    latest.sort((a,b)=>(b.__updatedTime||0)-(a.__updatedTime||0));
+    store['🔥 อัปเดทล่าสุด']={data:latest,page:1,error:''};
+    rows.push('🔥 อัปเดทล่าสุด');
+  }
+  for(const g of groupOrder){
+    if(groupMap[g]&&groupMap[g].length){
+      store[g]={data:groupMap[g],page:1,error:''};
+      rows.push(g);
+    }else if(store[g]){
+      rows.push(g);
+    }
+  }
+  Object.keys(groupMap).forEach(g=>{if(!rows.includes(g)){store[g]={data:groupMap[g],page:1,error:''};rows.push(g)}});
+  grid.innerHTML='';
+  rows.forEach(renderRow);
+  setTimeout(()=>document.getElementById('homeBtn')?.focus(),250);
+}
 function renderRow(name){const rowId=safeId(name),row=document.createElement('div');row.innerHTML=`<div class="row-title"><span>${esc(name)}</span><button class="seeall" onclick="seeAll('${name.replace(/'/g,"\\'")}')">ดูทั้งหมด</button></div><div class="row-items" id="row-${rowId}"></div>`;grid.appendChild(row);renderPage(name)}
 function createCard(item,onClick){const div=document.createElement('div');div.className='card';div.tabIndex=0;div.innerHTML=`<img src="${esc(getImage(item))}" alt="${esc(getTitle(item))}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'"><div class="card-title">${esc(getTitle(item))}</div>`;div.onclick=onClick;div.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();onClick()}};return div}
 function renderPage(name){const obj=store[name],row=document.getElementById('row-'+safeId(name));if(!obj||!row)return;row.innerHTML='';if(obj.error){row.innerHTML=`<div class="status">❌ ${obj.error}</div>`;return}const items=obj.data.slice(0,15);if(!items.length){row.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>row.appendChild(createCard(item,()=>openItem(item))))}
@@ -350,7 +442,7 @@ async function copyCurrentLink(){const item=currentList[currentIndex];const url=
 function backToListOrGrid(){if(allView.active)renderAllPage();else backToGrid()}
 function backToGrid(){overlay.style.display='none';overlay.innerHTML='';grid.style.display='block';allView={active:false,name:'',page:1};setTimeout(()=>lastFocus?.focus?.(),100)}
 function goHome(){cleanupPlayers();player.style.display='none';overlay.style.display='none';overlay.innerHTML='';grid.style.display='block';currentList=[];currentIndex=0;window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>lastFocus?.focus?.(),100)}
-document.getElementById('homeBtn').onclick=()=>{cleanupPlayers();window.location.href='https://tiea9999.github.io/tv-online/index.html'};
+document.getElementById('homeBtn').onclick=()=>{cleanupPlayers();window.location.href='https://tiea9999.github.io/tv/index.html'};
 document.addEventListener('keydown',e=>{const key=e.key;if(player.style.display==='block')showPlayerUI();if(key==='ArrowRight'||e.keyCode===22){e.preventDefault();moveFocus('right');return}if(key==='ArrowLeft'||e.keyCode===21){e.preventDefault();moveFocus('left');return}if(key==='ArrowDown'||e.keyCode===20){e.preventDefault();moveFocus('down');return}if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();moveFocus('up');return}if(key==='Escape'||key==='Backspace'||key==='GoBack'||e.keyCode===10009){e.preventDefault();if(player.style.display==='block'){goHome();return}if(overlay.style.display==='block'){backToListOrGrid();return}}if((key==='Enter'||key==='OK'||e.keyCode===23||e.keyCode===66)&&document.activeElement&&typeof document.activeElement.click==='function'){e.preventDefault();document.activeElement.click()}});
 
 let uiTimer=null;
