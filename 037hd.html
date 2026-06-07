@@ -289,7 +289,7 @@
     <div id="overlay"></div>
     <div id="player">
         <div class="topBtns">
-            <div class="btnBox"><button class="btn red" onclick="goHome()">✕ ปิด</button><button class="btn green" onclick="goHome()">🏠 HOME</button></div>
+            <div class="btnBox"><button id="closeTopBtn" class="btn red" onclick="goHome()">✕ ปิด</button><button id="playerHomeTopBtn" class="btn green" onclick="goHome()">🏠 HOME</button></div>
             <div class="btnBox">
                 <button class="btn purple" onclick="copyCurrentLink()">คัดลอก</button><button class="btn blue" onclick="openSystemPlayer()">▶ PLAYER</button><button class="btn blue" onclick="openExternal()">▶ MX</button>
             </div>
@@ -459,18 +459,30 @@ function seekVideoBy(sec){
   }catch(e){}
 }
 document.getElementById('homeBtn').onclick=()=>{cleanupPlayers();window.location.href='https://tiea9999.github.io/tv/index.html'};
+function isPlayerTopFocused(){try{return !!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.topBtns'))}catch(e){return false}}
+function focusPlayerClose(){showPlayerUI(true);setTimeout(()=>{const b=document.getElementById('closeTopBtn')||document.querySelector('#player .btn.red');if(b)b.focus()},30)}
 document.addEventListener('keydown',e=>{const key=e.key;if(player.style.display==='block')showPlayerUI();
-if(player.style.display==='block' && video.style.display!=='none'){
-  if(key==='ArrowRight'||key==='MediaFastForward'||e.keyCode===22){e.preventDefault();seekVideoBy(15);return}
-  if(key==='ArrowLeft'||key==='MediaRewind'||e.keyCode===21){e.preventDefault();seekVideoBy(-15);return}
+if(player.style.display==='block'){
+  if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();focusPlayerClose();return}
+  if((key==='ArrowDown'||e.keyCode===20)&&isPlayerTopFocused()){e.preventDefault();video.focus();showPlayerUI();return}
+  if(video.style.display!=='none'){
+    if(key==='ArrowRight'||key==='MediaFastForward'||e.keyCode===22){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('right'); else seekVideoBy(15); return}
+    if(key==='ArrowLeft'||key==='MediaRewind'||e.keyCode===21){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('left'); else seekVideoBy(-15); return}
+  }
 }
 if(key==='ArrowRight'||e.keyCode===22){e.preventDefault();moveFocus('right');return}if(key==='ArrowLeft'||e.keyCode===21){e.preventDefault();moveFocus('left');return}if(key==='ArrowDown'||e.keyCode===20){e.preventDefault();moveFocus('down');return}if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();moveFocus('up');return}if(key==='Escape'||key==='Backspace'||key==='GoBack'||e.keyCode===10009){e.preventDefault();if(player.style.display==='block'){goHome();return}if(overlay.style.display==='block'){backToListOrGrid();return}}if((key==='Enter'||key==='OK'||e.keyCode===23||e.keyCode===66)&&document.activeElement&&typeof document.activeElement.click==='function'){e.preventDefault();document.activeElement.click()}});
 
 let uiTimer=null;
-function showPlayerUI(){
+function showPlayerUI(forceFocus){
   player.classList.remove('playerUIHidden');
   clearTimeout(uiTimer);
-  uiTimer=setTimeout(()=>{ if(player.style.display==='block') player.classList.add('playerUIHidden'); },3500);
+  if(forceFocus) return;
+  uiTimer=setTimeout(()=>{
+    if(player.style.display==='block'){
+      try{ if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.topBtns')) return; }catch(e){}
+      player.classList.add('playerUIHidden');
+    }
+  },3500);
 }
 ['mousemove','mousedown','touchstart','touchmove','pointermove','click'].forEach(ev=>player.addEventListener(ev,showPlayerUI,{passive:true}));
 function visibleFocusables(){return Array.from(document.querySelectorAll('button,.card,.ep-card')).filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(el).visibility!=='hidden'&&getComputedStyle(el).display!=='none'})}
