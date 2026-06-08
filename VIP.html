@@ -322,42 +322,45 @@
                 padding: 6px 7px
             }
         }
-    
-/* ===== FULLSCREEN PLAYER AUTO HIDE FINAL ===== */
-#player-container{
-  position:fixed!important;
-  inset:0!important;
-  width:100vw!important;
-  height:100vh!important;
-  background:#000!important;
-  z-index:99999!important;
-}
-#player{
-  width:100vw!important;
-  height:100vh!important;
-  max-width:none!important;
-  object-fit:contain!important;
-  background:#000!important;
-}
-.player-controls,
-.status{
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  transition:opacity .22s ease,visibility .22s ease!important;
-}
-#player-container.show-ui .player-controls{
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-}
-#player-container.show-status .status{
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-}
 
-</style>
+        /* ===== FULLSCREEN PLAYER AUTO HIDE FINAL ===== */
+        #player-container {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: #000 !important;
+            z-index: 99999 !important;
+        }
+
+        #player {
+            width: 100vw !important;
+            height: 100vh !important;
+            max-width: none !important;
+            object-fit: contain !important;
+            background: #000 !important;
+        }
+
+        .player-controls,
+        .status {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+            transition: opacity .22s ease, visibility .22s ease !important;
+        }
+
+        #player-container.show-ui .player-controls {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+        }
+
+        #player-container.show-status .status {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+        }
+    </style>
 </head>
 
 <body>
@@ -377,7 +380,7 @@
     <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
-                <button class="player-btn" id="closeBtn" onclick="closePlayer()">X</button>
+                <button class="player-btn" id="closeBtn" onclick="closePlayer()">✕ ปิด</button>
                 <button class="player-btn" onclick="reloadPlayer()">↻ รีโหลด</button>
             </div>
             <div class="right-buttons">
@@ -392,10 +395,11 @@
 
     <script>
         const JSON_URLS=[
-  {name:"supjav 18+",url:"https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/supjav.json"},
-  {name:"pornxxx",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornxxx.json"},
-  {name:"avpung18+",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_avpung.json"},
-  {name:"jav24 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_jav24.json"}
+{name:"supjav 18+",url:"https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/supjav.json"},
+{name:"pornxxx",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornxxx.json"},
+{name:"avpung18+",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_avpung.json"},
+{name:"jav24 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_jav24.json"}
+
 ];
 const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 
@@ -1107,6 +1111,12 @@ function showPlayerUI(showStatus=false){
 
   uiTimer=setTimeout(()=>{
     if(box.style.display==="block"){
+      const active=document.activeElement;
+      if(active && active.classList && active.classList.contains("player-btn")){
+        box.classList.add("show-ui");
+        box.classList.remove("hide-ui");
+        return;
+      }
       box.classList.remove("show-ui");
       box.classList.remove("show-status");
       box.classList.add("hide-ui");
@@ -1137,6 +1147,36 @@ function setupAutoHideUI(){
 }
 
 
+// REMOTE TOP BUTTON FOCUS FINAL
+function isPlayerOpen(){
+  const box=document.getElementById("player-container");
+  return !!box && box.style.display==="block";
+}
+
+function focusCloseButton(){
+  const box=document.getElementById("player-container");
+  const close=document.getElementById("closeBtn");
+  if(!box || !close) return;
+  box.classList.add("show-ui");
+  box.classList.remove("hide-ui");
+  box.classList.remove("show-status");
+  setTimeout(()=>close.focus(),30);
+}
+
+document.addEventListener("keydown",e=>{
+  if(!isPlayerOpen()) return;
+  const k=e.key||"";
+  const c=e.keyCode||0;
+
+  // กดขึ้นบนขณะดูหนัง = โฟกัสไปที่ปุ่ม ✕ ปิด ด้านบนทันที
+  if(k==="ArrowUp" || c===19){
+    e.preventDefault();
+    e.stopPropagation();
+    focusCloseButton();
+    return;
+  }
+},true);
+
 // SEEK REMOTE ANDROID TV
 document.addEventListener("keydown",e=>{
   const box=document.getElementById("player-container");
@@ -1145,6 +1185,14 @@ document.addEventListener("keydown",e=>{
 
   const k=e.key||"";
   const c=e.keyCode||0;
+
+  const active=document.activeElement;
+  const onPlayerButton=active && active.classList && active.classList.contains("player-btn");
+
+  // ถ้าโฟกัสอยู่บนปุ่ม ให้ซ้าย/ขวาเลื่อนระหว่างปุ่ม ไม่ใช่ seek
+  if(onPlayerButton && (k==="ArrowLeft" || k==="ArrowRight" || c===21 || c===22)){
+    return;
+  }
 
   // LEFT = -15s
   if(
