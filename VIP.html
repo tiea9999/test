@@ -389,7 +389,7 @@
                 <button class="player-btn" onclick="goHome()">🏠 HOME</button>
             </div>
         </div>
-        <video id="player" controls autoplay playsinline webkit-playsinline></video>
+        <video id="player" tabindex="0" controls autoplay playsinline webkit-playsinline></video>
         <div id="status" class="status">กำลังโหลด...</div>
     </div>
 
@@ -748,7 +748,7 @@ async function playChannel(ch,el){
   if(el)el.classList.add("active");
   document.getElementById("player-container").style.display="block";
   showPlayerUI(false);
-  setTimeout(()=>document.getElementById("closeBtn")?.focus(),200);
+  setTimeout(()=>{ try{ player.focus(); }catch(e){} },250);
   await tryServer();
 }
 
@@ -1168,6 +1168,9 @@ document.addEventListener("keydown",e=>{
   const k=e.key||"";
   const c=e.keyCode||0;
 
+  const active=document.activeElement;
+  const onPlayerButton=active && active.classList && active.classList.contains("player-btn");
+
   // กดขึ้นบนขณะดูหนัง = โฟกัสไปที่ปุ่ม ✕ ปิด ด้านบนทันที
   if(k==="ArrowUp" || c===19){
     e.preventDefault();
@@ -1175,62 +1178,63 @@ document.addEventListener("keydown",e=>{
     focusCloseButton();
     return;
   }
+
+  // กดลงจากแถบปุ่ม = กลับไปโฟกัสวิดีโอ เพื่อให้ซ้าย/ขวา seek 15 วิ
+  if(onPlayerButton && (k==="ArrowDown" || c===20)){
+    e.preventDefault();
+    e.stopPropagation();
+    try{ player.focus(); }catch(err){}
+    showPlayerUI(false);
+    return;
+  }
 },true);
 
-// SEEK REMOTE ANDROID TV
+// SEEK REMOTE ANDROID TV - CAPTURE FINAL
 document.addEventListener("keydown",e=>{
   const box=document.getElementById("player-container");
-
-  if(box.style.display!=="block") return;
+  if(!box || box.style.display!=="block") return;
 
   const k=e.key||"";
   const c=e.keyCode||0;
-
   const active=document.activeElement;
   const onPlayerButton=active && active.classList && active.classList.contains("player-btn");
 
-  // ถ้าโฟกัสอยู่บนปุ่ม ให้ซ้าย/ขวาเลื่อนระหว่างปุ่ม ไม่ใช่ seek
-  if(onPlayerButton && (k==="ArrowLeft" || k==="ArrowRight" || c===21 || c===22)){
-    return;
-  }
+  // ถ้าโฟกัสอยู่บนปุ่ม ให้ซ้าย/ขวาเลื่อนปุ่มตามปกติ ไม่ seek
+  if(onPlayerButton && (k==="ArrowLeft" || k==="ArrowRight" || c===21 || c===22)) return;
 
-  // LEFT = -15s
-  if(
-    k==="ArrowLeft" ||
-    k==="MediaRewind" ||
-    c===21
-  ){
+  // LEFT = -15s ตอนโฟกัสอยู่ในวิดีโอ / พื้นที่เล่น
+  if(k==="ArrowLeft" || k==="MediaRewind" || c===21){
     e.preventDefault();
-
+    e.stopPropagation();
+    if(e.stopImmediatePropagation) e.stopImmediatePropagation();
     try{
       player.currentTime=Math.max(0,(player.currentTime||0)-15);
       setStatus("⏪ ย้อนกลับ 15 วิ");
       showPlayerUI(false);
+      try{ player.focus(); }catch(err){}
     }catch(err){}
+    return;
   }
 
-  // RIGHT = +15s
-  if(
-    k==="ArrowRight" ||
-    k==="MediaFastForward" ||
-    c===22
-  ){
+  // RIGHT = +15s ตอนโฟกัสอยู่ในวิดีโอ / พื้นที่เล่น
+  if(k==="ArrowRight" || k==="MediaFastForward" || c===22){
     e.preventDefault();
-
+    e.stopPropagation();
+    if(e.stopImmediatePropagation) e.stopImmediatePropagation();
     try{
       player.currentTime=(player.currentTime||0)+15;
       setStatus("⏩ เดินหน้า 15 วิ");
       showPlayerUI(false);
+      try{ player.focus(); }catch(err){}
     }catch(err){}
+    return;
   }
 
   // PLAY/PAUSE
-  if(
-    k==="MediaPlayPause" ||
-    c===179
-  ){
+  if(k==="MediaPlayPause" || c===179){
     e.preventDefault();
-
+    e.stopPropagation();
+    if(e.stopImmediatePropagation) e.stopImmediatePropagation();
     try{
       if(player.paused){
         player.play().catch(()=>{});
@@ -1239,12 +1243,12 @@ document.addEventListener("keydown",e=>{
         player.pause();
         setStatus("⏸ หยุด");
       }
-
       showPlayerUI(false);
+      try{ player.focus(); }catch(err){}
     }catch(err){}
+    return;
   }
-});
-
+},true);
 
 document.addEventListener("DOMContentLoaded",()=>{setupAutoHideUI();loadDefaultJson();});
     </script>
