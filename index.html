@@ -1057,13 +1057,19 @@ function closeModal(){$('modal').classList.remove('show');$('prevPageBtn').style
 function getAutoReferer(url){
   const u=String(url||'').toLowerCase();
   if(u.includes('ok-hd.com')) return 'https://ok-hd.com/';
+  if(u.includes('main.24playerhd.com')||u.includes('24playerhd')) return 'https://main.24playerhd.com/';
   if(u.includes('037hddmovie.com')||u.includes('037hdmovie.com')||u.includes('master.streamhls.com')||u.includes('stream1689.com')) return 'https://www.037hddmovie.com/';
   if(u.includes('fc2stream')) return 'https://fc2stream.tv/';
   if(u.includes('doonewmovie')) return 'https://doonewmovie365.com/';
   if(u.includes('livedoomovies')) return 'https://www.doonewmovie365.com/';
   return '';
 }
+function isWorkerUrl(url){
+  const u=String(url||'').toLowerCase();
+  return u.includes('iptv.tawatchai250958.workers.dev') || u.includes('workers.dev/?url=') || u.includes('workers.dev/?u=');
+}
 function makePlayProxyUrl(url){
+  if(isWorkerUrl(url)) return url;
   let ref=getAutoReferer(url);
   let out=PROXY+encodeURIComponent(url);
   if(ref) out+='&referer='+encodeURIComponent(ref);
@@ -1071,7 +1077,8 @@ function makePlayProxyUrl(url){
 }
 function preferProxyFirst(url){
   const u=String(url||'').toLowerCase();
-  return u.includes('ok-hd.com') || u.includes('037hddmovie.com') || u.includes('037hdmovie.com') || u.includes('master.streamhls.com') || u.includes('stream1689.com') || u.includes('fc2stream') || u.includes('doonewmovie') || u.includes('livedoomovies');
+  if(isWorkerUrl(url)) return false;
+  return u.includes('ok-hd.com') || u.includes('main.24playerhd.com') || u.includes('24playerhd') || u.includes('037hddmovie.com') || u.includes('037hdmovie.com') || u.includes('master.streamhls.com') || u.includes('stream1689.com') || u.includes('fc2stream') || u.includes('doonewmovie') || u.includes('livedoomovies');
 }
 
 function forceFullSound(){try{video.muted=false;video.defaultMuted=false;video.volume=1;video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
@@ -1122,9 +1129,9 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   state.originalUrl=finalUrl;
   state.currentUrl=finalUrl;
 
-  let lower=finalUrl.toLowerCase(),isMpd=lower.includes('.mpd'),noProxy=isMpd||lower.includes('thaicdn')||lower.includes('mux.dev')||lower.includes('byteark');
-  let proxied=makePlayProxyUrl(finalUrl);
-  let candidates=noProxy?[finalUrl]:(preferProxyFirst(finalUrl)?[proxied,finalUrl]:[finalUrl,proxied]);
+  let lower=finalUrl.toLowerCase(),isMpd=lower.includes('.mpd'),noProxy=isMpd||lower.includes('thaicdn')||lower.includes('mux.dev')||lower.includes('byteark')||isWorkerUrl(finalUrl);
+  let proxied=isWorkerUrl(finalUrl)?finalUrl:makePlayProxyUrl(finalUrl);
+  let candidates=isWorkerUrl(finalUrl)?[finalUrl]:(noProxy?[finalUrl]:(preferProxyFirst(finalUrl)?[proxied,finalUrl]:[finalUrl,proxied]));
   let playObj=Object.assign({},item,{servers:[{name:'Main',url:finalUrl}]});
   playCandidate(candidates,playObj,0,0)
 }
