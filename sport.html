@@ -3,516 +3,1073 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>TIEA IPTV 037HD AUTO GROUP UNLIMITED FINAL</title>
+    <meta name="viewport"
+        content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
+    <title>TIEA AUTO M3U MOVIE LIVE SPORTS FINAL</title>
+
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.10.9/shaka-player.compiled.min.js"></script>
+
     <style>
         * {
             box-sizing: border-box
         }
 
+        html,
         body {
             margin: 0;
+            width: 100%;
+            min-height: 100%;
             background: #000;
             color: #fff;
             font-family: Arial, sans-serif;
             overflow-x: hidden
         }
 
-        #homeBtn {
+        body {
+            padding-top: 56px
+        }
+
+        .home-btn {
             position: fixed;
             top: 10px;
             left: 10px;
             z-index: 9999;
+            background: rgba(0, 0, 0, .78);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, .35);
+            border-radius: 999px;
             padding: 10px 14px;
-            background: #00c853;
-            border: 0;
-            border-radius: 10px;
-            color: #fff;
-            cursor: pointer;
-            font-weight: 700
+            font-weight: 900;
+            cursor: pointer
         }
 
-        .row-title {
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #00e5ff;
-            font-weight: 700;
-            font-size: 18px
+        .home-btn:focus,
+        .home-btn:hover,
+        .tool-btn:focus,
+        .channel:focus,
+        .player-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px cyan
         }
 
-        .seeall {
-            background: #ff9800;
-            border: 0;
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: #fff;
-            cursor: pointer;
-            font-weight: 700
-        }
-
-        .row-items {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 10px;
-            scrollbar-width: thin
-        }
-
-        .card {
-            min-width: 190px;
-            max-width: 190px;
-            background: #111;
-            border-radius: 10px;
-            padding: 8px;
+        h2 {
             text-align: center;
-            cursor: pointer;
-            flex-shrink: 0;
-            border: 1px solid #222
-        }
-
-        .card img {
-            width: 100%;
-            height: 260px;
-            object-fit: cover;
-            border-radius: 8px;
-            background: #1a1a1a;
-            display: block
-        }
-
-        .card-title {
-            margin-top: 8px;
-            font-size: 14px;
-            line-height: 1.35;
-            word-break: break-word
-        }
-
-        #overlay,
-        #player {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none
-        }
-
-        #overlay {
-            background: #000;
-            z-index: 999;
-            overflow: auto;
-            padding-top: 50px
-        }
-
-        #player {
-            background: #000;
-            z-index: 10000
-        }
-
-        video,
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            background: #000;
-            object-fit: contain
-        }
-
-        .topBtns {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            z-index: 10003;
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            pointer-events: none
-        }
-
-        .btnBox {
-            display: flex;
-            gap: 8px;
-            pointer-events: auto
-        }
-
-        .btn {
-            padding: 10px;
-            border: 0;
-            border-radius: 8px;
-            color: #fff;
-            cursor: pointer;
-            font-weight: 700
-        }
-
-        .red {
-            background: #f00
-        }
-
-        .blue {
-            background: #2196f3
-        }
-
-        .purple {
-            background: #9c27b0
-        }
-
-        .green {
-            background: #00c853
-        }
-
-        .statusbar {
-            position: absolute;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            z-index: 1002;
-            background: rgba(0, 0, 0, .65);
+            color: orange;
+            margin: 0;
             padding: 8px 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #fff
+            font-size: 22px
         }
 
-        .statusbar:empty {
-            display: none
+        #load-status {
+            text-align: center;
+            color: #9ff;
+            font-size: 14px;
+            margin: 8px 10px;
+            line-height: 1.45
         }
 
-        .status {
-            padding: 14px;
-            color: #fff
-        }
-
-        .ep-wrap {
+        .tools {
             display: flex;
+            justify-content: center;
+            gap: 8px;
             flex-wrap: wrap;
+            margin: 8px 10px
+        }
+
+        .tool-btn {
+            background: #1b1b1b;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 999px;
+            padding: 10px 14px;
+            font-weight: 900;
+            cursor: pointer
+        }
+
+        .group-title {
+            max-width: 1200px;
+            margin: 18px auto 0;
+            padding: 0 12px;
+            color: cyan;
+            font-size: 20px;
+            font-weight: 900
+        }
+
+        .grid {
+            max-width: 1200px;
+            margin: 8px auto 0;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
             gap: 10px;
             padding: 10px
         }
 
-        .ep-card {
-            min-width: 110px;
-            background: #111;
+        .channel {
+            background: #222;
+            border: 2px solid #444;
             border-radius: 10px;
-            padding: 12px;
+            padding: 7px 4px;
             text-align: center;
             cursor: pointer;
-            border: 1px solid #222
+            min-height: 88px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start
         }
 
-        .card:focus,
-        .ep-card:focus,
-        button:focus {
-            outline: 3px solid #00e5ff;
-            outline-offset: 2px
+        .channel img {
+            width: 62px;
+            height: 62px;
+            object-fit: contain;
+            margin-bottom: 5px
         }
 
-        .all-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-            padding: 10px
+        .channel span {
+            font-size: 12px;
+            line-height: 1.25;
+            word-break: break-word;
+            overflow-wrap: anywhere
         }
 
-        .all-grid .card {
-            min-width: 0;
-            max-width: none;
-            width: 100%
+        .channel.active {
+            background: orange;
+            color: #000;
+            border-color: yellow
         }
 
-        @media(min-width:700px) {
-            .all-grid {
-                grid-template-columns: repeat(4, minmax(0, 1fr))
-            }
+        #player-container {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: none;
+            z-index: 99999;
+            overflow: hidden
         }
 
-        @media(min-width:1100px) {
-            .all-grid {
-                grid-template-columns: repeat(6, minmax(0, 1fr))
-            }
+        #html5-player {
+            width: 100vw !important;
+            height: 100vh !important;
+            background: #000;
+            object-fit: contain
         }
 
-        @media(max-width:700px) {
-            .card {
-                min-width: 150px;
-                max-width: 150px
-            }
-
-            .card img {
-                height: 215px
-            }
-
-            .row-items {
-                gap: 10px
-            }
-
-            .btn {
-                padding: 9px 10px;
-                font-size: 13px
-            }
-        }
-
-        @media(max-width:420px) {
-            .card {
-                min-width: 135px;
-                max-width: 135px
-            }
-
-            .card img {
-                height: 195px
-            }
-
-            .card-title {
-                font-size: 13px
-            }
-        }
-
-        .playerUIHidden .topBtns,
-        .playerUIHidden .statusbar {
+        .player-controls {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            z-index: 100000;
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
-            transition: .25s
+            transition: .22s
         }
 
-        .topBtns,
-        .statusbar {
-            transition: .25s
+        #player-container.show-ui .player-controls {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap
+        }
+
+        .player-btn {
+            background: rgba(0, 0, 0, .78);
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 16px;
+            font-weight: 900;
+            cursor: pointer
+        }
+
+        .status {
+            position: absolute;
+            left: 12px;
+            right: 12px;
+            bottom: 12px;
+            z-index: 100001;
+            text-align: center;
+            background: rgba(0, 0, 0, .72);
+            border: 1px solid rgba(0, 255, 255, .35);
+            border-radius: 10px;
+            padding: 9px;
+            color: #fff;
+            opacity: 0;
+            visibility: hidden;
+            transition: .22s
+        }
+
+        #player-container.show-status .status {
+            opacity: 1;
+            visibility: visible
+        }
+
+        .empty {
+            text-align: center;
+            color: #ffcc66;
+            padding: 30px;
+            line-height: 1.6
+        }
+
+        @media(max-width:768px) {
+            .grid {
+                grid-template-columns: repeat(5, 1fr)
+            }
+
+            .player-btn {
+                font-size: 14px;
+                padding: 8px 10px
+            }
+        }
+
+        @media(max-width:480px) {
+            body {
+                padding-top: 52px
+            }
+
+            h2 {
+                font-size: 18px
+            }
+
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+                padding: 8px
+            }
+
+            .channel {
+                min-height: 76px
+            }
+
+            .channel img {
+                width: 50px;
+                height: 50px
+            }
+
+            .channel span {
+                font-size: 10px
+            }
+
+            .player-btn {
+                font-size: 12px;
+                padding: 7px 8px
+            }
         }
     </style>
 
 
-<script>
-(function(){
-  function unlock(){
-    var s=document.getElementById('tiea-vip-lock-style');
-    if(s) s.remove();
-    document.documentElement.style.visibility='visible';
-  }
-  document.addEventListener('tiea-member-ready', unlock, {once:true});
-  setTimeout(function(){ if(window.TIEA_USER) unlock(); }, 5000);
-})();
-</script>
 </head>
 
 <body>
-    <button id="homeBtn">🏠 HOME</button>
-    <div id="grid"></div>
-    <div id="overlay"></div>
-    <div id="player">
-        <div class="topBtns">
-            <div class="btnBox"><button id="closeTopBtn" class="btn red" onclick="goHome()">✕ ปิด</button><button id="playerHomeTopBtn" class="btn green" onclick="goHome()">🏠 HOME</button></div>
-            <div class="btnBox">
-                <button class="btn purple" onclick="copyCurrentLink()">คัดลอก</button><button class="btn blue" onclick="openSystemPlayer()">▶ PLAYER</button><button class="btn blue" onclick="openExternal()">▶ MX</button>
+    <button class="home-btn" onclick="goHome()">🏠 โฮม</button>
+    <h2>TIEA AUTO M3U MOVIE LIVE SPORTS FINAL</h2>
+    <div id="load-status">กำลังโหลดรายการ...</div>
+
+    <div class="tools">
+        <button class="tool-btn" onclick="loadDefaultM3U()">↻ โหลดรายการใหม่</button>
+        <button class="tool-btn" onclick="focusFirstChannel()">🎯 ช่องแรก</button>
+        <button class="tool-btn" id="modeBtn" onclick="togglePlayMode()">⚽ กีฬา/สดไว</button>
+        <label class="tool-btn" for="m3uFile">📁 เลือกไฟล์ M3U</label>
+        <input id="m3uFile" type="file" accept=".m3u,.m3u8,text/plain" style="display:none">
+    </div>
+
+    <div id="app"></div>
+
+    <div id="player-container">
+        <div class="player-controls">
+            <div class="btn-row">
+                <button class="player-btn" id="closeBtn" onclick="closePlayer()">X</button>
+                <button class="player-btn" onclick="restartCurrent()">↻ รีโหลด</button>
+            </div>
+            <div class="btn-row">
+                <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
+                <button class="player-btn" onclick="openMX()">▶ MX</button>
+                <button class="player-btn" onclick="goHome()">🏠 HOME</button>
             </div>
         </div>
-        <video id="video" tabindex="0" playsinline webkit-playsinline x5-playsinline controls autoplay preload="auto"></video>
-        <iframe id="frame" allowfullscreen referrerpolicy="no-referrer"></iframe>
-        <div id="statusbar" class="statusbar">AUTO GROUP UNLIMITED • Main + Worker พร้อมเล่น</div>
+        <video id="html5-player" controls autoplay playsinline webkit-playsinline></video>
+        <div id="status" class="status"></div>
     </div>
+
     <script>
-        const PROXY="https://iptv.tawatchai250958.workers.dev/?url=";
-const SOURCES=[
-{name:"หนังใหม่ชนโรง",type:"anime-json",url:"https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/หนังใหม่ชนโรง.json"},
-{name:"หนังใหม่2026",type:"anime-json",url:"https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/หนังใหม่ 2026.json"},
-{name:"หนังใหม่2025",type:"anime-json",url:"https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/หนังใหม่ 2025.json"},
-{name:"Netflix",type:"anime-json",url:"https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/Netflix.json"},
-{name:"หนังฝรั่ง",type:"anime-json",url:"https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/หนังฝรั่ง.json"},
-{name:"หนังเอเชีย",type:"anime-json",url:"https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/หนังเอเชีย.json"},
-{name:"หนังไทย",type:"anime-json",url:"https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/หนังไทย.json"},
-{name:"หนังการ์ตูน",type:"anime-json",url:"https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/หนังการ์ตูน.json"},
-{name:"หนัง 18+",type:"anime-json",url:"https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/หนัง 18+.json"},
-];
-const FALLBACK_IMG="data:image/svg+xml;utf8,"+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="450"><rect width="100%" height="100%" fill="#1a1a1a"/><text x="50%" y="50%" fill="#fff" font-size="22" text-anchor="middle" dy=".3em">NO IMAGE</text></svg>`);
-let grid=document.getElementById('grid'),overlay=document.getElementById('overlay'),video=document.getElementById('video'),frame=document.getElementById('frame'),player=document.getElementById('player'),statusbar=document.getElementById('statusbar');
-let hls=null,store={},allView={active:false,name:'',page:1},currentList=[],currentIndex=0,currentUrl='',lastFocus=null;
-function setStatus(t){t=String(t||'');if(t.includes('กำลังเล่น Main ผ่าน Worker'))t='';statusbar.textContent=t}
-function safeId(t){return String(t).replace(/[^\wก-๙-]/g,'_')}
-function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
-function getTitle(item){return item.title||item.name||item.ep_name||'ไม่มีชื่อ'}
-function getImage(item){return item.image||item.poster||item.poster_url||item.thumb||item.thumbnail||item.logo||FALLBACK_IMG}
-function getDirectUrl(item){if(!item||typeof item!=='object')return'';return item.url||item.file||item.src||item.link||item.stream||item.play||item.video||item.video_url||item.m3u8||item.player||item.embed||item.stream_url||''}
-function getAutoReferer(url){const u=String(url||'').toLowerCase();if(u.includes('ok-hd.com'))return'https://ok-hd.com/';if(u.includes('master.streamhls.com')||u.includes('stream1689.com')||u.includes('037hddmovie.com')||u.includes('037hdmovie.com'))return'https://www.037hddmovie.com/';return'https://www.037hddmovie.com/'}
-function proxyUrl(url,ref){let out=PROXY+encodeURIComponent(url);const r=ref||getAutoReferer(url);if(r)out+='&referer='+encodeURIComponent(r);return out}
-function cacheKey(url){try{return 'tiea037_main_'+btoa(unescape(encodeURIComponent(String(url||'')))).slice(0,120)}catch(e){return 'tiea037_main_'+String(url||'').slice(0,120)}}
-function getCachedMain(url){try{const v=localStorage.getItem(cacheKey(url));if(!v)return'';const o=JSON.parse(v);if(!o.url||Date.now()-(o.t||0)>1000*60*60*12)return'';return o.url}catch(e){return''}}
-function setCachedMain(url,playable){try{if(url&&playable&&url!==playable)localStorage.setItem(cacheKey(url),JSON.stringify({url:playable,t:Date.now()}))}catch(e){}}
-function isHls(url){return /\.m3u8(\?|$)/i.test(url)||/m3u8/i.test(url)}
-function isVideoFile(url){return /\.(mp4|m4v|webm|ogg|ogv|mov)(\?|$)/i.test(url)}
-function isEmbeddable(url){return /youtube\.com|youtu\.be|vk\.com|ok\.ru|dailymotion\.com|player|embed/i.test(url)}
-function normalizeServers(servers){if(!Array.isArray(servers))return[];return servers.map((s,i)=>{if(typeof s==='string')return{name:'',url:s,idx:i};if(s&&typeof s==='object')return{name:String(s.name||s.title||s.label||s.server||s.quality||''),url:getDirectUrl(s),referer:s.referer||s.referrer||s.origin||'',idx:i};return{name:'',url:'',idx:i}}).filter(s=>s.url)}
-function pickMainOnly(list){const arr=normalizeServers(list);if(!arr.length)return[];let main=arr.find(s=>/^(main|หลัก)$/i.test(s.name.trim()))||arr.find(s=>/main|หลัก|server\s*1|สำรอง\s*0/i.test(s.name))||arr[0];return[main]}
-function normalizeGroupName(g, fallback){
-  g=String(g||'').trim();
-  if(!g) g=String(fallback||'อื่นๆ').trim()||'อื่นๆ';
-  const compact=g.replace(/\s+/g,'');
-  const aliases={
-    'หนังใหม่2026':'หนังใหม่2026',
-    'หนังใหม่ 2026':'หนังใหม่2026',
-    'หนังใหม่2025':'หนังใหม่2025',
-    'หนังใหม่ 2025':'หนังใหม่2025',
-    'netflix':'Netflix',
-    'NETFLIX':'Netflix'
-  };
-  return aliases[g]||aliases[compact]||g;
-}
-function getItemGroups(item, fallback){
-  let gs=[];
-  if(Array.isArray(item.groups)) gs.push(...item.groups);
-  if(item.group) gs.push(item.group);
-  if(item.category) gs.push(item.category);
-  if(item.type_group) gs.push(item.type_group);
-  if(!gs.length) gs=[fallback||'อื่นๆ'];
-  return [...new Set(gs.map(x=>normalizeGroupName(x,fallback)).filter(Boolean))];
-}
-function getUpdatedTime(item){
-  const raw=String(item.updated||item.update||item.date||item.added||item.created||item.last_update||'').trim();
-  if(!raw) return 0;
-  let t=Date.parse(raw);
-  if(!Number.isNaN(t)) return t;
-  const m=raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-  if(m) return new Date(Number(m[3]),Number(m[2])-1,Number(m[1])).getTime();
-  return 0;
-}
-function dedupeKey(item){
-  const title=String(getTitle(item)||'').trim().toLowerCase();
-  let url='';
-  try{url=(item.servers&&item.servers[0]&&(item.servers[0].url||item.servers[0].link||item.servers[0].file))||getDirectUrl(item)||'';}catch(e){}
-  return title+'|'+String(url).trim().toLowerCase();
-}
-async function loadAll(){
-  grid.innerHTML='<div class="status">⚡ LOADING AUTO GROUP...</div>';
-  store={};
-  const groupMap={};
-  const latest=[];
-  const seen=new Set();
-  const sourceNames=SOURCES.map(s=>s.name);
-  const groupOrder=[...sourceNames];
+        const DEFAULT_M3U_URL="https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/sport.m3u";
+const WORKER_PROXY="https://iptv.tawatchai250958.workers.dev/?url=";
+const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 
-  for(const s of SOURCES){
-    try{
-      const res=await fetch(s.url+'?t='+Date.now(),{cache:'no-store'});
-      if(!res.ok)throw new Error(res.status);
-      const data=await res.json();
-      let list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));
-      for(const item of list){
-        if(!item||typeof item!=='object') continue;
-        const key=dedupeKey(item);
-        if(seen.has(key)) continue;
-        seen.add(key);
-        const groups=getItemGroups(item,s.name);
-        const t=getUpdatedTime(item);
-        if(t>0) latest.push({...item,__updatedTime:t});
-        for(const g of groups){
-          if(!groupMap[g]){groupMap[g]=[]; if(!groupOrder.includes(g)) groupOrder.push(g);}
-          groupMap[g].push(item);
-        }
-      }
-    }catch(e){
-      const g=normalizeGroupName(s.name);
-      if(!groupMap[g]) groupMap[g]=[];
-      store[g]={data:[],page:1,error:'โหลดรายการไม่ได้'};
-      if(!groupOrder.includes(g)) groupOrder.push(g);
-    }
+let channels=[];
+let activeChannel=null,activeElement=null,activeUrl="",activeOriginalUrl="";
+let hls=null,tsPlayer=null,shakaPlayer=null,watchdog=null,uiTimer=null,playStartedTimer=null,noPictureTimer=null;
+let playMode = localStorage.getItem("TIEA_PLAY_MODE") || "sports"; // sports = กีฬา/สดไว, movie = หนังสดนิ่ง, projector = โปรเจคเตอร์นิ่งสุด
+
+const app=document.getElementById("app");
+const video=document.getElementById("html5-player");
+
+function applyModeLabel(){
+  const btn=document.getElementById("modeBtn");
+  if(btn){
+    if(playMode === "sports") btn.textContent = "⚽ กีฬา/สดไว";
+    else if(playMode === "movie") btn.textContent = "🎬 หนังสดนิ่ง";
+    else btn.textContent = "📽 โปรเจคเตอร์นิ่ง";
   }
 
-  const rows=[];
-  if(latest.length){
-    latest.sort((a,b)=>(b.__updatedTime||0)-(a.__updatedTime||0));
-    store['🔥 อัปเดทล่าสุด']={data:latest,page:1,error:''};
-    rows.push('🔥 อัปเดทล่าสุด');
+  if(playMode === "sports"){
+    setLoad("โหมด ⚽ กีฬา/สดไว: เหมาะกับกีฬา/ทีวีสด เข้าไวกว่า");
+  }else if(playMode === "movie"){
+    setLoad("โหมด 🎬 หนังสดนิ่ง: เหมาะกับช่องหนังสด เช่น HBO/CINEMAX ลดหมุน");
+  }else{
+    setLoad("โหมด 📽 โปรเจคเตอร์นิ่ง: บัฟเฟอร์ลึกสุด สำหรับโปรเจคเตอร์");
   }
-  for(const g of groupOrder){
-    if(groupMap[g]&&groupMap[g].length){
-      store[g]={data:groupMap[g],page:1,error:''};
-      rows.push(g);
-    }else if(store[g]){
-      rows.push(g);
-    }
-  }
-  Object.keys(groupMap).forEach(g=>{if(!rows.includes(g)){store[g]={data:groupMap[g],page:1,error:''};rows.push(g)}});
-  grid.innerHTML='';
-  rows.forEach(renderRow);
-  setTimeout(()=>document.getElementById('homeBtn')?.focus(),250);
 }
-function renderRow(name){const rowId=safeId(name),row=document.createElement('div');row.innerHTML=`<div class="row-title"><span>${esc(name)}</span><button class="seeall" onclick="seeAll('${name.replace(/'/g,"\\'")}')">ดูทั้งหมด</button></div><div class="row-items" id="row-${rowId}"></div>`;grid.appendChild(row);renderPage(name)}
-function createCard(item,onClick){const div=document.createElement('div');div.className='card';div.tabIndex=0;div.innerHTML=`<img src="${esc(getImage(item))}" alt="${esc(getTitle(item))}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'"><div class="card-title">${esc(getTitle(item))}</div>`;div.onclick=onClick;div.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();onClick()}};return div}
-function renderPage(name){const obj=store[name],row=document.getElementById('row-'+safeId(name));if(!obj||!row)return;row.innerHTML='';if(obj.error){row.innerHTML=`<div class="status">❌ ${obj.error}</div>`;return}const items=obj.data.slice(0,15);if(!items.length){row.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>row.appendChild(createCard(item,()=>openItem(item))))}
-function seeAll(name){allView={active:true,name,page:1};renderAllPage()}
-function renderAllPage(){const obj=store[allView.name];if(!obj)return;const perPage=20,total=obj.data.length,totalPages=Math.max(1,Math.ceil(total/perPage)),page=Math.min(allView.page,totalPages),items=obj.data.slice((page-1)*perPage,page*perPage);overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(allView.name)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="seeall" onclick="prevAllPage()">◀ ก่อนหน้า</button><button class="seeall" onclick="nextAllPage()">ถัดไป ▶</button><button class="seeall" onclick="backToGrid()">← กลับ</button></div></div><div style="padding:0 10px 10px;color:#00e5ff">หน้า ${page} / ${totalPages} &nbsp; | &nbsp; ทั้งหมด ${total} เรื่อง</div><div id="allBox" class="all-grid"></div>`;const box=document.getElementById('allBox');if(!items.length){box.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>box.appendChild(createCard(item,()=>openItem(item))))}
-function nextAllPage(){const obj=store[allView.name];if(obj&&allView.page<Math.ceil(obj.data.length/20)){allView.page++;renderAllPage()}}
-function prevAllPage(){if(allView.page>1){allView.page--;renderAllPage()}}
-function openItem(item){lastFocus=document.activeElement;if(Array.isArray(item.episodes)&&item.episodes.length){showEP(item);return}const servers=pickMainOnly(item.servers||item.sources||item.links||[]);const url=getDirectUrl(item);startPlay(servers.length?servers:[{name:'Main',url}])}
-function showEP(item){overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between"><h2 style="margin:0">${esc(getTitle(item))}</h2><button class="seeall" onclick="backToListOrGrid()">← กลับ</button></div><div class="ep-wrap" id="epBox"></div>`;const box=document.getElementById('epBox');item.episodes.forEach((ep,i)=>{const d=document.createElement('div');d.className='ep-card';d.tabIndex=0;d.textContent=ep.name||ep.title||`EP ${i+1}`;d.onclick=()=>{lastFocus=d;const servers=pickMainOnly(ep.servers||ep.sources||ep.links||ep.files||ep.playlist||[]);const single=getDirectUrl(ep);startPlay(servers.length?servers:[{name:'Main',url:single}])};d.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();d.click()}};box.appendChild(d)});setTimeout(()=>box.querySelector('.ep-card')?.focus(),100)}
-function startPlay(list){currentList=(list||[]).filter(x=>x&&x.url);currentIndex=0;if(!currentList.length){alert('❌ ไม่พบลิงก์ Main');return}overlay.style.display='none';player.style.display='block';showPlayerUI();setTimeout(()=>document.querySelector('#player .btn.blue')?.focus(),200);playMain(currentList[0])}
-function cleanupPlayers(){if(hls){try{hls.destroy()}catch(e){}hls=null}try{video.pause();video.removeAttribute('src');video.load()}catch(e){}video.style.display='none';frame.src='';frame.style.display='none'}
-async function playMain(item){cleanupPlayers();const url=item.url;currentUrl=url;setStatus('Main เท่านั้น • กำลังหาไฟล์เล่นจาก Main...');try{const playable=await resolveMainUrl(url,item.referer);if(isHls(playable)){await playHlsMain(playable,item.referer||getAutoReferer(url));setStatus('');return}if(isVideoFile(playable)){await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}catch(e){console.warn(e);setStatus('Main ยังไม่ขึ้นภาพ • ไม่สลับ Backup • ให้กด MX หรือคัดลอกลิงก์');}}
-async function resolveMainUrl(url,referer){if(isHls(url)||isVideoFile(url))return url;const cached=getCachedMain(url);if(cached){setStatus('Main เท่านั้น • ใช้ลิงก์ที่จำไว้ กำลังเล่นเร็วขึ้น...');return cached}try{const txt=await fetchText(proxyUrl(url,referer||getAutoReferer(url)),12000);const found=extractPlayable(txt,url);if(found){setCachedMain(url,found);return found}}catch(e){console.warn('resolve fail',e)}return url}
-async function fetchText(url,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||10000);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}catch(e){clearTimeout(t);throw e}}
-function extractPlayable(txt,base){txt=String(txt||'');const abs=txt.match(/https?:[^'"\s<>]+\.m3u8[^'"\s<>]*/i);if(abs)return abs[0].replace(/\\\//g,'/');const file=txt.match(/["']([^"']+\.m3u8[^"']*)["']/i);if(file){try{return new URL(file[1].replace(/\\\//g,'/'),base).toString()}catch(e){return file[1]}}return''}
-function playNativeVideo(url){video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;return new Promise((resolve,reject)=>{let done=false;const ok=()=>{if(done)return;done=true;clear();video.muted=false;video.play().then(resolve).catch(resolve)};const fail=()=>{if(done)return;done=true;clear();reject('video error')};const clear=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('canplay',ok);video.removeEventListener('playing',ok);video.removeEventListener('error',fail)};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('canplay',ok,{once:true});video.addEventListener('playing',ok,{once:true});video.addEventListener('error',fail,{once:true});video.src=url;video.load();setTimeout(()=>{if(!done)fail()},16000)})}
-function playHlsMain(url,referer){const source=proxyUrl(url,referer||getAutoReferer(url));video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;return new Promise((resolve,reject)=>{let settled=false;const ok=()=>{if(settled)return;settled=true;clear();video.muted=false;video.play().then(resolve).catch(resolve)};const fail=()=>{if(settled)return;settled=true;clear();reject('hls error')};const clear=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('canplay',ok);video.removeEventListener('playing',ok);video.removeEventListener('error',fail);if(hls){hls.off(Hls.Events.MANIFEST_PARSED,ok);hls.off(Hls.Events.LEVEL_LOADED,ok);hls.off(Hls.Events.ERROR,onErr)}};const onErr=(ev,data)=>{if(data&&data.fatal){if(data.type===Hls.ErrorTypes.NETWORK_ERROR){try{hls.startLoad()}catch(e){}}else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){try{hls.recoverMediaError()}catch(e){}}else fail()}};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('canplay',ok,{once:true});video.addEventListener('playing',ok,{once:true});video.addEventListener('error',fail,{once:true});if(window.Hls&&Hls.isSupported()){hls=new Hls({enableWorker:false,lowLatencyMode:false,maxBufferLength:45,maxMaxBufferLength:60,backBufferLength:20,manifestLoadingTimeOut:20000,fragLoadingTimeOut:25000,levelLoadingTimeOut:20000,manifestLoadingMaxRetry:6,fragLoadingMaxRetry:8,levelLoadingMaxRetry:6});hls.on(Hls.Events.MANIFEST_PARSED,ok);hls.on(Hls.Events.LEVEL_LOADED,ok);hls.on(Hls.Events.ERROR,onErr);hls.loadSource(source);hls.attachMedia(video)}else{video.src=source;video.load()}setTimeout(()=>{if(!settled)fail()},20000)})}
-function openSystemPlayer(){const item=currentList[currentIndex];const url=(item&&item.url)||currentUrl;if(!url)return;try{const u=new URL(url);let intent='intent://'+u.host+u.pathname+(u.search||'')+'#Intent;scheme='+u.protocol.replace(':','')+';action=android.intent.action.VIEW;type=video/*;S.browser_fallback_url='+encodeURIComponent(url)+';end';window.location.href=intent}catch(e){window.open(url,'_blank')}}
-function openExternal(){const item=currentList[currentIndex];const url=(item&&item.url)||currentUrl;if(!url)return;try{const u=new URL(url);let intent='intent://'+u.host+u.pathname+(u.search||'')+'#Intent;scheme='+u.protocol.replace(':','')+';action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;S.browser_fallback_url='+encodeURIComponent(url)+';end';window.location.href=intent}catch(e){window.open(url,'_blank')}}
-async function copyCurrentLink(){const item=currentList[currentIndex];const url=(item&&item.url)||currentUrl;if(!url)return;try{await navigator.clipboard.writeText(url);alert('คัดลอกลิงก์ Main แล้ว')}catch(e){prompt('คัดลอกลิงก์ Main',url)}}
-function backToListOrGrid(){if(allView.active)renderAllPage();else backToGrid()}
-function backToGrid(){overlay.style.display='none';overlay.innerHTML='';grid.style.display='block';allView={active:false,name:'',page:1};setTimeout(()=>lastFocus?.focus?.(),100)}
-function goHome(){cleanupPlayers();player.style.display='none';overlay.style.display='none';overlay.innerHTML='';grid.style.display='block';currentList=[];currentIndex=0;window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>lastFocus?.focus?.(),100)}
-function seekVideoBy(sec){
+function togglePlayMode(){
+  if(playMode === "sports") playMode = "movie";
+  else if(playMode === "movie") playMode = "projector";
+  else playMode = "sports";
+
+  localStorage.setItem("TIEA_PLAY_MODE", playMode);
+  applyModeLabel();
+}
+function clean(v){return String(v||"").trim()}
+function setLoad(t){document.getElementById("load-status").textContent=t||""}
+
+function normalizeDropboxUrl(url){
+  url=clean(url);
+  if(url.includes("dropbox.com")){
+    url=url.replace("?dl=0","?dl=1").replace("&dl=0","&dl=1");
+    if(!url.includes("dl=1")) url+=(url.includes("?")?"&":"?")+"dl=1";
+  }
+  return url;
+}
+function dropboxRaw(url){
+  url=normalizeDropboxUrl(url);
+  if(!url.includes("dropbox.com")) return url;
   try{
-    if(!video || video.style.display==='none')return;
-    const cur=Number(video.currentTime||0);
-    const dur=Number(video.duration||0);
-    let next=cur+sec;
-    if(Number.isFinite(dur)&&dur>0) next=Math.max(0,Math.min(dur,next));
-    else next=Math.max(0,next);
-    video.currentTime=next;
-    showPlayerUI();
-  }catch(e){}
-}
-document.getElementById('homeBtn').onclick=()=>{cleanupPlayers();window.location.href='https://tiea9999.github.io/tv-online/index.html'};
-function isPlayerTopFocused(){try{return !!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.topBtns'))}catch(e){return false}}
-function focusPlayerClose(){showPlayerUI(true);setTimeout(()=>{const b=document.getElementById('closeTopBtn')||document.querySelector('#player .btn.red');if(b)b.focus()},30)}
-document.addEventListener('keydown',e=>{const key=e.key;if(player.style.display==='block')showPlayerUI();
-if(player.style.display==='block'){
-  if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();focusPlayerClose();return}
-  if((key==='ArrowDown'||e.keyCode===20)&&isPlayerTopFocused()){e.preventDefault();video.focus();showPlayerUI();return}
-  if(video.style.display!=='none'){
-    if(key==='ArrowRight'||key==='MediaFastForward'||e.keyCode===22){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('right'); else seekVideoBy(15); return}
-    if(key==='ArrowLeft'||key==='MediaRewind'||e.keyCode===21){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('left'); else seekVideoBy(-15); return}
+    const u=new URL(url);
+    u.hostname="dl.dropboxusercontent.com";
+    u.searchParams.delete("dl");
+    return u.toString();
+  }catch(e){
+    return url.replace("www.dropbox.com","dl.dropboxusercontent.com").replace("&dl=1","").replace("?dl=1","");
   }
 }
-if(key==='ArrowRight'||e.keyCode===22){e.preventDefault();moveFocus('right');return}if(key==='ArrowLeft'||e.keyCode===21){e.preventDefault();moveFocus('left');return}if(key==='ArrowDown'||e.keyCode===20){e.preventDefault();moveFocus('down');return}if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();moveFocus('up');return}if(key==='Escape'||key==='Backspace'||key==='GoBack'||e.keyCode===10009){e.preventDefault();if(player.style.display==='block'){goHome();return}if(overlay.style.display==='block'){backToListOrGrid();return}}if((key==='Enter'||key==='OK'||e.keyCode===23||e.keyCode===66)&&document.activeElement&&typeof document.activeElement.click==='function'){e.preventDefault();document.activeElement.click()}});
+function makeProxyUrl(url){return WORKER_PROXY+encodeURIComponent(clean(url))}
+function allOrigins(url){return "https://api.allorigins.win/raw?url="+encodeURIComponent(url)}
 
-let uiTimer=null;
-function showPlayerUI(forceFocus){
-  player.classList.remove('playerUIHidden');
-  clearTimeout(uiTimer);
-  if(forceFocus) return;
-  uiTimer=setTimeout(()=>{
-    if(player.style.display==='block'){
-      try{ if(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.topBtns')) return; }catch(e){}
-      player.classList.add('playerUIHidden');
+async function fetchText(url,ms){
+  const c=new AbortController();
+  const t=setTimeout(()=>c.abort(),ms||10000);
+  try{
+    const r=await fetch(url,{cache:"no-store",signal:c.signal});
+    clearTimeout(t);
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    return await r.text();
+  }catch(e){clearTimeout(t);throw e}
+}
+
+async function loadM3U(url){
+  app.innerHTML='<div class="empty">กำลังโหลดรายการ...</div>';
+  setLoad("กำลังโหลดรายการ...");
+  const raw=dropboxRaw(url);
+  const direct=normalizeDropboxUrl(url);
+  const tries=[
+    raw+(raw.includes("?")?"&":"?")+"t="+Date.now(),
+    direct+(direct.includes("?")?"&":"?")+"t="+Date.now(),
+    allOrigins(direct),
+    allOrigins(raw),
+    makeProxyUrl(raw),
+    makeProxyUrl(direct)
+  ];
+  let lastErr=null;
+  for(let i=0;i<tries.length;i++){
+    try{
+      setLoad("กำลังโหลดรายการ... "+(i+1)+"/"+tries.length);
+      const txt=await fetchText(tries[i],12000);
+      if(txt.includes("#EXTINF")){
+        channels=parseM3U(txt);
+        renderChannels(channels);
+        setLoad("โหลดสำเร็จ "+channels.length+" ช่อง • โหมด "+(playMode === "sports" ? "กีฬา/สดไว" : (playMode === "movie" ? "หนังสดนิ่ง" : "โปรเจคเตอร์นิ่ง")));
+        return;
+      }
+      lastErr=new Error("ไม่ใช่ไฟล์ M3U");
+    }catch(e){lastErr=e;console.log("load fail",i,e)}
+  }
+  setLoad("โหลดรายการไม่สำเร็จ ลองกดเลือกไฟล์ M3U จากเครื่อง");
+  app.innerHTML='<div class="empty">โหลดรายการไม่สำเร็จ<br>ถ้า Dropbox ไม่มา ให้กด “เลือกไฟล์ M3U” จากเครื่อง</div>';
+}
+function loadDefaultM3U(){loadM3U(DEFAULT_M3U_URL)}
+
+function parseExtinf(line){
+  const info={};
+  const re=/([a-zA-Z0-9_-]+)="([^"]*)"/g;
+  let m;
+  while((m=re.exec(line))) info[m[1].toLowerCase()]=m[2];
+  const comma=line.lastIndexOf(",");
+  info.name=comma>=0?line.slice(comma+1).trim():(info["tvg-name"]||"ไม่มีชื่อ");
+  return info;
+}
+function parseM3U(txt){
+  const lines=String(txt||"").replace(/\r/g,"").split("\n").map(x=>x.trim()).filter(Boolean);
+  const out=[]; let meta=null;
+  for(const line of lines){
+    if(line.startsWith("#EXTINF")){meta=parseExtinf(line);continue}
+    if(line.startsWith("#")) continue;
+    if(meta && /^https?:\/\//i.test(line)){
+      out.push({
+        name:meta["tvg-name"]||meta.name||"ไม่มีชื่อ",
+        logo:meta["tvg-logo"]||FALLBACK_LOGO,
+        group:meta["group-title"]||"อื่นๆ",
+        file:normalizeStreamUrl(line),
+        drm:false
+      });
+      meta=null;
     }
-  },3500);
-}
-['mousemove','mousedown','touchstart','touchmove','pointermove','click'].forEach(ev=>player.addEventListener(ev,showPlayerUI,{passive:true}));
-function visibleFocusables(){return Array.from(document.querySelectorAll('button,.card,.ep-card')).filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(el).visibility!=='hidden'&&getComputedStyle(el).display!=='none'})}
-function moveFocus(dir){
-  const els=visibleFocusables(); if(!els.length)return;
-  const cur=document.activeElement&&els.includes(document.activeElement)?document.activeElement:els[0];
-  const r=cur.getBoundingClientRect(); const cx=r.left+r.width/2, cy=r.top+r.height/2;
-  let best=null,score=1e9;
-  for(const el of els){if(el===cur)continue;const b=el.getBoundingClientRect();const x=b.left+b.width/2,y=b.top+b.height/2;const dx=x-cx,dy=y-cy;
-    if(dir==='right'&&dx<=8)continue; if(dir==='left'&&dx>=-8)continue; if(dir==='down'&&dy<=8)continue; if(dir==='up'&&dy>=-8)continue;
-    const primary=(dir==='right'||dir==='left')?Math.abs(dx):Math.abs(dy); const secondary=(dir==='right'||dir==='left')?Math.abs(dy):Math.abs(dx);
-    const s=primary*10+secondary; if(s<score){score=s;best=el;}
   }
-  if(best){best.focus();best.scrollIntoView({block:'nearest',inline:'nearest'});}
+  return out;
+}
+function normalizeStreamUrl(url){
+  url=clean(url);
+  if(!url) return "";
+  try{
+    const u=new URL(url);
+    const parts=u.pathname.split("/").filter(Boolean);
+    const hasExt=/\.(m3u8|mpd|mp4|ts)(\?|$)/i.test(url);
+    const hasLive=parts[0]==="live"||parts[0]==="movie"||parts[0]==="series";
+    if(!hasExt && !hasLive && parts.length>=3){
+      u.pathname="/live/"+parts.join("/")+".m3u8";
+      return u.toString();
+    }
+    if(!hasExt && hasLive){
+      u.pathname=u.pathname.replace(/\/$/,"")+".m3u8";
+      return u.toString();
+    }
+  }catch(e){}
+  return url;
 }
 
-loadAll();
+function renderChannels(list){
+  app.innerHTML="";
+  if(!list.length){app.innerHTML='<div class="empty">ไม่พบรายการ</div>';return}
+  const groups={};
+  list.forEach(ch=>{const g=ch.group||"อื่นๆ";(groups[g]||(groups[g]=[])).push(ch)});
+  Object.keys(groups).forEach(group=>{
+    const title=document.createElement("div");
+    title.className="group-title";
+    title.textContent="📺 "+group+" ("+groups[group].length+")";
+    app.appendChild(title);
+    const grid=document.createElement("div");
+    grid.className="grid";
+    groups[group].forEach(ch=>{
+      const div=document.createElement("div");
+      div.className="channel";
+      div.tabIndex=0;
+
+      const img=document.createElement("img");
+      img.src=ch.logo||FALLBACK_LOGO;
+      img.onerror=function(){this.src=FALLBACK_LOGO};
+
+      const span=document.createElement("span");
+      span.textContent=ch.name||"IPTV";
+
+      div.appendChild(img);
+      div.appendChild(span);
+
+      div.onclick=()=>loadChannel(ch,div);
+      div.onkeydown=e=>{
+        if(e.key==="Enter"||e.key==="OK"||e.key===" "||e.keyCode===23||e.keyCode===66){
+          e.preventDefault();
+          loadChannel(ch,div);
+        }
+      };
+      grid.appendChild(div);
+    });
+    app.appendChild(grid);
+  });
+  setTimeout(()=>document.querySelector(".channel")?.focus(),250);
+}
+function focusFirstChannel(){document.querySelector(".channel")?.focus()}
+
+function showUI(){
+  const box=document.getElementById("player-container");
+  box.classList.add("show-ui");
+  if(uiTimer) clearTimeout(uiTimer);
+  uiTimer=setTimeout(()=>{box.classList.remove("show-ui");box.classList.remove("show-fallback")},4200);
+}
+function setStatus(t,auto=true){
+  const box=document.getElementById("player-container");
+  const st=document.getElementById("status");
+  st.textContent=t||"";
+  if(t){box.classList.add("show-status");showUI()}else box.classList.remove("show-status");
+  if(auto&&t){clearTimeout(setStatus._t);setStatus._t=setTimeout(()=>box.classList.remove("show-status"),3600)}
+}
+function hasPicture(){
+  try{
+    return video.readyState>=2 || (video.videoWidth>0 && video.videoHeight>0) || (video.currentTime||0)>0.5;
+  }catch(e){return false}
+}
+
+function scheduleNoPictureHint(ms){
+  if(noPictureTimer) clearTimeout(noPictureTimer);
+  noPictureTimer=setTimeout(()=>{
+    noPictureTimer=null;
+    const box=document.getElementById("player-container");
+    if(box && box.style.display==="block" && !hasPicture()){
+      showFallback("ถ้าเว็บไม่ขึ้นภาพ ให้กด PLAYER/MX ด้านบน");
+    }
+  }, ms || 15000);
+}
+
+function showFallback(msg){
+  if(hasPicture()) return;
+  setStatus(msg || "ถ้าเว็บไม่ขึ้นภาพ ให้กด PLAYER/MX ด้านบน", false);
+  showUI();
+}
+function hideFallback(){
+  if(noPictureTimer){clearTimeout(noPictureTimer);noPictureTimer=null}
+  const box=document.getElementById("player-container");
+  if(box) box.classList.remove("show-fallback");
+  if(hasPicture()) setStatus("");
+}
+
+async function stopAll(){
+  if(playStartedTimer){clearTimeout(playStartedTimer);playStartedTimer=null}
+  if(noPictureTimer){clearTimeout(noPictureTimer);noPictureTimer=null}
+  if(watchdog){clearInterval(watchdog);watchdog=null}
+  try{if(hls){hls.destroy();hls=null}}catch(e){}
+  try{if(tsPlayer){tsPlayer.destroy();tsPlayer=null}}catch(e){}
+  try{if(shakaPlayer){await shakaPlayer.destroy();shakaPlayer=null}}catch(e){}
+  try{video.pause();video.removeAttribute("src");video.load()}catch(e){}
+  hideFallback();
+}
+function forceAudio(){try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}}
+
+async function loadChannel(ch,el){
+  activeChannel=ch;activeElement=el;
+  activeOriginalUrl=normalizeStreamUrl(clean(ch.file));activeUrl=activeOriginalUrl;
+
+  document.querySelectorAll(".channel").forEach(x=>x.classList.remove("active"));
+  if(el) el.classList.add("active");
+
+  const box=document.getElementById("player-container");
+  box.style.display="block";
+  showUI();
+  await stopAll();
+
+  const u=activeOriginalUrl.toLowerCase();
+
+  scheduleNoPictureHint(playMode === "sports" ? 20000 : (playMode === "movie" ? 25000 : 30000));
+
+  if(u.includes(".mpd")){
+    playMPD(activeOriginalUrl);
+  }else if(u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")){
+    playHLS(activeOriginalUrl,false);
+  }else{
+    playTS(activeOriginalUrl,false);
+  }
+
+  setTimeout(()=>{showUI();document.getElementById("closeBtn")?.focus()},250);
+}
+
+function playHLS(url,usedProxy){
+  activeUrl=url;
+  video.style.display="block";
+  forceAudio();
+  setStatus(usedProxy?"กำลังโหลด HLS ผ่าน Worker...":"กำลังโหลด HLS ตรง...");
+  if(hls){try{hls.destroy()}catch(e){} hls=null}
+  if(watchdog){clearInterval(watchdog);watchdog=null}
+
+  if(window.Hls&&Hls.isSupported()){
+    let started=false;
+    const cfg = playMode === "sports" ? {
+      enableWorker:true,
+      lowLatencyMode:false,
+      startFragPrefetch:true,
+      progressive:true,
+
+      // ⚽ กีฬา/สดไว: เข้าไว เหมาะกับบอล/กีฬา/ข่าวสด
+      maxBufferLength:80,
+      maxMaxBufferLength:120,
+      backBufferLength:30,
+      maxBufferHole:4,
+      highBufferWatchdogPeriod:8,
+      liveSyncDurationCount:8,
+      liveMaxLatencyDurationCount:20,
+
+      fragLoadingMaxRetry:10,
+      levelLoadingMaxRetry:8,
+      manifestLoadingMaxRetry:8,
+      fragLoadingTimeOut:28000,
+      levelLoadingTimeOut:22000,
+      manifestLoadingTimeOut:22000,
+
+      startLevel:-1,
+      abrEwmaDefaultEstimate:900000,
+      abrBandWidthFactor:.8,
+      abrBandWidthUpFactor:.65,
+      capLevelToPlayerSize:true,
+      testBandwidth:false
+    } : playMode === "movie" ? {
+      enableWorker:true,
+      lowLatencyMode:false,
+      startFragPrefetch:true,
+      progressive:true,
+
+      // 🎬 หนังสดนิ่ง: ช่องหนังสดยอมหน่วงมากขึ้น ลดหมุนหนัก
+      maxBufferLength:200,
+      maxMaxBufferLength:300,
+      backBufferLength:80,
+      maxBufferHole:8,
+      highBufferWatchdogPeriod:14,
+      liveSyncDurationCount:20,
+      liveMaxLatencyDurationCount:55,
+
+      fragLoadingMaxRetry:14,
+      levelLoadingMaxRetry:12,
+      manifestLoadingMaxRetry:12,
+      fragLoadingTimeOut:35000,
+      levelLoadingTimeOut:28000,
+      manifestLoadingTimeOut:28000,
+
+      startLevel:0,
+      abrEwmaDefaultEstimate:350000,
+      abrBandWidthFactor:.55,
+      abrBandWidthUpFactor:.35,
+      capLevelToPlayerSize:true,
+      testBandwidth:false
+    } : {
+      enableWorker:true,
+      lowLatencyMode:false,
+      startFragPrefetch:true,
+      progressive:true,
+
+      // 📽 โปรเจคเตอร์นิ่ง: บัฟเฟอร์ลึกมากสุด
+      maxBufferLength:260,
+      maxMaxBufferLength:380,
+      backBufferLength:100,
+      maxBufferHole:9,
+      highBufferWatchdogPeriod:16,
+      liveSyncDurationCount:26,
+      liveMaxLatencyDurationCount:70,
+
+      fragLoadingMaxRetry:16,
+      levelLoadingMaxRetry:14,
+      manifestLoadingMaxRetry:14,
+      fragLoadingTimeOut:42000,
+      levelLoadingTimeOut:32000,
+      manifestLoadingTimeOut:32000,
+
+      startLevel:0,
+      abrEwmaDefaultEstimate:300000,
+      abrBandWidthFactor:.5,
+      abrBandWidthUpFactor:.3,
+      capLevelToPlayerSize:true,
+      testBandwidth:false
+    };
+
+    hls=new Hls(cfg);
+
+    hls.loadSource(url);
+    hls.attachMedia(video);
+
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+      started=true;
+
+      if(playMode === "movie" || playMode === "projector"){
+        try{
+          if(hls.levels&&hls.levels.length>1){
+            hls.currentLevel=0;
+            hls.nextLevel=0;
+            hls.loadLevel=0;
+          }
+        }catch(e){}
+
+        forceAudio();
+        setStatus(playMode === "movie" ? "🎬 หนังสดนิ่ง: เติมบัฟเฟอร์ก่อนเล่น..." : "📽 โปรเจคเตอร์นิ่ง: เติมบัฟเฟอร์ก่อนเล่น...");
+
+        setTimeout(()=>{
+          forceAudio();
+          video.play().catch(()=>{});
+          hideFallback();
+          setStatus(playMode === "movie" ? "กำลังเล่นโหมด 🎬 หนังสดนิ่ง" : "กำลังเล่นโหมด 📽 โปรเจคเตอร์นิ่ง");
+        }, playMode === "movie" ? 2500 : 3500);
+
+        setTimeout(()=>{try{if(hls) hls.currentLevel=-1}catch(e){}}, playMode === "movie" ? 35000 : 45000);
+      }else{
+        forceAudio();
+        video.play().catch(()=>{});
+        hideFallback();
+        setStatus("กำลังเล่นโหมด ⚽ กีฬา/สดไว");
+      }
+    });
+
+    playStartedTimer=setTimeout(()=>{
+      if(!started && !usedProxy && !hasPicture()){
+        playHLS(makeProxyUrl(url),true);
+      }
+    }, playMode === "sports" ? 8000 : (playMode === "movie" ? 12000 : 15000));
+
+    hls.on(Hls.Events.BUFFER_STALLED,()=>{
+      if(!hasPicture()) setStatus("กำลังบัฟเฟอร์...",true);
+      setTimeout(()=>{try{if(video.paused)video.play().catch(()=>{})}catch(e){}},1500);
+    });
+
+    hls.on(Hls.Events.ERROR,(ev,data)=>{
+      if(!data||!hls)return;
+      if(data.fatal){
+        if(data.type===Hls.ErrorTypes.NETWORK_ERROR){try{hls.startLoad()}catch(e){}}
+        else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){try{hls.recoverMediaError()}catch(e){}}
+        else if(!usedProxy) playHLS(makeProxyUrl(url),true);
+        else showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX");
+      }
+    });
+
+    startWatchdog(()=>{try{hls.startLoad();video.play().catch(()=>{})}catch(e){}});
+  }else{
+    video.src=url;
+    video.play().catch(()=>showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX"));
+  }
+}
+
+function playTS(url,usedProxy=false){
+  activeUrl=url;
+  video.style.display="block";
+  forceAudio();
+
+  if(watchdog){clearInterval(watchdog);watchdog=null}
+  try{if(tsPlayer){tsPlayer.destroy();tsPlayer=null}}catch(e){}
+  try{video.pause();video.removeAttribute("src");video.load()}catch(e){}
+
+  setStatus(usedProxy ? "กำลังเล่นผ่าน Worker..." : "กำลังเล่นลิงก์ตรงแบบไม่กระโดด...");
+
+  let nativeStarted=false;
+  let fallbackStarted=false;
+
+  const isStarted=()=> nativeStarted || video.readyState>=2 || (video.currentTime||0)>0.2;
+  const fallbackWorker=()=>{
+    if(usedProxy || fallbackStarted) return false;
+    fallbackStarted=true;
+    const p=makeProxyUrl(url);
+    if(p && p!==url){
+      setStatus("เส้นตรงไม่ขึ้นภาพ กำลังลอง Worker สำรอง...");
+      playTS(p,true);
+      return true;
+    }
+    return false;
+  };
+
+  video.src=url;
+  video.load();
+
+  const goNative=()=>{
+    forceAudio();
+    video.play().then(()=>{
+      nativeStarted=true;
+      hideFallback();
+      setStatus(usedProxy ? "กำลังเล่นผ่าน Worker" : "กำลังเล่นลิงก์ตรง");
+    }).catch(()=>{});
+  };
+
+  setTimeout(goNative,150);
+  setTimeout(goNative, playMode === "sports" ? 450 : (playMode === "movie" ? 1000 : 1300));
+  setTimeout(goNative, playMode === "sports" ? 1000 : (playMode === "movie" ? 2200 : 2800));
+
+  setTimeout(()=>{
+    if(isStarted()){
+      startTsNoJumpWatchdog(false,()=>fallbackWorker());
+      return;
+    }
+
+    if(window.mpegts && mpegts.getFeatureList().mseLivePlayback){
+      try{
+        setStatus("ลิงก์ตรงยังไม่ขึ้น กำลังลอง TS Engine...");
+        try{video.pause();video.removeAttribute("src");video.load()}catch(e){}
+
+        tsPlayer=mpegts.createPlayer(
+          {type:"mpegts",isLive:true,url:url,cors:true,withCredentials:false},
+          {
+            enableWorker:false,
+            enableStashBuffer:true,
+            stashInitialSize:4096*1024,
+            lazyLoad:false,
+            deferLoadAfterSourceOpen:false,
+            autoCleanupSourceBuffer:true,
+            autoCleanupMaxBackwardDuration:180,
+            autoCleanupMinBackwardDuration:60,
+            liveBufferLatencyChasing:false,
+            liveBufferLatencyMaxLatency:45,
+            liveBufferLatencyMinRemain:12,
+            fixAudioTimestampGap:true,
+            accurateSeek:false
+          }
+        );
+
+        tsPlayer.attachMediaElement(video);
+        tsPlayer.load();
+
+        const goTs=()=>{
+          forceAudio();
+          video.play().then(()=>{
+            nativeStarted=true;
+            hideFallback();
+            setStatus(usedProxy ? "กำลังเล่น TS ผ่าน Worker" : "กำลังเล่น TS Engine");
+          }).catch(()=>{});
+        };
+
+        setTimeout(goTs,500);
+        setTimeout(goTs,1600);
+        setTimeout(goTs,3200);
+
+        setTimeout(()=>{
+          if(!isStarted()){
+            if(!fallbackWorker()) showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX ด้านบน");
+          }
+        },5000);
+
+        tsPlayer.on(mpegts.Events.ERROR,(type,detail,info)=>{
+          console.log("TS ERROR",type,detail,info);
+          if(!isStarted()){
+            if(fallbackWorker()) return;
+          }
+          setStatus("สัญญาณสะดุด รอให้กลับมา...");
+          try{video.play().catch(()=>{})}catch(e){}
+        });
+
+        startTsNoJumpWatchdog(true,()=>fallbackWorker());
+      }catch(e){
+        console.log("TS INIT ERROR",e);
+        if(!fallbackWorker()) showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX ด้านบน");
+      }
+    }else{
+      if(!fallbackWorker()) showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX ด้านบน");
+    }
+  }, playMode === "sports" ? 1800 : (playMode === "movie" ? 4200 : 5200));
+}
+
+function startTsNoJumpWatchdog(usingTsEngine,fallbackWorker){
+  if(watchdog) clearInterval(watchdog);
+  let last=0,stuck=0,noData=0,lastAction=0;
+  watchdog=setInterval(()=>{
+    const box=document.getElementById("player-container");
+    if(box.style.display!=="block"){
+      clearInterval(watchdog);watchdog=null;return;
+    }
+
+    forceAudio();
+
+    if(video.paused && video.readyState>=2){
+      video.play().catch(()=>{});
+      return;
+    }
+
+    if(video.readyState<2){
+      noData++;
+      setStatus("กำลังรอสัญญาณ...");
+      if(noData>=6 && typeof fallbackWorker==="function"){
+        if(fallbackWorker()) return;
+      }
+      return;
+    }else noData=0;
+
+    if(Math.abs((video.currentTime||0)-last)<0.05) stuck++;
+    else stuck=0;
+
+    last=video.currentTime||0;
+
+    if(stuck>=20){
+      const now=Date.now();
+      if(now-lastAction>20000){
+        lastAction=now;
+        setStatus("สัญญาณนิ่ง กำลังเล่นต่อ...");
+        try{video.play().catch(()=>{})}catch(e){}
+      }
+      stuck=0;
+    }
+  },4000);
+}
+
+async function playMPD(url){
+  activeUrl=url;
+  video.style.display="block";
+  if(!window.shaka){showFallback("เครื่องนี้ไม่รองรับ MPD ให้กด PLAYER/MX");return}
+  try{
+    shaka.polyfill.installAll();
+    shakaPlayer=new shaka.Player(video);
+    shakaPlayer.configure({streaming:{bufferingGoal:35,rebufferingGoal:5,bufferBehind:20,retryParameters:{maxAttempts:5,timeout:25000}}});
+    setStatus("กำลังโหลด MPD...");
+    await shakaPlayer.load(url);
+    forceAudio();video.play().catch(()=>{});
+    setStatus("กำลังเล่น MPD");
+    startWatchdog(()=>{try{shakaPlayer.retryStreaming();video.play().catch(()=>{})}catch(e){}});
+  }catch(e){console.log(e);showFallback("MPD เล่นในเว็บไม่ได้ ให้กด PLAYER/MX")}
+}
+
+function startWatchdog(recover){
+  if(watchdog) clearInterval(watchdog);
+  let last=0,stuck=0,lowReady=0,lastRecover=0;
+  watchdog=setInterval(()=>{
+    const box=document.getElementById("player-container");
+    if(box.style.display!=="block"){clearInterval(watchdog);watchdog=null;return}
+    forceAudio();
+
+    if(video.paused&&video.readyState>=2){
+      video.play().catch(()=>{});
+      return;
+    }
+
+    if(video.readyState<2){
+      lowReady++;
+      if(!hasPicture()) setStatus("กำลังบัฟเฟอร์...");
+      const now=Date.now();
+      if(lowReady>=8 && now-lastRecover>30000){
+        lastRecover=now;
+        lowReady=0;
+        try{recover&&recover()}catch(e){}
+      }
+      return;
+    }else lowReady=0;
+
+    if(Math.abs((video.currentTime||0)-last)<.05) stuck++;
+    else stuck=0;
+
+    last=video.currentTime||0;
+
+    if(stuck>=45){
+      const now=Date.now();
+      setStatus("สัญญาณหยุดนาน กำลังประคองต่อ...");
+      try{
+        if(now-lastRecover>30000){
+          lastRecover=now;
+          recover&&recover();
+        }
+        video.play().catch(()=>{});
+      }catch(e){}
+      stuck=0;
+    }
+  },4000);
+}
+
+function openIntent(url,pkg){
+  url=url||activeOriginalUrl||activeUrl;
+  if(!url)return;
+  try{
+    const u=new URL(url),scheme=u.protocol.replace(":",""),hostPath=u.host+u.pathname+(u.search||"");
+    let intent="intent://"+hostPath+"#Intent;scheme="+scheme+";action=android.intent.action.VIEW;type=video/*";
+    if(pkg)intent+=";package="+pkg;
+    intent+=";S.browser_fallback_url="+encodeURIComponent(url)+";end";
+    window.location.href=intent;
+  }catch(e){window.location.href=url}
+}
+function openExternal(){openIntent(activeOriginalUrl||activeUrl,"")}
+function openMX(){openIntent(activeOriginalUrl||activeUrl,"com.mxtech.videoplayer.ad")}
+function restartCurrent(){if(activeChannel)loadChannel(activeChannel,activeElement)}
+async function closePlayer(){
+  await stopAll();
+  const box=document.getElementById("player-container");
+  box.style.display="none";
+  box.classList.remove("show-ui","show-status","show-fallback");
+  try{document.activeElement&&document.activeElement.blur&&document.activeElement.blur()}catch(e){}
+  setTimeout(()=>activeElement?.focus(),150);
+}
+function goHome(){window.location.href="https://tiea9999.github.io/tv/index.html"}
+
+["mousemove","mousedown","touchstart","touchmove","pointermove","pointerdown","click"].forEach(ev=>{
+  document.getElementById("player-container").addEventListener(ev,showUI,{passive:true});
+});
+
+/* ================= REMOTE BUTTON CLICK FIX ================= */
+function getFocusablePlayerButtons(){
+  return Array.from(document.querySelectorAll('#player-container .player-btn')).filter(el=>el.offsetParent!==null);
+}
+function focusPlayerButtonByStep(step){
+  const buttons=getFocusablePlayerButtons();
+  if(!buttons.length) return;
+  let idx=buttons.indexOf(document.activeElement);
+  if(idx<0) idx=0;
+  else idx=(idx+step+buttons.length)%buttons.length;
+  buttons[idx].focus();
+}
+document.addEventListener('keydown',function(e){
+  const box=document.getElementById('player-container');
+  if(!box || box.style.display!=='block') return;
+
+  const active=document.activeElement;
+  const onPlayerButton=active&&active.classList&&active.classList.contains('player-btn');
+
+  if(onPlayerButton&&(e.key==='Enter'||e.key==='OK'||e.key===' '||e.keyCode===23||e.keyCode===66)){
+    e.preventDefault();
+    e.stopPropagation();
+    showUI();
+    active.click();
+    return;
+  }
+
+  if(e.key==='ArrowLeft'||e.keyCode===21){
+    e.preventDefault();e.stopPropagation();showUI();focusPlayerButtonByStep(-1);return;
+  }
+  if(e.key==='ArrowRight'||e.keyCode===22){
+    e.preventDefault();e.stopPropagation();showUI();focusPlayerButtonByStep(1);return;
+  }
+  if(e.key==='ArrowUp'||e.keyCode===19){
+    e.preventDefault();e.stopPropagation();showUI();
+    const closeBtn=document.getElementById('closeBtn');
+    if(closeBtn) closeBtn.focus();
+    return;
+  }
+  if(e.key==='ArrowDown'||e.keyCode===20){
+    e.preventDefault();e.stopPropagation();showUI();
+    const buttons=getFocusablePlayerButtons();
+    if(buttons.length) buttons[buttons.length-1].focus();
+    return;
+  }
+},true);
+
+document.addEventListener("keydown",e=>{
+  const box=document.getElementById("player-container");
+  if(box.style.display==="block"){
+    showUI();
+    if(e.key==="Escape"||e.key==="Backspace"||e.key==="BrowserBack"||e.keyCode===10009){
+      e.preventDefault();closePlayer();return;
+    }
+
+    const active=document.activeElement;
+    if(active&&active.classList&&active.classList.contains("player-btn")){
+      return;
+    }
+
+    if(e.key==="Enter"||e.key==="OK"||e.key===" "||e.keyCode===23||e.keyCode===66||e.keyCode===179){
+      e.preventDefault();
+      try{
+        if(video.paused){video.play().catch(()=>{});setStatus("▶ เล่น")}
+        else{video.pause();setStatus("⏸ หยุด")}
+      }catch(err){}
+    }
+  }
+});
+
+document.getElementById("m3uFile").addEventListener("change",async e=>{
+  const file=e.target.files&&e.target.files[0]; if(!file)return;
+  try{
+    setLoad("กำลังอ่านไฟล์...");
+    const txt=await file.text();
+    channels=parseM3U(txt);
+    renderChannels(channels);
+    setLoad("อ่านไฟล์สำเร็จ "+channels.length+" ช่อง");
+  }catch(err){setLoad("อ่านไฟล์ไม่สำเร็จ")}
+});
+document.addEventListener("DOMContentLoaded",()=>{
+  applyModeLabel();
+  setTimeout(loadDefaultM3U,300);
+});
     </script>
 </body>
 
