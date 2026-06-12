@@ -569,7 +569,8 @@ async function loadChannel(ch,el){
 
   const u=activeOriginalUrl.toLowerCase();
 
-  scheduleNoPictureHint(playMode === "sports" ? 12000 : (playMode === "movie" ? 25000 : 30000));
+  try{ fetch(activeOriginalUrl,{cache:"no-store",mode:"no-cors"}).catch(()=>{}); }catch(e){}
+  scheduleNoPictureHint(3000);
 
   if(u.includes(".mpd")){
     playMPD(activeOriginalUrl);
@@ -579,7 +580,7 @@ async function loadChannel(ch,el){
     playTS(activeOriginalUrl,false);
   }
 
-  setTimeout(()=>{showUI();document.getElementById("closeBtn")?.focus()},250);
+  setTimeout(()=>{showUI();try{video.focus()}catch(e){}},120);
 }
 
 function playHLS(url,usedProxy){
@@ -599,25 +600,25 @@ function playHLS(url,usedProxy){
       progressive:true,
 
       // ⚽ กีฬา/สดไว: เข้าไว เหมาะกับบอล/กีฬา/ข่าวสด
-      maxBufferLength:65,
-      maxMaxBufferLength:110,
-      backBufferLength:25,
-      maxBufferHole:3,
-      highBufferWatchdogPeriod:6,
-      liveSyncDurationCount:6,
-      liveMaxLatencyDurationCount:15,
+      maxBufferLength:8,
+      maxMaxBufferLength:16,
+      backBufferLength:6,
+      maxBufferHole:0.8,
+      highBufferWatchdogPeriod:3,
+      liveSyncDurationCount:3,
+      liveMaxLatencyDurationCount:7,
 
-      fragLoadingMaxRetry:12,
-      levelLoadingMaxRetry:10,
-      manifestLoadingMaxRetry:10,
-      fragLoadingTimeOut:26000,
-      levelLoadingTimeOut:20000,
-      manifestLoadingTimeOut:18000,
+      fragLoadingMaxRetry:4,
+      levelLoadingMaxRetry:3,
+      manifestLoadingMaxRetry:3,
+      fragLoadingTimeOut:9000,
+      levelLoadingTimeOut:7000,
+      manifestLoadingTimeOut:5000,
 
       startLevel:0,
-      abrEwmaDefaultEstimate:700000,
-      abrBandWidthFactor:.72,
-      abrBandWidthUpFactor:.55,
+      abrEwmaDefaultEstimate:450000,
+      abrBandWidthFactor:.6,
+      abrBandWidthUpFactor:.45,
       capLevelToPlayerSize:true,
       testBandwidth:false
     } : playMode === "movie" ? {
@@ -718,7 +719,7 @@ function playHLS(url,usedProxy){
       if(!started && !usedProxy && !hasPicture()){
         playHLS(makeProxyUrl(url),true);
       }
-    }, playMode === "sports" ? 5500 : (playMode === "movie" ? 12000 : 15000));
+    }, 1000);
 
     hls.on(Hls.Events.BUFFER_STALLED,()=>{
       if(!hasPicture()) setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
@@ -781,9 +782,9 @@ function playTS(url,usedProxy=false){
     }).catch(()=>{});
   };
 
-  setTimeout(goNative,150);
-  setTimeout(goNative, playMode === "sports" ? 250 : (playMode === "movie" ? 1000 : 1300));
-  setTimeout(goNative, playMode === "sports" ? 700 : (playMode === "movie" ? 2200 : 2800));
+  goNative();
+  setTimeout(goNative,80);
+  setTimeout(goNative,180);
 
   setTimeout(()=>{
     if(isStarted()){
@@ -827,15 +828,15 @@ function playTS(url,usedProxy=false){
           }).catch(()=>{});
         };
 
-        setTimeout(goTs,500);
-        setTimeout(goTs,1600);
-        setTimeout(goTs,3200);
+        setTimeout(goTs,120);
+        setTimeout(goTs,450);
+        setTimeout(goTs,900);
 
         setTimeout(()=>{
           if(!isStarted()){
             if(!fallbackWorker()) showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX ด้านบน");
           }
-        },5000);
+        },1200);
 
         tsPlayer.on(mpegts.Events.ERROR,(type,detail,info)=>{
           console.log("TS ERROR",type,detail,info);
@@ -854,7 +855,7 @@ function playTS(url,usedProxy=false){
     }else{
       if(!fallbackWorker()) showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX ด้านบน");
     }
-  }, playMode === "sports" ? 1400 : (playMode === "movie" ? 4200 : 5200));
+  }, 300);
 }
 
 function startTsNoJumpWatchdog(usingTsEngine,fallbackWorker){
