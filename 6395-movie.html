@@ -201,7 +201,7 @@ function parseM3U(txt){
     if(meta && /^https?:\/\//i.test(line)){
       out.push({
         name:meta["tvg-name"]||meta.name||"ไม่มีชื่อ",
-        logo:meta["tvg-logo"]||FALLBACK_LOGO,
+        logo:normalizeStreamUrl(meta["tvg-logo"]||FALLBACK_LOGO),
         group:meta["group-title"]||"อื่นๆ",
         file:normalizeStreamUrl(line),
         drm:false
