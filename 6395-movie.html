@@ -214,6 +214,22 @@ function parseM3U(txt){
 function normalizeStreamUrl(url){
   url=clean(url);
   if(!url) return "";
+
+  // FIX GitHub HTTPS: กัน Mixed Content
+  // ถ้า M3U/JSON ใส่ http://6395online.com:8080 ให้แปลงเป็น https://6395online.com:8443 ก่อนเล่น
+  try{
+    const fix=new URL(url);
+    if(
+      fix.hostname.includes("6395online.com") &&
+      fix.protocol === "http:" &&
+      (fix.port === "8080" || fix.port === "")
+    ){
+      fix.protocol = "https:";
+      fix.port = "8443";
+      url = fix.toString();
+    }
+  }catch(e){}
+
   try{
     const u=new URL(url);
     const parts=u.pathname.split("/").filter(Boolean);
