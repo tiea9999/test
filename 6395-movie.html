@@ -219,15 +219,16 @@ function normalizeStreamUrl(url){
   // ถ้า M3U/JSON ใส่ http://6395online.com:8080 ให้แปลงเป็น https://6395online.com:8443 ก่อนเล่น
   try{
     const fix=new URL(url);
-    if(
-      fix.hostname.includes("6395online.com") &&
-      fix.protocol === "http:" &&
-      (fix.port === "8080" || fix.port === "")
-    ){
-      fix.protocol = "https:";
-      fix.port = "8443";
-      url = fix.toString();
-    }
+if(
+  fix.hostname.includes("6395online.com") ||
+  fix.hostname.includes("gold.6395online.com") ||
+  fix.hostname.includes("odl.6395online.com")
+){
+  fix.protocol = "https:";
+  fix.hostname = "6395online.com";
+  fix.port = "8443";
+  url = fix.toString();
+}
   }catch(e){}
 
   try{
