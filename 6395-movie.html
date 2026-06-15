@@ -414,8 +414,8 @@ async function loadChannel(ch,el){
 
 
 function isNativeFirstHost(url){
-  // ปิด native-first เพื่อให้ HLS.js ยิงตรงเท่านั้น และไม่ตรง
-  return false;
+  url = String(url || "").toLowerCase();
+  return url.includes("6395online.com");
 }
 
 function playNativeFirst(url){
