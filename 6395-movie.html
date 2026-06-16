@@ -201,7 +201,7 @@ function parseM3U(txt){
     if(meta && /^https?:\/\//i.test(line)){
       out.push({
         name:meta["tvg-name"]||meta.name||"ไม่มีชื่อ",
-        logo:normalizeStreamUrl(meta["tvg-logo"]||FALLBACK_LOGO),
+        logo:clean(meta["tvg-logo"]||FALLBACK_LOGO),
         group:meta["group-title"]||"อื่นๆ",
         file:normalizeStreamUrl(line),
         drm:false
@@ -220,9 +220,10 @@ function normalizeStreamUrl(url){
   try{
     const fix=new URL(url);
 if(
+  fix.hostname.includes("6395online.com") ||
   fix.hostname.includes("gold.6395online.com") ||
   fix.hostname.includes("old.6395online.com") ||
-  fix.hostname.includes(".com")
+  fix.hostname.includes("odl.6395online.com")
 ){
   fix.protocol = "https:";
   fix.hostname = "6395online.com";
