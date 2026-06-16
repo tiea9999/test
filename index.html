@@ -1166,6 +1166,13 @@ function cleanupPlayer(){
     video.load();
   }catch(e){}
 }
+
+function hasVideoStartedFinal(){
+  try{
+    return video.readyState>=2 || (video.videoWidth>0 && video.videoHeight>0) || (video.currentTime||0)>0.3;
+  }catch(e){return false}
+}
+
 function isPlayableUrl(url){
   const u=String(url||'').toLowerCase();
   return u.includes('.m3u8') || u.includes('.mp4') || u.includes('.m4v') || u.includes('.webm') || u.includes('.mpd') || u.includes('type=m3u8') || u.includes('extension=m3u8');
@@ -1226,10 +1233,15 @@ function playDirectUrl(url,item,serverIndex){
   state.originalUrl=url;
 
   state.playTimer=setTimeout(()=>{
+    if(is6395Url(url) && !hasVideoStartedFinal()){
+      setStatus('6395 เว็บไม่ขึ้นใน 5 วิ • เปิด PLAYER อัตโนมัติ');
+      try{ openExternal(url); }catch(e){}
+      return;
+    }
     if(video.readyState<2 && (video.currentTime||0)===0){
       setStatus('ลิงก์ตรงยังไม่ขึ้นภาพ • กด PLAYER/MX ได้');
     }
-  },15000);
+  }, is6395Url(url) ? 5000 : 15000);
 
   ['playing','loadeddata','canplay'].forEach(ev=>video.addEventListener(ev,()=>{
     if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null;}
