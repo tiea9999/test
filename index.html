@@ -889,7 +889,26 @@ function setStatus(t){
   t=String(t||'พร้อมใช้งาน');
   if(t.includes('โหลดสำเร็จ')||t.includes(' รายการ จาก ')||t.includes('githubusercontent.com')||t.includes('http'))t='พร้อมใช้งาน';
   statusText.textContent=t;
-}function cleanUrl(u){return String(u||'').trim()}function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
+}function cleanUrl(u){return String(u||'').trim()}
+function normalize6395Url(url){
+  url=cleanUrl(url);
+  if(!url) return "";
+  try{
+    const u=new URL(url);
+    if(
+      u.hostname.includes("6395online.com") ||
+      u.hostname.includes("gold.6395online.com") ||
+      u.hostname.includes("old.6395online.com") ||
+      u.hostname.includes("odl.6395online.com")
+    ){
+      u.protocol="https:";
+      u.hostname="6395online.com";
+      u.port="8443";
+      return u.toString();
+    }
+  }catch(e){}
+  return url;
+}function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
 function groupName(g){
   let raw=String(g||'').trim();
   let t=raw.toLowerCase();
@@ -924,11 +943,11 @@ function groupName(g){
   return raw||'อื่นๆ';
 }
 function groupsOf(item,parent=''){let a=[];if(Array.isArray(item.groups))a.push(...item.groups.map(groupName));if(typeof item.groups==='string')a.push(groupName(item.groups));if(item.group)a.push(groupName(item.group));if(item.category)a.push(groupName(item.category));if(!a.length&&parent)a.push(groupName(parent));if(!a.length)a.push('อื่นๆ');return[...new Set(a.filter(Boolean))]}
-function serversOf(item){let o=[];if(Array.isArray(item.servers))item.servers.forEach(s=>{let u=cleanUrl(s.url||s.link||s.file||s.source);if(u)o.push({name:s.name||'Main',url:u})});let one=cleanUrl(item.url||item.link||item.stream||item.file);if(one&&!isJsonUrl(one))o.push({name:'Main',url:one});return o}
+function serversOf(item){let o=[];if(Array.isArray(item.servers))item.servers.forEach(s=>{let u=normalize6395Url(s.url||s.link||s.file||s.source);if(u)o.push({name:s.name||'Main',url:u})});let one=normalize6395Url(item.url||item.link||item.stream||item.file);if(one&&!isJsonUrl(one))o.push({name:'Main',url:one});return o}
 function episodesOf(item,img=''){if(!Array.isArray(item.episodes))return[];return item.episodes.map((ep,i)=>({title:ep.title||ep.name||ep.ep_name||`EP${i+1}`,image:imgOf(ep)||img,servers:serversOf(ep),type:'episode'})).filter(e=>e.servers.length)}
 function calcStatus(item,eps){let raw=String(item.status||item.finish||item.end||item.complete||'').trim();if(raw)return raw;let title=String(item.title||''),l=Number(item.latest_ep||0),t=Number(item.total_ep||0);if(title.includes('จบเรื่อง')||title.includes('ครบทุกตอน')||title.includes('(END)'))return'จบแล้ว';if(t&&l&&l>=t)return'จบแล้ว';if(eps&&eps.some(e=>String(e.title||'').includes('ตอนจบ')))return'จบแล้ว';if(eps&&eps.length)return'ยังไม่จบ';return''}
 function normalize(data,parent=''){let out=[],seen=new Set();function add(obj){let k=[obj.kind,obj.title,obj.source,obj.servers?.[0]?.url,obj.episodes?.length].join('|').toLowerCase();if(seen.has(k))return;seen.add(k);out.push(obj)}function walk(n,pg=''){if(Array.isArray(n)){n.forEach(x=>walk(x,pg));return}if(!n||typeof n!=='object')return;let title=n.title||n.name||n.channel||'ไม่มีชื่อ',img=imgOf(n),gs=groupsOf(n,pg||parent),source=cleanUrl(n.source||n.url||n.link||n.file);if((n.type==='menu'||Array.isArray(n.items))&&Array.isArray(n.items)){n.items.forEach(x=>walk(x,title));return}if((n.type==='source'||source)&&source&&isJsonUrl(source)&&!n.episodes){add({kind:'folder',title,image:img,source,groups:gs,group:gs[0]||title,status:n.status||''});return}if(Array.isArray(n.data)){n.data.forEach(x=>walk(x,gs[0]));return}let eps=episodesOf(n,img),sv=serversOf(n);if(eps.length)add({kind:'series',title,image:img,groups:gs,group:gs[0],language:n.language||'',year:n.year||'',status:calcStatus(n,eps),latest_ep:n.latest_ep||eps.length,total_ep:n.total_ep||eps.length,updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',episodes:eps,raw:n});else if(sv.length)add({kind:'play',title,image:img,groups:gs,group:gs[0]||'อื่นๆ',language:n.language||'',year:n.year||'',status:calcStatus(n,[]),updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',servers:sv,type:n.type||'video',raw:n})}walk(data,parent);return out}
-function parseM3U(text,parent='ทีวี'){let out=[],cur=null;text.split(/\r?\n/).forEach(raw=>{let line=raw.trim();if(!line)return;if(line.startsWith('#EXTINF:')){let logo=line.match(/tvg-logo="([^"]*)"/i)?.[1]||'',group=groupName(line.match(/group-title="([^"]*)"/i)?.[1]||parent),title=line.split(',').pop()?.trim()||'ช่อง';cur={kind:'play',title,image:logo,group,groups:[group],servers:[],type:'tv'}}else if(!line.startsWith('#')&&cur){cur.servers=[{name:'Main',url:line}];out.push(cur);cur=null}});return out}
+function parseM3U(text,parent='ทีวี'){let out=[],cur=null;text.split(/\r?\n/).forEach(raw=>{let line=raw.trim();if(!line)return;if(line.startsWith('#EXTINF:')){let logo=line.match(/tvg-logo="([^"]*)"/i)?.[1]||'',group=groupName(line.match(/group-title="([^"]*)"/i)?.[1]||parent),title=line.split(',').pop()?.trim()||'ช่อง';cur={kind:'play',title,image:logo,group,groups:[group],servers:[],type:'tv'}}else if(!line.startsWith('#')&&cur){cur.servers=[{name:'Main',url:normalize6395Url(line)}];out.push(cur);cur=null}});return out}
 async function fetchText(url){if(state.cache[url])return state.cache[url];let sep=url.includes('?')?'&':'?',res=await fetch(url+sep+'t='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);let text=await res.text();state.cache[url]=text;return text}
 async function loadUrl(url,parent=''){let text=await fetchText(url),trim=text.trim();if(trim.startsWith('{')||trim.startsWith('['))return normalize(JSON.parse(text),parent);if(trim.includes('#EXTM3U')||trim.includes('#EXTINF'))return parseM3U(text,parent);return[]}
 async function loadSourcePack(key){if(key==='tv-main')return TV_LINKS;let pack=SOURCES[key]||[],all=[];for(const s of pack){try{all.push(...await loadUrl(s.source,s.title))}catch(e){console.log('โหลดไม่ได้',s.source,e)}}return all}
@@ -1052,7 +1071,7 @@ function openItem(item){if(item.kind==='link'){location.href=item.url;return}if(
 function openDetail(item){let modal=$('modal');$('modalTitle').textContent=item.title;$('modalBody').innerHTML=`<div class="detail-box"><div class="detail-title">${item.title}</div><div class="detail-sub">${item.language?item.language+' • ':''}${item.status?item.status+' • ':''}${item.group||''}${item.total_ep?' • ทั้งหมด '+item.total_ep+' ตอน':''}</div></div><div class="episode-list"></div>`;let list=$('modalBody').querySelector('.episode-list');item.episodes.forEach((ep,i)=>{let b=document.createElement('button');b.className='episode-btn';b.textContent=ep.title||`EP${i+1}`;b.onclick=()=>{state.returnEpisodeItem=item;closeModal();playItem(ep,0,item.title+' '+b.textContent)};list.appendChild(b)});$('modalCount').textContent='ทั้งหมด '+item.episodes.length+' ตอน';$('pageInfo').textContent='เลือกตอน';$('prevPageBtn').style.display='none';$('nextPageBtn').style.display='none';modal.classList.add('show');setTimeout(()=>list.querySelector('.episode-btn')?.focus(),80)}
 function openModal(title,items){state.modalItems=items;state.page=1;$('modalTitle').textContent=title;$('prevPageBtn').style.display='';$('nextPageBtn').style.display='';renderModalPage();$('modal').classList.add('show')}
 function renderModalPage(){let total=state.modalItems.length,pages=Math.max(1,Math.ceil(total/state.perPage));state.page=Math.max(1,Math.min(state.page,pages));let start=(state.page-1)*state.perPage,items=state.modalItems.slice(start,start+state.perPage);$('modalBody').innerHTML='<div class="grid"></div>';let g=$('modalBody').querySelector('.grid');items.forEach(item=>g.appendChild(createCard(item)));$('modalCount').textContent='ทั้งหมด '+total+' รายการ';$('pageInfo').textContent='หน้า '+state.page+' / '+pages;$('prevPageBtn').disabled=state.page<=1;$('nextPageBtn').disabled=state.page>=pages;setTimeout(()=>g.querySelector('.card')?.focus(),80)}
-function closeModal(){$('modal').classList.remove('show');$('prevPageBtn').style.display='';$('nextPageBtn').style.display=''}function getUrl(item,serverIndex=0){return cleanUrl(item.servers?.[serverIndex]?.url||item.servers?.[0]?.url||item.url||item.link||item.stream||'')}
+function closeModal(){$('modal').classList.remove('show');$('prevPageBtn').style.display='';$('nextPageBtn').style.display=''}function getUrl(item,serverIndex=0){return normalize6395Url(item.servers?.[serverIndex]?.url||item.servers?.[0]?.url||item.url||item.link||item.stream||'')}
 
 function forceFullSound(){
   try{
@@ -1143,7 +1162,7 @@ async function resolveMovieUrl(original){
   return cleanUrl(original);
 }
 function playItem(item,serverIndex=0,displayTitle=''){
-  let original=getUrl(item,serverIndex);
+  let original=normalize6395Url(getUrl(item,serverIndex));
   if(!original){setStatus('ไม่พบลิงก์เล่น');return}
 
   cleanupPlayer();
@@ -1155,13 +1174,14 @@ function playItem(item,serverIndex=0,displayTitle=''){
   playerPanel.classList.add('show');
   showPlayerUI();
 
-  const url=cleanUrl(original);
+  const url=normalize6395Url(original);
   state.currentUrl=url;
   state.originalUrl=url;
 
   playDirectUrl(url,item,serverIndex);
 }
 function playDirectUrl(url,item,serverIndex){
+  url=normalize6395Url(url);
   cleanupPlayer();
   playerPanel.classList.add('show');
   showPlayerUI();
@@ -1209,12 +1229,12 @@ function playDirectUrl(url,item,serverIndex){
   if(window.Hls && Hls.isSupported() && (lower.includes('.m3u8') || lower.includes('type=m3u8') || lower.includes('extension=m3u8'))){
     try{
       state.hls=new Hls({
-        enableWorker:false,
+        enableWorker:true,
         lowLatencyMode:false,
-        maxBufferLength:30,
-        maxMaxBufferLength:60,
-        backBufferLength:12,
-        maxBufferHole:1,
+        maxBufferLength:80,
+        maxMaxBufferLength:120,
+        backBufferLength:30,
+        maxBufferHole:4,
         highBufferWatchdogPeriod:5,
         fragLoadingTimeOut:25000,
         manifestLoadingTimeOut:18000,
@@ -1230,8 +1250,8 @@ function playDirectUrl(url,item,serverIndex){
         testBandwidth:false,
         abrEwmaDefaultEstimate:650000,
         startLevel:-1,
-        liveSyncDurationCount:6,
-        liveMaxLatencyDurationCount:14,
+        liveSyncDurationCount:8,
+        liveMaxLatencyDurationCount:20,
         progressive:true,
         liveDurationInfinity:true
       });
