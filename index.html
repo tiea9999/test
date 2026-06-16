@@ -742,7 +742,7 @@
             align-items: center !important;
             justify-content: center !important;
         }
-
+    
 
         /* ===== MOBILE TOUCH SEEK CONTROLS ===== */
         .mobile-seek-controls {
@@ -757,32 +757,26 @@
             gap: 12px;
             pointer-events: auto;
         }
-
         .mobile-seek-btn {
             min-width: 74px;
             min-height: 48px;
-            border: 2px solid rgba(255, 255, 255, .85);
+            border: 2px solid rgba(255,255,255,.85);
             border-radius: 999px;
-            background: rgba(0, 0, 0, .68);
+            background: rgba(0,0,0,.68);
             color: #fff;
             font-size: 18px;
             font-weight: 900;
             cursor: pointer;
         }
-
         .mobile-seek-btn:active {
             transform: scale(.96);
         }
-
         .player-panel.hide-ui .mobile-seek-controls {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
-
-        @media (hover:none),
-        (pointer:coarse),
-        (max-width:900px) {
+        @media (hover:none), (pointer:coarse), (max-width:900px) {
             .player-panel.show .mobile-seek-controls {
                 display: flex;
             }
@@ -796,7 +790,7 @@
             <div class="brand">TIEA IPTV<div class="subbrand">DIRECT ENGINE NO WORKER</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
-            <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><button class="menu-btn" data-action="live-page">📅 ตารางแข่งขัน</button>
+            <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
             <div class="group-title">ทีวีออนไลน์</div>
             <button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-source="tv-6395">🏆 DooBall6395</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/animegood.html">🏆 Animegood</button>
             <div class="group-title">หนัง</div>
@@ -808,7 +802,7 @@
         </aside>
         <main class="main">
             <div class="topbar">
-                <button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><button class="top-btn live" id="liveBtn">📅 live.html</button>
+                <button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button>
                 <div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep
                     return</div>
             </div>
@@ -850,7 +844,11 @@
     <script>
         const HOME_URL='https://tiea9999.github.io/tv/index.html',LIVE_URL='https://tiea9999.github.io/tv/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/',PROXY='' /* Direct Only: ปิด Worker สำหรับ player ตัวแม่ */,FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
 const MY_SERIES=RAW+'myseries-series.json',MY_CHINA=RAW+'myseries-china.json',MY_KOREA=RAW+'myseries-korea.json',MY_THAI=RAW+'myseries-thai.json',MY_JAPAN=RAW+'myseries-japan.json',MY_SHORT=RAW+'myseries-short.json',MY_MOVIE=RAW+'myseries-movie.json';
-const TV_LINKS=[{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/3bb.html',group:'ทีวีออนไลน์'},{kind:'link',title:'SPORT TV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/sport.html',group:'ทีวีออนไลน์'},{kind:'link',title:'DOOBALL66',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/ball66.html',group:'ทีวีออนไลน์'}];
+const TV_LINKS=[
+{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/3bb.html',group:'ทีวีออนไลน์'},
+{kind:'folder',title:'DOOBALL6395',image:FOLDER_LOGO,source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u',group:'ทีวีออนไลน์'},
+{kind:'link',title:'Animegood',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/animegood.html',group:'ทีวีออนไลน์'}
+];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'MySeries',image:FOLDER_LOGO,source:MY_SERIES,group:'MySeries'}];
 const MYSERIES_FILTERS={
 'series-update':[
@@ -916,9 +914,7 @@ function groupName(g){
     'series-movie':'หนัง MySeries',
     'movie':'ดูหนังออนไลน์',
     'tv':'ทีวี',
-    'sport':'กีฬา',
-    'dooball6395':'DooBall6395',
-    '6395':'DooBall6395'
+    'sport':'กีฬา'
   };
   if(map[t])return map[t];
   if(raw.includes('อัพเดท')||raw.includes('มาใหม่'))return'ซีรี่ย์อัพเดทใหม่';
@@ -1102,7 +1098,7 @@ function startWatchdog(){
     state.lastTime=video.currentTime||0;
 
     // เบากว่าเดิม ไม่รีโหลดถี่ ลดอาการสะดุดจาก watchdog
-    if(state.stuckCount>=10 && Date.now()-state.lastRecoverAt>25000){
+    if(state.stuckCount>=12 && Date.now()-state.lastRecoverAt>30000){
       state.stuckCount=0;
       state.recoverCount++;
       state.lastRecoverAt=Date.now();
@@ -1186,7 +1182,7 @@ function playItem(item,serverIndex=0,displayTitle=''){
   playerPanel.classList.remove('hide-ui');
   showPlayerUI();
 
-  setTimeout(()=>playDirectUrl(original,item,serverIndex),180);
+  setTimeout(()=>playDirectUrl(original,item,serverIndex),is6395Url(original)?50:180);
 }
 function playDirectUrl(url,item,serverIndex){
   cleanupPlayer();
@@ -1241,13 +1237,14 @@ function playDirectUrl(url,item,serverIndex){
         lowLatencyMode:false,
         startFragPrefetch:true,
         progressive:true,
-        maxBufferLength:is6395Url(url)?80:30,
-        maxMaxBufferLength:is6395Url(url)?120:60,
-        backBufferLength:is6395Url(url)?30:12,
-        maxBufferHole:is6395Url(url)?4:1,
-        highBufferWatchdogPeriod:is6395Url(url)?8:5,
-        liveSyncDurationCount:is6395Url(url)?8:6,
-        liveMaxLatencyDurationCount:is6395Url(url)?20:14,
+        // 6395 = กีฬา/ทีวีสดไว: เข้าไวกว่าเดิม
+        maxBufferLength:is6395Url(url)?24:30,
+        maxMaxBufferLength:is6395Url(url)?45:60,
+        backBufferLength:is6395Url(url)?10:12,
+        maxBufferHole:is6395Url(url)?2:1,
+        highBufferWatchdogPeriod:is6395Url(url)?5:5,
+        liveSyncDurationCount:is6395Url(url)?4:6,
+        liveMaxLatencyDurationCount:is6395Url(url)?9:14,
         fragLoadingMaxRetry:12,
         manifestLoadingMaxRetry:8,
         levelLoadingMaxRetry:8,
@@ -1259,19 +1256,44 @@ function playDirectUrl(url,item,serverIndex){
         levelLoadingRetryDelay:800,
         capLevelToPlayerSize:true,
         testBandwidth:false,
-        abrEwmaDefaultEstimate:900000,
-        startLevel:-1,
+        abrEwmaDefaultEstimate:is6395Url(url)?2000000:900000,
+        startLevel:is6395Url(url)?0:-1,
         liveDurationInfinity:true
       });
       state.hls.loadSource(url);
       state.hls.attachMedia(video);
       state.hls.on(Hls.Events.MANIFEST_PARSED,()=>{
         forceFullSound();
+
+        if(is6395Url(url)){
+          try{
+            if(state.hls.levels && state.hls.levels.length>1){
+              state.hls.currentLevel=0;
+              state.hls.nextLevel=0;
+              state.hls.loadLevel=0;
+            }
+          }catch(e){}
+          video.play().catch(()=>{});
+          startWatchdog();
+          setStatus('กำลังเล่น 6395 สดไว');
+
+          // หลังเล่นติดแล้วค่อยปล่อย auto quality
+          setTimeout(()=>{
+            try{ if(state.hls) state.hls.currentLevel=-1; }catch(e){}
+          },18000);
+          return;
+        }
+
         video.play().catch(()=>{});
         startWatchdog();
-        setStatus(is6395Url(url)?'กำลังเล่น 6395 HTTPS 8443':'กำลังเล่น HLS ตรง');
+        setStatus('กำลังเล่น HLS ตรง');
       });
       state.hls.on(Hls.Events.BUFFER_STALLED,()=>{
+        if(is6395Url(url)){
+          setStatus('กำลังเล่น 6395 สดไว',true);
+          setTimeout(()=>video.play().catch(()=>{}),500);
+          return;
+        }
         setStatus('กำลังเติมบัฟเฟอร์...',true);
         setTimeout(()=>video.play().catch(()=>{}),1000);
       });
@@ -1320,7 +1342,7 @@ function playCandidate(candidates,item,serverIndex,idx){
   playDirectUrl(normalize6395Url(direct),item,serverIndex);
 }
 function safeIntent(url,mode){
-  url=url||state.originalUrl||state.currentUrl;
+  url=normalize6395Url(url||state.originalUrl||state.currentUrl);
   if(!url)return;
   saveReturnState({player:mode||'external',url:url});
   const ua=(navigator.userAgent||'').toLowerCase();
@@ -1392,7 +1414,7 @@ function closePlayer(){
   }
 }function saveReturnState(obj){try{sessionStorage.setItem('tiea_return_state',JSON.stringify({activeSource:state.activeSource,scroll:content.scrollTop,time:Date.now(),...obj}))}catch(e){}}function restoreReturnState(){try{let raw=sessionStorage.getItem('tiea_return_state');if(!raw)return false;let data=JSON.parse(raw);sessionStorage.removeItem('tiea_return_state');if(data.activeSource&&data.activeSource!=='home'){loadMenuSource(data.activeSource).then(()=>setTimeout(()=>{content.scrollTop=data.scroll||0},500));return true}}catch(e){}return false}
 function safeIntent(url,mode){
-  url=url||state.originalUrl||state.currentUrl;
+  url=normalize6395Url(url||state.originalUrl||state.currentUrl);
   if(!url)return;
   saveReturnState({player:mode||'external',url:url});
 
@@ -1469,8 +1491,8 @@ setStatus('โหลดไม่สำเร็จ');
 }}
 
 function openVip(url){let pass=prompt('กรุณาใส่รหัสผ่าน VIP');if(pass===VIP_PASSWORD)location.href=url;else if(pass!==null)alert('รหัสผ่านไม่ถูกต้อง')}
-document.querySelectorAll('.menu-btn').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(btn.dataset.vipLink){openVip(btn.dataset.vipLink);return}if(btn.dataset.link){location.href=btn.dataset.link;return}if(btn.dataset.action==='home'){renderHome();return}if(btn.dataset.action==='live-page'){location.href=LIVE_URL;return}if(btn.dataset.source){loadMenuSource(btn.dataset.source);return}}});
-$('homeBtn').onclick=()=>location.href=HOME_URL;$('reloadBtn').onclick=()=>{state.cache={};if(state.activeSource&&state.activeSource!=='home')loadMenuSource(state.activeSource);else renderHome()};$('liveBtn').onclick=()=>location.href=LIVE_URL;$('closePlayerBtn').onclick=closePlayer;$('playerHomeBtn').onclick=()=>location.href=HOME_URL;$('mxBtn').onclick=()=>openMx();$('extBtn').onclick=()=>openExternal();$('closeModalBtn').onclick=closeModal;$('prevPageBtn').onclick=()=>{state.page--;renderModalPage()};$('nextPageBtn').onclick=()=>{state.page++;renderModalPage()};
+document.querySelectorAll('.menu-btn').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(btn.dataset.vipLink){openVip(btn.dataset.vipLink);return}if(btn.dataset.link){location.href=btn.dataset.link;return}if(btn.dataset.action==='home'){renderHome();return}if(btn.dataset.source){loadMenuSource(btn.dataset.source);return}}});
+$('homeBtn').onclick=()=>location.href=HOME_URL;$('reloadBtn').onclick=()=>{state.cache={};if(state.activeSource&&state.activeSource!=='home')loadMenuSource(state.activeSource);else renderHome()};$('closePlayerBtn').onclick=closePlayer;$('playerHomeBtn').onclick=()=>location.href=HOME_URL;$('mxBtn').onclick=()=>openMx();$('extBtn').onclick=()=>openExternal();$('closeModalBtn').onclick=closeModal;$('prevPageBtn').onclick=()=>{state.page--;renderModalPage()};$('nextPageBtn').onclick=()=>{state.page++;renderModalPage()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'||e.keyCode===10009){e.preventDefault();if(playerPanel.classList.contains('show'))closePlayer();else if($('modal').classList.contains('show'))closeModal();else location.href=HOME_URL}});document.addEventListener('keydown',e=>{let a=document.activeElement;if(!a||!a.classList||!a.classList.contains('card'))return;if(e.key==='ArrowRight'){let n=a.nextElementSibling;if(n&&n.classList.contains('card')){e.preventDefault();n.focus();n.scrollIntoView({block:'nearest',inline:'center'})}}if(e.key==='ArrowLeft'){let p=a.previousElementSibling;if(p&&p.classList.contains('card')){e.preventDefault();p.focus();p.scrollIntoView({block:'nearest',inline:'center'})}}});
 
 
