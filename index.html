@@ -742,7 +742,7 @@
             align-items: center !important;
             justify-content: center !important;
         }
-    
+
 
         /* ===== MOBILE TOUCH SEEK CONTROLS ===== */
         .mobile-seek-controls {
@@ -757,26 +757,32 @@
             gap: 12px;
             pointer-events: auto;
         }
+
         .mobile-seek-btn {
             min-width: 74px;
             min-height: 48px;
-            border: 2px solid rgba(255,255,255,.85);
+            border: 2px solid rgba(255, 255, 255, .85);
             border-radius: 999px;
-            background: rgba(0,0,0,.68);
+            background: rgba(0, 0, 0, .68);
             color: #fff;
             font-size: 18px;
             font-weight: 900;
             cursor: pointer;
         }
+
         .mobile-seek-btn:active {
             transform: scale(.96);
         }
+
         .player-panel.hide-ui .mobile-seek-controls {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
-        @media (hover:none), (pointer:coarse), (max-width:900px) {
+
+        @media (hover:none),
+        (pointer:coarse),
+        (max-width:900px) {
             .player-panel.show .mobile-seek-controls {
                 display: flex;
             }
@@ -792,7 +798,7 @@
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><button class="menu-btn" data-action="live-page">📅 ตารางแข่งขัน</button>
             <div class="group-title">ทีวีออนไลน์</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/sport.html">🏆 SPORT TV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/6395-movie.html">🏆 DooBall6395</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/animegood.html">🏆 Animegood</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-source="tv-6395">🏆 DooBall6395</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/animegood.html">🏆 Animegood</button>
             <div class="group-title">หนัง</div>
             <button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/037hd.html">🎬 Movie 037HD</button>
             <div class="group-title">ซีรีส์</div>
@@ -863,6 +869,7 @@ const MYSERIES_FILTERS={
 'series-movie':['หนัง MySeries','series-movie']
 };
 const SOURCES={
+'tv-6395':[{title:'DooBall6395',source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u'}],
 'movie-main':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],
 'movie-24hd':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],
 
@@ -889,36 +896,7 @@ function setStatus(t){
   t=String(t||'พร้อมใช้งาน');
   if(t.includes('โหลดสำเร็จ')||t.includes(' รายการ จาก ')||t.includes('githubusercontent.com')||t.includes('http'))t='พร้อมใช้งาน';
   statusText.textContent=t;
-}function cleanUrl(u){return String(u||'').trim()}
-function is6395Url(url){
-  const u=String(url||'').toLowerCase();
-  return u.includes('6395online.com') || u.includes('gold.6395online.com') || u.includes('old.6395online.com') || u.includes('odl.6395online.com');
-}
-function normalize6395Url(url){
-  url=cleanUrl(url);
-  if(!url) return '';
-  try{
-    const u=new URL(url);
-    if(is6395Url(url)){
-      u.protocol='https:';
-      u.hostname='6395online.com';
-      u.port='8443';
-
-      const hasExt=/\.(m3u8|mpd|mp4|ts)(\?|$)/i.test(u.href);
-      const parts=u.pathname.split('/').filter(Boolean);
-      const hasType=parts[0]==='live'||parts[0]==='movie'||parts[0]==='series';
-
-      if(!hasExt && !hasType && parts.length>=3){
-        u.pathname='/live/'+parts.join('/')+'.m3u8';
-      }else if(!hasExt && hasType){
-        u.pathname=u.pathname.replace(/\/$/,'')+'.m3u8';
-      }
-      return u.toString();
-    }
-  }catch(e){}
-  return url;
-}
-function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
+}function cleanUrl(u){return String(u||'').trim()}function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
 function groupName(g){
   let raw=String(g||'').trim();
   let t=raw.toLowerCase();
@@ -938,7 +916,9 @@ function groupName(g){
     'series-movie':'หนัง MySeries',
     'movie':'ดูหนังออนไลน์',
     'tv':'ทีวี',
-    'sport':'กีฬา'
+    'sport':'กีฬา',
+    'dooball6395':'DooBall6395',
+    '6395':'DooBall6395'
   };
   if(map[t])return map[t];
   if(raw.includes('อัพเดท')||raw.includes('มาใหม่'))return'ซีรี่ย์อัพเดทใหม่';
@@ -998,7 +978,7 @@ function renderHome(){state.activeSource='home';setStatus('หน้าแรก
 {title:'ทีวีแนะนำ',items:[
 {kind:'play',title:'BEIN 01',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/203.m3u8'}]},
 {kind:'play',title:'BEIN 02',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/204.m3u8'}]},
-{kind:'play',title:'BEIN 03',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/205.m3u8'}]},
+{kind:'play',title:'CH3',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/83.m3u8'}]},
 {kind:'play',title:'FOOTBALL03',image:FOLDER_LOGO,group:'กีฬา',groups:['กีฬา'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/391722.m3u8'}]}
 ]},
 {title:'ซีรี่ย์อัพเดทใหม่',items:seriesUpdate.slice(0,30)},
@@ -1168,47 +1148,53 @@ function isPlayableUrl(url){
   return u.includes('.m3u8') || u.includes('.mp4') || u.includes('.m4v') || u.includes('.webm') || u.includes('.mpd') || u.includes('type=m3u8') || u.includes('extension=m3u8');
 }
 async function resolveMovieUrl(original){
-  // ปิดการดึงผ่าน Worker/Proxy: ถ้าเป็น URL เล่นอยู่แล้วคืนตรง
-  return cleanUrl(original);
+  return normalize6395Url(original);
 }
+
+function normalize6395Url(url){
+  url=cleanUrl(url);
+  if(!url)return '';
+  try{
+    const u=new URL(url);
+    const h=u.hostname.toLowerCase();
+    if(h.includes('6395online.com')){
+      u.protocol='https:';
+      u.hostname='6395online.com';
+      u.port='8443';
+      if(!/\.m3u8($|\?)/i.test(u.pathname)){
+        u.pathname=u.pathname.replace(/\/$/,'')+'.m3u8';
+      }
+      return u.toString();
+    }
+  }catch(e){}
+  return url;
+}
+function is6395Url(url){return String(url||'').toLowerCase().includes('6395online.com')}
+
 function playItem(item,serverIndex=0,displayTitle=''){
-  let original=normalize6395Url(getUrl(item,serverIndex));
+  let original=getUrl(item,serverIndex);
   if(!original){setStatus('ไม่พบลิงก์เล่น');return}
 
   cleanupPlayer();
+  original=normalize6395Url(original);
   state.originalUrl=original;
   state.currentUrl=original;
   state.currentTitle=displayTitle||item.title||'กำลังเล่น';
   $('playerTitle').textContent=state.currentTitle;
-  setStatus('กำลังเล่นแบบตรง • ไม่ผ่าน Worker');
+  setStatus(is6395Url(original)?'กำลังเล่น 6395 HTTPS 8443':'กำลังเล่นแบบตรง');
   playerPanel.classList.add('show');
+  playerPanel.classList.remove('hide-ui');
   showPlayerUI();
 
-  const url=cleanUrl(original);
-  state.currentUrl=url;
-  state.originalUrl=url;
-
-  playDirectUrl(url,item,serverIndex);
+  setTimeout(()=>playDirectUrl(original,item,serverIndex),180);
 }
 function playDirectUrl(url,item,serverIndex){
-  url=normalize6395Url(url);
   cleanupPlayer();
-
-  // 6395 ต้องเล่นแบบ Native Direct เหมือนหน้า 6395-movie
-  // ไม่ผ่าน Worker และไม่บังคับ HLS.js เพราะบางช่อง เช่น 83.m3u8 จะหมุนในตัวแม่
-  if(is6395Url(url)){
-    state.originalUrl=url;
-    state.currentUrl=url;
-    state.currentTitle=state.currentTitle||'6395';
-    playerPanel.classList.add('show');
-    showPlayerUI();
-    playNativeDirect6395(url);
-    return;
-  }
+  url=normalize6395Url(url);
   playerPanel.classList.add('show');
+  playerPanel.classList.remove('hide-ui');
   showPlayerUI();
   forceFullSound();
-  startWatchdog();
 
   state.currentUrl=url;
   state.originalUrl=url;
@@ -1217,7 +1203,7 @@ function playDirectUrl(url,item,serverIndex){
     if(video.readyState<2 && (video.currentTime||0)===0){
       setStatus('ลิงก์ตรงยังไม่ขึ้นภาพ • กด PLAYER/MX ได้');
     }
-  },12000);
+  },15000);
 
   ['playing','loadeddata','canplay'].forEach(ev=>video.addEventListener(ev,()=>{
     if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null;}
@@ -1234,7 +1220,7 @@ function playDirectUrl(url,item,serverIndex){
       state.dash.updateSettings({
         streaming:{
           buffer:{fastSwitchEnabled:true,bufferTimeDefault:8,bufferTimeAtTopQuality:12},
-          retryAttempts:{MPD:3,MediaSegment:4},
+          retryAttempts:{MPD:4,MediaSegment:6},
           retryIntervals:{MPD:1000,MediaSegment:1000}
         }
       });
@@ -1250,61 +1236,31 @@ function playDirectUrl(url,item,serverIndex){
 
   if(window.Hls && Hls.isSupported() && (lower.includes('.m3u8') || lower.includes('type=m3u8') || lower.includes('extension=m3u8'))){
     try{
-      const is6395 = is6395Url(url);
-      state.hls=new Hls(is6395 ? {
-        // สูตร 6395: เล่นตรง https:8443 ไม่ผ่าน Worker และบัฟเฟอร์ลึกกว่า
-        enableWorker:false,
+      state.hls=new Hls({
+        enableWorker:true,
         lowLatencyMode:false,
-        maxBufferLength:80,
-        maxMaxBufferLength:120,
-        backBufferLength:30,
-        maxBufferHole:4,
-        highBufferWatchdogPeriod:8,
-        fragLoadingTimeOut:28000,
-        manifestLoadingTimeOut:22000,
-        levelLoadingTimeOut:22000,
-        fragLoadingMaxRetry:10,
+        startFragPrefetch:true,
+        progressive:true,
+        maxBufferLength:is6395Url(url)?80:30,
+        maxMaxBufferLength:is6395Url(url)?120:60,
+        backBufferLength:is6395Url(url)?30:12,
+        maxBufferHole:is6395Url(url)?4:1,
+        highBufferWatchdogPeriod:is6395Url(url)?8:5,
+        liveSyncDurationCount:is6395Url(url)?8:6,
+        liveMaxLatencyDurationCount:is6395Url(url)?20:14,
+        fragLoadingMaxRetry:12,
         manifestLoadingMaxRetry:8,
         levelLoadingMaxRetry:8,
-        fragLoadingRetryDelay:1200,
-        manifestLoadingRetryDelay:1200,
-        levelLoadingRetryDelay:1200,
-        startFragPrefetch:true,
+        fragLoadingTimeOut:30000,
+        manifestLoadingTimeOut:22000,
+        levelLoadingTimeOut:22000,
+        fragLoadingRetryDelay:800,
+        manifestLoadingRetryDelay:800,
+        levelLoadingRetryDelay:800,
         capLevelToPlayerSize:true,
         testBandwidth:false,
         abrEwmaDefaultEstimate:900000,
-        abrBandWidthFactor:.8,
-        abrBandWidthUpFactor:.65,
-        startLevel:0,
-        liveSyncDurationCount:8,
-        liveMaxLatencyDurationCount:20,
-        progressive:true,
-        liveDurationInfinity:true
-      } : {
-        enableWorker:false,
-        lowLatencyMode:false,
-        maxBufferLength:30,
-        maxMaxBufferLength:60,
-        backBufferLength:12,
-        maxBufferHole:1,
-        highBufferWatchdogPeriod:5,
-        fragLoadingTimeOut:25000,
-        manifestLoadingTimeOut:18000,
-        levelLoadingTimeOut:18000,
-        fragLoadingMaxRetry:8,
-        manifestLoadingMaxRetry:5,
-        levelLoadingMaxRetry:5,
-        fragLoadingRetryDelay:1000,
-        manifestLoadingRetryDelay:1000,
-        levelLoadingRetryDelay:1000,
-        startFragPrefetch:true,
-        capLevelToPlayerSize:true,
-        testBandwidth:false,
-        abrEwmaDefaultEstimate:650000,
         startLevel:-1,
-        liveSyncDurationCount:6,
-        liveMaxLatencyDurationCount:14,
-        progressive:true,
         liveDurationInfinity:true
       });
       state.hls.loadSource(url);
@@ -1313,11 +1269,11 @@ function playDirectUrl(url,item,serverIndex){
         forceFullSound();
         video.play().catch(()=>{});
         startWatchdog();
-        setStatus(is6395 ? 'กำลังเล่น 6395 ตรง' : 'กำลังเล่น HLS ตรง');
+        setStatus(is6395Url(url)?'กำลังเล่น 6395 HTTPS 8443':'กำลังเล่น HLS ตรง');
       });
       state.hls.on(Hls.Events.BUFFER_STALLED,()=>{
         setStatus('กำลังเติมบัฟเฟอร์...',true);
-        setTimeout(()=>video.play().catch(()=>{}),800);
+        setTimeout(()=>video.play().catch(()=>{}),1000);
       });
       state.hls.on(Hls.Events.ERROR,(e,d)=>{
         if(!d || !state.hls)return;
@@ -1346,60 +1302,7 @@ function playDirectUrl(url,item,serverIndex){
 
   playNativeDirect(url);
 }
-
-function playNativeDirect6395(url){
-  url=normalize6395Url(url);
-  state.currentUrl=url;
-  state.originalUrl=url;
-
-  try{
-    if(state.hls){state.hls.destroy();state.hls=null}
-    if(state.dash){state.dash.destroy();state.dash=null}
-  }catch(e){}
-
-  try{
-    video.pause();
-    video.removeAttribute('src');
-    video.src='';
-    video.load();
-  }catch(e){}
-
-  try{ video.removeAttribute('crossorigin'); }catch(e){}
-
-  video.src=url;
-  video.load();
-
-  let started=false;
-  const go=()=>{
-    try{
-      video.muted=false;
-      video.defaultMuted=false;
-      video.volume=1;
-      video.play().then(()=>{
-        started=true;
-        setStatus('กำลังเล่น 6395 ตรง');
-      }).catch(()=>{});
-    }catch(e){}
-  };
-
-  setStatus('กำลังเล่น 6395 ตรง');
-  setTimeout(go,80);
-  setTimeout(go,350);
-  setTimeout(go,900);
-  setTimeout(go,1600);
-
-  if(state.playTimer) clearTimeout(state.playTimer);
-  state.playTimer=setTimeout(()=>{
-    if(!started && video.readyState<2 && (video.currentTime||0)===0){
-      setStatus('6395 เส้นนี้เว็บไม่ขึ้น ให้กด PLAYER/MX');
-    }
-  },12000);
-
-  startWatchdog();
-}
-
 function playNativeDirect(url){
-  url=normalize6395Url(url);
   try{
     video.src=url;
     video.load();
@@ -1414,10 +1317,10 @@ function playNativeDirect(url){
 function playCandidate(candidates,item,serverIndex,idx){
   // เหลือไว้กันโค้ดเก่าเรียก แต่บังคับเล่นตรงเท่านั้น
   const direct=getUrl(item,serverIndex) || candidates?.[0] || state.currentUrl;
-  playDirectUrl(cleanUrl(direct),item,serverIndex);
+  playDirectUrl(normalize6395Url(direct),item,serverIndex);
 }
 function safeIntent(url,mode){
-  url=normalize6395Url(url||state.originalUrl||state.currentUrl);
+  url=url||state.originalUrl||state.currentUrl;
   if(!url)return;
   saveReturnState({player:mode||'external',url:url});
   const ua=(navigator.userAgent||'').toLowerCase();
