@@ -72,7 +72,7 @@
 
 <script>
 const DEFAULT_M3U_URL="https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u";
-const WORKER_PROXY="https://iptv.tawatchai250958.workers.dev/?url="; // ใช้ Worker เฉพาะ 6395 กัน 302 กลับ http:8080
+const WORKER_PROXY=""; // ปิด Worker ทั้งหมดในไฟล์นี้
 const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 
 let channels=[];
@@ -139,18 +139,7 @@ function dropboxRaw(url){
     return url.replace("www.dropbox.com","dl.dropboxusercontent.com").replace("&dl=1","").replace("?dl=1","");
   }
 }
-function is6395Url(url){
-  const u=String(url||"").toLowerCase();
-  return u.includes("6395online.com") || u.includes("gold.6395online.com") || u.includes("old.6395online.com") || u.includes("odl.6395online.com");
-}
-function makeProxyUrl(url){
-  url=clean(url);
-  if(is6395Url(url)){
-    url=normalizeStreamUrl(url);
-    return WORKER_PROXY + encodeURIComponent(url);
-  }
-  return url;
-} // ใช้ Worker เฉพาะ 6395 เท่านั้น
+function makeProxyUrl(url){return clean(url)} // ปิด Worker: คืนลิงก์เดิมเท่านั้น
 function allOrigins(url){return "https://api.allorigins.win/raw?url="+encodeURIComponent(url)}
 
 async function fetchText(url,ms){
@@ -393,8 +382,7 @@ function forceAudio(){try{video.muted=false;video.defaultMuted=false;video.volum
 async function loadChannel(ch,el){
   const mySeq=++playSeq;
   activeChannel=ch;activeElement=el;
-  activeOriginalUrl=normalizeStreamUrl(clean(ch.file));
-  activeUrl=makeProxyUrl(activeOriginalUrl);
+  activeOriginalUrl=normalizeStreamUrl(clean(ch.file));activeUrl=activeOriginalUrl;
   lastChannelStartedAt=Date.now();
 
   document.querySelectorAll(".channel").forEach(x=>x.classList.remove("active"));
@@ -410,19 +398,16 @@ async function loadChannel(ch,el){
   await sleep(450);
   if(mySeq!==playSeq) return;
 
-  const playUrl=makeProxyUrl(activeOriginalUrl);
-  activeUrl=playUrl;
   const u=activeOriginalUrl.toLowerCase();
-  const pu=playUrl.toLowerCase();
 
   scheduleNoPictureHint(playMode === "sports" ? 22000 : (playMode === "movie" ? 27000 : 32000));
 
   if(u.includes(".mpd")){
-    playMPD(playUrl,mySeq);
-  }else if(u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")||pu.includes(".m3u8")){
-    playHLS(playUrl,is6395Url(activeOriginalUrl),null,mySeq);
+    playMPD(activeOriginalUrl,mySeq);
+  }else if(u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")){
+    playHLS(activeOriginalUrl,false,null,mySeq);
   }else{
-    playTS(playUrl,is6395Url(activeOriginalUrl),mySeq);
+    playTS(activeOriginalUrl,false,mySeq);
   }
 
   setTimeout(()=>{if(mySeq===playSeq){showUI();document.getElementById("closeBtn")?.focus()}},250);
