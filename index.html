@@ -792,7 +792,7 @@
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><button class="menu-btn" data-action="live-page">📅 ตารางแข่งขัน</button>
             <div class="group-title">ทีวีออนไลน์</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/sport.html">🏆 SPORT TV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/6395-movie.html">🏆 DooBall6395</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/animegood.html">🏆 Animegood</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/sport.html">🏆 SPORT TV</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/6395-movie.html?v=2026061601">🏆 DooBall6395</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/animegood.html">🏆 Animegood</button>
             <div class="group-title">หนัง</div>
             <button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/037hd.html">🎬 Movie 037HD</button>
             <div class="group-title">ซีรีส์</div>
@@ -842,7 +842,7 @@
         </div>
     </div>
     <script>
-        const HOME_URL='https://tiea9999.github.io/tv/index.html',LIVE_URL='https://tiea9999.github.io/tv/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/',PROXY='' /* Direct Only: ปิด Worker สำหรับ player ตัวแม่ */,FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
+        const HOME_URL='https://tiea9999.github.io/tv/index.html',LIVE_URL='https://tiea9999.github.io/tv/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=' /* ใช้ Worker เฉพาะ 6395 กัน 302 */,FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
 const MY_SERIES=RAW+'myseries-series.json',MY_CHINA=RAW+'myseries-china.json',MY_KOREA=RAW+'myseries-korea.json',MY_THAI=RAW+'myseries-thai.json',MY_JAPAN=RAW+'myseries-japan.json',MY_SHORT=RAW+'myseries-short.json',MY_MOVIE=RAW+'myseries-movie.json';
 const TV_LINKS=[{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/3bb.html',group:'ทีวีออนไลน์'},{kind:'link',title:'SPORT TV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/sport.html',group:'ทีวีออนไลน์'},{kind:'link',title:'DOOBALL66',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/ball66.html',group:'ทีวีออนไลน์'}];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'MySeries',image:FOLDER_LOGO,source:MY_SERIES,group:'MySeries'}];
@@ -1155,11 +1155,32 @@ function playItem(item,serverIndex=0,displayTitle=''){
   playerPanel.classList.add('show');
   showPlayerUI();
 
-  const url=cleanUrl(original);
-  state.currentUrl=url;
+  let url=cleanUrl(original);
+  let webUrl=url;
+
+  // FIX 6395: บังคับ 6395 ผ่าน Worker เฉพาะใน web player กัน 302 กลับ http:8080
+  if(
+    url.includes('6395online.com') ||
+    url.includes('gold.6395online.com') ||
+    url.includes('old.6395online.com') ||
+    url.includes('odl.6395online.com')
+  ){
+    try{
+      const u=new URL(url);
+      u.protocol='https:';
+      u.hostname='6395online.com';
+      u.port='8443';
+      url=u.toString();
+      webUrl=PROXY+encodeURIComponent(url);
+    }catch(e){
+      webUrl=PROXY+encodeURIComponent(url);
+    }
+  }
+
+  state.currentUrl=webUrl;
   state.originalUrl=url;
 
-  playDirectUrl(url,item,serverIndex);
+  playDirectUrl(webUrl,item,serverIndex);
 }
 function playDirectUrl(url,item,serverIndex){
   cleanupPlayer();
