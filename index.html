@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV AUTO PLAYER 5SEC</title>
+    <title>TIEA IPTV TV INDEX 6395 AUTO PLAYER 5SEC</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -792,8 +792,8 @@
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
             <div class="group-title">ทีวีออนไลน์</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-source="tv-6395">🏆 DooBall6395</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/animegood.html">🏆 Animegood</button>
-            <div class="group-title">หนัง</div>
+<button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-source="tv-6395">🏆 DooBall6395</button>
+<div class="group-title">หนัง</div>
             <button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/037hd.html">🎬 Movie 037HD</button>
             <div class="group-title">ซีรีส์</div>
             <button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ ฝรั่ง</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button>
@@ -846,8 +846,7 @@
 const MY_SERIES=RAW+'myseries-series.json',MY_CHINA=RAW+'myseries-china.json',MY_KOREA=RAW+'myseries-korea.json',MY_THAI=RAW+'myseries-thai.json',MY_JAPAN=RAW+'myseries-japan.json',MY_SHORT=RAW+'myseries-short.json',MY_MOVIE=RAW+'myseries-movie.json';
 const TV_LINKS=[
 {kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/3bb.html',group:'ทีวีออนไลน์'},
-{kind:'folder',title:'DOOBALL6395',image:FOLDER_LOGO,source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u',group:'ทีวีออนไลน์'},
-{kind:'link',title:'Animegood',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/animegood.html',group:'ทีวีออนไลน์'}
+{kind:'folder',title:'DOOBALL6395',image:FOLDER_LOGO,source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u',group:'ทีวีออนไลน์'}
 ];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'MySeries',image:FOLDER_LOGO,source:MY_SERIES,group:'MySeries'}];
 const MYSERIES_FILTERS={
@@ -896,56 +895,31 @@ function setStatus(t){
   statusText.textContent=t;
 }function cleanUrl(u){return String(u||'').trim()}
 
-
-function isAutoPlayerFallbackUrl(url){
+function isAuto6395Url(url){
   const u=String(url||'').toLowerCase();
   return (
-    u.includes('54.37.19.157') ||
     u.includes('6395online.com') ||
     u.includes('gold.6395online.com') ||
     u.includes('old.6395online.com') ||
-    u.includes('odl.6395online.com') ||
-    u.includes('animegood') ||
-    u.includes('anime-good') ||
-    u.includes('ani-good')
+    u.includes('odl.6395online.com')
   );
 }
-function hasVideoStartedForAutoPlayer(){
+function hasVideoStartedAuto(){
   try{
     return video.readyState>=2 || (video.videoWidth>0 && video.videoHeight>0) || (video.currentTime||0)>0.3;
-  }catch(e){return false}
+  }catch(e){
+    return false;
+  }
 }
-
-function isDirect54Url(url){
-  return String(url||'').toLowerCase().includes('54.37.19.157');
-}
-function normalizeSpecialStreamUrl(url){
-  url=cleanUrl(url);
-  if(!url)return '';
+function autoOpenPlayerUrl(url){
   try{
-    const u=new URL(url);
-    const h=u.hostname.toLowerCase();
-
-    if(h.includes('6395online.com') || h.includes('gold.6395online.com') || h.includes('old.6395online.com') || h.includes('odl.6395online.com')){
-      u.protocol='https:';
-      u.hostname='6395online.com';
-      u.port='8443';
-      if(!/\.m3u8($|\?)/i.test(u.pathname)){
-        u.pathname=u.pathname.replace(/\/$/,'')+'.m3u8';
-      }
-      return u.toString();
-    }
-
-    if(h==='54.37.19.157'){
-      return u.toString();
-    }
-
-  }catch(e){}
-  return url;
-}
-function isSpecial6395Url(url){
-  const u=String(url||'').toLowerCase();
-  return u.includes('6395online.com') || u.includes('gold.6395online.com') || u.includes('old.6395online.com') || u.includes('odl.6395online.com');
+    url=normalize6395Url(url||state.originalUrl||state.currentUrl);
+    if(!url)return;
+    setStatus('6395 ไม่ขึ้นใน 5 วิ • เปิด PLAYER');
+    openExternal(url);
+  }catch(e){
+    try{ window.open(url,'_blank'); }catch(err){}
+  }
 }
 function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
 function groupName(g){
@@ -982,11 +956,11 @@ function groupName(g){
   return raw||'อื่นๆ';
 }
 function groupsOf(item,parent=''){let a=[];if(Array.isArray(item.groups))a.push(...item.groups.map(groupName));if(typeof item.groups==='string')a.push(groupName(item.groups));if(item.group)a.push(groupName(item.group));if(item.category)a.push(groupName(item.category));if(!a.length&&parent)a.push(groupName(parent));if(!a.length)a.push('อื่นๆ');return[...new Set(a.filter(Boolean))]}
-function serversOf(item){let o=[];if(Array.isArray(item.servers))item.servers.forEach(s=>{let u=cleanUrl(s.url||s.link||s.file||s.source);if(u)o.push({name:s.name||'Main',url:normalizeSpecialStreamUrl(u)})});let one=cleanUrl(item.url||item.link||item.stream||item.file);if(one&&!isJsonUrl(one))o.push({name:'Main',url:normalizeSpecialStreamUrl(one)});return o}
+function serversOf(item){let o=[];if(Array.isArray(item.servers))item.servers.forEach(s=>{let u=cleanUrl(s.url||s.link||s.file||s.source);if(u)o.push({name:s.name||'Main',url:normalize6395Url(u)})});let one=cleanUrl(item.url||item.link||item.stream||item.file);if(one&&!isJsonUrl(one))o.push({name:'Main',url:normalize6395Url(one)});return o}
 function episodesOf(item,img=''){if(!Array.isArray(item.episodes))return[];return item.episodes.map((ep,i)=>({title:ep.title||ep.name||ep.ep_name||`EP${i+1}`,image:imgOf(ep)||img,servers:serversOf(ep),type:'episode'})).filter(e=>e.servers.length)}
 function calcStatus(item,eps){let raw=String(item.status||item.finish||item.end||item.complete||'').trim();if(raw)return raw;let title=String(item.title||''),l=Number(item.latest_ep||0),t=Number(item.total_ep||0);if(title.includes('จบเรื่อง')||title.includes('ครบทุกตอน')||title.includes('(END)'))return'จบแล้ว';if(t&&l&&l>=t)return'จบแล้ว';if(eps&&eps.some(e=>String(e.title||'').includes('ตอนจบ')))return'จบแล้ว';if(eps&&eps.length)return'ยังไม่จบ';return''}
 function normalize(data,parent=''){let out=[],seen=new Set();function add(obj){let k=[obj.kind,obj.title,obj.source,obj.servers?.[0]?.url,obj.episodes?.length].join('|').toLowerCase();if(seen.has(k))return;seen.add(k);out.push(obj)}function walk(n,pg=''){if(Array.isArray(n)){n.forEach(x=>walk(x,pg));return}if(!n||typeof n!=='object')return;let title=n.title||n.name||n.channel||'ไม่มีชื่อ',img=imgOf(n),gs=groupsOf(n,pg||parent),source=cleanUrl(n.source||n.url||n.link||n.file);if((n.type==='menu'||Array.isArray(n.items))&&Array.isArray(n.items)){n.items.forEach(x=>walk(x,title));return}if((n.type==='source'||source)&&source&&isJsonUrl(source)&&!n.episodes){add({kind:'folder',title,image:img,source,groups:gs,group:gs[0]||title,status:n.status||''});return}if(Array.isArray(n.data)){n.data.forEach(x=>walk(x,gs[0]));return}let eps=episodesOf(n,img),sv=serversOf(n);if(eps.length)add({kind:'series',title,image:img,groups:gs,group:gs[0],language:n.language||'',year:n.year||'',status:calcStatus(n,eps),latest_ep:n.latest_ep||eps.length,total_ep:n.total_ep||eps.length,updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',episodes:eps,raw:n});else if(sv.length)add({kind:'play',title,image:img,groups:gs,group:gs[0]||'อื่นๆ',language:n.language||'',year:n.year||'',status:calcStatus(n,[]),updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',servers:sv,type:n.type||'video',raw:n})}walk(data,parent);return out}
-function parseM3U(text,parent='ทีวี'){let out=[],cur=null;text.split(/\r?\n/).forEach(raw=>{let line=raw.trim();if(!line)return;if(line.startsWith('#EXTINF:')){let logo=line.match(/tvg-logo="([^"]*)"/i)?.[1]||'',group=groupName(line.match(/group-title="([^"]*)"/i)?.[1]||parent),title=line.split(',').pop()?.trim()||'ช่อง';cur={kind:'play',title,image:logo,group,groups:[group],servers:[],type:'tv'}}else if(!line.startsWith('#')&&cur){cur.servers=[{name:'Main',url:normalizeSpecialStreamUrl(line)}];out.push(cur);cur=null}});return out}
+function parseM3U(text,parent='ทีวี'){let out=[],cur=null;text.split(/\r?\n/).forEach(raw=>{let line=raw.trim();if(!line)return;if(line.startsWith('#EXTINF:')){let logo=line.match(/tvg-logo="([^"]*)"/i)?.[1]||'',group=groupName(line.match(/group-title="([^"]*)"/i)?.[1]||parent),title=line.split(',').pop()?.trim()||'ช่อง';cur={kind:'play',title,image:logo,group,groups:[group],servers:[],type:'tv'}}else if(!line.startsWith('#')&&cur){cur.servers=[{name:'Main',url:normalize6395Url(line)}];out.push(cur);cur=null}});return out}
 async function fetchText(url){if(state.cache[url])return state.cache[url];let sep=url.includes('?')?'&':'?',res=await fetch(url+sep+'t='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);let text=await res.text();state.cache[url]=text;return text}
 async function loadUrl(url,parent=''){let text=await fetchText(url),trim=text.trim();if(trim.startsWith('{')||trim.startsWith('['))return normalize(JSON.parse(text),parent);if(trim.includes('#EXTM3U')||trim.includes('#EXTINF'))return parseM3U(text,parent);return[]}
 async function loadSourcePack(key){if(key==='tv-main')return TV_LINKS;let pack=SOURCES[key]||[],all=[];for(const s of pack){try{all.push(...await loadUrl(s.source,s.title))}catch(e){console.log('โหลดไม่ได้',s.source,e)}}return all}
@@ -1025,7 +999,6 @@ function sortByUpdated(items){
 function makeRows(items){let order=['ซีรี่ย์อัพเดทใหม่','ซีรี่ย์จีน','ซีรี่ย์เกาหลี','ซีรี่ย์ฝรั่ง','ซีรี่ย์ไทย','ซีรี่ย์ญี่ปุ่น','ซีรี่ย์สั้น','หนัง MySeries','ดูหนังออนไลน์','ทีวีออนไลน์','ทีวี','กีฬา','อื่นๆ'],map={};items.forEach(item=>{let cats=item.groups&&item.groups.length?item.groups:[item.group||'อื่นๆ'];cats.forEach(c=>{c=groupName(c);if(!map[c])map[c]=[];if(!map[c].some(x=>x.title===item.title))map[c].push(item)})});return Object.keys(map).sort((a,b)=>{let ia=order.indexOf(a)<0?99:order.indexOf(a),ib=order.indexOf(b)<0?99:order.indexOf(b);return ia-ib||a.localeCompare(b,'th')}).map(title=>({title,items:map[title]}))}
 function renderHome(){state.activeSource='home';setStatus('หน้าแรก • ซีรี่ย์อัพเดทใหม่ + ดูหนังออนไลน์ + ทีวี');content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV FINAL 1080P TV STABLE</div><div class="hero-sub">หน้าแรกใหม่ • ซีรี่ย์อัพเดทใหม่ • ดูหนังออนไลน์จาก 037HD หนังใหม่ 2026 • เล่นไวขึ้น</div></div><div id="homeRows"></div>`;Promise.all([loadSeriesUpdateDirect().catch(()=>[]),loadUrl('https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%202026.json','ดูหนังออนไลน์').catch(()=>[])]).then(([seriesUpdate,movieOnline])=>{let rows=[
 {title:'ทีวีแนะนำ',items:[
-{kind:'play',title:'HBO 54.37 TEST',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'http://54.37.19.157/hbohd/tracks-v1a1/mono.m3u8'}]},
 {kind:'play',title:'BEIN 01',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/203.m3u8'}]},
 {kind:'play',title:'BEIN 02',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/204.m3u8'}]},
 {kind:'play',title:'CH3',image:FOLDER_LOGO,group:'ทีวี',groups:['ทีวี'],servers:[{name:'Main',url:'https://6395online.com:8443/live/mrpoogapooga@gmail.com/085858/83.m3u8'}]},
@@ -1111,7 +1084,7 @@ function openItem(item){if(item.kind==='link'){location.href=item.url;return}if(
 function openDetail(item){let modal=$('modal');$('modalTitle').textContent=item.title;$('modalBody').innerHTML=`<div class="detail-box"><div class="detail-title">${item.title}</div><div class="detail-sub">${item.language?item.language+' • ':''}${item.status?item.status+' • ':''}${item.group||''}${item.total_ep?' • ทั้งหมด '+item.total_ep+' ตอน':''}</div></div><div class="episode-list"></div>`;let list=$('modalBody').querySelector('.episode-list');item.episodes.forEach((ep,i)=>{let b=document.createElement('button');b.className='episode-btn';b.textContent=ep.title||`EP${i+1}`;b.onclick=()=>{state.returnEpisodeItem=item;closeModal();playItem(ep,0,item.title+' '+b.textContent)};list.appendChild(b)});$('modalCount').textContent='ทั้งหมด '+item.episodes.length+' ตอน';$('pageInfo').textContent='เลือกตอน';$('prevPageBtn').style.display='none';$('nextPageBtn').style.display='none';modal.classList.add('show');setTimeout(()=>list.querySelector('.episode-btn')?.focus(),80)}
 function openModal(title,items){state.modalItems=items;state.page=1;$('modalTitle').textContent=title;$('prevPageBtn').style.display='';$('nextPageBtn').style.display='';renderModalPage();$('modal').classList.add('show')}
 function renderModalPage(){let total=state.modalItems.length,pages=Math.max(1,Math.ceil(total/state.perPage));state.page=Math.max(1,Math.min(state.page,pages));let start=(state.page-1)*state.perPage,items=state.modalItems.slice(start,start+state.perPage);$('modalBody').innerHTML='<div class="grid"></div>';let g=$('modalBody').querySelector('.grid');items.forEach(item=>g.appendChild(createCard(item)));$('modalCount').textContent='ทั้งหมด '+total+' รายการ';$('pageInfo').textContent='หน้า '+state.page+' / '+pages;$('prevPageBtn').disabled=state.page<=1;$('nextPageBtn').disabled=state.page>=pages;setTimeout(()=>g.querySelector('.card')?.focus(),80)}
-function closeModal(){$('modal').classList.remove('show');$('prevPageBtn').style.display='';$('nextPageBtn').style.display=''}function getUrl(item,serverIndex=0){return normalizeSpecialStreamUrl(cleanUrl(item.servers?.[serverIndex]?.url||item.servers?.[0]?.url||item.url||item.link||item.stream||''))}
+function closeModal(){$('modal').classList.remove('show');$('prevPageBtn').style.display='';$('nextPageBtn').style.display=''}function getUrl(item,serverIndex=0){return normalize6395Url(cleanUrl(item.servers?.[serverIndex]?.url||item.servers?.[0]?.url||item.url||item.link||item.stream||''))}
 
 function forceFullSound(){
   try{
@@ -1190,9 +1163,6 @@ function cleanupPlayer(){
   try{
     video.removeAttribute('src');
     video.src='';
-    while(video.firstChild){
-      video.removeChild(video.firstChild);
-    }
     video.load();
   }catch(e){}
 }
@@ -1222,14 +1192,14 @@ function normalize6395Url(url){
   }catch(e){}
   return url;
 }
-function is6395Url(url){return isSpecial6395Url(url)}
+function is6395Url(url){return isAuto6395Url(url)}
 
 function playItem(item,serverIndex=0,displayTitle=''){
   let original=getUrl(item,serverIndex);
   if(!original){setStatus('ไม่พบลิงก์เล่น');return}
 
   cleanupPlayer();
-  original=normalizeSpecialStreamUrl(original);
+  original=normalize6395Url(original);
   state.originalUrl=original;
   state.currentUrl=original;
   state.currentTitle=displayTitle||item.title||'กำลังเล่น';
@@ -1243,7 +1213,7 @@ function playItem(item,serverIndex=0,displayTitle=''){
 }
 function playDirectUrl(url,item,serverIndex){
   cleanupPlayer();
-  url=normalizeSpecialStreamUrl(url);
+  url=normalize6395Url(url);
   playerPanel.classList.add('show');
   playerPanel.classList.remove('hide-ui');
   showPlayerUI();
@@ -1253,15 +1223,14 @@ function playDirectUrl(url,item,serverIndex){
   state.originalUrl=url;
 
   state.playTimer=setTimeout(()=>{
-    if(!hasVideoStartedForAutoPlayer()){
-      if(isAutoPlayerFallbackUrl(url)){
-        setStatus('เว็บไม่ขึ้นใน 5 วิ • เปิด PLAYER อัตโนมัติ');
-        try{ openExternal(url); }catch(e){}
+    if(!hasVideoStartedAuto()){
+      if(isAuto6395Url(url)){
+        autoOpenPlayerUrl(url);
         return;
       }
       setStatus('ลิงก์ตรงยังไม่ขึ้นภาพ • กด PLAYER/MX ได้');
     }
-  }, isAutoPlayerFallbackUrl(url) ? 5000 : 15000);
+  }, isAuto6395Url(url) ? 5000 : 15000);
 
   ['playing','loadeddata','canplay','timeupdate'].forEach(ev=>video.addEventListener(ev,()=>{
     if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null;}
@@ -1300,13 +1269,13 @@ function playDirectUrl(url,item,serverIndex){
         startFragPrefetch:true,
         progressive:true,
         // 6395 = กีฬา/ทีวีสดไว: เข้าไวกว่าเดิม
-        maxBufferLength:isDirect54Url(url)?18:(is6395Url(url)?24:30),
-        maxMaxBufferLength:isDirect54Url(url)?35:(is6395Url(url)?45:60),
-        backBufferLength:isDirect54Url(url)?8:(is6395Url(url)?10:12),
+        maxBufferLength:is6395Url(url)?24:30,
+        maxMaxBufferLength:is6395Url(url)?45:60,
+        backBufferLength:is6395Url(url)?10:12,
         maxBufferHole:is6395Url(url)?2:1,
         highBufferWatchdogPeriod:is6395Url(url)?5:5,
-        liveSyncDurationCount:isDirect54Url(url)?4:(is6395Url(url)?4:6),
-        liveMaxLatencyDurationCount:isDirect54Url(url)?9:(is6395Url(url)?9:14),
+        liveSyncDurationCount:is6395Url(url)?4:6,
+        liveMaxLatencyDurationCount:is6395Url(url)?9:14,
         fragLoadingMaxRetry:12,
         manifestLoadingMaxRetry:8,
         levelLoadingMaxRetry:8,
@@ -1318,8 +1287,8 @@ function playDirectUrl(url,item,serverIndex){
         levelLoadingRetryDelay:800,
         capLevelToPlayerSize:true,
         testBandwidth:false,
-        abrEwmaDefaultEstimate:isDirect54Url(url)?1800000:(is6395Url(url)?2000000:900000),
-        startLevel:(isDirect54Url(url)||is6395Url(url))?0:-1,
+        abrEwmaDefaultEstimate:is6395Url(url)?2000000:900000,
+        startLevel:is6395Url(url)?0:-1,
         liveDurationInfinity:true
       });
       state.hls.loadSource(url);
@@ -1375,9 +1344,8 @@ function playDirectUrl(url,item,serverIndex){
           try{state.hls.recoverMediaError();video.play().catch(()=>{})}catch(err){}
           return;
         }
-        if(isAutoPlayerFallbackUrl(url)){
-          setStatus('เว็บเล่นไม่ได้ • เปิด PLAYER อัตโนมัติ');
-          try{ openExternal(url); }catch(e){}
+        if(isAuto6395Url(url)){
+          autoOpenPlayerUrl(url);
           return;
         }
         setStatus('ลิงก์ตรงเล่นไม่ได้ในเว็บ • กด PLAYER/MX');
@@ -1400,15 +1368,14 @@ function playNativeDirect(url){
     setTimeout(forceFullSound,1200);
     if(state.playTimer){clearTimeout(state.playTimer);}
     state.playTimer=setTimeout(()=>{
-      if(!hasVideoStartedForAutoPlayer() && isAutoPlayerFallbackUrl(url)){
-        setStatus('เว็บไม่ขึ้นใน 5 วิ • เปิด PLAYER อัตโนมัติ');
-        try{ openExternal(url); }catch(e){}
+      if(!hasVideoStartedAuto() && isAuto6395Url(url)){
+        autoOpenPlayerUrl(url);
       }
-    }, isAutoPlayerFallbackUrl(url) ? 5000 : 15000);
+    }, isAuto6395Url(url) ? 5000 : 15000);
     startWatchdog();
   }catch(e){
-    if(isAutoPlayerFallbackUrl(url)){
-      try{ openExternal(url); }catch(err){}
+    if(isAuto6395Url(url)){
+      autoOpenPlayerUrl(url);
       return;
     }
     setStatus('ลิงก์ตรงเล่นไม่ได้ในเว็บ • กด PLAYER/MX');
@@ -1417,10 +1384,10 @@ function playNativeDirect(url){
 function playCandidate(candidates,item,serverIndex,idx){
   // เหลือไว้กันโค้ดเก่าเรียก แต่บังคับเล่นตรงเท่านั้น
   const direct=getUrl(item,serverIndex) || candidates?.[0] || state.currentUrl;
-  playDirectUrl(normalizeSpecialStreamUrl(direct),item,serverIndex);
+  playDirectUrl(normalize6395Url(direct),item,serverIndex);
 }
 function safeIntent(url,mode){
-  url=normalizeSpecialStreamUrl(url||state.originalUrl||state.currentUrl);
+  url=normalize6395Url(url||state.originalUrl||state.currentUrl);
   if(!url)return;
   saveReturnState({player:mode||'external',url:url});
   const ua=(navigator.userAgent||'').toLowerCase();
@@ -1492,7 +1459,7 @@ function closePlayer(){
   }
 }function saveReturnState(obj){try{sessionStorage.setItem('tiea_return_state',JSON.stringify({activeSource:state.activeSource,scroll:content.scrollTop,time:Date.now(),...obj}))}catch(e){}}function restoreReturnState(){try{let raw=sessionStorage.getItem('tiea_return_state');if(!raw)return false;let data=JSON.parse(raw);sessionStorage.removeItem('tiea_return_state');if(data.activeSource&&data.activeSource!=='home'){loadMenuSource(data.activeSource).then(()=>setTimeout(()=>{content.scrollTop=data.scroll||0},500));return true}}catch(e){}return false}
 function safeIntent(url,mode){
-  url=normalizeSpecialStreamUrl(url||state.originalUrl||state.currentUrl);
+  url=normalize6395Url(url||state.originalUrl||state.currentUrl);
   if(!url)return;
   saveReturnState({player:mode||'external',url:url});
 
@@ -1510,10 +1477,10 @@ function safeIntent(url,mode){
     ua.includes('tizen') ||
     ua.includes('webos');
 
-  // Auto fallback: ให้ Smart TV/Android TV เปิดลิงก์ตรงเพื่อเลือก Player ได้
+  // Android TV / Smart TV: เปิด URL ตรง เพื่อให้ระบบเลือก Player ได้
   if(isTV){
     try{
-      window.location.href = url;
+      window.location.href=url;
     }catch(e){
       setStatus('ถ้าในเว็บไม่ขึ้นภาพ ให้กด PLAYER/MX เอง');
     }
