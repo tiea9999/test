@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV TV INDEX 6395 AUTO PLAYER 5SEC</title>
+    <title>TIEA IPTV 6395 HARD AUTO PLAYER</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -887,7 +887,7 @@ const SOURCES={
 
 'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]
 };
-const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null};
+const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null,autoPlayerTimer:null};
 const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel');
 function setStatus(t){
   t=String(t||'พร้อมใช้งาน');
@@ -911,6 +911,47 @@ function hasVideoStartedAuto(){
     return false;
   }
 }
+
+function clearAutoPlayerTimer(){
+  try{
+    if(state.autoPlayerTimer){
+      clearTimeout(state.autoPlayerTimer);
+      state.autoPlayerTimer=null;
+    }
+  }catch(e){}
+}
+function isReallyPlaying(){
+  try{
+    return (!video.paused && video.readyState>=2 && ((video.currentTime||0)>0.5 || (video.videoWidth>0 && video.videoHeight>0)));
+  }catch(e){return false}
+}
+function startHardAutoPlayerTimer(url){
+  clearAutoPlayerTimer();
+  if(!isAuto6395Url(url))return;
+  state.autoPlayerTimer=setTimeout(()=>{
+    if(!isReallyPlaying()){
+      setStatus('6395 หมุนเกิน 5 วิ • เปิด PLAYER อัตโนมัติ');
+      try{
+        const finalUrl=normalize6395Url(url||state.originalUrl||state.currentUrl);
+        if(finalUrl){
+          const ua=(navigator.userAgent||'').toLowerCase();
+          if(ua.includes('android')){
+            const u=new URL(finalUrl);
+            const scheme=u.protocol.replace(':','');
+            const hostPath=u.host+u.pathname+(u.search||'');
+            const intent='intent://'+hostPath+'#Intent;scheme='+scheme+';action=android.intent.action.VIEW;type=video/*;S.browser_fallback_url='+encodeURIComponent(finalUrl)+';end';
+            window.location.href=intent;
+            return;
+          }
+          window.location.href=finalUrl;
+          return;
+        }
+      }catch(e){}
+      try{ openExternal(url); }catch(e){}
+    }
+  },5000);
+}
+
 function autoOpenPlayerUrl(url){
   try{
     url=normalize6395Url(url||state.originalUrl||state.currentUrl);
@@ -1147,6 +1188,7 @@ function startWatchdog(){
 }
 function cleanupPlayer(){
   stopWatchdog();
+  clearAutoPlayerTimer();
   if(state.playTimer){
     clearTimeout(state.playTimer);
     state.playTimer=null;
@@ -1202,6 +1244,7 @@ function playItem(item,serverIndex=0,displayTitle=''){
   original=normalize6395Url(original);
   state.originalUrl=original;
   state.currentUrl=original;
+  startHardAutoPlayerTimer(original);
   state.currentTitle=displayTitle||item.title||'กำลังเล่น';
   $('playerTitle').textContent=state.currentTitle;
   setStatus(is6395Url(original)?'กำลังเล่น 6395 HTTPS 8443':'กำลังเล่นแบบตรง');
@@ -1221,6 +1264,7 @@ function playDirectUrl(url,item,serverIndex){
 
   state.currentUrl=url;
   state.originalUrl=url;
+  startHardAutoPlayerTimer(url);
 
   state.playTimer=setTimeout(()=>{
     if(!hasVideoStartedAuto()){
@@ -1234,10 +1278,13 @@ function playDirectUrl(url,item,serverIndex){
 
   ['playing','loadeddata','canplay','timeupdate'].forEach(ev=>video.addEventListener(ev,()=>{
     if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null;}
-    state.stuckCount=0;
-    forceFullSound();
-    setStatus('กำลังเล่น');
-  },{once:true}));
+    if(isReallyPlaying()){
+      clearAutoPlayerTimer();
+      state.stuckCount=0;
+      forceFullSound();
+      setStatus('กำลังเล่น');
+    }
+  },{once:false}));
 
   let lower=String(url||'').toLowerCase();
 
@@ -1372,6 +1419,7 @@ function playNativeDirect(url){
         autoOpenPlayerUrl(url);
       }
     }, isAuto6395Url(url) ? 5000 : 15000);
+    startHardAutoPlayerTimer(url);
     startWatchdog();
   }catch(e){
     if(isAuto6395Url(url)){
