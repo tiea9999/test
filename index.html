@@ -384,6 +384,22 @@ video.play().catch(()=>next())
 
 let playerUiTimer=null;
 
+
+function focusPlayerButtons(){
+  try{
+    playerPanel.classList.remove('hide-ui');
+    const ext=document.getElementById('extBtn');
+    const mx=document.getElementById('mxBtn');
+    const close=document.getElementById('closePlayerBtn');
+
+    setTimeout(()=>{
+      if(ext){ext.focus(); return;}
+      if(mx){mx.focus(); return;}
+      if(close){close.focus();}
+    },80);
+  }catch(e){}
+}
+
 function showPlayerUI(focusClose){
   try{
     playerPanel.classList.remove('hide-ui');
@@ -417,9 +433,12 @@ function setupPlayerAutoHide(){
 
   document.addEventListener('keydown',(e)=>{
     if(!playerPanel.classList.contains('show'))return;
-    // กดขึ้นบนตอนดูหนัง = แสดงปุ่มและโฟกัส X
+    // กดขึ้นบนตอนดูหนัง = แสดงปุ่มและโฟกัส PLAYER/MX
     if(e.key==='ArrowUp'||e.keyCode===38){
-      showPlayerUI(true);
+      e.preventDefault();
+      e.stopPropagation();
+      showPlayerUI(false);
+      focusPlayerButtons();
     }else{
       showPlayerUI(false);
     }
@@ -487,6 +506,40 @@ document.querySelectorAll('.menu-btn').forEach(btn=>{btn.onclick=()=>{document.q
 $('homeBtn').onclick=()=>location.href=HOME_URL;$('reloadBtn').onclick=()=>{state.cache={};if(state.activeSource&&state.activeSource!=='home')loadMenuSource(state.activeSource);else renderHome()};$('closePlayerBtn').onclick=closePlayer;$('playerHomeBtn').onclick=()=>location.href=HOME_URL;$('mxBtn').onclick=()=>openMx();$('extBtn').onclick=()=>openExternal();$('closeModalBtn').onclick=closeModal;$('prevPageBtn').onclick=()=>{state.page--;renderModalPage()};$('nextPageBtn').onclick=()=>{state.page++;renderModalPage()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'||e.keyCode===10009){e.preventDefault();if(playerPanel.classList.contains('show'))closePlayer();else if($('modal').classList.contains('show'))closeModal();else location.href=HOME_URL}});document.addEventListener('keydown',e=>{let a=document.activeElement;if(!a||!a.classList||!a.classList.contains('card'))return;if(e.key==='ArrowRight'){let n=a.nextElementSibling;if(n&&n.classList.contains('card')){e.preventDefault();n.focus();n.scrollIntoView({block:'nearest',inline:'center'})}}if(e.key==='ArrowLeft'){let p=a.previousElementSibling;if(p&&p.classList.contains('card')){e.preventDefault();p.focus();p.scrollIntoView({block:'nearest',inline:'center'})}}});
 
+
+function setupPlayerButtonNav(){
+  if(setupPlayerButtonNav._ready)return;
+  setupPlayerButtonNav._ready=true;
+
+  document.addEventListener('keydown',function(e){
+    if(!playerPanel.classList.contains('show'))return;
+    const active=document.activeElement;
+    if(!active || !active.classList || !active.classList.contains('player-btn'))return;
+
+    const btns=[...document.querySelectorAll('.player-top .player-btn')].filter(b=>b.offsetParent!==null);
+    const i=btns.indexOf(active);
+    if(i<0)return;
+
+    if(e.key==='ArrowRight'||e.keyCode===39){
+      e.preventDefault();e.stopPropagation();
+      const n=btns[Math.min(btns.length-1,i+1)];
+      if(n)n.focus();
+      return;
+    }
+    if(e.key==='ArrowLeft'||e.keyCode===37){
+      e.preventDefault();e.stopPropagation();
+      const p=btns[Math.max(0,i-1)];
+      if(p)p.focus();
+      return;
+    }
+    if(e.key==='ArrowDown'||e.keyCode===40){
+      e.preventDefault();e.stopPropagation();
+      try{video.focus()}catch(err){}
+      return;
+    }
+  },true);
+}
+
 function setupRemoteSeekControl(){
   if(setupRemoteSeekControl._ready)return;
   setupRemoteSeekControl._ready=true;
@@ -518,8 +571,9 @@ function setupRemoteSeekControl(){
     if(key==='ArrowUp'||code===38){
       e.preventDefault();
       e.stopPropagation();
-      // ขึ้นบน = แสดงปุ่มและโฟกัสปุ่มปิด
-      showPlayerUI(true);
+      // ขึ้นบน = แสดงปุ่มและโฟกัส PLAYER/MX
+      showPlayerUI(false);
+      focusPlayerButtons();
       return;
     }
     if(key==='ArrowDown'||code===40){
@@ -530,7 +584,7 @@ function setupRemoteSeekControl(){
   },true);
 }
 
-window.addEventListener('pageshow',()=>{restoreReturnState()});setupPlayerAutoHide();setupRemoteSeekControl();if(!restoreReturnState())renderHome();
+window.addEventListener('pageshow',()=>{restoreReturnState()});setupPlayerAutoHide();setupPlayerButtonNav();setupRemoteSeekControl();if(!restoreReturnState())renderHome();
 </script>
 </body>
 </html>
