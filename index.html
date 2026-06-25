@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>TIEA IPTV TV INDEX OKHD + LIVE.HTML</title>
+<title>TIEA IPTV OKHD LIVE BACK FIX</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 <style>
@@ -120,7 +120,7 @@ function parseM3U(text,parent='ทีวี'){let out=[],cur=null;text.split(/\r
 async function fetchText(url){if(state.cache[url])return state.cache[url];let sep=url.includes('?')?'&':'?',res=await fetch(url+sep+'t='+Date.now(),{cache:'no-store'});if(!res.ok)throw new Error('HTTP '+res.status);let text=await res.text();state.cache[url]=text;return text}
 async function loadUrl(url,parent=''){let text=await fetchText(url),trim=text.trim();if(trim.startsWith('{')||trim.startsWith('['))return normalize(JSON.parse(text),parent);if(trim.includes('#EXTM3U')||trim.includes('#EXTINF'))return parseM3U(text,parent);return[]}
 async function loadSourcePack(key){if(key==='tv-main')return TV_LINKS;let pack=SOURCES[key]||[],all=[];for(const s of pack){try{all.push(...await loadUrl(s.source,s.title))}catch(e){console.log('โหลดไม่ได้',s.source,e)}}return all}
-async function loadFolder(item){setStatus('กำลังโหลด '+item.title+' ...');try{let items=await loadUrl(item.source,item.title);renderRows(makeRows(items),item.title);setStatus(items.length?'โหลด '+item.title+' สำเร็จ '+items.length+' รายการ':'โหลด '+item.title+' ได้ 0 รายการ')}catch(e){setStatus('โหลดไม่สำเร็จ '+e.message)}}
+async function loadFolder(item){state.activeSource='folder:'+item.title;setStatus('กำลังโหลด '+item.title+' ...');try{let items=await loadUrl(item.source,item.title);renderRows(makeRows(items),item.title);setStatus(items.length?'โหลด '+item.title+' สำเร็จ '+items.length+' รายการ':'โหลด '+item.title+' ได้ 0 รายการ')}catch(e){setStatus('โหลดไม่สำเร็จ '+e.message)}}
 
 function getUpdateTime(item){
   let raw=String(item.updated||item.update||item.last_update||item.date||item.added||item.created||'').trim();
@@ -481,10 +481,54 @@ function closePlayer(){
     setTimeout(()=>openDetail(item),120);
   }
 }function saveReturnState(obj){try{sessionStorage.setItem('tiea_return_state',JSON.stringify({activeSource:state.activeSource,scroll:content.scrollTop,time:Date.now(),...obj}))}catch(e){}}function restoreReturnState(){try{let raw=sessionStorage.getItem('tiea_return_state');if(!raw)return false;let data=JSON.parse(raw);sessionStorage.removeItem('tiea_return_state');if(data.activeSource&&data.activeSource!=='home'){loadMenuSource(data.activeSource).then(()=>setTimeout(()=>{content.scrollTop=data.scroll||0},500));return true}}catch(e){}return false}
+
+function saveReturnBeforeExternal(mode,url){
+  try{
+    sessionStorage.setItem('tiea_external_return', JSON.stringify({
+      activeSource: state.activeSource || 'home',
+      scroll: content ? content.scrollTop : 0,
+      modalOpen: $('modal') && $('modal').classList.contains('show'),
+      playerMode: mode || 'external',
+      url: url || state.originalUrl || state.currentUrl || '',
+      time: Date.now()
+    }));
+  }catch(e){}
+}
+
+function restoreAfterExternal(){
+  try{
+    const raw=sessionStorage.getItem('tiea_external_return');
+    if(!raw)return false;
+    const data=JSON.parse(raw);
+
+    // เก็บไว้แค่ 30 นาที
+    if(!data.time || Date.now()-data.time>30*60*1000){
+      sessionStorage.removeItem('tiea_external_return');
+      return false;
+    }
+
+    sessionStorage.removeItem('tiea_external_return');
+
+    if(data.activeSource && data.activeSource !== 'home' && !String(data.activeSource).startsWith('folder:')){
+      loadMenuSource(data.activeSource).then(()=>{
+        setTimeout(()=>{ try{content.scrollTop=data.scroll||0}catch(e){} },700);
+      });
+      return true;
+    }
+
+    renderHome();
+    setTimeout(()=>{ try{content.scrollTop=data.scroll||0}catch(e){} },700);
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
 function safeIntent(url,mode){
   url=url||state.originalUrl||state.currentUrl;
   if(!url)return;
   saveReturnState({player:mode||'external',url:url});
+  saveReturnBeforeExternal(mode,url);
 
   const ua=(navigator.userAgent||'').toLowerCase();
   const isTV =
@@ -608,7 +652,7 @@ function setupRemoteSeekControl(){
   },true);
 }
 
-window.addEventListener('pageshow',()=>{restoreReturnState()});setupPlayerAutoHide();setupPlayerButtonNav();setupRemoteSeekControl();if(!restoreReturnState())renderHome();
+window.addEventListener('pageshow',()=>{restoreAfterExternal()||restoreReturnState()});setupPlayerAutoHide();setupPlayerButtonNav();setupRemoteSeekControl();if(!restoreAfterExternal()&&!restoreReturnState())renderHome();
 </script>
 </body>
 </html>
