@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>TIEA IPTV OKHD LIVE BACK FIX</title>
+<title>TIEA IPTV PROJECTOR STABLE LOW QUALITY</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 <style>
@@ -296,10 +296,173 @@ function shouldWorkerFirst(url){
   );
 }
 
+
+function isProjectorMode(){
+  const ua=(navigator.userAgent||'').toLowerCase();
+  return (
+    ua.includes('projector') ||
+    ua.includes('xgimi') ||
+    ua.includes('android tv') ||
+    ua.includes('smart-tv') ||
+    ua.includes('smarttv') ||
+    ua.includes('mibox') ||
+    ua.includes('bravia') ||
+    ua.includes('aft') ||
+    ua.includes('tizen') ||
+    ua.includes('webos')
+  );
+}
+
+
+function chooseProjectorSafeLevel(){
+  try{
+    if(!state.hls || !state.hls.levels || !state.hls.levels.length)return;
+
+    const levels=state.hls.levels.map((lv,i)=>({
+      i,
+      h:lv.height||0,
+      bw:lv.bitrate||0
+    }));
+
+    // โปรเจคเตอร์: เริ่มที่ 480p ถ้ามี, ไม่เกิน 720p
+    let safe=levels
+      .filter(x=>x.h && x.h<=720)
+      .sort((a,b)=>{
+        const da=Math.abs((a.h||0)-480);
+        const db=Math.abs((b.h||0)-480);
+        return da-db || a.bw-b.bw;
+      })[0];
+
+    if(!safe){
+      safe=levels.sort((a,b)=>a.bw-b.bw)[0];
+    }
+
+    if(safe){
+      state.hls.currentLevel=safe.i;
+      state.hls.nextLevel=safe.i;
+      state.hls.loadLevel=safe.i;
+      setStatus('โปรเจคเตอร์โหมดนิ่ง • ล็อกคุณภาพ '+(safe.h?safe.h+'p':'ต่ำ'));
+    }
+  }catch(e){}
+}
+
+function dropProjectorQuality(){
+  try{
+    if(!state.hls || !state.hls.levels || state.hls.levels.length<2)return;
+    const cur=state.hls.currentLevel>=0?state.hls.currentLevel:state.hls.loadLevel;
+    let next=Math.max(0,(cur||1)-1);
+    state.hls.currentLevel=next;
+    state.hls.nextLevel=next;
+    state.hls.loadLevel=next;
+    setStatus('โปรเจคเตอร์หมุน • ลดคุณภาพลงเพื่อให้ลื่นขึ้น');
+    try{state.hls.startLoad(Math.max(0,(video.currentTime||0)-1));}catch(e){}
+    video.play().catch(()=>{});
+  }catch(e){}
+}
+
+function softRecoverPlayback(){
+  try{
+    forceFullSound();
+    if(state.hls){
+      try{state.hls.startLoad(Math.max(0,(video.currentTime||0)-0.5));}catch(e){}
+    }
+    if(video.paused && video.readyState>=2){
+      video.play().catch(()=>{});
+    }
+  }catch(e){}
+}
+
+function setupProjectorVideoRecovery(){
+  if(setupProjectorVideoRecovery._ready)return;
+  setupProjectorVideoRecovery._ready=true;
+
+  ['stalled','waiting','suspend','emptied'].forEach(ev=>{
+    video.addEventListener(ev,()=>{
+      if(!playerPanel.classList.contains('show'))return;
+      setStatus('โปรเจคเตอร์บัฟเฟอร์ • กำลังต่อภาพต่อเสียง');
+      setTimeout(softRecoverPlayback,900);
+      setTimeout(softRecoverPlayback,2500);
+      clearTimeout(state._projectorDropTimer);
+      state._projectorDropTimer=setTimeout(()=>{ if(playerPanel.classList.contains('show') && (video.readyState<3 || video.paused)) dropProjectorQuality(); },8000);
+    });
+  });
+
+  video.addEventListener('pause',()=>{
+    if(!playerPanel.classList.contains('show'))return;
+    setTimeout(()=>{
+      if(playerPanel.classList.contains('show') && video.paused && video.readyState>=2){
+        video.play().catch(()=>{});
+      }
+    },1200);
+  });
+}
+
 function forceFullSound(){try{video.muted=false;video.defaultMuted=false;video.volume=1;video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
-function startWatchdog(){stopWatchdog();state.lastTime=0;state.stuckCount=0;state.recoverCount=0;state.lastRecoverAt=0;state.watchdog=setInterval(()=>{if(!playerPanel.classList.contains('show'))return;forceFullSound();if(video.paused&&video.readyState>=2)video.play().catch(()=>{});let moved=Math.abs((video.currentTime||0)-(state.lastTime||0))>.25;if(moved){state.stuckCount=0;state.recoverCount=0}else if(!video.paused){state.stuckCount++}state.lastTime=video.currentTime||0;if(state.stuckCount>=7&&Date.now()-state.lastRecoverAt>22000){state.stuckCount=0;state.recoverCount++;state.lastRecoverAt=Date.now();setStatus('สัญญาณค้าง • กำลังต่อใหม่ครั้งที่ '+state.recoverCount);try{if(state.hls){state.hls.stopLoad();setTimeout(()=>{try{state.hls.startLoad(Math.max(0,video.currentTime-1));video.play().catch(()=>{})}catch(e){}},500);return}if(state.dash){video.play().catch(()=>{});return}}catch(e){}if(state.recoverCount>=3)setStatus('สัญญาณยังไม่กลับมา • กดรีโหลดหรือ PLAYER/MX เอง')}},7000)}
+function startWatchdog(){
+  stopWatchdog();
+  state.lastTime=0;
+  state.stuckCount=0;
+  state.recoverCount=0;
+  state.lastRecoverAt=0;
+
+  state.watchdog=setInterval(()=>{
+    if(!playerPanel.classList.contains('show'))return;
+
+    forceFullSound();
+
+    if(video.paused && video.readyState>=2){
+      video.play().catch(()=>{});
+    }
+
+    const cur=video.currentTime||0;
+    const moved=Math.abs(cur-(state.lastTime||0))>.18;
+
+    if(moved){
+      state.stuckCount=0;
+      state.recoverCount=0;
+    }else if(!video.paused){
+      state.stuckCount++;
+    }
+
+    state.lastTime=cur;
+
+    // โปรเจคเตอร์ให้รอนานขึ้น ไม่รีโหลดถี่เกินไป เพราะจะยิ่งกระตุก
+    const limit=isProjectorMode()?10:7;
+    const wait=isProjectorMode()?30000:22000;
+
+    if(state.stuckCount>=limit && Date.now()-state.lastRecoverAt>wait){
+      state.stuckCount=0;
+      state.recoverCount++;
+      state.lastRecoverAt=Date.now();
+      setStatus('โปรเจคเตอร์ค้าง • ลดคุณภาพและต่อสัญญาณใหม่ '+state.recoverCount);
+      dropProjectorQuality();
+
+      try{
+        if(state.hls){
+          try{state.hls.stopLoad()}catch(e){}
+          setTimeout(()=>{
+            try{
+              state.hls.startLoad(Math.max(0,(video.currentTime||0)-0.5));
+              video.play().catch(()=>{});
+            }catch(e){}
+          },900);
+          return;
+        }
+
+        if(state.dash){
+          video.play().catch(()=>{});
+          return;
+        }
+      }catch(e){}
+
+      if(state.recoverCount>=3){
+        setStatus('สัญญาณยังไม่นิ่ง • กด PLAYER/MX ถ้ายังหยุด');
+      }
+    }
+  }, isProjectorMode()?8000:7000);
+}
 function cleanupPlayer(){stopWatchdog();if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}if(state.hls){try{state.hls.destroy()}catch(e){}state.hls=null}if(state.dash){try{state.dash.destroy()}catch(e){}state.dash=null}try{video.pause()}catch(e){}video.removeAttribute('src');video.src='';video.load()}
-function playItem(item,serverIndex=0,displayTitle=''){if(!displayTitle)state.returnEpisodeItem=null;let original=getUrl(item,serverIndex);if(!original){setStatus('ไม่พบลิงก์เล่น');return}cleanupPlayer();state.originalUrl=original;state.currentUrl=original;state.currentTitle=displayTitle||item.title||'กำลังเล่น';$('playerTitle').textContent=state.currentTitle;setStatus('กำลังเล่น • v8.1 balanced');playerPanel.classList.add('show');showPlayerUI();let lower=original.toLowerCase(),isMpd=lower.includes('.mpd'),noProxy=isMpd||lower.includes('thaicdn')||lower.includes('mux.dev')||lower.includes('byteark'),candidates=noProxy?[original]:(shouldWorkerFirst(original)?[workerUrlFor(original),original]:[original,workerUrlFor(original)]);playCandidate(candidates,item,serverIndex,0)}
+function playItem(item,serverIndex=0,displayTitle=''){if(!displayTitle)state.returnEpisodeItem=null;let original=getUrl(item,serverIndex);if(!original){setStatus('ไม่พบลิงก์เล่น');return}cleanupPlayer();state.originalUrl=original;state.currentUrl=original;state.currentTitle=displayTitle||item.title||'กำลังเล่น';$('playerTitle').textContent=state.currentTitle;setStatus('กำลังเล่น • โหมดโปรเจคเตอร์ buffer ยาว');playerPanel.classList.add('show');showPlayerUI();let lower=original.toLowerCase(),isMpd=lower.includes('.mpd'),noProxy=isMpd||lower.includes('thaicdn')||lower.includes('mux.dev')||lower.includes('byteark'),candidates=noProxy?[original]:(shouldWorkerFirst(original)?[workerUrlFor(original),original]:[original,workerUrlFor(original)]);playCandidate(candidates,item,serverIndex,0)}
 function playCandidate(candidates,item,serverIndex,idx){
 let url=candidates[idx]||candidates[0];
 state.currentUrl=url;
@@ -345,40 +508,60 @@ if(Hls.isSupported()&&(lower.includes('.m3u8')||lower.includes('master.txt')||lo
 state.hls=new Hls({
 enableWorker:false,
 lowLatencyMode:false,
-maxBufferLength:30,
-maxMaxBufferLength:60,
-backBufferLength:15,
-maxBufferHole:1.5,
-highBufferWatchdogPeriod:4,
-nudgeOffset:0.25,
-nudgeMaxRetry:6,
-fragLoadingTimeOut:25000,
-manifestLoadingTimeOut:20000,
-levelLoadingTimeOut:20000,
-fragLoadingMaxRetry:6,
-manifestLoadingMaxRetry:4,
-levelLoadingMaxRetry:4,
-fragLoadingRetryDelay:1500,
-manifestLoadingRetryDelay:1500,
-levelLoadingRetryDelay:1500,
+
+// โปรเจคเตอร์/Android TV: เพิ่ม buffer ให้ยาวขึ้น ลดหยุดเป็นระยะ
+maxBufferLength:isProjectorMode()?45:35,
+maxMaxBufferLength:isProjectorMode()?75:60,
+backBufferLength:isProjectorMode()?10:15,
+maxBufferHole:2.2,
+highBufferWatchdogPeriod:8,
+nudgeOffset:0.18,
+nudgeMaxRetry:10,
+
+// โหลดช้าหรือเน็ตแกว่งให้รอนานขึ้น
+fragLoadingTimeOut:45000,
+manifestLoadingTimeOut:30000,
+levelLoadingTimeOut:30000,
+fragLoadingMaxRetry:10,
+manifestLoadingMaxRetry:6,
+levelLoadingMaxRetry:6,
+fragLoadingRetryDelay:1200,
+manifestLoadingRetryDelay:1200,
+levelLoadingRetryDelay:1200,
+
 startFragPrefetch:true,
 capLevelToPlayerSize:true,
 testBandwidth:false,
-abrEwmaDefaultEstimate:500000,
-abrBandWidthFactor:0.8,
-abrBandWidthUpFactor:0.55,
-liveSyncDurationCount:5,
-liveMaxLatencyDurationCount:10,
+
+// เริ่มที่ bitrate กลาง ๆ ไม่กระโดดสูงเกินจนโปรเจคเตอร์สะดุด
+abrEwmaDefaultEstimate:isProjectorMode()?550000:1000000,
+abrBandWidthFactor:0.65,
+abrBandWidthUpFactor:0.35,
+
+liveSyncDurationCount:7,
+liveMaxLatencyDurationCount:14,
 progressive:true,
+maxStarvationDelay:8,
+maxLoadingDelay:8,
 liveDurationInfinity:true
 });
 state.hls.loadSource(url);
 state.hls.attachMedia(video);
-state.hls.on(Hls.Events.MANIFEST_PARSED,()=>{forceFullSound();startWatchdog();video.play().catch(()=>{})});
+state.hls.on(Hls.Events.MANIFEST_PARSED,()=>{chooseProjectorSafeLevel();forceFullSound();startWatchdog();video.play().catch(()=>{})});
+state.hls.on(Hls.Events.BUFFER_STALLED,()=>{
+  setStatus('โปรเจคเตอร์กำลังเติมบัฟเฟอร์...');
+  softRecoverPlayback();
+});
+state.hls.on(Hls.Events.FRAG_BUFFERED,()=>{
+  forceFullSound();
+});
 state.hls.on(Hls.Events.ERROR,(e,d)=>{
   if(!d)return;
   if(!d.fatal){
-    if(d.type===Hls.ErrorTypes.NETWORK_ERROR){try{state.hls.startLoad()}catch(err){}}
+    if(d.type===Hls.ErrorTypes.NETWORK_ERROR){
+      try{state.hls.startLoad(Math.max(0,(video.currentTime||0)-0.5))}catch(err){}
+      setTimeout(()=>video.play().catch(()=>{}),500);
+    }
     return
   }
   if(isAutoFallbackUrl(direct)){forceOpenPlayerNow(direct);return}
@@ -652,7 +835,7 @@ function setupRemoteSeekControl(){
   },true);
 }
 
-window.addEventListener('pageshow',()=>{restoreAfterExternal()||restoreReturnState()});setupPlayerAutoHide();setupPlayerButtonNav();setupRemoteSeekControl();if(!restoreAfterExternal()&&!restoreReturnState())renderHome();
+window.addEventListener('pageshow',()=>{restoreAfterExternal()||restoreReturnState()});setupPlayerAutoHide();setupPlayerButtonNav();setupRemoteSeekControl();setupProjectorVideoRecovery();if(!restoreAfterExternal()&&!restoreReturnState())renderHome();
 </script>
 </body>
 </html>
