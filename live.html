@@ -18,6 +18,7 @@
 const HOME_URL="https://tiea9999.github.io/tv";
 const SOURCE_URL="https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/sportsonline_api.json";
 const WORKER_PROXY="https://iptv.tawatchai250958.workers.dev/?url=";
+const GATE_URL="open_external.html";
 const statusBox=document.getElementById('statusBox'),dayBar=document.getElementById('dayBar'),content=document.getElementById('content'),playerWrap=document.getElementById('playerWrap'),playerStatus=document.getElementById('playerStatus'),video=document.getElementById('videoPlayer');
 let allMatches=[],selectedDate='',tickTimer=null,playerUiTimer=null,hls=null,hlsWatchdog=null,currentUrl='';
 document.getElementById('homeBtn').onclick=()=>location.href=HOME_URL;document.getElementById('reloadBtn').onclick=()=>loadSchedule();document.getElementById('playerHomeBtn').onclick=()=>location.href=HOME_URL;document.getElementById('playerCloseBtn').onclick=closePlayer;document.getElementById('playerReloadBtn').onclick=()=>{if(currentUrl)tryPlay(currentUrl)};document.getElementById('playerExternalBtn').onclick=()=>openExternalPlayer(currentUrl);document.getElementById('playerMxBtn').onclick=()=>openMx(currentUrl);
@@ -66,9 +67,14 @@ function isWebPageStream(url){
 }
 function openWebOnly(url){
   if(!url)return;
-  try{window.location.href=url}catch(e){try{window.open(url,'_blank')}catch(err){}}
+  openFullscreenGate(url);
 }
 
+
+function openFullscreenGate(url){
+  if(!url)return;
+  location.href=GATE_URL+'?url='+encodeURIComponent(url);
+}
 function proxify(u){
   u=String(u||'').trim();
   if(!u)return'';
@@ -136,7 +142,7 @@ function tryPlay(rawUrl){
   // แบบ 1: เว็บเราฝังเล่นเฉพาะลิงก์สตรีมตรงเท่านั้น
   // ลิงก์ .php / หน้าเว็บต้นทาง ไม่เอาเข้า video เพื่อกันภาพมาแต่ไม่มีเสียง
   if(!isDirectStreamUrl(original)){
-    openWebOnly(original);
+    openFullscreenGate(original);
     return;
   }
 
