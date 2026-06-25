@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>TIEA IPTV PLAYER BACK SKIP FIX</title>
+<title>TIEA IPTV HIDE PLAYER BEFORE EXTERNAL</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 <style>
@@ -681,6 +681,18 @@ function saveReturnBeforeExternal(mode,url){
 }
 
 
+
+function handleReturnFromExternalFocus(){
+  try{
+    const raw=sessionStorage.getItem('tiea_external_return');
+    if(!raw)return;
+    // ถ้ากลับมาแล้ว player ยังโชว์อยู่ ให้ซ่อนทันที
+    if(playerPanel && playerPanel.classList.contains('show')){
+      closePlayerOnlyAfterExternal();
+    }
+  }catch(e){}
+}
+
 function closePlayerOnlyAfterExternal(){
   try{ cleanupPlayer(); }catch(e){}
   try{
@@ -731,11 +743,32 @@ function restoreAfterExternal(){
   }
 }
 
+
+function preparePageBeforeExternal(){
+  try{
+    const epItem=state.returnEpisodeItem || null;
+
+    // ปิดเครื่องเล่นในเว็บทันที ก่อนออกไป PLAYER/MX
+    try{ cleanupPlayer(); }catch(e){}
+
+    try{
+      playerPanel.classList.remove('show');
+      playerPanel.classList.remove('hide-ui');
+    }catch(e){}
+
+    // ถ้าเปิดจาก EP ให้เปิดหน้ารายการ EP ค้างไว้ข้างหลัง
+    if(epItem){
+      setTimeout(()=>{ try{openDetail(epItem)}catch(e){} },80);
+    }
+  }catch(e){}
+}
+
 function safeIntent(url,mode){
   url=url||state.originalUrl||state.currentUrl;
   if(!url)return;
   saveReturnState({player:mode||'external',url:url});
   saveReturnBeforeExternal(mode,url);
+  preparePageBeforeExternal();
 
   const ua=(navigator.userAgent||'').toLowerCase();
   const isTV =
@@ -784,7 +817,15 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();
 
     if(playerPanel.classList.contains('show')){
-      closePlayer();
+      try{
+        if(sessionStorage.getItem('tiea_external_return')){
+          closePlayerOnlyAfterExternal();
+        }else{
+          closePlayer();
+        }
+      }catch(e){
+        closePlayer();
+      }
       return;
     }
 
@@ -876,6 +917,8 @@ function setupRemoteSeekControl(){
 }
 
 let __didInitialRestore=false;
+window.addEventListener('focus',handleReturnFromExternalFocus);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)handleReturnFromExternalFocus();});
 window.addEventListener('pageshow',()=>{
   if(restoreAfterExternal()||restoreReturnState()){
     __didInitialRestore=true;
