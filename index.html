@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>TIEA IPTV PROJECTOR STABLE LOW QUALITY</title>
+<title>TIEA IPTV PLAYER BACK SKIP FIX</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 <style>
@@ -671,10 +671,26 @@ function saveReturnBeforeExternal(mode,url){
       activeSource: state.activeSource || 'home',
       scroll: content ? content.scrollTop : 0,
       modalOpen: $('modal') && $('modal').classList.contains('show'),
+      hasEpisodeReturn: !!state.returnEpisodeItem,
+      episodeTitle: state.returnEpisodeItem ? (state.returnEpisodeItem.title || '') : '',
       playerMode: mode || 'external',
       url: url || state.originalUrl || state.currentUrl || '',
       time: Date.now()
     }));
+  }catch(e){}
+}
+
+
+function closePlayerOnlyAfterExternal(){
+  try{ cleanupPlayer(); }catch(e){}
+  try{
+    playerPanel.classList.remove('show');
+    playerPanel.classList.remove('hide-ui');
+  }catch(e){}
+  try{
+    state.currentUrl='';
+    state.originalUrl='';
+    state.currentTitle='';
   }catch(e){}
 }
 
@@ -691,6 +707,14 @@ function restoreAfterExternal(){
     }
 
     sessionStorage.removeItem('tiea_external_return');
+
+    // กลับจาก PLAYER/MX แล้วข้ามหน้าเครื่องเล่นในเว็บทันที
+    closePlayerOnlyAfterExternal();
+
+    if(data.hasEpisodeReturn && state.returnEpisodeItem){
+      setTimeout(()=>openDetail(state.returnEpisodeItem),150);
+      return true;
+    }
 
     if(data.activeSource && data.activeSource !== 'home' && !String(data.activeSource).startsWith('folder:')){
       loadMenuSource(data.activeSource).then(()=>{
@@ -755,7 +779,23 @@ function safeIntent(url,mode){
 async function loadMenuSource(key){state.activeSource=key;let label=document.querySelector(`[data-source="${key}"]`)?.textContent?.trim()||'รายการ';setStatus('กำลังโหลด '+label+' ...');content.innerHTML='<div class="hero"><div class="hero-title">กำลังโหลด...</div><div class="hero-sub">'+label+'</div></div>';try{if(key==='series-update'){let items=await loadSeriesUpdateDirect();renderUpdatePage(items,label);return}if(key==='series-main'){renderRows([{title:'MySeries แยกหมวด',items:MYSERIES_FOLDERS}],label);setStatus('พร้อมใช้งาน • MySeries แยกหมวด');return}let items=await loadSourcePack(key);renderRows(makeRows(items),label);setStatus(items.length?'พร้อมใช้งาน':'ไม่พบรายการ')}catch(e){content.innerHTML='<div class="hero"><div class="hero-title">โหลดไม่สำเร็จ</div><div class="hero-sub">'+e.message+'</div></div>';setStatus('โหลดไม่สำเร็จ')}}function openVip(url){let pass=prompt('กรุณาใส่รหัสผ่าน VIP');if(pass===VIP_PASSWORD)location.href=url;else if(pass!==null)alert('รหัสผ่านไม่ถูกต้อง')}
 document.querySelectorAll('.menu-btn').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(btn.dataset.vipLink){openVip(btn.dataset.vipLink);return}if(btn.dataset.link){location.href=btn.dataset.link;return}if(btn.dataset.action==='home'){renderHome();return}if(btn.dataset.source){loadMenuSource(btn.dataset.source);return}}});
 $('homeBtn').onclick=()=>location.href=HOME_URL;$('reloadBtn').onclick=()=>{state.cache={};if(state.activeSource&&state.activeSource!=='home')loadMenuSource(state.activeSource);else renderHome()};$('closePlayerBtn').onclick=closePlayer;$('playerHomeBtn').onclick=()=>location.href=HOME_URL;$('mxBtn').onclick=()=>openMx();$('extBtn').onclick=()=>openExternal();$('closeModalBtn').onclick=closeModal;$('prevPageBtn').onclick=()=>{state.page--;renderModalPage()};$('nextPageBtn').onclick=()=>{state.page++;renderModalPage()};
-document.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'||e.keyCode===10009){e.preventDefault();if(playerPanel.classList.contains('show'))closePlayer();else if($('modal').classList.contains('show'))closeModal();else location.href=HOME_URL}});document.addEventListener('keydown',e=>{let a=document.activeElement;if(!a||!a.classList||!a.classList.contains('card'))return;if(e.key==='ArrowRight'){let n=a.nextElementSibling;if(n&&n.classList.contains('card')){e.preventDefault();n.focus();n.scrollIntoView({block:'nearest',inline:'center'})}}if(e.key==='ArrowLeft'){let p=a.previousElementSibling;if(p&&p.classList.contains('card')){e.preventDefault();p.focus();p.scrollIntoView({block:'nearest',inline:'center'})}}});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'||e.key==='Backspace'||e.keyCode===10009){
+    e.preventDefault();
+
+    if(playerPanel.classList.contains('show')){
+      closePlayer();
+      return;
+    }
+
+    if($('modal').classList.contains('show')){
+      closeModal();
+      return;
+    }
+
+    location.href=HOME_URL;
+  }
+});document.addEventListener('keydown',e=>{let a=document.activeElement;if(!a||!a.classList||!a.classList.contains('card'))return;if(e.key==='ArrowRight'){let n=a.nextElementSibling;if(n&&n.classList.contains('card')){e.preventDefault();n.focus();n.scrollIntoView({block:'nearest',inline:'center'})}}if(e.key==='ArrowLeft'){let p=a.previousElementSibling;if(p&&p.classList.contains('card')){e.preventDefault();p.focus();p.scrollIntoView({block:'nearest',inline:'center'})}}});
 
 
 function setupPlayerButtonNav(){
@@ -835,7 +875,19 @@ function setupRemoteSeekControl(){
   },true);
 }
 
-window.addEventListener('pageshow',()=>{restoreAfterExternal()||restoreReturnState()});setupPlayerAutoHide();setupPlayerButtonNav();setupRemoteSeekControl();setupProjectorVideoRecovery();if(!restoreAfterExternal()&&!restoreReturnState())renderHome();
+let __didInitialRestore=false;
+window.addEventListener('pageshow',()=>{
+  if(restoreAfterExternal()||restoreReturnState()){
+    __didInitialRestore=true;
+  }
+});
+setupPlayerAutoHide();setupPlayerButtonNav();setupRemoteSeekControl();
+try{setupProjectorVideoRecovery()}catch(e){}
+if(!restoreAfterExternal()&&!restoreReturnState()){
+  renderHome();
+}else{
+  __didInitialRestore=true;
+}
 </script>
 </body>
 </html>
