@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV INDEX OKHD REFERER FINAL</title>
+    <title>TIEA IPTV LIVEDOOMOVIES STABLE PATCH</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -883,7 +883,7 @@ const SOURCES={
 
 'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]
 };
-const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null};
+const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null,liveDooWatchdog:null,liveDooLastTime:0,liveDooLastMoveAt:0,liveDooSoftAt:0,liveDooHardAt:0};
 const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel');
 function setStatus(t){
   t=String(t||'พร้อมใช้งาน');
@@ -1081,9 +1081,93 @@ function preferProxyFirst(url){
   return u.includes('ok-hd.com') || u.includes('main.24playerhd.com') || u.includes('24playerhd') || u.includes('037hddmovie.com') || u.includes('037hdmovie.com') || u.includes('master.streamhls.com') || u.includes('stream1689.com') || u.includes('fc2stream') || u.includes('doonewmovie') || u.includes('livedoomovies');
 }
 
+
+function isLiveDooMoviesUrl(url){
+  const u=String(url||'').toLowerCase();
+  return (
+    u.includes('live.livedoomovies.com') ||
+    u.includes('www.livedoomovies.com') ||
+    u.includes('livedoomovies.com:4431') ||
+    u.includes('livedoomovies.com:4433')
+  );
+}
+
+function startLiveDooMoviesSmartWatchdog(){
+  try{
+    if(state.liveDooWatchdog){
+      clearInterval(state.liveDooWatchdog);
+      state.liveDooWatchdog=null;
+    }
+
+    if(!isLiveDooMoviesUrl(state.originalUrl) && !isLiveDooMoviesUrl(state.currentUrl)){
+      return;
+    }
+
+    state.liveDooLastTime=video.currentTime||0;
+    state.liveDooLastMoveAt=Date.now();
+    state.liveDooSoftAt=0;
+    state.liveDooHardAt=0;
+
+    state.liveDooWatchdog=setInterval(()=>{
+      try{
+        if(!playerPanel.classList.contains('show') || !state.hls){
+          clearInterval(state.liveDooWatchdog);
+          state.liveDooWatchdog=null;
+          return;
+        }
+
+        const cur=video.currentTime||0;
+        const moved=Math.abs(cur-(state.liveDooLastTime||0))>0.12;
+
+        if(moved){
+          state.liveDooLastMoveAt=Date.now();
+          state.liveDooLastTime=cur;
+          return;
+        }
+
+        state.liveDooLastTime=cur;
+        const stuckMs=Date.now()-(state.liveDooLastMoveAt||Date.now());
+
+        if(stuckMs>5000 && Date.now()-(state.liveDooSoftAt||0)>20000){
+          state.liveDooSoftAt=Date.now();
+          setStatus('LiveDooMovies สะดุด • กำลังต่อสัญญาณ');
+          try{
+            state.hls.startLoad(Math.max(0,(video.currentTime||0)-0.5));
+          }catch(e){}
+          try{video.play().catch(()=>{})}catch(e){}
+          return;
+        }
+
+        if(stuckMs>10000 && Date.now()-(state.liveDooHardAt||0)>30000){
+          state.liveDooHardAt=Date.now();
+          setStatus('LiveDooMovies ยังหมุน • รีโหลด playlist เดิม');
+          try{state.hls.stopLoad()}catch(e){}
+          setTimeout(()=>{
+            try{
+              state.hls.loadSource(state.currentUrl);
+              state.hls.startLoad(-1);
+              video.play().catch(()=>{});
+            }catch(e){}
+          },500);
+          return;
+        }
+      }catch(e){}
+    },1000);
+  }catch(e){}
+}
+
+function stopLiveDooMoviesSmartWatchdog(){
+  try{
+    if(state.liveDooWatchdog){
+      clearInterval(state.liveDooWatchdog);
+      state.liveDooWatchdog=null;
+    }
+  }catch(e){}
+}
+
 function forceFullSound(){try{video.muted=false;video.defaultMuted=false;video.volume=1;video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
 function startWatchdog(){stopWatchdog();state.lastTime=0;state.stuckCount=0;state.recoverCount=0;state.lastRecoverAt=0;state.watchdog=setInterval(()=>{if(!playerPanel.classList.contains('show'))return;forceFullSound();if(video.paused&&video.readyState>=2)video.play().catch(()=>{});let moved=Math.abs((video.currentTime||0)-(state.lastTime||0))>.25;if(moved){state.stuckCount=0;state.recoverCount=0}else if(!video.paused){state.stuckCount++}state.lastTime=video.currentTime||0;if(state.stuckCount>=12&&Date.now()-state.lastRecoverAt>35000){state.stuckCount=0;state.recoverCount++;state.lastRecoverAt=Date.now();setStatus('สัญญาณค้าง • กำลังต่อใหม่ครั้งที่ '+state.recoverCount);try{if(state.hls){state.hls.stopLoad();setTimeout(()=>{try{state.hls.startLoad(Math.max(0,video.currentTime-1));video.play().catch(()=>{})}catch(e){}},500);return}if(state.dash){video.play().catch(()=>{});return}}catch(e){}if(state.recoverCount>=3)setStatus('สัญญาณยังไม่กลับมา • กดรีโหลดหรือ PLAYER/MX เอง')}},7000)}
-function cleanupPlayer(){stopWatchdog();if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}if(state.hls){try{state.hls.destroy()}catch(e){}state.hls=null}if(state.dash){try{state.dash.destroy()}catch(e){}state.dash=null}try{video.pause()}catch(e){}video.removeAttribute('src');video.src='';video.load()}
+function cleanupPlayer(){stopLiveDooMoviesSmartWatchdog();stopWatchdog();if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}if(state.hls){try{state.hls.destroy()}catch(e){}state.hls=null}if(state.dash){try{state.dash.destroy()}catch(e){}state.dash=null}try{video.pause()}catch(e){}video.removeAttribute('src');video.src='';video.load()}
 function isAlreadyPlayableUrl(url){
   const u=String(url||'').toLowerCase();
   return u.includes('.m3u8')||u.includes('.mp4')||u.includes('.m4v')||u.includes('.webm')||u.includes('.mpd')||u.includes('type=m3u8')||u.includes('extension=m3u8');
@@ -1194,7 +1278,7 @@ function tuneProjectorLevel(){
   }catch(e){}
 }
 
-function playCandidate(candidates,item,serverIndex,idx){let url=candidates[idx]||candidates[0];state.currentUrl=url;let direct=getUrl(item,serverIndex);let next=()=>{if(idx+1<candidates.length){playCandidate(candidates,item,serverIndex,idx+1);return}if(item.servers?.length>serverIndex+1){playItem(item,serverIndex+1);return}openMx(direct)};cleanupPlayer();playerPanel.classList.add('show');showPlayerUI();forceFullSound();startWatchdog();state.playTimer=setTimeout(()=>{if(video.readyState<2 && (video.currentTime||0)===0)setStatus('ถ้าภาพไม่ขึ้น ให้กด PLAYER/MX ด้านบน')},30000);['playing','loadeddata','canplay'].forEach(ev=>video.addEventListener(ev,()=>{if(state.playTimer)clearTimeout(state.playTimer);state.stuckCount=0;forceFullSound()},{once:true}));let lower=url.toLowerCase();if(lower.includes('.mpd')){try{state.dash=dashjs.MediaPlayer().create();state.dash.initialize(video,url,true);setTimeout(forceFullSound,500)}catch(e){next()}return}if(Hls.isSupported()&&(lower.includes('.m3u8')||lower.includes('master.txt')||lower.includes('.txt')||lower.includes('type=m3u8')||lower.includes('extension=m3u8'))){state.hls=new Hls(getStableHlsConfig());state.hls.loadSource(url);state.hls.attachMedia(video);state.hls.on(Hls.Events.MANIFEST_PARSED,()=>{tuneProjectorLevel();forceFullSound();startWatchdog();video.play().catch(()=>{})});state.hls.on(Hls.Events.ERROR,(e,d)=>{if(!d)return;if(!d.fatal){if(d.type===Hls.ErrorTypes.NETWORK_ERROR){try{state.hls.startLoad()}catch(err){}}return}if(d.type===Hls.ErrorTypes.NETWORK_ERROR){setStatus('network ค้าง • ต่อสัญญาณใหม่');try{state.hls.startLoad(Math.max(0,video.currentTime-1));video.play().catch(()=>{})}catch(err){next()}return}if(d.type===Hls.ErrorTypes.MEDIA_ERROR){setStatus('media ค้าง • ซ่อม player');try{state.hls.recoverMediaError();video.play().catch(()=>{})}catch(err){next()}return}next()});return}video.src=url;forceFullSound();startWatchdog();video.play().catch(()=>next())}
+function playCandidate(candidates,item,serverIndex,idx){let url=candidates[idx]||candidates[0];state.currentUrl=url;let direct=getUrl(item,serverIndex);let next=()=>{if(idx+1<candidates.length){playCandidate(candidates,item,serverIndex,idx+1);return}if(item.servers?.length>serverIndex+1){playItem(item,serverIndex+1);return}openMx(direct)};cleanupPlayer();playerPanel.classList.add('show');showPlayerUI();forceFullSound();startWatchdog();state.playTimer=setTimeout(()=>{if(video.readyState<2 && (video.currentTime||0)===0)setStatus('ถ้าภาพไม่ขึ้น ให้กด PLAYER/MX ด้านบน')},30000);['playing','loadeddata','canplay'].forEach(ev=>video.addEventListener(ev,()=>{if(state.playTimer)clearTimeout(state.playTimer);state.stuckCount=0;forceFullSound()},{once:true}));let lower=url.toLowerCase();if(lower.includes('.mpd')){try{state.dash=dashjs.MediaPlayer().create();state.dash.initialize(video,url,true);setTimeout(forceFullSound,500)}catch(e){next()}return}if(Hls.isSupported()&&(lower.includes('.m3u8')||lower.includes('master.txt')||lower.includes('.txt')||lower.includes('type=m3u8')||lower.includes('extension=m3u8'))){state.hls=new Hls(getStableHlsConfig());state.hls.loadSource(url);state.hls.attachMedia(video);state.hls.on(Hls.Events.MANIFEST_PARSED,()=>{tuneProjectorLevel();forceFullSound();startWatchdog();startLiveDooMoviesSmartWatchdog();video.play().catch(()=>{})});state.hls.on(Hls.Events.ERROR,(e,d)=>{if(!d)return;if(!d.fatal){if(d.type===Hls.ErrorTypes.NETWORK_ERROR){try{state.hls.startLoad(Math.max(0,(video.currentTime||0)-0.5))}catch(err){} if(isLiveDooMoviesUrl(state.originalUrl)||isLiveDooMoviesUrl(state.currentUrl)){try{video.play().catch(()=>{})}catch(e){}}}return}if(d.type===Hls.ErrorTypes.NETWORK_ERROR){setStatus('network ค้าง • ต่อสัญญาณใหม่');try{state.hls.startLoad(Math.max(0,video.currentTime-1));video.play().catch(()=>{})}catch(err){next()}return}if(d.type===Hls.ErrorTypes.MEDIA_ERROR){setStatus('media ค้าง • ซ่อม player');try{state.hls.recoverMediaError();video.play().catch(()=>{})}catch(err){next()}return}next()});return}video.src=url;forceFullSound();startWatchdog();video.play().catch(()=>next())}
 
 
 
