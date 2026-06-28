@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV LIVEDOOMOVIES STABLE PATCH</title>
+    <title>TIEA IPTV LIVEDOOMOVIES START FIX</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -883,7 +883,7 @@ const SOURCES={
 
 'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]
 };
-const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null,liveDooWatchdog:null,liveDooLastTime:0,liveDooLastMoveAt:0,liveDooSoftAt:0,liveDooHardAt:0};
+const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null,liveDooWatchdog:null,liveDooLastTime:0,liveDooLastMoveAt:0,liveDooSoftAt:0,liveDooHardAt:0,liveDooStarted:false,liveDooStartAt:0};
 const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel');
 function setStatus(t){
   t=String(t||'พร้อมใช้งาน');
@@ -1107,6 +1107,8 @@ function startLiveDooMoviesSmartWatchdog(){
     state.liveDooLastMoveAt=Date.now();
     state.liveDooSoftAt=0;
     state.liveDooHardAt=0;
+    state.liveDooStarted=false;
+    state.liveDooStartAt=Date.now();
 
     state.liveDooWatchdog=setInterval(()=>{
       try{
@@ -1119,6 +1121,33 @@ function startLiveDooMoviesSmartWatchdog(){
         const cur=video.currentTime||0;
         const moved=Math.abs(cur-(state.liveDooLastTime||0))>0.12;
 
+        // ช่วงเริ่มเล่น: ห้าม recover ซ้ำ ให้รอภาพมาก่อน
+        if(!state.liveDooStarted){
+          if(cur>0.5 && video.readyState>=2){
+            state.liveDooStarted=true;
+            state.liveDooLastMoveAt=Date.now();
+            state.liveDooLastTime=cur;
+            setStatus('พร้อมใช้งาน');
+            return;
+          }
+
+          // 15 วิแรกปล่อยให้โหลดเอง ไม่ไป startLoad/loadSource ซ้ำ
+          if(Date.now()-state.liveDooStartAt < 15000){
+            state.liveDooLastTime=cur;
+            return;
+          }
+
+          // หลัง 15 วิ ถ้ายังไม่เริ่ม ค่อยกระตุ้นเบา ๆ แค่ครั้งคราว
+          if(Date.now()-(state.liveDooSoftAt||0)>15000){
+            state.liveDooSoftAt=Date.now();
+            setStatus('LiveDooMovies เริ่มช้า • กระตุ้นโหลดเบา ๆ');
+            try{state.hls.startLoad(-1)}catch(e){}
+            try{video.play().catch(()=>{})}catch(e){}
+          }
+          state.liveDooLastTime=cur;
+          return;
+        }
+
         if(moved){
           state.liveDooLastMoveAt=Date.now();
           state.liveDooLastTime=cur;
@@ -1128,7 +1157,8 @@ function startLiveDooMoviesSmartWatchdog(){
         state.liveDooLastTime=cur;
         const stuckMs=Date.now()-(state.liveDooLastMoveAt||Date.now());
 
-        if(stuckMs>5000 && Date.now()-(state.liveDooSoftAt||0)>20000){
+        // หลังเล่นติดแล้วเท่านั้น: 6 วิค่อยต่อเบา ๆ
+        if(stuckMs>6000 && Date.now()-(state.liveDooSoftAt||0)>20000){
           state.liveDooSoftAt=Date.now();
           setStatus('LiveDooMovies สะดุด • กำลังต่อสัญญาณ');
           try{
@@ -1138,7 +1168,8 @@ function startLiveDooMoviesSmartWatchdog(){
           return;
         }
 
-        if(stuckMs>10000 && Date.now()-(state.liveDooHardAt||0)>30000){
+        // หลังเล่นติดแล้วเท่านั้น: 14 วิค่อย reload playlist
+        if(stuckMs>14000 && Date.now()-(state.liveDooHardAt||0)>45000){
           state.liveDooHardAt=Date.now();
           setStatus('LiveDooMovies ยังหมุน • รีโหลด playlist เดิม');
           try{state.hls.stopLoad()}catch(e){}
@@ -1148,7 +1179,7 @@ function startLiveDooMoviesSmartWatchdog(){
               state.hls.startLoad(-1);
               video.play().catch(()=>{});
             }catch(e){}
-          },500);
+          },700);
           return;
         }
       }catch(e){}
