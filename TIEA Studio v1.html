@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TIEA Studio V1</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#0b0b0f;color:#fff;font-family:Arial,'Noto Sans Thai',sans-serif}
+    header{padding:16px;background:#111827;border-bottom:1px solid #263042;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    h1{margin:0;font-size:22px;color:#00e676}
+    .sub{color:#aab3c2;font-size:13px}
+    .wrap{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 76px)}
+    aside{background:#10151f;border-right:1px solid #263042;padding:14px;overflow:auto}
+    main{padding:14px;overflow:auto}
+    .card{background:#151b29;border:1px solid #263042;border-radius:14px;padding:14px;margin-bottom:14px}
+    label{display:block;margin:10px 0 5px;color:#c9d3e4;font-size:13px}
+    input,select,textarea{width:100%;background:#090d14;color:#fff;border:1px solid #344156;border-radius:10px;padding:10px;outline:none}
+    textarea{min-height:220px;font-family:Consolas,monospace;font-size:13px;resize:vertical}
+    button{background:#00c853;color:#001b0b;border:0;border-radius:10px;padding:10px 12px;font-weight:bold;cursor:pointer;margin:4px 4px 4px 0}
+    button.secondary{background:#263042;color:#fff}
+    button.danger{background:#ff5252;color:#fff}
+    button.blue{background:#42a5f5;color:#00172a}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+    .item{background:#10151f;border:1px solid #263042;border-radius:14px;overflow:hidden}
+    .poster{height:120px;background:#05070b;display:flex;align-items:center;justify-content:center;color:#657287;font-size:12px}
+    .poster img{width:100%;height:100%;object-fit:cover}
+    .info{padding:10px}
+    .title{font-weight:bold;color:#fff;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .meta{font-size:12px;color:#aab3c2;line-height:1.5}
+    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+    .tab{background:#263042;color:#fff;border-radius:999px;padding:8px 12px;cursor:pointer}
+    .tab.active{background:#00c853;color:#001b0b;font-weight:bold}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .small{font-size:12px;color:#9aa7ba}
+    pre{white-space:pre-wrap;word-break:break-word;background:#090d14;border:1px solid #263042;border-radius:12px;padding:12px;max-height:360px;overflow:auto}
+    @media(max-width:850px){.wrap{grid-template-columns:1fr}.row{grid-template-columns:1fr}aside{border-right:0;border-bottom:1px solid #263042}}
+  </style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>TIEA Studio V1</h1>
+    <div class="sub">จัดการ JSON มาตรฐานชุดเดียว แล้ว Build เป็น IPTV JSON + Wiseplay M3U</div>
+  </div>
+  <div>
+    <button onclick="downloadStandardJson()">ดาวน์โหลด tiea-standard.json</button>
+    <button class="blue" onclick="buildAll()">Build ทั้งหมด</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <aside>
+    <div class="card">
+      <b>เพิ่มรายการ</b>
+      <label>ประเภท</label>
+      <select id="type">
+        <option value="tv">TV</option>
+        <option value="sport">Sport</option>
+        <option value="movie">Movie</option>
+        <option value="series">Series</option>
+        <option value="anime">Anime</option>
+      </select>
+      <label>ชื่อเรื่อง / ชื่อช่อง</label>
+      <input id="title" placeholder="เช่น CH3 HD / Movie Name" />
+      <label>กลุ่ม</label>
+      <input id="group" placeholder="เช่น ทีวีไทย / พรีเมียร์ลีก / หนังใหม่" />
+      <label>โลโก้ / โปสเตอร์</label>
+      <input id="logo" placeholder="https://...jpg" />
+      <label>ลิงก์เล่นหลัก</label>
+      <input id="url" placeholder="https://...m3u8 / .mpd / .mp4" />
+      <div class="row">
+        <div>
+          <label>Referer</label>
+          <input id="referer" placeholder="https://..." />
+        </div>
+        <div>
+          <label>User-Agent</label>
+          <input id="userAgent" placeholder="เว้นว่างได้" />
+        </div>
+      </div>
+      <label>DRM Key ID</label>
+      <input id="keyId" placeholder="สำหรับ MPD ClearKey" />
+      <label>DRM Key</label>
+      <input id="key" placeholder="สำหรับ MPD ClearKey" />
+      <button onclick="addItem()">เพิ่มเข้า JSON</button>
+      <button class="secondary" onclick="clearForm()">ล้างฟอร์ม</button>
+    </div>
+
+    <div class="card">
+      <b>นำเข้า JSON</b>
+      <label>วาง JSON Standard</label>
+      <textarea id="importBox" placeholder="วาง tiea-standard.json ที่นี่"></textarea>
+      <button onclick="importJson()">นำเข้า</button>
+      <button class="danger" onclick="resetData()">รีเซ็ตทั้งหมด</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="tabs" id="tabs"></div>
+
+    <div class="card">
+      <b>รายการทั้งหมด</b>
+      <div class="small" id="countText"></div>
+      <div class="grid" id="list"></div>
+    </div>
+
+    <div class="card">
+      <b>Build Output</b><br />
+      <button onclick="downloadM3U('tv')">tv.m3u</button>
+      <button onclick="downloadM3U('sport')">sport.m3u</button>
+      <button onclick="downloadM3U('movie')">movie.m3u</button>
+      <button onclick="downloadM3U('series')">series.m3u</button>
+      <button onclick="downloadM3U('anime')">anime.m3u</button>
+      <button class="secondary" onclick="downloadIptvJson()">iptv-build.json</button>
+      <pre id="output">กด Build ทั้งหมด เพื่อดูผลลัพธ์</pre>
+    </div>
+
+    <div class="card">
+      <b>JSON Standard ตัวอย่าง</b>
+      <pre id="schemaBox"></pre>
+    </div>
+  </main>
+</div>
+
+<script>
+const STORAGE_KEY = 'TIEA_STUDIO_V1_DATA';
+const TYPES = ['tv','sport','movie','series','anime'];
+let activeType = 'tv';
+let data = loadData();
+
+const schemaExample = {
+  version: '1.0',
+  app: 'TIEA Studio',
+  updated: new Date().toISOString().slice(0,10),
+  items: [
+    {
+      id: 'ch3-hd',
+      type: 'tv',
+      title: 'CH3 HD',
+      group: 'ทีวีไทย',
+      logo: 'https://example.com/ch3.png',
+      language: 'th',
+      status: 'active',
+      servers: [
+        {
+          name: 'Main',
+          url: 'https://example.com/live/ch3.m3u8',
+          referer: '',
+          userAgent: '',
+          drm: false,
+          keyId: '',
+          key: ''
+        }
+      ],
+      episodes: []
+    },
+    {
+      id: 'series-demo',
+      type: 'series',
+      title: 'ตัวอย่างซีรี่ย์',
+      group: 'ซีรี่ย์เกาหลี',
+      logo: 'https://example.com/poster.jpg',
+      language: 'th',
+      status: 'active',
+      servers: [],
+      episodes: [
+        {
+          ep: 'EP1',
+          title: 'ตอนที่ 1',
+          servers: [
+            { name: 'Main', url: 'https://example.com/ep1.m3u8', referer: '', userAgent: '', drm: false, keyId: '', key: '' }
+          ]
+        }
+      ]
+    }
+  ]
+};
+
+document.getElementById('schemaBox').textContent = JSON.stringify(schemaExample, null, 2);
+renderTabs();
+render();
+
+function loadData(){
+  try{
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if(saved) return JSON.parse(saved);
+  }catch(e){}
+  return { version:'1.0', app:'TIEA Studio', updated: today(), items:[] };
+}
+
+function saveData(){
+  data.updated = today();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function today(){ return new Date().toISOString().slice(0,10); }
+function slug(s){ return String(s||'item').toLowerCase().trim().replace(/[^a-z0-9ก-๙]+/gi,'-').replace(/^-|-$/g,'') + '-' + Date.now().toString().slice(-5); }
+
+function addItem(){
+  const type = val('type');
+  const title = val('title');
+  const group = val('group') || type;
+  const logo = val('logo');
+  const url = val('url');
+  if(!title || !url){ alert('กรุณาใส่ชื่อและลิงก์เล่นหลัก'); return; }
+  const item = {
+    id: slug(title), type, title, group, logo, language:'th', status:'active',
+    servers: [{ name:'Main', url, referer:val('referer'), userAgent:val('userAgent'), drm: !!(val('keyId') && val('key')), keyId:val('keyId'), key:val('key') }],
+    episodes: []
+  };
+  data.items.push(item);
+  activeType = type;
+  saveData(); clearForm(); renderTabs(); render();
+}
+
+function val(id){ return document.getElementById(id).value.trim(); }
+function clearForm(){ ['title','group','logo','url','referer','userAgent','keyId','key'].forEach(id=>document.getElementById(id).value=''); }
+
+function renderTabs(){
+  const el = document.getElementById('tabs');
+  el.innerHTML = TYPES.map(t=>`<div class="tab ${activeType===t?'active':''}" onclick="activeType='${t}';renderTabs();render();">${t.toUpperCase()} (${data.items.filter(x=>x.type===t).length})</div>`).join('');
+}
+
+function render(){
+  const items = data.items.filter(x=>x.type===activeType);
+  document.getElementById('countText').textContent = `หมวด ${activeType.toUpperCase()} มี ${items.length} รายการ`;
+  document.getElementById('list').innerHTML = items.map(item=>`
+    <div class="item">
+      <div class="poster">${item.logo ? `<img src="${escapeHtml(item.logo)}" onerror="this.remove();">` : 'NO IMAGE'}</div>
+      <div class="info">
+        <div class="title">${escapeHtml(item.title)}</div>
+        <div class="meta">${escapeHtml(item.group)}<br>${escapeHtml(item.servers?.[0]?.url || '')}</div>
+        <button class="danger" onclick="removeItem('${item.id}')">ลบ</button>
+      </div>
+    </div>`).join('') || '<div class="small">ยังไม่มีรายการในหมวดนี้</div>';
+}
+
+function removeItem(id){
+  if(!confirm('ลบรายการนี้ใช่ไหม?')) return;
+  data.items = data.items.filter(x=>x.id!==id);
+  saveData(); renderTabs(); render();
+}
+
+function importJson(){
+  try{
+    const imported = JSON.parse(document.getElementById('importBox').value);
+    if(!Array.isArray(imported.items)) throw new Error('missing items');
+    data = imported;
+    saveData(); renderTabs(); render();
+    alert('นำเข้าเรียบร้อย');
+  }catch(e){ alert('JSON ไม่ถูกต้อง'); }
+}
+
+function resetData(){
+  if(!confirm('ลบข้อมูลทั้งหมดใน Studio ใช่ไหม?')) return;
+  data = { version:'1.0', app:'TIEA Studio', updated: today(), items:[] };
+  saveData(); renderTabs(); render();
+}
+
+function buildM3U(type){
+  const items = data.items.filter(x=>x.type===type && x.status!=='disabled');
+  let out = '#EXTM3U\n';
+  for(const item of items){
+    if(item.episodes && item.episodes.length){
+      for(const ep of item.episodes){
+        const s = ep.servers?.[0]; if(!s?.url) continue;
+        out += `#EXTINF:-1 tvg-id="${item.id}" tvg-logo="${item.logo||''}" group-title="${item.group||type}",${item.title} ${ep.ep||''}\n${s.url}\n`;
+      }
+    }else{
+      const s = item.servers?.[0]; if(!s?.url) continue;
+      out += `#EXTINF:-1 tvg-id="${item.id}" tvg-logo="${item.logo||''}" group-title="${item.group||type}",${item.title}\n${s.url}\n`;
+    }
+  }
+  return out;
+}
+
+function buildIptvJson(){
+  return JSON.stringify(data.items.filter(x=>x.status!=='disabled'), null, 2);
+}
+
+function buildAll(){
+  const all = {
+    'tv.m3u': buildM3U('tv'),
+    'sport.m3u': buildM3U('sport'),
+    'movie.m3u': buildM3U('movie'),
+    'series.m3u': buildM3U('series'),
+    'anime.m3u': buildM3U('anime'),
+    'iptv-build.json': buildIptvJson()
+  };
+  document.getElementById('output').textContent = Object.entries(all).map(([k,v])=>`===== ${k} =====\n${v}`).join('\n');
+}
+
+function downloadStandardJson(){ download('tiea-standard.json', JSON.stringify(data, null, 2)); }
+function downloadIptvJson(){ download('iptv-build.json', buildIptvJson()); }
+function downloadM3U(type){ download(`${type}.m3u`, buildM3U(type)); }
+
+function download(filename, text){
+  const blob = new Blob([text], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(a.href);
+}
+
+function escapeHtml(s){ return String(s||'').replace(/[&<>'"]/g, c=>({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '\'':'&#39;', '"':'&quot;' }[c])); }
+</script>
+</body>
+</html>
