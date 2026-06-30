@@ -41,7 +41,7 @@
 <header>
   <div>
     <h1>TIEA Studio V1</h1>
-    <div class="sub">จัดการ JSON มาตรฐานชุดเดียว แล้ว Build เป็น IPTV JSON + Wiseplay M3U</div>
+    <div class="sub">Import M3U รายการสด → JSON มาตรฐาน → Build เป็น IPTV JSON + Wiseplay M3U</div>
   </div>
   <div>
     <button onclick="downloadStandardJson()">ดาวน์โหลด tiea-standard.json</button>
@@ -85,6 +85,22 @@
       <input id="key" placeholder="สำหรับ MPD ClearKey" />
       <button onclick="addItem()">เพิ่มเข้า JSON</button>
       <button class="secondary" onclick="clearForm()">ล้างฟอร์ม</button>
+    </div>
+
+    <div class="card">
+      <b>นำเข้า M3U รายการสด</b>
+      <label>เลือกหมวดปลายทาง</label>
+      <select id="m3uType">
+        <option value="tv">TV</option>
+        <option value="sport">Sport</option>
+        <option value="anime">Anime</option>
+      </select>
+      <label>วาง M3U เดิมของพี่</label>
+      <textarea id="m3uBox" placeholder="#EXTM3U
+#EXTINF:-1 tvg-logo="..." group-title="ดิจิตอล",CH 3
+https://...m3u8"></textarea>
+      <button class="blue" onclick="importM3U()">Import M3U → JSON Standard</button>
+      <div class="small">ระบบจะดึงชื่อช่อง, group-title, tvg-logo และ URL ให้อัตโนมัติ</div>
     </div>
 
     <div class="card">
@@ -240,6 +256,56 @@ function removeItem(id){
   if(!confirm('ลบรายการนี้ใช่ไหม?')) return;
   data.items = data.items.filter(x=>x.id!==id);
   saveData(); renderTabs(); render();
+}
+
+function importM3U(){
+  const text = document.getElementById('m3uBox').value;
+  const type = document.getElementById('m3uType').value;
+  const items = parseM3U(text, type);
+  if(!items.length){ alert('ยังอ่าน M3U ไม่ได้ครับ กรุณาตรวจดูว่ามี #EXTINF และลิงก์ URL'); return; }
+  data.items.push(...items);
+  activeType = type;
+  saveData(); renderTabs(); render();
+  document.getElementById('m3uBox').value = '';
+  alert('Import M3U สำเร็จ: ' + items.length + ' รายการ');
+}
+
+function parseM3U(text, type){
+  const lines = String(text||'').replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean);
+  const items = [];
+  for(let i=0;i<lines.length;i++){
+    const line = lines[i];
+    if(!line.startsWith('#EXTINF')) continue;
+    let url = '';
+    for(let j=i+1;j<lines.length;j++){
+      if(lines[j].startsWith('#EXTINF')) break;
+      if(!lines[j].startsWith('#')){ url = lines[j]; i = j; break; }
+    }
+    if(!url) continue;
+    const title = getTitleFromExtinf(line) || 'ไม่มีชื่อ';
+    const group = getAttr(line, 'group-title') || type;
+    const logo = getAttr(line, 'tvg-logo') || '';
+    const tvgId = getAttr(line, 'tvg-id') || slug(title);
+    items.push({
+      id: slug(title),
+      sourceId: tvgId,
+      type, title, group, logo, language:'th', status:'active',
+      servers: [{ name:'Main', url, referer:'', userAgent:'', drm:false, keyId:'', key:'' }],
+      episodes: []
+    });
+  }
+  return items;
+}
+
+function getAttr(line, name){
+  const re = new RegExp(name + '=\"([^\"]*)\"', 'i');
+  const m = line.match(re);
+  return m ? m[1].trim() : '';
+}
+
+function getTitleFromExtinf(line){
+  const idx = line.lastIndexOf(',');
+  return idx >= 0 ? line.slice(idx+1).trim() : '';
 }
 
 function importJson(){
