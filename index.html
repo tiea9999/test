@@ -742,7 +742,7 @@
             align-items: center !important;
             justify-content: center !important;
         }
-    
+
 
         /* ===== MOBILE TOUCH SEEK CONTROLS ===== */
         .mobile-seek-controls {
@@ -757,26 +757,32 @@
             gap: 12px;
             pointer-events: auto;
         }
+
         .mobile-seek-btn {
             min-width: 74px;
             min-height: 48px;
-            border: 2px solid rgba(255,255,255,.85);
+            border: 2px solid rgba(255, 255, 255, .85);
             border-radius: 999px;
-            background: rgba(0,0,0,.68);
+            background: rgba(0, 0, 0, .68);
             color: #fff;
             font-size: 18px;
             font-weight: 900;
             cursor: pointer;
         }
+
         .mobile-seek-btn:active {
             transform: scale(.96);
         }
+
         .player-panel.hide-ui .mobile-seek-controls {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
         }
-        @media (hover:none), (pointer:coarse), (max-width:900px) {
+
+        @media (hover:none),
+        (pointer:coarse),
+        (max-width:900px) {
             .player-panel.show .mobile-seek-controls {
                 display: flex;
             }
@@ -844,7 +850,7 @@
     <script>
         const HOME_URL='https://tiea9999.github.io/tv/index.html',LIVE_URL='https://tiea9999.github.io/tv/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
 const MY_SERIES=RAW+'myseries-series.json',MY_CHINA=RAW+'myseries-china.json',MY_KOREA=RAW+'myseries-korea.json',MY_THAI=RAW+'myseries-thai.json',MY_JAPAN=RAW+'myseries-japan.json',MY_SHORT=RAW+'myseries-short.json',MY_MOVIE=RAW+'myseries-movie.json';
-const TV_LINKS=[{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/3bb.html',group:'ทีวีออนไลน์'},{kind:'link',title:'SPORT TV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/sport.html',group:'ทีวีออนไลน์'},{kind:'link',title:'DOOBALL66',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/ball66.html',group:'ทีวีออนไลน์'}];
+const TV_LINKS=[];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'MySeries',image:FOLDER_LOGO,source:MY_SERIES,group:'MySeries'}];
 const MYSERIES_FILTERS={
 'series-update':[
