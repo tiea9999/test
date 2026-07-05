@@ -309,6 +309,7 @@ const FALLBACK_LOGO="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo4
 let channels=[];
 let activeChannel=null,activeElement=null,activeUrl="",activeOriginalUrl="";
 let hls=null,tsPlayer=null,shakaPlayer=null,watchdog=null,uiTimer=null,playStartedTimer=null,noPictureTimer=null;
+let autoRetryTimer=null, autoRetryCount=0, startupMutedUntil=0;
 let playMode = "sports"; // บังคับเริ่มที่กีฬา/สดไวเสมอ
 
 // V3 Fast Click Fix: กันการโหลดซ้อน/กดซ้ำ และยกเลิกงานเก่าทันทีเมื่อเปลี่ยนช่อง
@@ -316,9 +317,62 @@ let playSeq = 0;
 let isSwitchingChannel = false;
 function nextPlaySeq(){ playSeq++; return playSeq; }
 function isCurrentSeq(seq){ return seq === playSeq; }
+function clearAutoRetry(){
+  if(autoRetryTimer){clearTimeout(autoRetryTimer);autoRetryTimer=null}
+}
+function markPlaybackStarted(seq){
+  if(!isCurrentSeq(seq)) return;
+  clearAutoRetry();
+  hideFallback();
+  setStatus('กำลังเล่นแล้ว', true);
+  setTimeout(()=>{
+    if(isCurrentSeq(seq)){
+      try{video.muted=false;video.defaultMuted=false;video.volume=1;video.play().catch(()=>{})}catch(e){}
+    }
+  },900);
+}
+function kickPlay(seq){
+  if(!isCurrentSeq(seq)) return;
+  try{
+    // เริ่มแบบ muted ก่อน ช่วยแก้ Chrome/Android บล็อก autoplay หลังเปลี่ยนช่อง
+    if(Date.now()<startupMutedUntil){video.muted=true;video.defaultMuted=true;}
+    video.volume=1;
+    video.play().catch(()=>{});
+  }catch(e){}
+}
+function scheduleAutoRetryPlayback(seq, kind, delay){
+  clearAutoRetry();
+  autoRetryTimer=setTimeout(()=>{
+    if(!isCurrentSeq(seq)) return;
+    const box=document.getElementById('player-container');
+    if(!box || box.style.display!=='block') return;
+    if(hasPicture()) { markPlaybackStarted(seq); return; }
+    autoRetryCount++;
+    setStatus('กำลังลองใหม่อัตโนมัติ ครั้งที่ '+autoRetryCount, true);
+    const base=activeOriginalUrl || activeUrl;
+    const low=(base||'').toLowerCase();
+    try{video.pause();video.removeAttribute('src');video.load()}catch(e){}
+    if(low.includes('.mpd')){
+      if(autoRetryCount<=3) playMPD(base,seq);
+      else showFallback('ช่องนี้โหลดช้า ลองกด PLAYER/MX');
+    }else if(low.includes('.m3u8')||low.includes('extension=m3u8')||low.includes('type=m3u8')){
+      if(autoRetryCount<=2) playHLS(base,false,seq);
+      else if(autoRetryCount<=5) playHLS(makeProxyUrl(base),true,seq);
+      else showFallback('เซิร์ฟเวอร์ไม่นิ่ง ลองกด PLAYER/MX');
+    }else{
+      if(autoRetryCount<=2) playTS(base,false,seq);
+      else if(autoRetryCount<=5) playTS(makeProxyUrl(base),true,seq);
+      else showFallback('เซิร์ฟเวอร์ไม่นิ่ง ลองกด PLAYER/MX');
+    }
+  }, delay||1800);
+}
+
 
 const app=document.getElementById("app");
 const video=document.getElementById("html5-player");
+["loadeddata","canplay","playing"].forEach(ev=>{
+  video.addEventListener(ev,()=>markPlaybackStarted(playSeq));
+});
 
 function applyModeLabel(){
   const btn=document.getElementById("modeBtn");
@@ -546,6 +600,7 @@ function hideFallback(){
 async function stopAll(){
   // Fast Click Fix: ล้าง timeout/player เก่าให้หมดก่อนเริ่มช่องใหม่
   if(playStartedTimer){clearTimeout(playStartedTimer);playStartedTimer=null}
+  clearAutoRetry();
   if(noPictureTimer){clearTimeout(noPictureTimer);noPictureTimer=null}
   if(watchdog){clearInterval(watchdog);watchdog=null}
   try{if(hls){hls.destroy();hls=null}}catch(e){}
@@ -554,11 +609,17 @@ async function stopAll(){
   try{video.pause();video.removeAttribute("src");video.load()}catch(e){}
   hideFallback();
 }
-function forceAudio(){try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}}
+function forceAudio(){try{
+  if(Date.now()<startupMutedUntil){video.muted=true;video.defaultMuted=true;}
+  else{video.muted=false;video.defaultMuted=false;}
+  video.volume=1;
+}catch(e){}}
 
 async function loadChannel(ch,el){
   // Fast Click Fix: ทุกครั้งที่กดช่องใหม่ ให้ token ใหม่ทันที
   const seq = nextPlaySeq();
+  autoRetryCount = 0;
+  startupMutedUntil = Date.now()+2600;
   isSwitchingChannel = true;
 
   playMode = "sports";
@@ -581,8 +642,8 @@ async function loadChannel(ch,el){
 
   // รีเซ็ต video แบบสะอาดก่อนเริ่มช่องใหม่ ป้องกัน HLS/TS เก่าค้าง
   try{
-    video.muted=false;
-    video.defaultMuted=false;
+    video.muted=true;
+    video.defaultMuted=true;
     video.volume=1;
     video.autoplay=true;
     video.playsInline=true;
@@ -730,7 +791,7 @@ function playHLS(url,usedProxy,seq){
 
         setTimeout(()=>{
           forceAudio();
-          video.play().catch(()=>{});
+          kickPlay(seq);
           hideFallback();
           setStatus(playMode === "movie" ? "กำลังเล่นโหมด 🎬 หนังสดนิ่ง" : "กำลังเล่นโหมด 📽 โปรเจคเตอร์นิ่ง");
         }, playMode === "movie" ? 2500 : 3500);
@@ -738,7 +799,7 @@ function playHLS(url,usedProxy,seq){
         setTimeout(()=>{try{if(hls) hls.currentLevel=-1}catch(e){}}, playMode === "movie" ? 35000 : 45000);
       }else{
         forceAudio();
-        video.play().catch(()=>{});
+        kickPlay(seq);
         hideFallback();
         setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
       }
@@ -746,9 +807,11 @@ function playHLS(url,usedProxy,seq){
 
     playStartedTimer=setTimeout(()=>{
       if(isCurrentSeq(seq) && !started && !usedProxy && !hasPicture()){
+        setStatus('กำลังลอง Worker อัตโนมัติ...', true);
         playHLS(makeProxyUrl(url),true,seq);
       }
-    }, 1000);
+    }, 1800);
+    scheduleAutoRetryPlayback(seq,'hls', usedProxy?2600:2200);
 
     hls.on(Hls.Events.BUFFER_STALLED,()=>{
       if(!hasPicture()) setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
@@ -756,19 +819,29 @@ function playHLS(url,usedProxy,seq){
     });
 
     hls.on(Hls.Events.ERROR,(ev,data)=>{
-      if(!data||!hls)return;
+      if(!data||!hls||!isCurrentSeq(seq))return;
       if(data.fatal){
-        if(data.type===Hls.ErrorTypes.NETWORK_ERROR){try{hls.startLoad()}catch(e){}}
-        else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){try{hls.recoverMediaError()}catch(e){}}
-        else if(!usedProxy) if(isCurrentSeq(seq)) playHLS(makeProxyUrl(url),true,seq);
-        else showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX");
+        if(data.type===Hls.ErrorTypes.NETWORK_ERROR){
+          try{hls.startLoad()}catch(e){}
+          scheduleAutoRetryPlayback(seq,'hls-error',1200);
+        }
+        else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){
+          try{hls.recoverMediaError()}catch(e){}
+          kickPlay(seq);
+        }
+        else if(!usedProxy){
+          playHLS(makeProxyUrl(url),true,seq);
+        }else{
+          scheduleAutoRetryPlayback(seq,'hls-fatal',1200);
+        }
       }
     });
 
     startWatchdog(()=>{try{hls.startLoad();video.play().catch(()=>{})}catch(e){}});
   }else{
     video.src=url;
-    video.play().catch(()=>showFallback("เว็บเล่นช่องนี้ไม่ได้ ให้กด PLAYER/MX"));
+    kickPlay(seq);
+    scheduleAutoRetryPlayback(seq,'native',2500);
   }
 }
 
@@ -806,8 +879,10 @@ function playTS(url,usedProxy=false,seq){
 
   const goNative=()=>{
     forceAudio();
+    kickPlay(seq);
     video.play().then(()=>{
       nativeStarted=true;
+      markPlaybackStarted(seq);
       hideFallback();
       setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
     }).catch(()=>{});
@@ -816,6 +891,7 @@ function playTS(url,usedProxy=false,seq){
   goNative();
   setTimeout(goNative,80);
   setTimeout(goNative,180);
+  scheduleAutoRetryPlayback(seq,'ts',2600);
 
   setTimeout(()=>{
     if(!isCurrentSeq(seq)) return;
@@ -853,8 +929,10 @@ function playTS(url,usedProxy=false,seq){
 
         const goTs=()=>{
           forceAudio();
+          kickPlay(seq);
           video.play().then(()=>{
             nativeStarted=true;
+            markPlaybackStarted(seq);
             hideFallback();
             setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
           }).catch(()=>{});
@@ -943,9 +1021,11 @@ async function playMPD(url,seq){
     shakaPlayer=new shaka.Player(video);
     shakaPlayer.configure({streaming:{bufferingGoal:35,rebufferingGoal:5,bufferBehind:20,retryParameters:{maxAttempts:5,timeout:25000}}});
     setStatus("กำลังโหลด MPD...");
+    scheduleAutoRetryPlayback(seq,'mpd',4500);
     await shakaPlayer.load(url);
     if(!isCurrentSeq(seq)) return;
-    forceAudio();video.play().catch(()=>{});
+    forceAudio();kickPlay(seq);
+    markPlaybackStarted(seq);
     setStatus("กำลังเล่น MPD");
     startWatchdog(()=>{try{shakaPlayer.retryStreaming();video.play().catch(()=>{})}catch(e){}});
   }catch(e){console.log(e);showFallback("MPD เล่นในเว็บไม่ได้ ให้กด PLAYER/MX")}
