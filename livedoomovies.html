@@ -356,8 +356,8 @@ function scheduleAutoRetryPlayback(seq, kind, delay){
       if(autoRetryCount<=3) playMPD(base,seq);
       else showFallback('ช่องนี้โหลดช้า ลองกด PLAYER/MX');
     }else if(low.includes('.m3u8')||low.includes('extension=m3u8')||low.includes('type=m3u8')){
-      if(autoRetryCount<=2) playHLS(base,false,seq);
-      else if(autoRetryCount<=5) playHLS(makeProxyUrl(base),true,seq);
+      if(autoRetryCount<=1 && !isWorkerUrl(base)) playHLS(base,false,seq);
+      else if(autoRetryCount<=4) playHLS(makeProxyUrl(base),true,seq);
       else showFallback('เซิร์ฟเวอร์ไม่นิ่ง ลองกด PLAYER/MX');
     }else{
       if(autoRetryCount<=2) playTS(base,false,seq);
@@ -419,7 +419,26 @@ function dropboxRaw(url){
     return url.replace("www.dropbox.com","dl.dropboxusercontent.com").replace("&dl=1","").replace("?dl=1","");
   }
 }
-function makeProxyUrl(url){return WORKER_PROXY+encodeURIComponent(clean(url))}
+function isWorkerUrl(url){
+  url=clean(url).toLowerCase();
+  return url.includes('iptv.tawatchai250958.workers.dev/?url=');
+}
+function isLiveDooUrl(url){
+  url=clean(url).toLowerCase();
+  return url.includes('live.livedoomovies.com') || url.includes('livedoomovies.com:4433');
+}
+function makeProxyUrl(url){
+  url=clean(url);
+  if(!url) return '';
+  if(isWorkerUrl(url)) return url;
+  return WORKER_PROXY+encodeURIComponent(url);
+}
+function stablePlayUrl(url){
+  url=normalizeStreamUrl(clean(url));
+  // livedoomovies ต้องผ่าน Worker ตั้งแต่ครั้งแรก ไม่งั้นบางรอบต้องกดย้ำรีโหลด
+  if(isLiveDooUrl(url) && !isWorkerUrl(url)) return makeProxyUrl(url);
+  return url;
+}
 function allOrigins(url){return "https://api.allorigins.win/raw?url="+encodeURIComponent(url)}
 
 async function fetchText(url,ms){
@@ -627,7 +646,7 @@ async function loadChannel(ch,el){
   applyModeLabel();
 
   activeChannel=ch;activeElement=el;
-  activeOriginalUrl=normalizeStreamUrl(clean(ch.file));activeUrl=activeOriginalUrl;
+  activeOriginalUrl=stablePlayUrl(clean(ch.file));activeUrl=activeOriginalUrl;
 
   document.querySelectorAll(".channel").forEach(x=>x.classList.remove("active"));
   if(el) el.classList.add("active");
@@ -655,8 +674,7 @@ async function loadChannel(ch,el){
 
   const u=activeOriginalUrl.toLowerCase();
 
-  try{ fetch(activeOriginalUrl,{cache:"no-store",mode:"no-cors"}).catch(()=>{}); }catch(e){}
-  scheduleNoPictureHint(3500);
+  scheduleNoPictureHint(12000);
 
   if(u.includes(".mpd")){
     playMPD(activeOriginalUrl, seq);
@@ -671,6 +689,8 @@ async function loadChannel(ch,el){
 }
 
 function playHLS(url,usedProxy,seq){
+  url = usedProxy ? makeProxyUrl(url) : stablePlayUrl(url);
+  usedProxy = usedProxy || isWorkerUrl(url);
   seq = seq || playSeq;
   if(!isCurrentSeq(seq)) return;
   activeUrl=url;
@@ -689,25 +709,25 @@ function playHLS(url,usedProxy,seq){
       progressive:true,
 
       // ⚽ กีฬา/สดไว: เข้าไว เหมาะกับบอล/กีฬา/ข่าวสด
-      maxBufferLength:8,
-      maxMaxBufferLength:16,
-      backBufferLength:6,
-      maxBufferHole:0.8,
-      highBufferWatchdogPeriod:3,
-      liveSyncDurationCount:3,
-      liveMaxLatencyDurationCount:7,
+      maxBufferLength:28,
+      maxMaxBufferLength:55,
+      backBufferLength:18,
+      maxBufferHole:2,
+      highBufferWatchdogPeriod:8,
+      liveSyncDurationCount:5,
+      liveMaxLatencyDurationCount:16,
 
-      fragLoadingMaxRetry:4,
-      levelLoadingMaxRetry:3,
-      manifestLoadingMaxRetry:3,
-      fragLoadingTimeOut:9000,
-      levelLoadingTimeOut:7000,
-      manifestLoadingTimeOut:5000,
+      fragLoadingMaxRetry:8,
+      levelLoadingMaxRetry:6,
+      manifestLoadingMaxRetry:6,
+      fragLoadingTimeOut:22000,
+      levelLoadingTimeOut:18000,
+      manifestLoadingTimeOut:16000,
 
-      startLevel:0,
-      abrEwmaDefaultEstimate:450000,
-      abrBandWidthFactor:.6,
-      abrBandWidthUpFactor:.45,
+      startLevel:-1,
+      abrEwmaDefaultEstimate:700000,
+      abrBandWidthFactor:.75,
+      abrBandWidthUpFactor:.55,
       capLevelToPlayerSize:true,
       testBandwidth:false
     } : playMode === "movie" ? {
@@ -806,12 +826,16 @@ function playHLS(url,usedProxy,seq){
     });
 
     playStartedTimer=setTimeout(()=>{
-      if(isCurrentSeq(seq) && !started && !usedProxy && !hasPicture()){
-        setStatus('กำลังลอง Worker อัตโนมัติ...', true);
+      if(!isCurrentSeq(seq) || started || hasPicture()) return;
+      if(!usedProxy){
+        setStatus('กำลังสลับผ่าน Worker อัตโนมัติ...', true);
         playHLS(makeProxyUrl(url),true,seq);
+      }else{
+        // ผ่าน Worker อยู่แล้ว ให้รอต่อ ไม่รีโหลดซ้อนเร็วเกินไป
+        try{ if(hls) hls.startLoad(); kickPlay(seq); }catch(e){}
       }
-    }, 1800);
-    scheduleAutoRetryPlayback(seq,'hls', usedProxy?2600:2200);
+    }, usedProxy ? 9000 : 6500);
+    scheduleAutoRetryPlayback(seq,'hls', usedProxy?11000:8000);
 
     hls.on(Hls.Events.BUFFER_STALLED,()=>{
       if(!hasPicture()) setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
@@ -823,7 +847,7 @@ function playHLS(url,usedProxy,seq){
       if(data.fatal){
         if(data.type===Hls.ErrorTypes.NETWORK_ERROR){
           try{hls.startLoad()}catch(e){}
-          scheduleAutoRetryPlayback(seq,'hls-error',1200);
+          scheduleAutoRetryPlayback(seq,'hls-error', usedProxy?6500:3500);
         }
         else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){
           try{hls.recoverMediaError()}catch(e){}
@@ -832,7 +856,7 @@ function playHLS(url,usedProxy,seq){
         else if(!usedProxy){
           playHLS(makeProxyUrl(url),true,seq);
         }else{
-          scheduleAutoRetryPlayback(seq,'hls-fatal',1200);
+          scheduleAutoRetryPlayback(seq,'hls-fatal', usedProxy?6500:3500);
         }
       }
     });
