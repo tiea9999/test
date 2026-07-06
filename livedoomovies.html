@@ -425,6 +425,73 @@ function makeProxyUrl(url){
   if(url.startsWith(WORKER_PROXY) || url.includes('iptv.tawatchai250958.workers.dev/?url=')) return url;
   return WORKER_PROXY+encodeURIComponent(url)+'&r='+Date.now();
 }
+
+
+// ===== V5.4B PLAYLIST-ONLY WORKER TEST =====
+// ใช้ Worker เฉพาะ .m3u8 แต่ให้ไฟล์ .ts โหลดตรง เพื่อลดภาระ RAM/CPU บนโปรเจคเตอร์ 1GB
+function decodeWorkerTarget(url){
+  url=clean(url);
+  try{
+    if(!url.includes('iptv.tawatchai250958.workers.dev')) return url;
+    const u=new URL(url);
+    return u.searchParams.get('url') || u.searchParams.get('u') || url;
+  }catch(e){ return url; }
+}
+function isLivedoomoviesUrl(url){
+  const target=decodeWorkerTarget(url).toLowerCase();
+  return target.includes('live.livedoomovies.com') || target.includes('livedoomovies.com');
+}
+function isPlaylistUrl(url){
+  const target=decodeWorkerTarget(url).toLowerCase();
+  return target.includes('.m3u8') || target.includes('playlist');
+}
+function makeLivedooStartUrl(url){
+  url=clean(url);
+  if(!url) return '';
+  // livedoomovies เริ่มด้วย Worker เฉพาะ playlist เพื่อกัน CORS/302
+  if(isLivedoomoviesUrl(url) && !url.includes('iptv.tawatchai250958.workers.dev')){
+    return makeProxyUrl(url);
+  }
+  return url;
+}
+function unwrapWorkerUrlIfSegment(url){
+  url=clean(url);
+  if(!url) return url;
+  const decoded=decodeWorkerTarget(url);
+  const low=decoded.toLowerCase();
+  // ให้ segment โหลดตรง ไม่ผ่าน Worker
+  if(isLivedoomoviesUrl(decoded) && (low.includes('.ts') || low.includes('.m4s') || low.includes('/hls/') || low.match(/\/(\d+|seg|segment)[^\/]*$/))){
+    return decoded;
+  }
+  return url;
+}
+function rewritePlaylistWorkerToDirectSegments(data){
+  if(typeof data!=='string' || !data.includes('#EXTM3U')) return data;
+  return data.split(/\r?\n/).map(line=>{
+    const l=String(line||'').trim();
+    if(!l) return line;
+    // key ยังปล่อยตามเดิมก่อน เพื่อไม่ให้ key CORS เสีย
+    if(l.startsWith('#EXT-X-KEY')) return line;
+    if(l.startsWith('#')) return line;
+    return unwrapWorkerUrlIfSegment(l);
+  }).join('\n');
+}
+function createPlaylistOnlyLoader(DefaultLoader){
+  return class PlaylistOnlyLoader extends DefaultLoader{
+    load(context,config,callbacks){
+      const originalOnSuccess=callbacks.onSuccess;
+      callbacks={...callbacks,onSuccess:(response,stats,ctx,networkDetails)=>{
+        try{
+          if(ctx && isPlaylistUrl(ctx.url) && typeof response.data==='string'){
+            response.data=rewritePlaylistWorkerToDirectSegments(response.data);
+          }
+        }catch(e){console.log('playlist rewrite fail',e)}
+        originalOnSuccess(response,stats,ctx,networkDetails);
+      }};
+      super.load(context,config,callbacks);
+    }
+  }
+}
 function allOrigins(url){return "https://api.allorigins.win/raw?url="+encodeURIComponent(url)}
 
 async function fetchText(url,ms){
@@ -687,7 +754,7 @@ async function loadChannel(ch,el){
   if(u.includes(".mpd")){
     playMPD(activeOriginalUrl, seq);
   }else if(u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")){
-    playHLS(activeOriginalUrl,false,seq);
+    playHLS(makeLivedooStartUrl(activeOriginalUrl), isLivedoomoviesUrl(activeOriginalUrl), seq);
   }else{
     playTS(activeOriginalUrl,false,seq);
   }
@@ -793,6 +860,11 @@ function playHLS(url,usedProxy,seq){
       capLevelToPlayerSize:true,
       testBandwidth:false
     };
+
+    if(isLivedoomoviesUrl(url) && window.Hls && Hls.DefaultConfig && Hls.DefaultConfig.loader){
+      cfg.loader = createPlaylistOnlyLoader(Hls.DefaultConfig.loader);
+      setStatus('โหมด B: Worker เฉพาะ Playlist • TS โหลดตรง', true);
+    }
 
     hls=new Hls(cfg);
 
