@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
-    <title>TIEA AUTO M3U MOVIE LIVE SPORTS FINAL V5.4 PROJECTOR STABLE</title>
+    <title>TIEA AUTO M3U MOVIE LIVE SPORTS FINAL V5.4C PROJECTOR 1GB</title>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
@@ -272,7 +272,7 @@
 
 <body>
     <button class="home-btn" onclick="goHome()">🏠 โฮม</button>
-    <h2>TIEA AUTO M3U MOVIE LIVE SPORTS FINAL V5.4</h2>
+    <h2>TIEA AUTO M3U MOVIE LIVE SPORTS FINAL V5.4C</h2>
     <div id="load-status">กำลังโหลดรายการ...</div>
 
     <div class="tools">
@@ -310,7 +310,7 @@ let channels=[];
 let activeChannel=null,activeElement=null,activeUrl="",activeOriginalUrl="";
 let hls=null,tsPlayer=null,shakaPlayer=null,watchdog=null,uiTimer=null,playStartedTimer=null,noPictureTimer=null;
 let autoRetryTimer=null, autoRetryCount=0, startupMutedUntil=0;
-let playMode = "sports"; // บังคับเริ่มที่กีฬา/สดไวเสมอ
+let playMode = "sports"; // V5.4C: โปรเจ็กเตอร์ RAM 1GB ใช้กีฬา/สดไวแบบบัฟเฟอร์พอดี ไม่หนักเครื่อง
 
 // V3 Fast Click Fix: กันการโหลดซ้อน/กดซ้ำ และยกเลิกงานเก่าทันทีเมื่อเปลี่ยนช่อง
 let playSeq = 0;
@@ -346,7 +346,8 @@ function scheduleAutoRetryPlayback(seq, kind, delay){
     if(!isCurrentSeq(seq)) return;
     const box=document.getElementById('player-container');
     if(!box || box.style.display!=='block') return;
-    if(hasPicture() || bufferAhead()>5) { markPlaybackStarted(seq); return; }
+    if(hasPicture()) { markPlaybackStarted(seq); return; }
+    if(bufferedAhead()>5){ projectorSoftResume(); scheduleAutoRetryPlayback(seq,kind,9000); return; }
     autoRetryCount++;
     setStatus('กำลังลองใหม่อัตโนมัติ ครั้งที่ '+autoRetryCount, true);
     const base=activeOriginalUrl || activeUrl;
@@ -364,7 +365,7 @@ function scheduleAutoRetryPlayback(seq, kind, delay){
       else if(autoRetryCount<=5) playTS(makeProxyUrl(base),true,seq);
       else showFallback('เซิร์ฟเวอร์ไม่นิ่ง ลองกด PLAYER/MX');
     }
-  }, delay || (isProjectorDevice()?7000:3500));
+  }, delay||1800);
 }
 
 
@@ -419,79 +420,7 @@ function dropboxRaw(url){
     return url.replace("www.dropbox.com","dl.dropboxusercontent.com").replace("&dl=1","").replace("?dl=1","");
   }
 }
-function makeProxyUrl(url){
-  url=clean(url);
-  if(!url) return '';
-  if(url.startsWith(WORKER_PROXY) || url.includes('iptv.tawatchai250958.workers.dev/?url=')) return url;
-  return WORKER_PROXY+encodeURIComponent(url)+'&r='+Date.now();
-}
-
-
-// ===== V5.4B PLAYLIST-ONLY WORKER TEST =====
-// ใช้ Worker เฉพาะ .m3u8 แต่ให้ไฟล์ .ts โหลดตรง เพื่อลดภาระ RAM/CPU บนโปรเจคเตอร์ 1GB
-function decodeWorkerTarget(url){
-  url=clean(url);
-  try{
-    if(!url.includes('iptv.tawatchai250958.workers.dev')) return url;
-    const u=new URL(url);
-    return u.searchParams.get('url') || u.searchParams.get('u') || url;
-  }catch(e){ return url; }
-}
-function isLivedoomoviesUrl(url){
-  const target=decodeWorkerTarget(url).toLowerCase();
-  return target.includes('live.livedoomovies.com') || target.includes('livedoomovies.com');
-}
-function isPlaylistUrl(url){
-  const target=decodeWorkerTarget(url).toLowerCase();
-  return target.includes('.m3u8') || target.includes('playlist');
-}
-function makeLivedooStartUrl(url){
-  url=clean(url);
-  if(!url) return '';
-  // livedoomovies เริ่มด้วย Worker เฉพาะ playlist เพื่อกัน CORS/302
-  if(isLivedoomoviesUrl(url) && !url.includes('iptv.tawatchai250958.workers.dev')){
-    return makeProxyUrl(url);
-  }
-  return url;
-}
-function unwrapWorkerUrlIfSegment(url){
-  url=clean(url);
-  if(!url) return url;
-  const decoded=decodeWorkerTarget(url);
-  const low=decoded.toLowerCase();
-  // ให้ segment โหลดตรง ไม่ผ่าน Worker
-  if(isLivedoomoviesUrl(decoded) && (low.includes('.ts') || low.includes('.m4s') || low.includes('/hls/') || low.match(/\/(\d+|seg|segment)[^\/]*$/))){
-    return decoded;
-  }
-  return url;
-}
-function rewritePlaylistWorkerToDirectSegments(data){
-  if(typeof data!=='string' || !data.includes('#EXTM3U')) return data;
-  return data.split(/\r?\n/).map(line=>{
-    const l=String(line||'').trim();
-    if(!l) return line;
-    // key ยังปล่อยตามเดิมก่อน เพื่อไม่ให้ key CORS เสีย
-    if(l.startsWith('#EXT-X-KEY')) return line;
-    if(l.startsWith('#')) return line;
-    return unwrapWorkerUrlIfSegment(l);
-  }).join('\n');
-}
-function createPlaylistOnlyLoader(DefaultLoader){
-  return class PlaylistOnlyLoader extends DefaultLoader{
-    load(context,config,callbacks){
-      const originalOnSuccess=callbacks.onSuccess;
-      callbacks={...callbacks,onSuccess:(response,stats,ctx,networkDetails)=>{
-        try{
-          if(ctx && isPlaylistUrl(ctx.url) && typeof response.data==='string'){
-            response.data=rewritePlaylistWorkerToDirectSegments(response.data);
-          }
-        }catch(e){console.log('playlist rewrite fail',e)}
-        originalOnSuccess(response,stats,ctx,networkDetails);
-      }};
-      super.load(context,config,callbacks);
-    }
-  }
-}
+function makeProxyUrl(url){return WORKER_PROXY+encodeURIComponent(clean(url))}
 function allOrigins(url){return "https://api.allorigins.win/raw?url="+encodeURIComponent(url)}
 
 async function fetchText(url,ms){
@@ -646,6 +575,26 @@ function hasPicture(){
   }catch(e){return false}
 }
 
+function bufferedAhead(){
+  try{
+    if(!video || !video.buffered || !video.buffered.length) return 0;
+    const t=video.currentTime||0;
+    for(let i=0;i<video.buffered.length;i++){
+      if(video.buffered.start(i)<=t && video.buffered.end(i)>=t){
+        return Math.max(0, video.buffered.end(i)-t);
+      }
+    }
+  }catch(e){}
+  return 0;
+}
+function projectorSoftResume(){
+  try{
+    forceAudio();
+    if(video.paused && video.readyState>=2) video.play().catch(()=>{});
+    if(hls && bufferedAhead()<4) hls.startLoad();
+  }catch(e){}
+}
+
 function scheduleNoPictureHint(ms){
   if(noPictureTimer) clearTimeout(noPictureTimer);
   noPictureTimer=setTimeout(()=>{
@@ -687,36 +636,15 @@ function forceAudio(){try{
   video.volume=1;
 }catch(e){}}
 
-function isProjectorDevice(){
-  const ua=(navigator.userAgent||'').toLowerCase();
-  return ua.includes('android tv') || ua.includes('projector') || ua.includes('xgimi') || ua.includes('mibox') || ua.includes('smart-tv') || ua.includes('smarttv') || ua.includes('bravia') || ua.includes('aft') || ua.includes('chromecast') || ua.includes('google tv');
-}
-function bufferAhead(){
-  try{
-    if(!video.buffered || !video.buffered.length) return 0;
-    const t=video.currentTime||0;
-    for(let i=0;i<video.buffered.length;i++){
-      if(video.buffered.start(i)<=t && video.buffered.end(i)>=t){
-        return Math.max(0, video.buffered.end(i)-t);
-      }
-    }
-  }catch(e){}
-  return 0;
-}
-function currentStableDelay(msMobile, msProjector){
-  return isProjectorDevice() ? msProjector : msMobile;
-}
-
-
 async function loadChannel(ch,el){
   // Fast Click Fix: ทุกครั้งที่กดช่องใหม่ ให้ token ใหม่ทันที
   const seq = nextPlaySeq();
   autoRetryCount = 0;
-  startupMutedUntil = Date.now() + (isProjectorDevice()?4200:2600);
+  startupMutedUntil = Date.now()+2600;
   isSwitchingChannel = true;
 
-  playMode = isProjectorDevice() ? "projector" : "sports";
-  try{ localStorage.setItem("TIEA_PLAY_MODE",playMode); }catch(e){}
+  playMode = "sports";
+  try{ localStorage.setItem("TIEA_PLAY_MODE","sports"); }catch(e){}
   applyModeLabel();
 
   activeChannel=ch;activeElement=el;
@@ -744,17 +672,17 @@ async function loadChannel(ch,el){
     video.load();
   }catch(e){}
 
-  setStatus(isProjectorDevice()?'กำลังเล่นโหมด 📽 โปรเจคเตอร์นิ่ง':'กำลังเล่นหมวด "กีฬา สดไว"', true);
+  setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
 
   const u=activeOriginalUrl.toLowerCase();
 
   try{ fetch(activeOriginalUrl,{cache:"no-store",mode:"no-cors"}).catch(()=>{}); }catch(e){}
-  scheduleNoPictureHint(isProjectorDevice()?12000:5500);
+  scheduleNoPictureHint(12000);
 
   if(u.includes(".mpd")){
     playMPD(activeOriginalUrl, seq);
   }else if(u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")){
-    playHLS(makeLivedooStartUrl(activeOriginalUrl), isLivedoomoviesUrl(activeOriginalUrl), seq);
+    playHLS(activeOriginalUrl,false,seq);
   }else{
     playTS(activeOriginalUrl,false,seq);
   }
@@ -783,9 +711,9 @@ function playHLS(url,usedProxy,seq){
 
       // ⚽ กีฬา/สดไว: เข้าไว เหมาะกับบอล/กีฬา/ข่าวสด
       maxBufferLength:24,
-      maxMaxBufferLength:45,
-      backBufferLength:18,
-      maxBufferHole:2.2,
+      maxMaxBufferLength:36,
+      backBufferLength:8,
+      maxBufferHole:2.5,
       highBufferWatchdogPeriod:8,
       liveSyncDurationCount:6,
       liveMaxLatencyDurationCount:18,
@@ -793,14 +721,14 @@ function playHLS(url,usedProxy,seq){
       fragLoadingMaxRetry:8,
       levelLoadingMaxRetry:6,
       manifestLoadingMaxRetry:6,
-      fragLoadingTimeOut:22000,
-      levelLoadingTimeOut:18000,
-      manifestLoadingTimeOut:18000,
+      fragLoadingTimeOut:26000,
+      levelLoadingTimeOut:22000,
+      manifestLoadingTimeOut:20000,
 
       startLevel:0,
-      abrEwmaDefaultEstimate:650000,
-      abrBandWidthFactor:.7,
-      abrBandWidthUpFactor:.55,
+      abrEwmaDefaultEstimate:380000,
+      abrBandWidthFactor:.55,
+      abrBandWidthUpFactor:.32,
       capLevelToPlayerSize:true,
       testBandwidth:false
     } : playMode === "movie" ? {
@@ -861,11 +789,6 @@ function playHLS(url,usedProxy,seq){
       testBandwidth:false
     };
 
-    if(isLivedoomoviesUrl(url) && window.Hls && Hls.DefaultConfig && Hls.DefaultConfig.loader){
-      cfg.loader = createPlaylistOnlyLoader(Hls.DefaultConfig.loader);
-      setStatus('โหมด B: Worker เฉพาะ Playlist • TS โหลดตรง', true);
-    }
-
     hls=new Hls(cfg);
 
     hls.loadSource(url);
@@ -908,30 +831,35 @@ function playHLS(url,usedProxy,seq){
         setStatus('กำลังลอง Worker อัตโนมัติ...', true);
         playHLS(makeProxyUrl(url),true,seq);
       }
-    }, isProjectorDevice()?9000:4500);
-    scheduleAutoRetryPlayback(seq,'hls', usedProxy?(isProjectorDevice()?9000:5000):(isProjectorDevice()?7000:4200));
+    }, 6500);
+    scheduleAutoRetryPlayback(seq,'hls', usedProxy?9000:7500);
 
     hls.on(Hls.Events.BUFFER_STALLED,()=>{
-      if(bufferAhead()>8){ try{video.play().catch(()=>{})}catch(e){}; return; }
-      if(!hasPicture()) setStatus(isProjectorDevice()?'กำลังเติมบัฟเฟอร์โปรเจคเตอร์...':'กำลังเล่นหมวด "กีฬา สดไว"', true);
-      setTimeout(()=>{try{if(video.paused)video.play().catch(()=>{}); if(hls) hls.startLoad();}catch(e){}}, isProjectorDevice()?3000:1200);
+      if(!isCurrentSeq(seq)) return;
+      const ahead=bufferedAhead();
+      if(ahead>6){ projectorSoftResume(); return; }
+      if(!hasPicture()) setStatus('กำลังเติมบัฟเฟอร์แบบโปรเจ็กเตอร์...', true);
+      setTimeout(()=>projectorSoftResume(),2200);
+      if(ahead<2) scheduleAutoRetryPlayback(seq,'hls-stall-soft',9000);
     });
 
     hls.on(Hls.Events.ERROR,(ev,data)=>{
       if(!data||!hls||!isCurrentSeq(seq))return;
       if(data.fatal){
+        const ahead=bufferedAhead();
         if(data.type===Hls.ErrorTypes.NETWORK_ERROR){
           try{hls.startLoad()}catch(e){}
-          scheduleAutoRetryPlayback(seq,'hls-error', isProjectorDevice()?4500:1800);
+          if(ahead<2) scheduleAutoRetryPlayback(seq,'hls-error-soft',9000);
+          else projectorSoftResume();
         }
         else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){
           try{hls.recoverMediaError()}catch(e){}
-          kickPlay(seq);
+          setTimeout(()=>kickPlay(seq),1200);
         }
         else if(!usedProxy){
-          playHLS(makeProxyUrl(url),true,seq);
+          setTimeout(()=>{ if(isCurrentSeq(seq)&&!hasPicture()) playHLS(makeProxyUrl(url),true,seq); },6500);
         }else{
-          scheduleAutoRetryPlayback(seq,'hls-fatal', isProjectorDevice()?4500:1800);
+          scheduleAutoRetryPlayback(seq,'hls-fatal-soft',9000);
         }
       }
     });
@@ -1106,7 +1034,7 @@ function startTsNoJumpWatchdog(usingTsEngine,fallbackWorker){
       }
       stuck=0;
     }
-  }, isProjectorDevice()?8000:5000);
+  },7000);
 }
 
 async function playMPD(url,seq){
@@ -1143,17 +1071,11 @@ function startWatchdog(recover){
       return;
     }
 
-    const ahead=bufferAhead();
-    if(ahead>12){
-      lowReady=0; stuck=0;
-      return;
-    }
-
     if(video.readyState<2){
       lowReady++;
-      if(!hasPicture()) setStatus(isProjectorDevice()?'กำลังเติมบัฟเฟอร์โปรเจคเตอร์...':'กำลังเล่นหมวด "กีฬา สดไว"', true);
+      if(!hasPicture()) setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
       const now=Date.now();
-      if(lowReady>=(isProjectorDevice()?14:8) && now-lastRecover>(isProjectorDevice()?55000:30000)){
+      if(lowReady>=8 && now-lastRecover>30000){
         lastRecover=now;
         lowReady=0;
         try{recover&&recover()}catch(e){}
@@ -1166,9 +1088,9 @@ function startWatchdog(recover){
 
     last=video.currentTime||0;
 
-    if(stuck>=(isProjectorDevice()?75:45)){
+    if(stuck>=45){
       const now=Date.now();
-      setStatus(isProjectorDevice()?'กำลังประคองสัญญาณโปรเจคเตอร์':'กำลังเล่นหมวด "กีฬา สดไว"');
+      setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
       try{
         if(now-lastRecover>30000){
           lastRecover=now;
@@ -1178,7 +1100,7 @@ function startWatchdog(recover){
       }catch(e){}
       stuck=0;
     }
-  },4000);
+  },7000);
 }
 
 function openIntent(url,pkg){
@@ -1209,7 +1131,6 @@ function goHome(){window.location.href="https://tiea9999.github.io/tv/index.html
   document.getElementById("player-container").addEventListener(ev,showUI,{passive:true});
 });
 
-/* ===== V5.4 Projector Stable: soft recovery + deeper buffer + slower watchdog ===== */
 /* ================= REMOTE BUTTON CLICK FIX ================= */
 function getFocusablePlayerButtons(){
   return Array.from(document.querySelectorAll('#player-container .player-btn')).filter(el=>el.offsetParent!==null);
