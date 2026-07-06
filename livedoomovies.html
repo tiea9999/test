@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
-    <title>TIEA AUTO M3U V5.5 AI STREAMING ENGINE</title>
+    <title>TIEA AUTO M3U V6 MEMORY GUARDIAN</title>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
@@ -272,7 +272,7 @@
 
 <body>
     <button class="home-btn" onclick="goHome()">🏠 โฮม</button>
-    <h2>TIEA AUTO M3U V5.5 AI STREAMING ENGINE</h2>
+    <h2>TIEA AUTO M3U V6 MEMORY GUARDIAN</h2>
     <div id="load-status">กำลังโหลดรายการ...</div>
 
     <div class="tools">
@@ -323,13 +323,22 @@ let aiLastSoftRefreshAt=0;
 let aiLastCurrentTime=0;
 let aiLastGoodAt=0;
 let aiSoftRefreshCount=0;
+const V6_PROFILE={
+  memoryRefreshMs: 11*60*1000,
+  predictiveFirstMs: 33*60*1000,
+  predictiveRepeatMs: 4*60*1000,
+  maxRuntimeBeforeResetMs: 55*60*1000,
+  longSpinnerMs: 6500,
+  guardianEveryMs: 7000
+};
+
 const AI_PROFILE={
-  softRefreshMs:8*60*1000,
-  minSoftRefreshGap:90*1000,
+  softRefreshMs:6*60*1000,
+  minSoftRefreshGap:75*1000,
   healthEveryMs:5000,
   lowBufferLimit:3,
   stallLimit:3,
-  spinnerRecoverMs:10000,
+  spinnerRecoverMs:6500,
   maxSoftRefreshBeforeReload:3
 };
 let playMode = "sports"; // บังคับเริ่มที่กีฬา/สดไวเสมอ
@@ -409,9 +418,94 @@ function aiSoftRefresh(reason,seq){
 
   scheduleAISoftRefresh(seq);
 }
+
+function v6MemoryClean(reason){
+  try{
+    if(hls){
+      try{hls.startLoad()}catch(e){}
+    }
+    try{
+      video.muted=false;
+      video.defaultMuted=false;
+      video.volume=1;
+      if(video.paused && video.readyState>=2) video.play().catch(()=>{});
+    }catch(e){}
+    setStatus('V6 Memory Guardian ทำงาน...', true);
+  }catch(e){}
+}
+
+function v6HardSoftReset(seq, reason){
+  seq = seq || playSeq;
+  if(!isCurrentSeq(seq)) return;
+  const url = activeOriginalUrl || activeUrl;
+  if(!url) return;
+
+  setStatus('V6 รีเฟรชสัญญาณก่อนค้าง...', true);
+
+  try{
+    if(hls){
+      try{hls.stopLoad()}catch(e){}
+      try{hls.detachMedia()}catch(e){}
+      try{hls.destroy()}catch(e){}
+      hls=null;
+    }
+  }catch(e){hls=null}
+
+  try{
+    video.pause();
+    video.removeAttribute("src");
+    video.load();
+  }catch(e){}
+
+  setTimeout(()=>{
+    if(!isCurrentSeq(seq)) return;
+    const low = String(url).toLowerCase();
+    if(low.includes(".m3u8") || low.includes("playlist") || low.includes("type=m3u8") || low.includes("extension=m3u8")){
+      playHLS(makeProxyUrl(url), true, seq);
+    }else if(low.includes(".mpd")){
+      playMPD(url, seq);
+    }else{
+      playTS(makeProxyUrl(url), true, seq);
+    }
+  }, 900);
+}
+
+function startV6PredictiveGuardian(seq){
+  if(!isCurrentSeq(seq)) return;
+
+  setTimeout(()=>{
+    if(isCurrentSeq(seq)) aiSoftRefresh('v6-before-35min', seq);
+  }, V6_PROFILE.predictiveFirstMs);
+
+  const repeat = setInterval(()=>{
+    if(!isCurrentSeq(seq)){
+      clearInterval(repeat);
+      return;
+    }
+    const elapsed = Date.now() - aiPlaybackStartAt;
+    if(elapsed > V6_PROFILE.maxRuntimeBeforeResetMs){
+      clearInterval(repeat);
+      v6HardSoftReset(seq, 'v6-55min-reset');
+      return;
+    }
+    if(elapsed > V6_PROFILE.predictiveFirstMs){
+      aiSoftRefresh('v6-predictive-repeat', seq);
+    }
+  }, V6_PROFILE.predictiveRepeatMs);
+
+  const mem = setInterval(()=>{
+    if(!isCurrentSeq(seq)){
+      clearInterval(mem);
+      return;
+    }
+    v6MemoryClean('v6-periodic');
+  }, V6_PROFILE.memoryRefreshMs);
+}
+
 function startAIHealthMonitor(seq){
   clearAIEngine();
   aiPlaybackStartAt=Date.now();
+  startV6PredictiveGuardian(seq);
   aiSoftRefreshCount=0;
   aiLastGoodAt=Date.now();
   aiLastCurrentTime=video.currentTime||0;
@@ -516,7 +610,7 @@ function applyModeLabel(){
   }
 
   if(playMode === "sports"){
-    setLoad('กำลังเล่นหมวด "กีฬา สดไว" • กดช่องแล้วเล่นทันที');
+    setLoad('V6 กำลังเล่นโหมดเสถียร • กดช่องแล้วเล่นทันที');
   }else if(playMode === "movie"){
     setLoad("โหมด 🎬 หนังสดนิ่ง: เหมาะกับช่องหนังสด เช่น HBO/CINEMAX ลดหมุน");
   }else{
@@ -587,7 +681,7 @@ async function loadM3U(url){
       if(txt.includes("#EXTINF")){
         channels=parseM3U(txt);
         renderChannels(channels);
-        setLoad('โหลดสำเร็จ '+channels.length+' ช่อง • กำลังเล่นหมวด "กีฬา สดไว"');
+        setLoad('โหลดสำเร็จ '+channels.length+' ช่อง • V6 กำลังเล่นโหมดเสถียร');
         return;
       }
       lastErr=new Error("ไม่ใช่ไฟล์ M3U");
@@ -785,7 +879,7 @@ async function loadChannel(ch,el){
     video.load();
   }catch(e){}
 
-  setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
+  setStatus('V6 กำลังเล่นโหมดเสถียร', true);
 
   const u=activeOriginalUrl.toLowerCase();
 
@@ -810,7 +904,7 @@ function playHLS(url,usedProxy,seq){
   activeUrl=url;
   video.style.display="block";
   forceAudio();
-  setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
+  setStatus('V6 กำลังเล่นโหมดเสถียร', true);
   if(hls){try{hls.destroy()}catch(e){} hls=null}
   if(watchdog){clearInterval(watchdog);watchdog=null}
 
@@ -824,9 +918,9 @@ function playHLS(url,usedProxy,seq){
 
       // ⚽ กีฬา/สดไว: เข้าไว เหมาะกับบอล/กีฬา/ข่าวสด
       // V5.5 Rolling Buffer สำหรับ RAM 1GB: ไม่สะสม buffer/backBuffer จนเครื่องหน่วง
-      maxBufferLength:12,
-      maxMaxBufferLength:24,
-      backBufferLength:4,
+      maxBufferLength:10,
+      maxMaxBufferLength:18,
+      backBufferLength:2,
       maxBufferHole:1.2,
       highBufferWatchdogPeriod:6,
       liveSyncDurationCount:4,
@@ -937,7 +1031,7 @@ function playHLS(url,usedProxy,seq){
         forceAudio();
         kickPlay(seq);
         hideFallback();
-        setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
+        setStatus('V6 กำลังเล่นโหมดเสถียร');
       }
     });
 
@@ -950,7 +1044,7 @@ function playHLS(url,usedProxy,seq){
     scheduleAutoRetryPlayback(seq,'hls', usedProxy?7000:5500);
 
     hls.on(Hls.Events.BUFFER_STALLED,()=>{
-      if(!hasPicture()) setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
+      if(!hasPicture()) setStatus('V6 กำลังเล่นโหมดเสถียร', true);
       setTimeout(()=>{try{if(video.paused)video.play().catch(()=>{})}catch(e){}},900);
     });
 
@@ -992,7 +1086,7 @@ function playTS(url,usedProxy=false,seq){
   try{if(tsPlayer){tsPlayer.destroy();tsPlayer=null}}catch(e){}
   try{video.pause();video.removeAttribute("src");video.load()}catch(e){}
 
-  setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
+  setStatus('V6 กำลังเล่นโหมดเสถียร', true);
 
   let nativeStarted=false;
   let fallbackStarted=false;
@@ -1003,7 +1097,7 @@ function playTS(url,usedProxy=false,seq){
     fallbackStarted=true;
     const p=makeProxyUrl(url);
     if(p && p!==url){
-      setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
+      setStatus('V6 กำลังเล่นโหมดเสถียร', true);
       if(isCurrentSeq(seq)) playTS(p,true,seq);
       return true;
     }
@@ -1020,7 +1114,7 @@ function playTS(url,usedProxy=false,seq){
       nativeStarted=true;
       markPlaybackStarted(seq);
       hideFallback();
-      setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
+      setStatus('V6 กำลังเล่นโหมดเสถียร');
     }).catch(()=>{});
   };
 
@@ -1038,7 +1132,7 @@ function playTS(url,usedProxy=false,seq){
 
     if(window.mpegts && mpegts.getFeatureList().mseLivePlayback){
       try{
-        setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
+        setStatus('V6 กำลังเล่นโหมดเสถียร');
         try{video.pause();video.removeAttribute("src");video.load()}catch(e){}
 
         tsPlayer=mpegts.createPlayer(
@@ -1070,7 +1164,7 @@ function playTS(url,usedProxy=false,seq){
             nativeStarted=true;
             markPlaybackStarted(seq);
             hideFallback();
-            setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
+            setStatus('V6 กำลังเล่นโหมดเสถียร');
           }).catch(()=>{});
         };
 
@@ -1089,7 +1183,7 @@ function playTS(url,usedProxy=false,seq){
           if(!isStarted()){
             if(fallbackWorker()) return;
           }
-          setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
+          setStatus('V6 กำลังเล่นโหมดเสถียร');
           try{video.play().catch(()=>{})}catch(e){}
         });
 
@@ -1122,7 +1216,7 @@ function startTsNoJumpWatchdog(usingTsEngine,fallbackWorker){
 
     if(video.readyState<2){
       noData++;
-      setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
+      setStatus('V6 กำลังเล่นโหมดเสถียร');
       if(noData>=6 && typeof fallbackWorker==="function"){
         if(fallbackWorker()) return;
       }
@@ -1138,7 +1232,7 @@ function startTsNoJumpWatchdog(usingTsEngine,fallbackWorker){
       const now=Date.now();
       if(now-lastAction>20000){
         lastAction=now;
-        setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
+        setStatus('V6 กำลังเล่นโหมดเสถียร');
         try{video.play().catch(()=>{})}catch(e){}
       }
       stuck=0;
@@ -1182,7 +1276,7 @@ function startWatchdog(recover){
 
     if(video.readyState<2){
       lowReady++;
-      if(!hasPicture()) setStatus('กำลังเล่นหมวด "กีฬา สดไว"', true);
+      if(!hasPicture()) setStatus('V6 กำลังเล่นโหมดเสถียร', true);
       const now=Date.now();
       if(lowReady>=8 && now-lastRecover>30000){
         lastRecover=now;
@@ -1199,7 +1293,7 @@ function startWatchdog(recover){
 
     if(stuck>=45){
       const now=Date.now();
-      setStatus('กำลังเล่นหมวด "กีฬา สดไว"');
+      setStatus('V6 กำลังเล่นโหมดเสถียร');
       try{
         if(now-lastRecover>30000){
           lastRecover=now;
