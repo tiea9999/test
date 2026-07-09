@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
-    <title>TIEA AUTO M3U V6.1 AI JSON FAST LOAD</title>
+    <title>TIEA AUTO M3U V6.2 FINAL 429 FIX</title>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
@@ -272,7 +272,7 @@
 
 <body>
     <button class="home-btn" onclick="goHome()">🏠 โฮม</button>
-    <h2>TIEA AUTO M3U V6.1 AI JSON FAST LOAD</h2>
+    <h2>TIEA AUTO M3U V6.2 FINAL 429 FIX</h2>
     <div id="load-status">กำลังโหลดรายการ...</div>
 
     <div class="tools">
@@ -649,41 +649,50 @@ function dropboxRaw(url){
 function makeProxyUrl(url){return WORKER_PROXY+encodeURIComponent(clean(url))}
 function allOrigins(url){return "https://api.allorigins.win/raw?url="+encodeURIComponent(url)}
 
-// ===== V6.1 AI JSON / M3U FAST LOAD ENGINE =====
-// จุดประสงค์: เข้า Doomovie ให้ไวขึ้น ไม่รอ Raw GitHub timeout ทีละตัว
-// - โหลดหลายทางพร้อมกัน
-// - ตัวไหนมาก่อนใช้ทันที
-// - เก็บ cache ในเครื่องไว้ใช้รอบต่อไป
-// - ถ้าต้นทางช้า ใช้ cache ก่อน แล้วค่อย refresh เบื้องหลัง
-const TIEA_LIST_CACHE_KEY = "TIEA_LIVEDOOMOVIES_M3U_CACHE_V61";
-const TIEA_LIST_CACHE_TIME_KEY = "TIEA_LIVEDOOMOVIES_M3U_CACHE_TIME_V61";
-const TIEA_LIST_CACHE_MAX_AGE = 1000 * 60 * 60 * 6; // 6 ชั่วโมง
+// ===== V6.2 FINAL M3U 429 FIX ENGINE =====
+const TIEA_LIST_CACHE_KEY = "TIEA_LIVEDOOMOVIES_M3U_CACHE_V62_FINAL";
+const TIEA_LIST_CACHE_TIME_KEY = "TIEA_LIVEDOOMOVIES_M3U_CACHE_TIME_V62_FINAL";
+const TIEA_LIST_CACHE_MAX_AGE = 1000 * 60 * 60 * 12;
 
+function githubToJsdelivr(url){
+  try{
+    const u=new URL(url);
+    if(u.hostname!=="raw.githubusercontent.com")return "";
+    const p=u.pathname.split("/").filter(Boolean);
+    const owner=p[0], repo=p[1];
+    let branch="", rest=[];
+    if(p[2]==="refs" && p[3]==="heads"){
+      branch=p[4]||"main";
+      rest=p.slice(5);
+    }else{
+      branch=p[2]||"main";
+      rest=p.slice(3);
+    }
+    if(!owner||!repo||!rest.length)return "";
+    return "https://cdn.jsdelivr.net/gh/"+owner+"/"+repo+"@"+branch+"/"+rest.join("/");
+  }catch(e){return ""}
+}
+function addCacheBust(url){return url+(url.includes("?")?"&":"?")+"t="+Date.now()}
 async function fetchText(url,ms){
   const c=new AbortController();
-  const t=setTimeout(()=>c.abort(),ms||6500);
+  const t=setTimeout(()=>c.abort(),ms||7000);
   try{
     const r=await fetch(url,{cache:"no-store",signal:c.signal});
     clearTimeout(t);
     if(!r.ok) throw new Error("HTTP "+r.status);
-    return await r.text();
-  }catch(e){
-    clearTimeout(t);
-    throw e;
-  }
+    const txt=await r.text();
+    if(/^429:\s*Too Many Requests/i.test(String(txt||"").trim())) throw new Error("HTTP 429");
+    return txt;
+  }catch(e){clearTimeout(t);throw e}
 }
-
 function getCachedM3U(){
   try{
     const txt=localStorage.getItem(TIEA_LIST_CACHE_KEY)||"";
     const ts=Number(localStorage.getItem(TIEA_LIST_CACHE_TIME_KEY)||0);
-    if(txt && txt.includes("#EXTINF") && Date.now()-ts<TIEA_LIST_CACHE_MAX_AGE){
-      return txt;
-    }
+    if(txt && txt.includes("#EXTINF") && Date.now()-ts<TIEA_LIST_CACHE_MAX_AGE)return txt;
   }catch(e){}
   return "";
 }
-
 function saveCachedM3U(txt){
   try{
     if(txt && txt.includes("#EXTINF")){
@@ -692,40 +701,37 @@ function saveCachedM3U(txt){
     }
   }catch(e){}
 }
-
 function buildM3UTries(url){
   const raw=dropboxRaw(url);
   const direct=normalizeDropboxUrl(url);
-  const stamp=Date.now();
-
-  const addT=u=>u+(u.includes("?")?"&":"?")+"t="+stamp;
-
-  // เรียงลำดับใหม่: Raw + Worker พร้อมกัน, AllOrigins เป็นสำรอง
-  return [
-    addT(raw),
+  const jsdRaw=githubToJsdelivr(raw);
+  const jsdDirect=githubToJsdelivr(direct);
+  return [...new Set([
+    jsdRaw,
+    jsdDirect,
+    jsdRaw?addCacheBust(jsdRaw):"",
+    jsdDirect?addCacheBust(jsdDirect):"",
+    addCacheBust(raw),
     makeProxyUrl(raw),
     makeProxyUrl(direct),
-    addT(direct),
+    addCacheBust(direct),
     allOrigins(direct),
     allOrigins(raw)
-  ];
+  ].filter(Boolean))];
 }
-
 async function fetchFirstM3U(tries,timeoutEach){
   return new Promise((resolve,reject)=>{
-    let done=false;
-    let failed=0;
+    let done=false, failed=0;
     const errors=[];
-
     tries.forEach((u,i)=>{
-      fetchText(u,timeoutEach||6500).then(txt=>{
+      fetchText(u,timeoutEach||8000).then(txt=>{
         if(done)return;
         if(txt && txt.includes("#EXTINF")){
           done=true;
           resolve({txt,url:u,index:i});
         }else{
           failed++;
-          errors.push("not m3u "+i);
+          errors.push("not m3u @"+i);
           if(failed>=tries.length && !done)reject(new Error(errors.join(" | ")));
         }
       }).catch(e=>{
@@ -736,56 +742,45 @@ async function fetchFirstM3U(tries,timeoutEach){
     });
   });
 }
-
 function renderM3UText(txt,sourceLabel){
   channels=parseM3U(txt);
   renderChannels(channels);
-  setLoad("โหลดสำเร็จ "+channels.length+" ช่อง • "+(sourceLabel||"V6.1 Fast Load"));
+  setLoad("โหลดสำเร็จ "+channels.length+" ช่อง • "+(sourceLabel||"V6.2 FINAL"));
 }
-
 async function refreshM3UInBackground(url){
   try{
-    const tries=buildM3UTries(url);
-    const result=await fetchFirstM3U(tries,9000);
+    const result=await fetchFirstM3U(buildM3UTries(url),9000);
     saveCachedM3U(result.txt);
     const newChannels=parseM3U(result.txt);
-    if(newChannels.length && Math.abs(newChannels.length-(channels||[]).length)>0){
+    if(newChannels.length && newChannels.length!==channels.length){
       channels=newChannels;
       renderChannels(channels);
       setLoad("อัปเดตรายการล่าสุดแล้ว "+channels.length+" ช่อง");
     }
-  }catch(e){
-    console.log("background refresh fail",e);
-  }
+  }catch(e){console.log("background refresh fail",e)}
 }
-
 async function loadM3U(url){
-  app.innerHTML='<div class="empty">กำลังโหลดรายการแบบเร็ว...</div>';
-  setLoad("V6.1 กำลังโหลดรายการแบบเร็ว...");
+  app.innerHTML='<div class="empty">กำลังโหลดรายการ V6.2 FINAL...</div>';
+  setLoad("V6.2 FINAL กำลังโหลดรายการ...");
 
-  // 1) ใช้ cache ก่อนทันที ถ้ามี
   const cached=getCachedM3U();
   if(cached){
-    renderM3UText(cached,"โหลดจาก Cache ก่อน");
-    setTimeout(()=>refreshM3UInBackground(url),500);
+    renderM3UText(cached,"โหลดจาก Cache");
+    setTimeout(()=>refreshM3UInBackground(url),800);
     return;
   }
 
-  // 2) ไม่มี cache: ยิงหลายทางพร้อมกัน ไม่รอทีละ 12 วิ
-  const tries=buildM3UTries(url);
-
   try{
-    setLoad("V6.1 กำลังแข่งโหลด Raw / Worker / สำรอง พร้อมกัน...");
-    const result=await fetchFirstM3U(tries,6500);
+    setLoad("V6.2 FINAL กำลังโหลดจาก jsDelivr / Raw / Worker พร้อมกัน...");
+    const result=await fetchFirstM3U(buildM3UTries(url),8000);
     saveCachedM3U(result.txt);
-    renderM3UText(result.txt,"โหลดจากแหล่งที่เร็วที่สุด");
+    renderM3UText(result.txt,"โหลดจากแหล่งสำรองที่เร็วที่สุด");
   }catch(e){
     console.log("loadM3U fail",e);
-    setLoad("โหลดรายการไม่สำเร็จ ลองกดโหลดรายการใหม่ หรือเลือกไฟล์ M3U จากเครื่อง");
-    app.innerHTML='<div class="empty">โหลดรายการไม่สำเร็จ<br>ต้นทางอาจตอบช้า/โดน 429<br>ลองกด “โหลดรายการใหม่” อีกครั้ง หรือเลือกไฟล์ M3U จากเครื่อง</div>';
+    setLoad("โหลดรายการไม่สำเร็จ ต้นทางอาจโดน 429");
+    app.innerHTML='<div class="empty">โหลดรายการไม่สำเร็จ<br>ต้นทางอาจโดน 429 หรือ GitHub จำกัดการโหลด<br><br>ให้ลองกด “โหลดรายการใหม่” อีกครั้ง หรือเลือกไฟล์ M3U จากเครื่อง</div>';
   }
 }
-
 function loadDefaultM3U(){loadM3U(DEFAULT_M3U_URL)}
 
 function parseExtinf(line){
