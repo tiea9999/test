@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
-    <title>TIEA AUTO M3U V6.2 FINAL 429 FIX</title>
+    <title>TIEA AUTO M3U V6.3 FAST FIRST OPEN</title>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
@@ -268,11 +268,20 @@
             }
         }
     </style>
+
+    <!-- V6.3 Fast First Open: DNS/TLS Preconnect -->
+    <link rel="dns-prefetch" href="//live.livedoomovies.com">
+    <link rel="preconnect" href="https://live.livedoomovies.com:4433" crossorigin>
+    <link rel="dns-prefetch" href="//iptv.tawatchai250958.workers.dev">
+    <link rel="preconnect" href="https://iptv.tawatchai250958.workers.dev" crossorigin>
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+
 </head>
 
 <body>
     <button class="home-btn" onclick="goHome()">🏠 โฮม</button>
-    <h2>TIEA AUTO M3U V6.2 FINAL 429 FIX</h2>
+    <h2>TIEA AUTO M3U V6.3 FAST FIRST OPEN</h2>
     <div id="load-status">กำลังโหลดรายการ...</div>
 
     <div class="tools">
@@ -342,6 +351,65 @@ const AI_PROFILE={
   maxSoftRefreshBeforeReload:3
 };
 let playMode = "sports"; // บังคับเริ่มที่กีฬา/สดไวเสมอ
+
+
+// ===== V6.3 FAST FIRST OPEN WARM-UP =====
+// ไม่แตะ Worker/Player/Watchdog: อุ่น connection เฉพาะก่อนกดช่องแรก
+const V63_WARM_HOSTS = [
+  "https://live.livedoomovies.com:4433/favicon.ico",
+  "https://iptv.tawatchai250958.workers.dev/?url=" + encodeURIComponent("https://live.livedoomovies.com:4433/api/hls/live/2820/playlist.m3u8") + "&profile=fast&debug=1"
+];
+let v63WarmStarted=false;
+let v63PlaylistWarmCache={};
+
+function v63WarmFetch(url,ms){
+  const c=new AbortController();
+  const t=setTimeout(()=>c.abort(),ms||3500);
+  return fetch(url,{cache:"no-store",mode:"no-cors",signal:c.signal})
+    .catch(()=>{})
+    .finally(()=>clearTimeout(t));
+}
+
+function v63StartWarmup(){
+  if(v63WarmStarted)return;
+  v63WarmStarted=true;
+
+  try{
+    V63_WARM_HOSTS.forEach((u,i)=>{
+      setTimeout(()=>v63WarmFetch(u,3000), i*350);
+    });
+  }catch(e){}
+
+  // อุ่น playlist ช่องหลักแบบเบา ๆ ผ่าน Worker
+  setTimeout(()=>{
+    try{
+      const hot=[
+        "https://live.livedoomovies.com:4433/api/hls/live/2820/playlist.m3u8",
+        "https://live.livedoomovies.com:4433/api/hls/live/82290/playlist.m3u8"
+      ];
+      hot.forEach((u,i)=>{
+        const p=makeProxyUrl(u)+"&profile="+(u.includes("/2820/")?"fast":"stable");
+        setTimeout(()=>{
+          fetch(p,{cache:"no-store"}).then(r=>r.text()).then(txt=>{
+            if(txt&&txt.includes("#EXT"))v63PlaylistWarmCache[u]=txt;
+          }).catch(()=>{});
+        },i*700);
+      });
+    }catch(e){}
+  },1200);
+}
+
+function v63WarmChannel(url){
+  try{
+    const u=String(url||"");
+    if(!u.includes("live.livedoomovies.com"))return;
+    const p=makeProxyUrl(u)+(u.includes("?")?"&":"&")+"profile="+(u.includes("/2820/")?"fast":"stream");
+    fetch(p,{cache:"no-store"}).then(r=>r.text()).then(txt=>{
+      if(txt&&txt.includes("#EXT"))v63PlaylistWarmCache[u]=txt;
+    }).catch(()=>{});
+  }catch(e){}
+}
+
 
 // V3 Fast Click Fix: กันการโหลดซ้อน/กดซ้ำ และยกเลิกงานเก่าทันทีเมื่อเปลี่ยนช่อง
 let playSeq = 0;
@@ -946,7 +1014,7 @@ async function loadChannel(ch,el){
   applyModeLabel();
 
   activeChannel=ch;activeElement=el;
-  activeOriginalUrl=normalizeStreamUrl(clean(ch.file));activeUrl=activeOriginalUrl;
+  activeOriginalUrl=normalizeStreamUrl(clean(ch.file));activeUrl=activeOriginalUrl;v63WarmChannel(activeOriginalUrl);
 
   document.querySelectorAll(".channel").forEach(x=>x.classList.remove("active"));
   if(el) el.classList.add("active");
@@ -1507,7 +1575,8 @@ document.getElementById("m3uFile").addEventListener("change",async e=>{
 });
 document.addEventListener("DOMContentLoaded",()=>{
   applyModeLabel();
-  setTimeout(loadDefaultM3U,300);
+  v63StartWarmup();
+  setTimeout(loadDefaultM3U,180);
 });
     </script>
 </body>
