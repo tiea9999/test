@@ -443,8 +443,6 @@ function shouldWorkerFirst(url){
     u.includes('showhd9.com') ||
     u.includes('torbo007.com') ||
     u.includes('getplay-cdn.com') ||
-
-    // MoviesDooFree CDN
     u.includes('m3u8haha.com')
   );
 }
@@ -643,7 +641,6 @@ function isUnstableLiveUrl(url){
          u.includes('getplay-cdn.com') ||
          u.includes('torbo007.com') ||
          u.includes('showhd9.com') ||
-         u.includes('m3u8haha.com') ||
          u.includes('54.37.');
 }
 
@@ -815,9 +812,9 @@ enableWorker:false,
 lowLatencyMode:false,
 
 // โปรเจคเตอร์/Android TV: เพิ่ม buffer ให้ยาวขึ้น ลดหยุดเป็นระยะ
-maxBufferLength:(isProjectorWeakMode()||isProjectorMode())?38:(isUnstableLiveUrl(state.originalUrl)?28:35),
-maxMaxBufferLength:(isProjectorWeakMode()||isProjectorMode())?65:(isUnstableLiveUrl(state.originalUrl)?50:60),
-backBufferLength:(isProjectorWeakMode()||isProjectorMode())?6:12,
+maxBufferLength:(String(state.originalUrl||'').includes('m3u8haha.com'))?60:((isProjectorWeakMode()||isProjectorMode())?38:(isUnstableLiveUrl(state.originalUrl)?28:35)),
+maxMaxBufferLength:(String(state.originalUrl||'').includes('m3u8haha.com'))?120:((isProjectorWeakMode()||isProjectorMode())?65:(isUnstableLiveUrl(state.originalUrl)?50:60)),
+backBufferLength:(String(state.originalUrl||'').includes('m3u8haha.com'))?20:((isProjectorWeakMode()||isProjectorMode())?6:12),
 maxBufferHole:2.2,
 highBufferWatchdogPeriod:8,
 nudgeOffset:0.18,
