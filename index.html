@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>TIEA IPTV HOME V7.1 MYSERIES HOST FIX</title>
+<title>TIEA IPTV HOME V7.1 UNIVERSAL REMOTE FIX</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 <style>
@@ -93,7 +93,7 @@
 </style>
 </head>
 <body>
-<div class="app"><aside class="sidebar"><div class="brand">TIEA IPTV<div class="subbrand">HOME V7.1 MYSERIES FIX</div></div><div class="group-title">เมนูหลัก</div><button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/live.html">⚽ ตารางแข่งขัน</button><div class="group-title">ทีวีออนไลน์</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-source="tv-6395">🏆 DooBall6395</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/livedoomovies.html">🎥 LiveDooMovies</button><div class="group-title">หนัง</div><button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><div class="group-title">ซีรีส์</div><button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button><div class="group-title">ระบบ</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button></aside><main class="main"><div class="topbar"><button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep return</div></div><div class="content" id="content"></div></main></div>
+<div class="app"><aside class="sidebar"><div class="brand">TIEA IPTV<div class="subbrand">HOME V7.1 REMOTE FIX</div></div><div class="group-title">เมนูหลัก</div><button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/live.html">⚽ ตารางแข่งขัน</button><div class="group-title">ทีวีออนไลน์</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 3BB IPTV</button><button class="menu-btn" data-source="tv-6395">🏆 DooBall6395</button><button class="menu-btn" data-link="https://tiea9999.github.io/tv/livedoomovies.html">🎥 LiveDooMovies</button><div class="group-title">หนัง</div><button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><div class="group-title">ซีรีส์</div><button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button><div class="group-title">ระบบ</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button></aside><main class="main"><div class="topbar"><button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep return</div></div><div class="content" id="content"></div></main></div>
 <div class="player-panel" id="playerPanel"><div class="player-top"><button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn home" id="playerHomeBtn">🏠 หน้าโฮม</button><div class="player-title" id="playerTitle">กำลังเล่น</div><button class="player-btn mx" id="mxBtn">▶ MX</button><button class="player-btn" id="extBtn">▶ PLAYER</button></div><div class="player-wrap"><div class="video-shell"><video id="video" controls playsinline webkit-playsinline autoplay></video></div><div class="player-hint"></div></div></div>
 <div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><div class="modal-title" id="modalTitle">ดูทั้งหมด</div><button class="player-btn close" id="closeModalBtn">✕ ปิด</button></div><div class="modal-body" id="modalBody"></div><div class="modal-foot"><div class="badge" id="modalCount">ทั้งหมด 0 รายการ</div><div class="pages"><button class="page-btn" id="prevPageBtn">◀ ก่อนหน้า</button><div class="badge" id="pageInfo">หน้า 1 / 1</div><button class="page-btn" id="nextPageBtn">ถัดไป ▶</button></div></div></div></div>
 <script>
@@ -304,7 +304,7 @@ function makeRows(items){let order=['ดูซีรี่ย์ออนไล�
 function renderHome(){
 state.activeSource='home';
 setStatus('กำลังโหลดหน้าแรก V7.1...');
-content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV HOME V7.1 MYSERIES HOST FIX</div><div class="hero-sub">แก้ GitHub 429 • หนัง/ซีรีส์โหลดผ่านสำรอง • ไม่โหลดทีวีออนไลน์บนหน้าแรก</div></div><div id="homeRows"><div class="empty">กำลังโหลดหนังและซีรีส์...</div></div>`;
+content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV HOME V7.1 UNIVERSAL REMOTE FIX</div><div class="hero-sub">แก้ GitHub 429 • หนัง/ซีรีส์โหลดผ่านสำรอง • ไม่โหลดทีวีออนไลน์บนหน้าแรก</div></div><div id="homeRows"><div class="empty">กำลังโหลดหนังและซีรีส์...</div></div>`;
 
 const homeRows=document.getElementById('homeRows');
 
@@ -898,14 +898,17 @@ let playerUiTimer=null;
 function focusPlayerButtons(){
   try{
     playerPanel.classList.remove('hide-ui');
-    const ext=document.getElementById('extBtn');
-    const mx=document.getElementById('mxBtn');
+
     const close=document.getElementById('closePlayerBtn');
+    const home=document.getElementById('playerHomeBtn');
+    const mx=document.getElementById('mxBtn');
+    const ext=document.getElementById('extBtn');
 
     setTimeout(()=>{
-      if(ext){ext.focus(); return;}
-      if(mx){mx.focus(); return;}
-      if(close){close.focus();}
+      if(close){close.focus();return;}
+      if(home){home.focus();return;}
+      if(mx){mx.focus();return;}
+      if(ext){ext.focus();}
     },80);
   }catch(e){}
 }
@@ -943,7 +946,7 @@ function setupPlayerAutoHide(){
 
   document.addEventListener('keydown',(e)=>{
     if(!playerPanel.classList.contains('show'))return;
-    // กดขึ้นบนตอนดูหนัง = แสดงปุ่มและโฟกัส PLAYER/MX
+    // กดขึ้นบนตอนดูหนัง/ซีรี่ย์ = แสดงปุ่มและโฟกัส X ปิด
     if(e.key==='ArrowUp'||e.keyCode===38){
       e.preventDefault();
       e.stopPropagation();
