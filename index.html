@@ -442,8 +442,7 @@ function shouldWorkerFirst(url){
     // MySeries new hosts: must go through Worker first
     u.includes('showhd9.com') ||
     u.includes('torbo007.com') ||
-    u.includes('getplay-cdn.com') ||
-    u.includes('m3u8haha.com')
+    u.includes('getplay-cdn.com')
   );
 }
 
@@ -641,6 +640,7 @@ function isUnstableLiveUrl(url){
          u.includes('getplay-cdn.com') ||
          u.includes('torbo007.com') ||
          u.includes('showhd9.com') ||
+         u.includes('m3u8haha.com') ||
          u.includes('54.37.');
 }
 
@@ -812,9 +812,9 @@ enableWorker:false,
 lowLatencyMode:false,
 
 // โปรเจคเตอร์/Android TV: เพิ่ม buffer ให้ยาวขึ้น ลดหยุดเป็นระยะ
-maxBufferLength:(String(state.originalUrl||'').includes('m3u8haha.com'))?60:((isProjectorWeakMode()||isProjectorMode())?38:(isUnstableLiveUrl(state.originalUrl)?28:35)),
-maxMaxBufferLength:(String(state.originalUrl||'').includes('m3u8haha.com'))?120:((isProjectorWeakMode()||isProjectorMode())?65:(isUnstableLiveUrl(state.originalUrl)?50:60)),
-backBufferLength:(String(state.originalUrl||'').includes('m3u8haha.com'))?20:((isProjectorWeakMode()||isProjectorMode())?6:12),
+maxBufferLength:(isProjectorWeakMode()||isProjectorMode())?38:(isUnstableLiveUrl(state.originalUrl)?28:35),
+maxMaxBufferLength:(isProjectorWeakMode()||isProjectorMode())?65:(isUnstableLiveUrl(state.originalUrl)?50:60),
+backBufferLength:(isProjectorWeakMode()||isProjectorMode())?6:12,
 maxBufferHole:2.2,
 highBufferWatchdogPeriod:8,
 nudgeOffset:0.18,
@@ -900,17 +900,14 @@ let playerUiTimer=null;
 function focusPlayerButtons(){
   try{
     playerPanel.classList.remove('hide-ui');
-
-    const close=document.getElementById('closePlayerBtn');
-    const home=document.getElementById('playerHomeBtn');
-    const mx=document.getElementById('mxBtn');
     const ext=document.getElementById('extBtn');
+    const mx=document.getElementById('mxBtn');
+    const close=document.getElementById('closePlayerBtn');
 
     setTimeout(()=>{
-      if(close){close.focus();return;}
-      if(home){home.focus();return;}
-      if(mx){mx.focus();return;}
-      if(ext){ext.focus();}
+      if(ext){ext.focus(); return;}
+      if(mx){mx.focus(); return;}
+      if(close){close.focus();}
     },80);
   }catch(e){}
 }
@@ -948,7 +945,7 @@ function setupPlayerAutoHide(){
 
   document.addEventListener('keydown',(e)=>{
     if(!playerPanel.classList.contains('show'))return;
-    // กดขึ้นบนตอนดูหนัง/ซีรี่ย์ = แสดงปุ่มและโฟกัส X ปิด
+    // กดขึ้นบนตอนดูหนัง = แสดงปุ่มและโฟกัส PLAYER/MX
     if(e.key==='ArrowUp'||e.keyCode===38){
       e.preventDefault();
       e.stopPropagation();
