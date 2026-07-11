@@ -442,7 +442,10 @@ function shouldWorkerFirst(url){
     // MySeries new hosts: must go through Worker first
     u.includes('showhd9.com') ||
     u.includes('torbo007.com') ||
-    u.includes('getplay-cdn.com')
+    u.includes('getplay-cdn.com') ||
+
+    // MoviesDooFree CDN
+    u.includes('m3u8haha.com')
   );
 }
 
@@ -900,14 +903,17 @@ let playerUiTimer=null;
 function focusPlayerButtons(){
   try{
     playerPanel.classList.remove('hide-ui');
-    const ext=document.getElementById('extBtn');
-    const mx=document.getElementById('mxBtn');
+
     const close=document.getElementById('closePlayerBtn');
+    const home=document.getElementById('playerHomeBtn');
+    const mx=document.getElementById('mxBtn');
+    const ext=document.getElementById('extBtn');
 
     setTimeout(()=>{
-      if(ext){ext.focus(); return;}
-      if(mx){mx.focus(); return;}
-      if(close){close.focus();}
+      if(close){close.focus();return;}
+      if(home){home.focus();return;}
+      if(mx){mx.focus();return;}
+      if(ext){ext.focus();}
     },80);
   }catch(e){}
 }
@@ -945,7 +951,7 @@ function setupPlayerAutoHide(){
 
   document.addEventListener('keydown',(e)=>{
     if(!playerPanel.classList.contains('show'))return;
-    // กดขึ้นบนตอนดูหนัง = แสดงปุ่มและโฟกัส PLAYER/MX
+    // กดขึ้นบนตอนดูหนัง/ซีรี่ย์ = แสดงปุ่มและโฟกัส X ปิด
     if(e.key==='ArrowUp'||e.keyCode===38){
       e.preventDefault();
       e.stopPropagation();
