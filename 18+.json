@@ -1,0 +1,27 @@
+{
+  "type": "menu",
+  "title": "18+",
+  "items": [
+    {
+      "title": "supjav 18+",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv/refs/heads/main/supjav.json"
+    },
+    {
+      "title": "pornxxx",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/pornxxx.json"
+    },
+    {
+      "title": "avpung18+",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_avpung.json"
+    },
+    {
+      "title": "jav24 18+",
+      "type": "source",
+      "source": "https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/playlist_jav24.json"
+
+    }
+  ]
+}
