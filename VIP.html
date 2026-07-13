@@ -388,7 +388,7 @@
                 <button class="player-btn" onclick="goHome()">🏠 HOME</button>
             </div>
         </div>
-        <video id="player" controls autoplay playsinline webkit-playsinline></video>
+        <video id="player" tabindex="0" controls autoplay playsinline webkit-playsinline></video>
         <div id="status" class="status">กำลังโหลด...</div>
     </div>
 
@@ -1199,6 +1199,83 @@ document.addEventListener("keydown",e=>{
   }
 });
 
+
+
+
+// ===== REMOTE DPAD: กดขึ้นจากวิดีโอไปหา X ปิด =====
+function getPlayerButtons(){
+  return Array.from(document.querySelectorAll("#player-container .player-btn"));
+}
+
+function focusCloseButton(){
+  const box=document.getElementById("player-container");
+  const closeBtn=document.getElementById("closeBtn");
+  if(!box||box.style.display!=="block"||!closeBtn)return;
+
+  showPlayerUI(false);
+  requestAnimationFrame(()=>{
+    try{ closeBtn.focus({preventScroll:true}); }
+    catch(e){ closeBtn.focus(); }
+  });
+}
+
+function focusPlayerVideo(){
+  showPlayerUI(false);
+  requestAnimationFrame(()=>{
+    try{ player.focus({preventScroll:true}); }
+    catch(e){ player.focus(); }
+  });
+}
+
+// ใช้ capture เพื่อให้รีโมท Android TV / โปรเจคเตอร์ส่งปุ่มขึ้นถึง X ได้แน่นอน
+document.addEventListener("keydown",e=>{
+  const box=document.getElementById("player-container");
+  if(!box||box.style.display!=="block")return;
+
+  const key=e.key||"";
+  const code=e.keyCode||0;
+  const active=document.activeElement;
+  const onPlayerButton=!!(active&&active.classList&&active.classList.contains("player-btn"));
+
+  // UP จากวิดีโอหรือพื้นที่ Player = เปิดแถบปุ่มและไปที่ X
+  if(key==="ArrowUp"||code===19){
+    e.preventDefault();
+    e.stopPropagation();
+    focusCloseButton();
+    return;
+  }
+
+  // DOWN จากแถบปุ่ม = กลับไปวิดีโอ
+  if((key==="ArrowDown"||code===20)&&onPlayerButton){
+    e.preventDefault();
+    e.stopPropagation();
+    focusPlayerVideo();
+    return;
+  }
+
+  // LEFT / RIGHT เมื่อโฟกัสอยู่บนปุ่ม ให้เลื่อนไปปุ่มข้างเคียง
+  if(onPlayerButton&&(key==="ArrowLeft"||key==="ArrowRight"||code===21||code===22)){
+    e.preventDefault();
+    e.stopPropagation();
+
+    const buttons=getPlayerButtons();
+    const index=buttons.indexOf(active);
+    if(index<0)return;
+
+    const direction=(key==="ArrowLeft"||code===21)?-1:1;
+    const next=Math.max(0,Math.min(buttons.length-1,index+direction));
+    showPlayerUI(false);
+    buttons[next].focus();
+    return;
+  }
+
+  // OK / ENTER บนวิดีโอ = แสดงแถบปุ่มและไป X
+  if((key==="Enter"||key==="OK"||code===23||code===66)&&active===player){
+    e.preventDefault();
+    e.stopPropagation();
+    focusCloseButton();
+  }
+},true);
 
 document.addEventListener("DOMContentLoaded",()=>{setupAutoHideUI();loadDefaultJson();});
     </script>
