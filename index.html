@@ -376,20 +376,16 @@ function hasRealPlayback(){
   }catch(e){return false}
 }
 function forceOpenPlayerNow(url){
-  try{
-    const finalUrl=url||state.originalUrl||state.currentUrl;
-    if(!finalUrl)return;
-    setStatus('หมุนเกิน 5 วิ • เปิด PLAYER');
-    const ua=(navigator.userAgent||'').toLowerCase();
+  const finalUrl = url || state.originalUrl || state.currentUrl;
 
-    if(ua.includes('android')){
-      const u=new URL(finalUrl);
-      const scheme=u.protocol.replace(':','');
-      const hostPath=u.host+u.pathname+(u.search||'');
-      const intent='intent://'+hostPath+'#Intent;scheme='+scheme+';action=android.intent.action.VIEW;type=video/*;S.browser_fallback_url='+encodeURIComponent(finalUrl)+';end';
-      window.location.href=intent;
-      return;
-    }
+  if (!finalUrl) return;
+
+  setStatus('เล่นในเว็บต่อ • ปิด Auto PLAYER ชั่วคราว');
+
+  console.log('[V7.2] Auto external player blocked:', finalUrl);
+
+  return false;
+}
 
     window.location.href=finalUrl;
   }catch(e){
