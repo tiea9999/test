@@ -440,6 +440,46 @@ function workerUrlFor(url){
 }
 function shouldWorkerFirst(url){
   const u=String(url||'').toLowerCase();
+
+  return (
+    // LiveDooMovies: เข้า Worker ทันที ไม่ลอง Direct ก่อน
+    u.includes('live.livedoomovies.com') ||
+    u.includes('livedoomovies.com') ||
+
+    u.includes('ok-hd.com') ||
+    u.includes('24playerhd') ||
+    u.includes('main.24playerhd.com') ||
+
+    // MySeries new hosts
+    u.includes('showhd9.com') ||
+    u.includes('torbo007.com') ||
+    u.includes('getplay-cdn.com') ||
+
+    // MoviesDooFree CDN
+    u.includes('m3u8haha.com')
+  );
+}
+  const u=String(url||'').toLowerCase();
+
+  return (
+    // LiveDooMovies: เข้า Worker ทันที ไม่ลอง Direct ก่อน
+    u.includes('live.livedoomovies.com') ||
+    u.includes('livedoomovies.com') ||
+
+    u.includes('ok-hd.com') ||
+    u.includes('24playerhd') ||
+    u.includes('main.24playerhd.com') ||
+
+    // MySeries new hosts
+    u.includes('showhd9.com') ||
+    u.includes('torbo007.com') ||
+    u.includes('getplay-cdn.com') ||
+
+    // MoviesDooFree CDN
+    u.includes('m3u8haha.com')
+  );
+}{
+  const u=String(url||'').toLowerCase();
   return (
     u.includes('ok-hd.com') ||
     u.includes('24playerhd') ||
