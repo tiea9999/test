@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport"
         content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover" />
-    <title>TIEA AUTO M3U V6.3 FAST FIRST OPEN</title>
+    <title>TIEA AUTO M3U V6.4 SMART FIRST OPEN</title>
 
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/mpegts.js@latest/dist/mpegts.min.js"></script>
@@ -269,7 +269,7 @@
         }
     </style>
 
-    <!-- V6.3 Fast First Open: DNS/TLS Preconnect -->
+    <!-- V6.4 Smart First Open: DNS/TLS + Playlist/Segment Prewarm -->
     <link rel="dns-prefetch" href="//live.livedoomovies.com">
     <link rel="preconnect" href="https://live.livedoomovies.com:4433" crossorigin>
     <link rel="dns-prefetch" href="//iptv.tawatchai250958.workers.dev">
@@ -281,7 +281,7 @@
 
 <body>
     <button class="home-btn" onclick="goHome()">🏠 โฮม</button>
-    <h2>TIEA AUTO M3U V6.3 FAST FIRST OPEN</h2>
+    <h2>TIEA AUTO M3U V6.4 SMART FIRST OPEN</h2>
     <div id="load-status">กำลังโหลดรายการ...</div>
 
     <div class="tools">
@@ -353,61 +353,139 @@ const AI_PROFILE={
 let playMode = "sports"; // บังคับเริ่มที่กีฬา/สดไวเสมอ
 
 
-// ===== V6.3 FAST FIRST OPEN WARM-UP =====
-// ไม่แตะ Worker/Player/Watchdog: อุ่น connection เฉพาะก่อนกดช่องแรก
-const V63_WARM_HOSTS = [
-  "https://live.livedoomovies.com:4433/favicon.ico",
-  "https://iptv.tawatchai250958.workers.dev/?url=" + encodeURIComponent("https://live.livedoomovies.com:4433/api/hls/live/2820/playlist.m3u8") + "&profile=fast&debug=1"
+// ===== V6.4 SMART FIRST OPEN =====
+// เป้าหมาย:
+// 1) LiveDooMovies เข้า Worker ตั้งแต่คลิกครั้งแรก
+// 2) อุ่น DNS/TLS + playlist + segment แรกแบบเบา
+// 3) ไม่โหลดวิดีโอทั้งไฟล์ล่วงหน้า
+const V64_HOT_CHANNELS = [
+  "https://live.livedoomovies.com:4433/api/hls/live/2820/playlist.m3u8",
+  "https://live.livedoomovies.com:4433/api/hls/live/82290/playlist.m3u8"
 ];
-let v63WarmStarted=false;
-let v63PlaylistWarmCache={};
 
-function v63WarmFetch(url,ms){
-  const c=new AbortController();
-  const t=setTimeout(()=>c.abort(),ms||3500);
-  return fetch(url,{cache:"no-store",mode:"no-cors",signal:c.signal})
-    .catch(()=>{})
-    .finally(()=>clearTimeout(t));
+let v64WarmStarted = false;
+const v64PlaylistWarmCache = Object.create(null);
+const v64SegmentWarmCache = Object.create(null);
+
+function isLiveDooMoviesUrl(url){
+  const u = String(url || "").toLowerCase();
+  return u.includes("live.livedoomovies.com") || u.includes("livedoomovies.com");
 }
 
-function v63StartWarmup(){
-  if(v63WarmStarted)return;
-  v63WarmStarted=true;
+function liveDooProfile(url){
+  const u = String(url || "");
+  if(u.includes("/2820/")) return "fast";
+  if(u.includes("/82290/")) return "stable";
+  return "stream";
+}
+
+function liveDooWorkerUrl(url){
+  const base = makeProxyUrl(url);
+  return base + "&profile=" + encodeURIComponent(liveDooProfile(url));
+}
+
+function v64FetchWithTimeout(url, options, ms){
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), ms || 4500);
+  return fetch(url, Object.assign({
+    cache: "no-store",
+    signal: controller.signal
+  }, options || {})).finally(()=>clearTimeout(timer));
+}
+
+function v64FirstMediaLine(playlistText){
+  const lines = String(playlistText || "")
+    .replace(/\r/g, "")
+    .split("\n")
+    .map(x=>x.trim())
+    .filter(Boolean);
+
+  for(const line of lines){
+    if(!line.startsWith("#")) return line;
+  }
+  return "";
+}
+
+function v64ResolveMediaUrl(line, playlistUrl){
+  if(!line) return "";
+  try{
+    if(/^https?:\/\//i.test(line)) return line;
+    return new URL(line, playlistUrl).toString();
+  }catch(e){
+    return line;
+  }
+}
+
+async function v64WarmPlaylistAndFirstSegment(originalUrl){
+  if(!isLiveDooMoviesUrl(originalUrl)) return false;
+
+  const playlistProxy = liveDooWorkerUrl(originalUrl);
 
   try{
-    V63_WARM_HOSTS.forEach((u,i)=>{
-      setTimeout(()=>v63WarmFetch(u,3000), i*350);
-    });
-  }catch(e){}
+    const response = await v64FetchWithTimeout(playlistProxy, {}, 5000);
+    if(!response.ok) return false;
 
-  // อุ่น playlist ช่องหลักแบบเบา ๆ ผ่าน Worker
-  setTimeout(()=>{
+    const playlistText = await response.text();
+    if(!playlistText.includes("#EXT")) return false;
+
+    v64PlaylistWarmCache[originalUrl] = playlistText;
+
+    const firstLine = v64FirstMediaLine(playlistText);
+    const segmentUrl = v64ResolveMediaUrl(firstLine, playlistProxy);
+    if(!segmentUrl) return true;
+
+    // Worker rewrite แล้ว Segment มักเป็น Worker URL อยู่แล้ว
+    // ใช้ Range เล็ก ๆ เพื่อลดเน็ต และเปิด connection/ต้นทางไว้ก่อน
     try{
-      const hot=[
-        "https://live.livedoomovies.com:4433/api/hls/live/2820/playlist.m3u8",
-        "https://live.livedoomovies.com:4433/api/hls/live/82290/playlist.m3u8"
-      ];
-      hot.forEach((u,i)=>{
-        const p=makeProxyUrl(u)+"&profile="+(u.includes("/2820/")?"fast":"stable");
-        setTimeout(()=>{
-          fetch(p,{cache:"no-store"}).then(r=>r.text()).then(txt=>{
-            if(txt&&txt.includes("#EXT"))v63PlaylistWarmCache[u]=txt;
-          }).catch(()=>{});
-        },i*700);
-      });
+      const segmentResponse = await v64FetchWithTimeout(segmentUrl, {
+        headers: { "Range": "bytes=0-65535" }
+      }, 3500);
+
+      if(segmentResponse.ok || segmentResponse.status === 206){
+        v64SegmentWarmCache[originalUrl] = Date.now();
+        try{
+          const reader = segmentResponse.body && segmentResponse.body.getReader
+            ? segmentResponse.body.getReader()
+            : null;
+          if(reader){
+            await reader.read();
+            try{ await reader.cancel(); }catch(e){}
+          }
+        }catch(e){}
+      }
     }catch(e){}
-  },1200);
+
+    return true;
+  }catch(e){
+    return false;
+  }
 }
 
-function v63WarmChannel(url){
-  try{
-    const u=String(url||"");
-    if(!u.includes("live.livedoomovies.com"))return;
-    const p=makeProxyUrl(u)+(u.includes("?")?"&":"&")+"profile="+(u.includes("/2820/")?"fast":"stream");
-    fetch(p,{cache:"no-store"}).then(r=>r.text()).then(txt=>{
-      if(txt&&txt.includes("#EXT"))v63PlaylistWarmCache[u]=txt;
-    }).catch(()=>{});
-  }catch(e){}
+function v64StartWarmup(){
+  if(v64WarmStarted) return;
+  v64WarmStarted = true;
+
+  // เปิด connection ไป Worker ก่อน
+  setTimeout(()=>{
+    v64FetchWithTimeout(
+      "https://iptv.tawatchai250958.workers.dev/?url=" +
+      encodeURIComponent(V64_HOT_CHANNELS[0]) +
+      "&profile=fast&debug=1",
+      {},
+      3000
+    ).catch(()=>{});
+  }, 80);
+
+  // อุ่น 2 ช่องหลักแบบเหลื่อมเวลา ไม่ยิงพร้อมกันหนักเกินไป
+  V64_HOT_CHANNELS.forEach((url, index)=>{
+    setTimeout(()=>v64WarmPlaylistAndFirstSegment(url), 450 + (index * 950));
+  });
+}
+
+function v64WarmChannel(url){
+  if(!isLiveDooMoviesUrl(url)) return;
+  // เมื่อรีโมท/เมาส์เลือกช่อง ให้เติมความอุ่นอีกครั้ง แต่ไม่บล็อกการคลิก
+  setTimeout(()=>v64WarmPlaylistAndFirstSegment(url), 0);
 }
 
 
@@ -1014,7 +1092,7 @@ async function loadChannel(ch,el){
   applyModeLabel();
 
   activeChannel=ch;activeElement=el;
-  activeOriginalUrl=normalizeStreamUrl(clean(ch.file));activeUrl=activeOriginalUrl;v63WarmChannel(activeOriginalUrl);
+  activeOriginalUrl=normalizeStreamUrl(clean(ch.file));activeUrl=activeOriginalUrl;v64WarmChannel(activeOriginalUrl);
 
   document.querySelectorAll(".channel").forEach(x=>x.classList.remove("active"));
   if(el) el.classList.add("active");
@@ -1042,15 +1120,32 @@ async function loadChannel(ch,el){
 
   const u=activeOriginalUrl.toLowerCase();
 
-  try{ fetch(activeOriginalUrl,{cache:"no-store",mode:"no-cors"}).catch(()=>{}); }catch(e){}
+  try{
+    if(isLiveDooMoviesUrl(activeOriginalUrl)){
+      v64WarmChannel(activeOriginalUrl);
+    }else{
+      fetch(activeOriginalUrl,{cache:"no-store",mode:"no-cors"}).catch(()=>{});
+    }
+  }catch(e){}
   scheduleNoPictureHint(9000);
 
   if(u.includes(".mpd")){
     playMPD(activeOriginalUrl, seq);
   }else if(u.includes(".m3u8")||u.includes("extension=m3u8")||u.includes("type=m3u8")){
-    playHLS(activeOriginalUrl,false,seq);
+    if(isLiveDooMoviesUrl(activeOriginalUrl)){
+      // V6.4: ไม่เสียเวลาลอง Direct ก่อน
+      setStatus("V6.4 LiveDooMovies • Worker First", true);
+      playHLS(liveDooWorkerUrl(activeOriginalUrl),true,seq);
+    }else{
+      playHLS(activeOriginalUrl,false,seq);
+    }
   }else{
-    playTS(activeOriginalUrl,false,seq);
+    if(isLiveDooMoviesUrl(activeOriginalUrl)){
+      setStatus("V6.4 LiveDooMovies • Worker First", true);
+      playTS(liveDooWorkerUrl(activeOriginalUrl),true,seq);
+    }else{
+      playTS(activeOriginalUrl,false,seq);
+    }
   }
 
   setTimeout(()=>{if(isCurrentSeq(seq)){showUI();try{video.focus()}catch(e){}}},120);
@@ -1575,7 +1670,7 @@ document.getElementById("m3uFile").addEventListener("change",async e=>{
 });
 document.addEventListener("DOMContentLoaded",()=>{
   applyModeLabel();
-  v63StartWarmup();
+  v64StartWarmup();
   setTimeout(loadDefaultM3U,180);
 });
     </script>
