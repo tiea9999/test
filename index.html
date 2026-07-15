@@ -378,19 +378,14 @@ function hasRealPlayback(){
 function forceOpenPlayerNow(url){
   const finalUrl = url || state.originalUrl || state.currentUrl;
 
-  if (!finalUrl) return;
+  if (!finalUrl) {
+    return false;
+  }
 
-  setStatus('เล่นในเว็บต่อ • ปิด Auto PLAYER ชั่วคราว');
-
-  console.log('[V7.2] Auto external player blocked:', finalUrl);
+  setStatus('เล่นในเว็บต่อ • ไม่เปิด PLAYER อัตโนมัติ');
+  console.log('[V7.2] Auto PLAYER blocked:', finalUrl);
 
   return false;
-}
-
-    window.location.href=finalUrl;
-  }catch(e){
-    try{window.open(url,'_blank')}catch(err){}
-  }
 }
 
 
