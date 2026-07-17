@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2 FAST CATEGORY REMOTE</title>
+    <title>TIEA IPTV V2.1 SERVERS FIX</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -57,7 +57,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA IPTV V2 FAST • แยกหมวดหมู่</h2>
+    <h2 style="color:orange;text-align:center;">TIEA IPTV V2.1 • SERVERS FIX</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -239,7 +239,7 @@ const channels = [
     },
     {
       name:"Backup",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp2/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp2/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
       drm:false
     }
   ]
@@ -256,7 +256,7 @@ const channels = [
     },
     {
       name:"Backup",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp3/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp3/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
       drm:false
     }
   ]
@@ -273,7 +273,7 @@ const channels = [
     },
     {
       name:"Backup",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp5/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp5/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
       drm:false
     }
   ]
@@ -290,7 +290,7 @@ const channels = [
     },
     {
       name:"Backup",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp7/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp7/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
       drm:false
     }
   ]
@@ -379,8 +379,10 @@ let currentHls = null;
 let shakaPlayer = null;
 let hlsWatchdog = null;
 let activeChannel = null;
+let activeOriginalChannel = null;
 let activeElement = null;
 let activeUrl = "";
+let activeServerIndex = 0;
 
 function setStatus(text, autoHide=true){
   const box = document.getElementById("status");
@@ -489,8 +491,42 @@ async function stopAllPlayers(){
   setStatus("");
 }
 
+
+function resolveChannel(channel, serverIndex=0){
+  if(Array.isArray(channel.servers) && channel.servers.length){
+    const server = channel.servers[serverIndex] || channel.servers[0];
+    if(!server) return null;
+
+    return {
+      name: channel.name,
+      logo: channel.logo,
+      group: channel.group,
+      file: server.file || server.url || "",
+      drm: typeof server.drm === "boolean" ? server.drm : !!channel.drm,
+      keyId: server.keyId || channel.keyId || "",
+      key: server.key || channel.key || ""
+    };
+  }
+
+  return channel && channel.file ? channel : null;
+}
+
+function firstChannelUrl(channel){
+  const resolved = resolveChannel(channel, 0);
+  return resolved ? resolved.file : "";
+}
+
 async function loadChannel(channel, element){
-  activeChannel = channel;
+  activeOriginalChannel = channel;
+  activeServerIndex = 0;
+
+  const resolvedChannel = resolveChannel(channel, activeServerIndex);
+  if(!resolvedChannel || !resolvedChannel.file){
+    setStatus("ช่องนี้ยังไม่มีลิงก์", false);
+    return;
+  }
+
+  activeChannel = resolvedChannel;
   activeElement = element;
 
   document.querySelectorAll(".channel").forEach(ch=>ch.classList.remove("active"));
@@ -500,11 +536,11 @@ async function loadChannel(channel, element){
   forceShowControls();
   await stopAllPlayers();
 
-  const url = proxyUrl(channel.file);
+  const url = proxyUrl(resolvedChannel.file);
   activeUrl = url;
 
   if(url.includes(".mpd")){
-    playMPDNotice(channel, url);
+    playMPDNotice(resolvedChannel, url);
   }else{
     useHLS_STABLE(url);
   }
@@ -689,7 +725,11 @@ function useHLS_STABLE(url){
 }
 
 function restartCurrent(){
-  if(activeChannel) loadChannel(activeChannel, activeElement);
+  if(activeOriginalChannel){
+    loadChannel(activeOriginalChannel, activeElement);
+  }else if(activeChannel){
+    loadChannel(activeChannel, activeElement);
+  }
 }
 
 
@@ -750,7 +790,7 @@ async function closePlayer(){
 }
 
 function goHome(){
-  window.location.href = "https://tiea9999.github.io/tv/index.html";
+  window.location.href = "https://tiea9999.github.io/tv-online/index.html";
 }
 
 document.addEventListener("keydown",function(e){
@@ -783,8 +823,8 @@ function renderCategory(group){
     div.tabIndex=0;
     div.innerHTML=`<img src="${ch.logo}" loading="lazy"><span>${ch.name}</span>`;
     div.onclick=()=>loadChannel(ch,div);
-    div.onfocus=()=>warmStream(ch.file);
-    div.onmouseenter=()=>warmStream(ch.file);
+    div.onfocus=()=>warmStream(firstChannelUrl(ch));
+    div.onmouseenter=()=>warmStream(firstChannelUrl(ch));
     div.onkeydown=e=>{if(e.key==="Enter"||e.key==="OK"||e.key===" "){e.preventDefault();loadChannel(ch,div);}};
     listContainer.appendChild(div);
   });
