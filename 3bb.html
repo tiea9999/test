@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV MPD HOME BASE HIDE FIX</title>
+    <title>TIEA IPTV CATEGORY V1</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -28,6 +28,12 @@
         .player-btn{background:rgba(0,0,0,.75);color:#fff;border:2px solid #fff;border-radius:12px;padding:10px 18px;font-size:20px;font-weight:bold;cursor:pointer}
         .player-btn:focus{outline:none;box-shadow:0 0 0 4px cyan}
         .status{position:fixed;bottom:15px;left:15px;right:15px;z-index:100001;text-align:center;color:#fff;background:rgba(0,0,0,.72);padding:8px 12px;border-radius:10px;display:none;font-size:14px;border:1px solid rgba(0,255,255,.35)}
+        #category-menu{position:sticky;top:0;z-index:5000;width:min(1200px,calc(100% - 20px));display:flex;gap:10px;overflow-x:auto;padding:12px 10px;background:rgba(0,0,0,.94)}
+        .category-btn{flex:0 0 auto;min-width:115px;padding:11px 18px;border:2px solid #555;border-radius:14px;background:#171717;color:#fff;font-size:16px;font-weight:bold;cursor:pointer}
+        .category-btn:hover,.category-btn:focus{border-color:cyan;outline:none;box-shadow:0 0 0 3px rgba(0,255,255,.45)}
+        .category-btn.active{background:orange;color:#000;border-color:#ffeb3b}
+        #category-title{width:min(1200px,calc(100% - 20px));margin:4px auto 0;padding:8px 10px;color:#00e5ff;font-size:20px;font-weight:bold;box-sizing:border-box}
+        #empty-message{grid-column:1/-1;padding:50px 20px;color:#bbb;font-size:18px;text-align:center}
         @media(max-width:768px){#channel-list{grid-template-columns:repeat(5,1fr)}.player-btn{font-size:16px;padding:8px 12px}}
         @media(max-width:480px){#channel-list{grid-template-columns:repeat(3,1fr)}.channel img{width:52px;height:52px}.channel{font-size:10px;min-height:60px}}
     </style>
@@ -52,7 +58,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA IPTV MPD HOME BASE HIDE FIX</h2>
+    <h2 style="color:orange;text-align:center;">TIEA IPTV แยกหมวดหมู่</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -71,6 +77,14 @@
         <div id="status" class="status"></div>
     </div>
 
+    <div id="category-menu">
+        <button class="category-btn active" data-group="ดิจิตอล">📺 ดิจิตอล</button>
+        <button class="category-btn" data-group="หนัง">🎬 หนัง</button>
+        <button class="category-btn" data-group="กีฬา">⚽ กีฬา</button>
+        <button class="category-btn" data-group="การ์ตูน">🧸 การ์ตูน</button>
+        <button class="category-btn" data-group="ทั้งหมด">⭐ ทั้งหมด</button>
+    </div>
+    <div id="category-title">หมวด: ดิจิตอล</div>
     <div id="channel-list"></div>
 
     <script>
@@ -78,36 +92,36 @@ const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 
 const channels = [
 
-{name:"Worldcup",logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",file:"https://yyi7tewa2x.3ppnkog.com/xstream/monomax-1/playlist.m3u8",drm:false},        
-{name:"Worldcup",logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",file:"https://live.livedoomovies.com:4433/api/hls/live/82290/playlist.m3u8",drm:false},    
-{name:"Worldcup",logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",file:"https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/3ynrpdanq2/out/v1/81fd4c26584044d2b1a1cc5b32fa9af0/cenc.mpd?amznDtid=AOAGZA014O5RE&encoding=segmentBase",keyId:"34475edab991ad5e92548aebd710410a",key:"501b209cccd323ac00bf5ac15b406cb4",drm:true},    
-{name:"TV5HD",logo:"https://6395online.com:8443/logotv/freetv/hd-ch5.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
-{name:"NBT",logo:"https://6395online.com:8443/logotv/freetv/sd-nbt.png",file:"https://cdn-edge.iiptvcdn.com/live_event/smil:f180-054a-38d7-ce66-f7cf.smil/playlist.m3u8",drm:false},
-{name:"ThaiPBS",logo:"https://6395online.com:8443/logotv/freetv/hd-tpbs.png",file:"https://thaipbs-ophctt.cdn.byteark.com/live/playlist.m3u8",drm:false},
-{name:"T-SPorts 7",logo:"https://mainstand.co.th/storage/news/4968_Tsports7.jpg",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/7/7.mpd",keyId:"6187523f92b9475bb5b192f70cef1342",key:"5119311f482144d58dacabc5bc1fa4ba",drm:true},
-{name:"TPTV",logo:"https://6395online.com:8443/logotv/freetv/sd-tptv.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/10/10.mpd",keyId:"5da46688fd1e4ed5b085a12519b9dc4e",key:"fd07bcf33823447180f53f6540f74ccb",drm:true},
-{name:"TNN16",logo:"https://6395online.com:8443/logotv/freetv/sd-tnn24.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/16/16.mpd",keyId:"9ebedc957e934d2b9023e4e60b97af73",key:"7bcb4363df74457bbafedec1a864e6b6",drm:true},
-{name:"Nation22",logo:"https://6395online.com:8443/logotv/freetv/sd-nation.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/22/22.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
-{name:"Workpoint",logo:"https://6395online.com:8443/logotv/freetv/hd-workpoint.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/23/23.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
-{name:"True4U",logo:"https://6395online.com:8443/logotv/freetv/sd-24u.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/24/24.mpd",keyId:"4eabd5db684248a98c5124fbb0687bde",key:"d2f7a6f45b3c48678ca69c91d7823c25",drm:true},
-{name:"GMM 25",logo:"https://6395online.com:8443/logotv/freetv/sd-gmmchannel.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/25/25.mpd",keyId:"ae986b6dd3d84b2bb868c8765c604815",key:"89bf3c85580249d5bac4d3edaec019ec",drm:true},
-{name:"CH 8",logo:"https://6395online.com:8443/logotv/freetv/hd-ch8.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/27/27.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
-{name:"Mono 29",logo:"https://6395online.com:8443/logotv/freetv/hd-mono.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/29/29.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
-{name:"MCOT HD",logo:"https://6395online.com:8443/logotv/freetv/hd-mcot.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/30/30.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true},
-{name:"ONE31",logo:"https://6395online.com:8443/logotv/freetv/hd-gmmone.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/31/31.mpd",keyId:"6529c8cd99db4489bd237f616f37124b",key:"b9d299ba9ea94fd2ac4a77e8966dd91e",drm:true},
-{name:"Thairath TV",logo:"https://6395online.com:8443/logotv/freetv/hd-thairath.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/32/32.mpd",keyId:"9d76aea451d441a4913d4d70c4e586ab",key:"051027a6ff54494b949ba792928e9008",drm:true},
-{name:"CH3 HD",logo:"https://6395online.com:8443/logotv/freetv/hd-ch3.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/33/33.mpd",keyId:"9d76aea451d441a4913d4d70c4e586ab",key:"051027a6ff54494b949ba792928e9008",drm:true},
-{name:"CH7 HD",logo:"https://6395online.com:8443/logotv/freetv/hd-ch7.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/35/35.mpd",keyId:"4d4426a505f64382a9841155d721cee6",key:"0f4770219ccb4be5836a7517057e51c3",drm:true},
-{name:"AmarinTV",logo:"https://6395online.com:8443/logotv/freetv/amarintv.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/34/34.mpd",keyId:"4d4426a505f64382a9841155d721cee6",key:"0f4770219ccb4be5836a7517057e51c3",drm:true},
-{name:"PPTV",logo:"https://6395online.com:8443/logotv/freetv/hd-pptv.png",file:"https://lb-gmmz.sky-cdn.com/gmm/pptv.m3u8",drm:false},
+{name:"Worldcup",logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",file:"https://yyi7tewa2x.3ppnkog.com/xstream/monomax-1/playlist.m3u8",drm:false,group:"กีฬา"},        
+{name:"Worldcup",logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",file:"https://live.livedoomovies.com:4433/api/hls/live/82290/playlist.m3u8",drm:false,group:"กีฬา"},    
+{name:"Worldcup",logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",file:"https://otte.live.fly.ww.aiv-cdn.net/gru-nitro/live/clients/dash/enc/3ynrpdanq2/out/v1/81fd4c26584044d2b1a1cc5b32fa9af0/cenc.mpd?amznDtid=AOAGZA014O5RE&encoding=segmentBase",keyId:"34475edab991ad5e92548aebd710410a",key:"501b209cccd323ac00bf5ac15b406cb4",drm:true,group:"กีฬา"},    
+{name:"TV5HD",logo:"https://6395online.com:8443/logotv/freetv/hd-ch5.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true,group:"ดิจิตอล"},
+{name:"NBT",logo:"https://6395online.com:8443/logotv/freetv/sd-nbt.png",file:"https://cdn-edge.iiptvcdn.com/live_event/smil:f180-054a-38d7-ce66-f7cf.smil/playlist.m3u8",drm:false,group:"ดิจิตอล"},
+{name:"ThaiPBS",logo:"https://6395online.com:8443/logotv/freetv/hd-tpbs.png",file:"https://thaipbs-ophctt.cdn.byteark.com/live/playlist.m3u8",drm:false,group:"ดิจิตอล"},
+{name:"T-SPorts 7",logo:"https://mainstand.co.th/storage/news/4968_Tsports7.jpg",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/7/7.mpd",keyId:"6187523f92b9475bb5b192f70cef1342",key:"5119311f482144d58dacabc5bc1fa4ba",drm:true,group:"กีฬา"},
+{name:"TPTV",logo:"https://6395online.com:8443/logotv/freetv/sd-tptv.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/10/10.mpd",keyId:"5da46688fd1e4ed5b085a12519b9dc4e",key:"fd07bcf33823447180f53f6540f74ccb",drm:true,group:"ดิจิตอล"},
+{name:"TNN16",logo:"https://6395online.com:8443/logotv/freetv/sd-tnn24.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/16/16.mpd",keyId:"9ebedc957e934d2b9023e4e60b97af73",key:"7bcb4363df74457bbafedec1a864e6b6",drm:true,group:"ดิจิตอล"},
+{name:"Nation22",logo:"https://6395online.com:8443/logotv/freetv/sd-nation.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/22/22.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true,group:"ดิจิตอล"},
+{name:"Workpoint",logo:"https://6395online.com:8443/logotv/freetv/hd-workpoint.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/23/23.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true,group:"ดิจิตอล"},
+{name:"True4U",logo:"https://6395online.com:8443/logotv/freetv/sd-24u.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/24/24.mpd",keyId:"4eabd5db684248a98c5124fbb0687bde",key:"d2f7a6f45b3c48678ca69c91d7823c25",drm:true,group:"ดิจิตอล"},
+{name:"GMM 25",logo:"https://6395online.com:8443/logotv/freetv/sd-gmmchannel.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/25/25.mpd",keyId:"ae986b6dd3d84b2bb868c8765c604815",key:"89bf3c85580249d5bac4d3edaec019ec",drm:true,group:"ดิจิตอล"},
+{name:"CH 8",logo:"https://6395online.com:8443/logotv/freetv/hd-ch8.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/27/27.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true,group:"ดิจิตอล"},
+{name:"Mono 29",logo:"https://6395online.com:8443/logotv/freetv/hd-mono.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/29/29.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true,group:"ดิจิตอล"},
+{name:"MCOT HD",logo:"https://6395online.com:8443/logotv/freetv/hd-mcot.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/30/30.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true,group:"ดิจิตอล"},
+{name:"ONE31",logo:"https://6395online.com:8443/logotv/freetv/hd-gmmone.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/31/31.mpd",keyId:"6529c8cd99db4489bd237f616f37124b",key:"b9d299ba9ea94fd2ac4a77e8966dd91e",drm:true,group:"ดิจิตอล"},
+{name:"Thairath TV",logo:"https://6395online.com:8443/logotv/freetv/hd-thairath.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/32/32.mpd",keyId:"9d76aea451d441a4913d4d70c4e586ab",key:"051027a6ff54494b949ba792928e9008",drm:true,group:"ดิจิตอล"},
+{name:"CH3 HD",logo:"https://6395online.com:8443/logotv/freetv/hd-ch3.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/33/33.mpd",keyId:"9d76aea451d441a4913d4d70c4e586ab",key:"051027a6ff54494b949ba792928e9008",drm:true,group:"ดิจิตอล"},
+{name:"CH7 HD",logo:"https://6395online.com:8443/logotv/freetv/hd-ch7.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/35/35.mpd",keyId:"4d4426a505f64382a9841155d721cee6",key:"0f4770219ccb4be5836a7517057e51c3",drm:true,group:"ดิจิตอล"},
+{name:"AmarinTV",logo:"https://6395online.com:8443/logotv/freetv/amarintv.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/34/34.mpd",keyId:"4d4426a505f64382a9841155d721cee6",key:"0f4770219ccb4be5836a7517057e51c3",drm:true,group:"ดิจิตอล"},
+{name:"PPTV",logo:"https://6395online.com:8443/logotv/freetv/hd-pptv.png",file:"https://lb-gmmz.sky-cdn.com/gmm/pptv.m3u8",drm:false,group:"ดิจิตอล"},
 
 
-{name:"CARTOON NETWORK",logo:"https://6395online.com:8443/logotv/cartoon/sd-cartoonnetwork.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/301/301.mpd",keyId:"f140b94c73ab4ef5b96da7f49afb1154",key:"85e4ef232c6e460f888eb20f651d66e3",drm:true},
-{name:"CARTOONITO",logo:"https://payload.cargocollective.com/1/5/164819/2525962/prt_1326647131.jpg",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/302/302.mpd",keyId:"ad2371259d34404cb89d54a4dc88dcd3",key:"1ba155e345c4456ba891cbee9b3e1c4c",drm:true},
-{name:"NICKELODEON",logo:"https://6395online.com:8443/logotv/cartoon/nickelodeon.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/303/303.mpd",keyId:"9130a6448a74430794d355b48b56a64c",key:"c2f4d3288cdb43cf81e519ceb414dd6f",drm:true},
-{name:"NICK JR",logo:"https://6395online.com:8443/logotv/cartoon/sd-nickjr.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/304/304.mpd",keyId:"641c3f0e676d49d18c2082e093380e69",key:"e06f3a2e327643249c3831ab199c4015",drm:true},
-{name:"Mr.Bean",logo:"https://i.postimg.cc/yWqNWZf5/Mr-Bean.png",file:"https://amg00627-amg00627c30-rakuten-es-3990.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanescc-rakutenes/playlist.m3u8",drm:false},
-{name:"PBS Kids",logo:"https://i.postimg.cc/HkkPhhWS/pbskids.png",file:"https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8",drm:false}
+{name:"CARTOON NETWORK",logo:"https://6395online.com:8443/logotv/cartoon/sd-cartoonnetwork.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/301/301.mpd",keyId:"f140b94c73ab4ef5b96da7f49afb1154",key:"85e4ef232c6e460f888eb20f651d66e3",drm:true,group:"การ์ตูน"},
+{name:"CARTOONITO",logo:"https://payload.cargocollective.com/1/5/164819/2525962/prt_1326647131.jpg",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/302/302.mpd",keyId:"ad2371259d34404cb89d54a4dc88dcd3",key:"1ba155e345c4456ba891cbee9b3e1c4c",drm:true,group:"การ์ตูน"},
+{name:"NICKELODEON",logo:"https://6395online.com:8443/logotv/cartoon/nickelodeon.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/303/303.mpd",keyId:"9130a6448a74430794d355b48b56a64c",key:"c2f4d3288cdb43cf81e519ceb414dd6f",drm:true,group:"การ์ตูน"},
+{name:"NICK JR",logo:"https://6395online.com:8443/logotv/cartoon/sd-nickjr.png",file:"https://udn-streamer1.cdn.3bbtv.com:8443/3bb/live/304/304.mpd",keyId:"641c3f0e676d49d18c2082e093380e69",key:"e06f3a2e327643249c3831ab199c4015",drm:true,group:"การ์ตูน"},
+{name:"Mr.Bean",logo:"https://i.postimg.cc/yWqNWZf5/Mr-Bean.png",file:"https://amg00627-amg00627c30-rakuten-es-3990.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanescc-rakutenes/playlist.m3u8",drm:false,group:"การ์ตูน"},
+{name:"PBS Kids",logo:"https://i.postimg.cc/HkkPhhWS/pbskids.png",file:"https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8",drm:false,group:"การ์ตูน"}
 ];
 
 let currentHls = null;
@@ -480,26 +494,53 @@ document.addEventListener("keydown",function(e){
   }
 });
 
-document.addEventListener("DOMContentLoaded",function(){
-  setupForceAutoHide();
-  const listContainer = document.getElementById("channel-list");
+let currentCategory="ดิจิตอล";
 
-  channels.forEach(ch=>{
-    const div = document.createElement("div");
-    div.className = "channel";
-    div.tabIndex = 0;
-    div.innerHTML = `<img src="${ch.logo}"><span>${ch.name}</span>`;
-
-    div.onclick = ()=>loadChannel(ch,div);
-    div.onkeydown = e=>{
-      if(e.key === "Enter" || e.key === "OK"){
+function renderCategory(group){
+  currentCategory=group;
+  document.querySelectorAll(".category-btn").forEach(btn=>btn.classList.toggle("active",btn.dataset.group===group));
+  document.getElementById("category-title").textContent="หมวด: "+group;
+  const list=document.getElementById("channel-list");
+  list.innerHTML="";
+  const items=group==="ทั้งหมด"?channels:channels.filter(ch=>(ch.group||"ดิจิตอล")===group);
+  if(!items.length){
+    list.innerHTML='<div id="empty-message">หมวดนี้ยังไม่มีรายการ</div>';
+    return;
+  }
+  items.forEach(ch=>{
+    const div=document.createElement("div");
+    div.className="channel";
+    div.tabIndex=0;
+    div.innerHTML=`<img src="${ch.logo}" loading="lazy"><span>${ch.name}</span>`;
+    div.onclick=()=>loadChannel(ch,div);
+    div.onkeydown=e=>{
+      if(e.key==="Enter"||e.key==="OK"||e.key===" "){
         e.preventDefault();
         loadChannel(ch,div);
       }
     };
-
-    listContainer.appendChild(div);
+    list.appendChild(div);
   });
+  setTimeout(()=>list.querySelector(".channel")?.focus(),100);
+}
+
+function setupCategoryMenu(){
+  const buttons=Array.from(document.querySelectorAll(".category-btn"));
+  buttons.forEach((btn,index)=>{
+    btn.onclick=()=>renderCategory(btn.dataset.group);
+    btn.onkeydown=e=>{
+      if(e.key==="ArrowRight"){e.preventDefault();buttons[(index+1)%buttons.length].focus();}
+      else if(e.key==="ArrowLeft"){e.preventDefault();buttons[(index-1+buttons.length)%buttons.length].focus();}
+      else if(e.key==="ArrowDown"){e.preventDefault();document.querySelector(".channel")?.focus();}
+      else if(e.key==="Enter"||e.key==="OK"||e.key===" "){e.preventDefault();renderCategory(btn.dataset.group);}
+    };
+  });
+}
+
+document.addEventListener("DOMContentLoaded",function(){
+  setupForceAutoHide();
+  setupCategoryMenu();
+  renderCategory("ดิจิตอล");
 });
     </script>
 
