@@ -175,7 +175,6 @@ const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 */
 
 const channels = [
-
 {
   name:"Worldcup",
   logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",
@@ -189,6 +188,23 @@ const channels = [
     {
       name:"Backup",
       file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/82290/playlist.m3u8",
+      drm:false
+    }
+  ]
+}, 
+{
+  name:"Bein 1",
+  logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",
+  group:"กีฬา",
+  servers:[
+    {
+      name:"Main",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.googlecdnforstreaming.live%2Flive%2Fbein1%2Fchunks.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F",
+      drm:false
+    },
+    {
+      name:"Backup",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/bein1/chunks.m3u8&referer=https://warpdooball.net/",
       drm:false
     }
   ]
