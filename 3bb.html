@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1 SAFE MAIN BACKUP</title>
+    <title>TIEA IPTV V1 BASELINE TEST</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -15,42 +15,9 @@
 
     <style>
         body{margin:0;padding:0;background:#000;color:#fff;font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center}
-        #channel-list{
-            width:min(1400px,calc(100% - 28px));
-            margin:8px auto 30px;
-            display:grid;
-            grid-template-columns:repeat(auto-fit,minmax(125px,1fr));
-            gap:14px;
-            padding:12px;
-            box-sizing:border-box;
-            overflow:visible;
-        }
-        .channel{
-            cursor:pointer;
-            padding:10px 6px;
-            background:#222;
-            border:2px solid #444;
-            border-radius:12px;
-            text-align:center;
-            font-size:15px;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            justify-content:center;
-            min-height:128px;
-            transition:all .2s;
-            box-sizing:border-box;
-        }
-        .channel img{
-            width:92px;
-            height:82px;
-            margin-bottom:8px;
-            object-fit:contain;
-            background:#fff;
-            border-radius:8px;
-            padding:4px;
-            box-sizing:border-box;
-        }
+        #channel-list{margin:10px auto;max-width:1200px;display:grid;grid-template-columns:repeat(7,1fr);gap:10px;overflow-x:auto;padding:10px}
+        .channel{cursor:pointer;padding:5px 3px;background:#222;border:2px solid #444;border-radius:8px;text-align:center;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:80px;transition:all .2s}
+        .channel img{width:65px;height:65px;margin-bottom:5px;object-fit:contain}
         .channel:hover,.channel:focus{background:#000;border-color:orange;outline:none;box-shadow:0 0 0 4px cyan}
         .channel.active{background:orange;color:black;border-color:yellow}
         .back-home{position:fixed;top:15px;left:15px;padding:10px 18px;border-radius:50px;font-weight:600;cursor:pointer;z-index:9999;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff}
@@ -67,28 +34,8 @@
         .category-btn.active{background:orange;color:#000;border-color:#ffeb3b}
         #category-title{width:min(1200px,calc(100% - 20px));margin:4px auto 0;padding:8px 10px;color:#00e5ff;font-size:20px;font-weight:bold;box-sizing:border-box}
         #empty-message{grid-column:1/-1;padding:50px 20px;color:#bbb;font-size:18px;text-align:center}
-        @media(max-width:768px){
-            #channel-list{
-                width:calc(100% - 16px);
-                grid-template-columns:repeat(auto-fit,minmax(105px,1fr));
-                gap:10px;
-                padding:8px;
-            }
-            .channel{min-height:112px;font-size:13px}
-            .channel img{width:78px;height:70px}
-            .player-btn{font-size:16px;padding:8px 12px}
-        }
-        @media(max-width:480px){
-            #channel-list{
-                width:calc(100% - 10px);
-                grid-template-columns:repeat(3,minmax(0,1fr));
-                gap:7px;
-                padding:5px;
-            }
-            .channel{min-height:96px;font-size:11px;padding:6px 3px}
-            .channel img{width:62px;height:58px;margin-bottom:5px}
-            .category-btn{min-width:100px;font-size:14px;padding:9px 12px}
-        }
+        @media(max-width:768px){#channel-list{grid-template-columns:repeat(5,1fr)}.player-btn{font-size:16px;padding:8px 12px}}
+        @media(max-width:480px){#channel-list{grid-template-columns:repeat(3,1fr)}.channel img{width:52px;height:52px}.channel{font-size:10px;min-height:60px}}
     </style>
 
 <style id="force-autohide-style">
@@ -111,7 +58,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA IPTV V2.1 SAFE MAIN / BACKUP</h2>
+    <h2 style="color:orange;text-align:center;">TIEA IPTV V1 BASELINE TEST</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -143,20 +90,7 @@
     <script>
 const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 
-/*
-รูปแบบช่อง Main / Backup แบบปลอดภัย
-เวอร์ชันทดลองนี้จะเล่น Main ก่อน โดยยังไม่เปลี่ยน Player เดิม
-
-{
-  name:"HBO",
-  logo:"ลิงก์โลโก้",
-  group:"หนัง",
-  servers:[
-    {name:"Main",file:"ลิงก์หลัก",drm:false},
-    {name:"Backup",file:"ลิงก์สำรอง",drm:false}
-  ]
-},
-*/
+const channels = [
 
 const channels = [
 {
@@ -442,15 +376,12 @@ const channels = [
 {name:"Mr.Bean",logo:"https://i.postimg.cc/yWqNWZf5/Mr-Bean.png",file:"https://amg00627-amg00627c30-rakuten-es-3990.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanescc-rakutenes/playlist.m3u8",drm:false,group:"การ์ตูน"},
 {name:"PBS Kids",logo:"https://i.postimg.cc/HkkPhhWS/pbskids.png",file:"https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8",drm:false,group:"การ์ตูน"}
 ];
-
 let currentHls = null;
 let shakaPlayer = null;
 let hlsWatchdog = null;
 let activeChannel = null;
 let activeElement = null;
 let activeUrl = "";
-let activeOriginalChannel = null;
-let activeServerIndex = 0;
 
 function setStatus(text, autoHide=true){
   const box = document.getElementById("status");
@@ -542,37 +473,7 @@ async function stopAllPlayers(){
   setStatus("");
 }
 
-
-function getChannelServer(channel, index){
-  if(Array.isArray(channel.servers) && channel.servers.length){
-    const s = channel.servers[index] || channel.servers[0];
-    if(!s) return null;
-
-    return {
-      name: channel.name,
-      logo: channel.logo,
-      group: channel.group,
-      file: s.file || s.url || "",
-      drm: typeof s.drm === "boolean" ? s.drm : !!channel.drm,
-      keyId: s.keyId || channel.keyId || "",
-      key: s.key || channel.key || ""
-    };
-  }
-
-  return channel;
-}
-
 async function loadChannel(channel, element){
-  activeOriginalChannel = channel;
-  activeServerIndex = 0;
-
-  const resolvedChannel = getChannelServer(channel, activeServerIndex);
-  if(!resolvedChannel || !resolvedChannel.file){
-    setStatus("ช่องนี้ยังไม่มีลิงก์", false);
-    return;
-  }
-
-  channel = resolvedChannel;
   activeChannel = channel;
   activeElement = element;
 
@@ -772,11 +673,7 @@ function useHLS_STABLE(url){
 }
 
 function restartCurrent(){
-  if(activeOriginalChannel){
-    loadChannel(activeOriginalChannel, activeElement);
-  }else if(activeChannel){
-    loadChannel(activeChannel, activeElement);
-  }
+  if(activeChannel) loadChannel(activeChannel, activeElement);
 }
 
 
@@ -829,16 +726,10 @@ function setupForceAutoHide(){
 
 async function closePlayer(){
   await stopAllPlayers();
-  const box = document.getElementById("player-container");
-  box.classList.remove("controls-hidden");
-  box.classList.remove("force-hide-controls");
-  box.style.display = "none";
-
-  setTimeout(()=>{
-    if(activeElement && document.body.contains(activeElement)){
-      activeElement.focus();
-    }
-  },120);
+  document.getElementById("player-container").classList.remove("controls-hidden");
+  document.getElementById("player-container").classList.remove("force-hide-controls");
+  document.getElementById("player-container").classList.remove("force-hide-controls");
+  document.getElementById("player-container").style.display = "none";
 }
 
 function goHome(){
@@ -848,14 +739,6 @@ function goHome(){
 document.addEventListener("keydown",function(e){
   const container = document.getElementById("player-container");
   if(container.style.display === "block"){
-    if(e.key === "ArrowUp"){
-      e.preventDefault();
-      forceShowControls();
-      const closeBtn = document.getElementById("closeBtn");
-      if(closeBtn) closeBtn.focus();
-      return;
-    }
-
     if(e.key === "Escape" || e.key === "Backspace" || e.key === "BrowserBack"){
       e.preventDefault();
       closePlayer();
