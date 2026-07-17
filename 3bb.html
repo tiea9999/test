@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA V8 LIVE CATEGORY MAIN BACKUP</title>
+    <title>TIEA V8.1 LIVE AUTO ROUTE</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA V8 LIVE • MAIN / BACKUP</h2>
+    <h2 style="color:orange;text-align:center;">TIEA V8.1 LIVE • AUTO DIRECT / WORKER</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -482,8 +482,30 @@ function setStatus(text, autoHide=true){
 }
 
 function proxyUrl(url){
-  // ลิงก์ workers.dev เล่นตรง ห้าม proxy ซ้อน
-  return url;
+  const raw = String(url || "").trim();
+  if(!raw) return "";
+
+  // ถ้าเป็น Worker อยู่แล้ว ห้ามห่อซ้ำ
+  if(raw.includes("workers.dev/?url=") || raw.includes("workers.dev?url=")){
+    return raw;
+  }
+
+  const lower = raw.toLowerCase();
+
+  // GitHub Pages เป็น HTTPS จึงเปิด HTTP ตรงไม่ได้
+  // LiveDooMovies และ 6395 ให้ผ่าน Worker ตั้งแต่ครั้งแรก
+  const mustUseWorker =
+    lower.startsWith("http://") ||
+    lower.includes("live.livedoomovies.com") ||
+    lower.includes("livedoomovies.com") ||
+    lower.includes("6395online.com");
+
+  if(mustUseWorker){
+    return WORKER_PROXY + encodeURIComponent(raw);
+  }
+
+  // MPD/3BB และ HTTPS ทั่วไป ให้ Direct ก่อน
+  return raw;
 }
 
 function forceAudio100(){
@@ -631,6 +653,9 @@ async function playActiveServer(server){
 
   activeUrl = proxyUrl(server.file);
 
+  const routeText = activeUrl === server.file ? "DIRECT" : "WORKER";
+  setStatus("กำลังเปิด " + routeText + "...", true);
+
   const mergedChannel = Object.assign({}, activeChannel, {
     file: server.file,
     drm: server.drm,
@@ -638,7 +663,7 @@ async function playActiveServer(server){
     key: server.key
   });
 
-  armServerFailTimer(token, 12000);
+  armServerFailTimer(token, 16000);
 
   if(activeUrl.includes(".mpd")){
     playMPDNotice(mergedChannel, activeUrl, token);
