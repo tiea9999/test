@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V1.1 CURRENT FIX</title>
+    <title>TIEA V8 LIVE CATEGORY MAIN BACKUP</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -15,9 +15,42 @@
 
     <style>
         body{margin:0;padding:0;background:#000;color:#fff;font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center}
-        #channel-list{margin:10px auto;max-width:1200px;display:grid;grid-template-columns:repeat(7,1fr);gap:10px;overflow-x:auto;padding:10px}
-        .channel{cursor:pointer;padding:5px 3px;background:#222;border:2px solid #444;border-radius:8px;text-align:center;font-size:12px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:80px;transition:all .2s}
-        .channel img{width:65px;height:65px;margin-bottom:5px;object-fit:contain}
+        #channel-list{
+            width:min(1400px,calc(100% - 28px));
+            margin:8px auto 30px;
+            display:grid;
+            grid-template-columns:repeat(auto-fit,minmax(125px,1fr));
+            gap:14px;
+            padding:12px;
+            box-sizing:border-box;
+            overflow:visible;
+        }
+        .channel{
+            cursor:pointer;
+            padding:10px 6px;
+            background:#222;
+            border:2px solid #444;
+            border-radius:12px;
+            text-align:center;
+            font-size:15px;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            min-height:128px;
+            transition:all .2s;
+            box-sizing:border-box;
+        }
+        .channel img{
+            width:92px;
+            height:82px;
+            margin-bottom:8px;
+            object-fit:contain;
+            background:#fff;
+            border-radius:8px;
+            padding:4px;
+            box-sizing:border-box;
+        }
         .channel:hover,.channel:focus{background:#000;border-color:orange;outline:none;box-shadow:0 0 0 4px cyan}
         .channel.active{background:orange;color:black;border-color:yellow}
         .back-home{position:fixed;top:15px;left:15px;padding:10px 18px;border-radius:50px;font-weight:600;cursor:pointer;z-index:9999;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff}
@@ -34,8 +67,28 @@
         .category-btn.active{background:orange;color:#000;border-color:#ffeb3b}
         #category-title{width:min(1200px,calc(100% - 20px));margin:4px auto 0;padding:8px 10px;color:#00e5ff;font-size:20px;font-weight:bold;box-sizing:border-box}
         #empty-message{grid-column:1/-1;padding:50px 20px;color:#bbb;font-size:18px;text-align:center}
-        @media(max-width:768px){#channel-list{grid-template-columns:repeat(5,1fr)}.player-btn{font-size:16px;padding:8px 12px}}
-        @media(max-width:480px){#channel-list{grid-template-columns:repeat(3,1fr)}.channel img{width:52px;height:52px}.channel{font-size:10px;min-height:60px}}
+        @media(max-width:768px){
+            #channel-list{
+                width:calc(100% - 16px);
+                grid-template-columns:repeat(auto-fit,minmax(105px,1fr));
+                gap:10px;
+                padding:8px;
+            }
+            .channel{min-height:112px;font-size:13px}
+            .channel img{width:78px;height:70px}
+            .player-btn{font-size:16px;padding:8px 12px}
+        }
+        @media(max-width:480px){
+            #channel-list{
+                width:calc(100% - 10px);
+                grid-template-columns:repeat(3,minmax(0,1fr));
+                gap:7px;
+                padding:5px;
+            }
+            .channel{min-height:96px;font-size:11px;padding:6px 3px}
+            .channel img{width:62px;height:58px;margin-bottom:5px}
+            .category-btn{min-width:100px;font-size:14px;padding:9px 12px}
+        }
     </style>
 
 <style id="force-autohide-style">
@@ -58,7 +111,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA IPTV V1.1 CURRENT FIX</h2>
+    <h2 style="color:orange;text-align:center;">TIEA V8 LIVE • MAIN / BACKUP</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -91,6 +144,35 @@
 const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 
 
+/*
+ตัวอย่างช่อง Main / Backup
+
+{
+  name:"HBO",
+  logo:"ใส่ลิงก์โลโก้",
+  group:"หนัง",
+  servers:[
+    {name:"Main",file:"ใส่ลิงก์หลัก",drm:false},
+    {name:"Backup",file:"ใส่ลิงก์สำรอง",drm:false}
+  ]
+},
+
+กรณี MPD + ClearKey:
+{
+  name:"ช่องตัวอย่าง",
+  logo:"ใส่ลิงก์โลโก้",
+  group:"ดิจิตอล",
+  servers:[
+    {
+      name:"Main",
+      file:"https://example.com/live.mpd",
+      drm:true,
+      keyId:"ใส่ KEY ID",
+      key:"ใส่ KEY"
+    }
+  ]
+},
+*/
 
 const channels = [
 {
@@ -242,7 +324,7 @@ const channels = [
     },
     {
       name:"Backup",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp2/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp2/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
       drm:false
     }
   ]
@@ -259,7 +341,7 @@ const channels = [
     },
     {
       name:"Backup",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp3/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp3/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
       drm:false
     }
   ]
@@ -276,7 +358,7 @@ const channels = [
     },
     {
       name:"Backup",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp5/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp5/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
       drm:false
     }
   ]
@@ -293,7 +375,7 @@ const channels = [
     },
     {
       name:"Backup",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp7/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp7/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
       drm:false
     }
   ]
@@ -376,14 +458,17 @@ const channels = [
 {name:"Mr.Bean",logo:"https://i.postimg.cc/yWqNWZf5/Mr-Bean.png",file:"https://amg00627-amg00627c30-rakuten-es-3990.playouts.now.amagi.tv/playlist/amg00627-banijayfast-mrbeanescc-rakutenes/playlist.m3u8",drm:false,group:"การ์ตูน"},
 {name:"PBS Kids",logo:"https://i.postimg.cc/HkkPhhWS/pbskids.png",file:"https://2-fss-2.streamhoster.com/pl_140/amlst:200914-1298290/playlist.m3u8",drm:false,group:"การ์ตูน"}
 ];
+
 let currentHls = null;
 let shakaPlayer = null;
 let hlsWatchdog = null;
 let activeChannel = null;
 let activeElement = null;
 let activeUrl = "";
-let activeOriginalChannel = null;
+let activeServers = [];
 let activeServerIndex = 0;
+let activeLoadToken = 0;
+let serverFailTimer = null;
 
 function setStatus(text, autoHide=true){
   const box = document.getElementById("status");
@@ -445,6 +530,7 @@ function openMX(url){
 }
 
 async function stopAllPlayers(){
+  clearServerFailTimer();
   const video = document.getElementById("html5-player");
 
   if(hlsWatchdog){
@@ -476,57 +562,109 @@ async function stopAllPlayers(){
 }
 
 
-function resolveChannelServer(channel, index){
+function normalizeServers(channel){
   if(Array.isArray(channel.servers) && channel.servers.length){
-    const server = channel.servers[index] || channel.servers[0];
-    if(!server) return null;
-
-    return {
-      name: channel.name,
-      logo: channel.logo,
-      group: channel.group,
-      file: server.file || server.url || "",
-      drm: typeof server.drm === "boolean" ? server.drm : !!channel.drm,
-      keyId: server.keyId || channel.keyId || "",
-      key: server.key || channel.key || ""
-    };
+    return channel.servers
+      .map((s,index)=>({
+        name:s.name || (index===0 ? "Main" : "Backup"+index),
+        file:s.file || s.url || "",
+        drm:typeof s.drm==="boolean" ? s.drm : !!channel.drm,
+        keyId:s.keyId || channel.keyId || "",
+        key:s.key || channel.key || ""
+      }))
+      .filter(s=>s.file);
   }
 
   if(channel.file){
-    return channel;
+    return [{
+      name:"Main",
+      file:channel.file,
+      drm:!!channel.drm,
+      keyId:channel.keyId || "",
+      key:channel.key || ""
+    }];
   }
 
-  return null;
+  return [];
 }
 
-async function loadChannel(channel, element){
-  activeOriginalChannel = channel;
-  activeServerIndex = 0;
+function clearServerFailTimer(){
+  if(serverFailTimer){
+    clearTimeout(serverFailTimer);
+    serverFailTimer = null;
+  }
+}
 
-  const resolvedChannel = resolveChannelServer(channel, activeServerIndex);
-  if(!resolvedChannel || !resolvedChannel.file){
-    setStatus("ช่องนี้ยังไม่มีลิงก์", false);
+function armServerFailTimer(token, ms){
+  clearServerFailTimer();
+  serverFailTimer = setTimeout(()=>{
+    if(token !== activeLoadToken) return;
+    tryNextServer("เปิดช้าเกินกำหนด");
+  }, ms || 12000);
+}
+
+function currentServer(){
+  return activeServers[activeServerIndex] || null;
+}
+
+async function tryNextServer(reason){
+  clearServerFailTimer();
+
+  if(activeServerIndex + 1 >= activeServers.length){
+    setStatus("ทุก Server เล่นไม่ได้" + (reason ? " • " + reason : ""), false);
     return;
   }
 
-  activeChannel = resolvedChannel;
+  activeServerIndex++;
+  const next = currentServer();
+  setStatus("กำลังสลับ Server...", true);
+  await playActiveServer(next);
+}
+
+async function playActiveServer(server){
+  if(!server || !server.file){
+    return tryNextServer("ไม่มีลิงก์");
+  }
+
+  const token = ++activeLoadToken;
+  await stopAllPlayers();
+
+  activeUrl = proxyUrl(server.file);
+
+  const mergedChannel = Object.assign({}, activeChannel, {
+    file: server.file,
+    drm: server.drm,
+    keyId: server.keyId,
+    key: server.key
+  });
+
+  armServerFailTimer(token, 12000);
+
+  if(activeUrl.includes(".mpd")){
+    playMPDNotice(mergedChannel, activeUrl, token);
+  }else{
+    useHLS_STABLE(activeUrl, token);
+  }
+}
+
+async function loadChannel(channel, element){
+  activeChannel = channel;
   activeElement = element;
+  activeServers = normalizeServers(channel);
+  activeServerIndex = 0;
 
   document.querySelectorAll(".channel").forEach(ch=>ch.classList.remove("active"));
   if(element) element.classList.add("active");
 
   document.getElementById("player-container").style.display = "block";
   forceShowControls();
-  await stopAllPlayers();
 
-  const url = proxyUrl(resolvedChannel.file);
-  activeUrl = url;
-
-  if(url.includes(".mpd")){
-    playMPDNotice(resolvedChannel, url);
-  }else{
-    useHLS_STABLE(url);
+  if(!activeServers.length){
+    setStatus("ช่องนี้ยังไม่มีลิงก์", false);
+    return;
   }
+
+  await playActiveServer(currentServer());
 
   setTimeout(()=>{
     const btn = document.getElementById("closeBtn");
@@ -539,7 +677,7 @@ async function loadChannel(channel, element){
    เพราะเครื่องไม่รองรับ EME/ClearKey หรือ header/DRM ไม่ผ่าน
    เวอร์ชันนี้ไม่ฝืนเล่นในเว็บ เพื่อไม่ให้ค้าง/จอดำ
 */
-function playMPDNotice(channel, url){
+function playMPDNotice(channel, url, token){
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
   if(jwBox) jwBox.style.display = "none";
@@ -567,12 +705,15 @@ function playMPDNotice(channel, url){
           shakaPlayer.configure({drm:{clearKeys:{[channel.keyId]:channel.key}}});
         }
         shakaPlayer.load(url).then(()=>{
+          if(token !== activeLoadToken) return;
+          clearServerFailTimer();
           forceAudio100();
           video.play().catch(()=>{});
           setStatus("กำลังเล่น MPD");
         }).catch(e=>{
+          if(token !== activeLoadToken) return;
           console.log("MPD เล่นในเว็บไม่ได้:", e);
-          setStatus("MPD เล่นในเว็บนี้ไม่ได้ ให้กด PLAYER/MX", false);
+          tryNextServer("MPD เล่นไม่ได้");
         });
       }
     }
@@ -582,7 +723,7 @@ function playMPDNotice(channel, url){
 }
 
 /* ================= HLS STABLE CLASSIC ================= */
-function useHLS_STABLE(url){
+function useHLS_STABLE(url, token){
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
 
@@ -635,6 +776,8 @@ function useHLS_STABLE(url){
     currentHls.attachMedia(video);
 
     currentHls.on(Hls.Events.MANIFEST_PARSED, function(){
+      if(token !== activeLoadToken) return;
+      clearServerFailTimer();
       forceAudio100();
       video.play().catch(()=>{});
       setTimeout(()=>{ forceAudio100(); video.play().catch(()=>{}); },300);
@@ -657,12 +800,8 @@ function useHLS_STABLE(url){
           setStatus("สัญญาณวิดีโอสะดุด กำลังกู้คืน...");
           try{ currentHls.recoverMediaError(); }catch(e){}
         }else{
-          setStatus("เล่นไม่ได้ กำลังลองโหลดใหม่...", false);
-          try{
-            currentHls.destroy();
-            currentHls = null;
-            setTimeout(()=>useHLS_STABLE(url), 1200);
-          }catch(e){}
+          setStatus("เล่นไม่ได้ กำลังสลับ Server...", true);
+          tryNextServer("HLS Fatal");
         }
       }
     });
@@ -700,6 +839,25 @@ function useHLS_STABLE(url){
 
   }else{
     video.src = url;
+
+    const onPlaying = ()=>{
+      if(token !== activeLoadToken) return;
+      clearServerFailTimer();
+      setStatus("กำลังเล่น");
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("error", onError);
+    };
+
+    const onError = ()=>{
+      if(token !== activeLoadToken) return;
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("error", onError);
+      tryNextServer("Native HLS เล่นไม่ได้");
+    };
+
+    video.addEventListener("playing", onPlaying);
+    video.addEventListener("error", onError);
+
     setTimeout(()=>{
       forceAudio100();
       video.play().catch(()=>{});
@@ -708,9 +866,8 @@ function useHLS_STABLE(url){
 }
 
 function restartCurrent(){
-  if(activeOriginalChannel){
-    loadChannel(activeOriginalChannel, activeElement);
-  }else if(activeChannel){
+  if(activeChannel){
+    activeServerIndex = 0;
     loadChannel(activeChannel, activeElement);
   }
 }
@@ -764,11 +921,18 @@ function setupForceAutoHide(){
 }
 
 async function closePlayer(){
+  activeLoadToken++;
   await stopAllPlayers();
-  document.getElementById("player-container").classList.remove("controls-hidden");
-  document.getElementById("player-container").classList.remove("force-hide-controls");
-  document.getElementById("player-container").classList.remove("force-hide-controls");
-  document.getElementById("player-container").style.display = "none";
+  const box = document.getElementById("player-container");
+  box.classList.remove("controls-hidden");
+  box.classList.remove("force-hide-controls");
+  box.style.display = "none";
+
+  setTimeout(()=>{
+    if(activeElement && document.body.contains(activeElement)){
+      activeElement.focus();
+    }
+  },120);
 }
 
 function goHome(){
@@ -778,11 +942,23 @@ function goHome(){
 document.addEventListener("keydown",function(e){
   const container = document.getElementById("player-container");
   if(container.style.display === "block"){
+    const buttons = Array.from(container.querySelectorAll(".player-btn"));
+
     if(e.key === "ArrowUp"){
       e.preventDefault();
       forceShowControls();
-      const btn = document.getElementById("closeBtn");
-      if(btn) btn.focus();
+      document.getElementById("closeBtn")?.focus();
+      return;
+    }
+
+    if((e.key === "ArrowLeft" || e.key === "ArrowRight") &&
+       document.activeElement &&
+       document.activeElement.classList.contains("player-btn")){
+      e.preventDefault();
+      forceShowControls();
+      const index = buttons.indexOf(document.activeElement);
+      const step = e.key === "ArrowRight" ? 1 : -1;
+      buttons[(index + step + buttons.length) % buttons.length].focus();
       return;
     }
 
