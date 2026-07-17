@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA V8.2 LIVE WORKER RAW URL</title>
+    <title>TIEA IPTV V2.1 SAFE MAIN BACKUP</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA V8.2 LIVE • WORKER RAW URL</h2>
+    <h2 style="color:orange;text-align:center;">TIEA IPTV V2.1 SAFE MAIN / BACKUP</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -143,33 +143,17 @@
     <script>
 const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 
-
 /*
-ตัวอย่างช่อง Main / Backup
+รูปแบบช่อง Main / Backup แบบปลอดภัย
+เวอร์ชันทดลองนี้จะเล่น Main ก่อน โดยยังไม่เปลี่ยน Player เดิม
 
 {
   name:"HBO",
-  logo:"ใส่ลิงก์โลโก้",
+  logo:"ลิงก์โลโก้",
   group:"หนัง",
   servers:[
-    {name:"Main",file:"ใส่ลิงก์หลัก",drm:false},
-    {name:"Backup",file:"ใส่ลิงก์สำรอง",drm:false}
-  ]
-},
-
-กรณี MPD + ClearKey:
-{
-  name:"ช่องตัวอย่าง",
-  logo:"ใส่ลิงก์โลโก้",
-  group:"ดิจิตอล",
-  servers:[
-    {
-      name:"Main",
-      file:"https://example.com/live.mpd",
-      drm:true,
-      keyId:"ใส่ KEY ID",
-      key:"ใส่ KEY"
-    }
+    {name:"Main",file:"ลิงก์หลัก",drm:false},
+    {name:"Backup",file:"ลิงก์สำรอง",drm:false}
   ]
 },
 */
@@ -182,7 +166,7 @@ const channels = [
   servers:[
     {
       name:"Main",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=http://macete.xyz:2095/play/live.php?mac=00:1A:79:AB:ED:5A&stream=115833&extension=m3u8&referer=http://macete.xyz:2095",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=http%3A%2F%2Fmacete.xyz%3A2095%2Fplay%2Flive.php%3Fmac%3D00%3A1A%3A79%3AAB%3AED%3A5A%26stream%3D115833%26extension%3Dm3u8&referer=https%3A%2F%2Fwww.madoball.com%2F",
       drm:false
     },
     {
@@ -465,10 +449,8 @@ let hlsWatchdog = null;
 let activeChannel = null;
 let activeElement = null;
 let activeUrl = "";
-let activeServers = [];
+let activeOriginalChannel = null;
 let activeServerIndex = 0;
-let activeLoadToken = 0;
-let serverFailTimer = null;
 
 function setStatus(text, autoHide=true){
   const box = document.getElementById("status");
@@ -482,32 +464,8 @@ function setStatus(text, autoHide=true){
 }
 
 function proxyUrl(url){
-  const raw = String(url || "").trim();
-  if(!raw) return "";
-
-  // ถ้าเป็น Worker อยู่แล้ว ห้ามห่อซ้ำ
-  if(raw.includes("workers.dev/?url=") || raw.includes("workers.dev?url=")){
-    return raw;
-  }
-
-  const lower = raw.toLowerCase();
-
-  // GitHub Pages เป็น HTTPS จึงเปิด HTTP ตรงไม่ได้
-  // LiveDooMovies และ 6395 ให้ผ่าน Worker ตั้งแต่ครั้งแรก
-  const mustUseWorker =
-    lower.startsWith("http://") ||
-    lower.includes("live.livedoomovies.com") ||
-    lower.includes("livedoomovies.com") ||
-    lower.includes("6395online.com");
-
-  if(mustUseWorker){
-    // Worker ตัวนี้ใช้รูปแบบ URL ตรง ไม่เข้ารหัสทั้งลิงก์
-    // ตัวอย่าง: ?url=http://host/live/0.m3u8
-    return WORKER_PROXY + raw;
-  }
-
-  // MPD/3BB และ HTTPS ทั่วไป ให้ Direct ก่อน
-  return raw;
+  // ลิงก์ workers.dev เล่นตรง ห้าม proxy ซ้อน
+  return url;
 }
 
 function forceAudio100(){
@@ -554,7 +512,6 @@ function openMX(url){
 }
 
 async function stopAllPlayers(){
-  clearServerFailTimer();
   const video = document.getElementById("html5-player");
 
   if(hlsWatchdog){
@@ -586,115 +543,54 @@ async function stopAllPlayers(){
 }
 
 
-function normalizeServers(channel){
+function getChannelServer(channel, index){
   if(Array.isArray(channel.servers) && channel.servers.length){
-    return channel.servers
-      .map((s,index)=>({
-        name:s.name || (index===0 ? "Main" : "Backup"+index),
-        file:s.file || s.url || "",
-        drm:typeof s.drm==="boolean" ? s.drm : !!channel.drm,
-        keyId:s.keyId || channel.keyId || "",
-        key:s.key || channel.key || ""
-      }))
-      .filter(s=>s.file);
+    const s = channel.servers[index] || channel.servers[0];
+    if(!s) return null;
+
+    return {
+      name: channel.name,
+      logo: channel.logo,
+      group: channel.group,
+      file: s.file || s.url || "",
+      drm: typeof s.drm === "boolean" ? s.drm : !!channel.drm,
+      keyId: s.keyId || channel.keyId || "",
+      key: s.key || channel.key || ""
+    };
   }
 
-  if(channel.file){
-    return [{
-      name:"Main",
-      file:channel.file,
-      drm:!!channel.drm,
-      keyId:channel.keyId || "",
-      key:channel.key || ""
-    }];
-  }
-
-  return [];
-}
-
-function clearServerFailTimer(){
-  if(serverFailTimer){
-    clearTimeout(serverFailTimer);
-    serverFailTimer = null;
-  }
-}
-
-function armServerFailTimer(token, ms){
-  clearServerFailTimer();
-  serverFailTimer = setTimeout(()=>{
-    if(token !== activeLoadToken) return;
-    tryNextServer("เปิดช้าเกินกำหนด");
-  }, ms || 12000);
-}
-
-function currentServer(){
-  return activeServers[activeServerIndex] || null;
-}
-
-async function tryNextServer(reason){
-  clearServerFailTimer();
-
-  if(activeServerIndex + 1 >= activeServers.length){
-    setStatus("ทุก Server เล่นไม่ได้" + (reason ? " • " + reason : ""), false);
-    return;
-  }
-
-  activeServerIndex++;
-  const next = currentServer();
-  setStatus("กำลังสลับ Server...", true);
-  await playActiveServer(next);
-}
-
-async function playActiveServer(server){
-  if(!server || !server.file){
-    return tryNextServer("ไม่มีลิงก์");
-  }
-
-  const token = ++activeLoadToken;
-  await stopAllPlayers();
-
-  activeUrl = proxyUrl(server.file);
-
-  const routeText = activeUrl === server.file ? "DIRECT" : "WORKER";
-  console.log("[TIEA V8.2]", routeText, activeUrl);
-  setStatus("กำลังเปิด " + routeText + "...", true);
-
-  const mergedChannel = Object.assign({}, activeChannel, {
-    file: server.file,
-    drm: server.drm,
-    keyId: server.keyId,
-    key: server.key
-  });
-
-  armServerFailTimer(token, 16000);
-
-  const originalLower = String(server.file || "").toLowerCase();
-
-  if(originalLower.includes(".mpd")){
-    playMPDNotice(mergedChannel, activeUrl, token);
-  }else{
-    useHLS_STABLE(activeUrl, token);
-  }
+  return channel;
 }
 
 async function loadChannel(channel, element){
+  activeOriginalChannel = channel;
+  activeServerIndex = 0;
+
+  const resolvedChannel = getChannelServer(channel, activeServerIndex);
+  if(!resolvedChannel || !resolvedChannel.file){
+    setStatus("ช่องนี้ยังไม่มีลิงก์", false);
+    return;
+  }
+
+  channel = resolvedChannel;
   activeChannel = channel;
   activeElement = element;
-  activeServers = normalizeServers(channel);
-  activeServerIndex = 0;
 
   document.querySelectorAll(".channel").forEach(ch=>ch.classList.remove("active"));
   if(element) element.classList.add("active");
 
   document.getElementById("player-container").style.display = "block";
   forceShowControls();
+  await stopAllPlayers();
 
-  if(!activeServers.length){
-    setStatus("ช่องนี้ยังไม่มีลิงก์", false);
-    return;
+  const url = proxyUrl(channel.file);
+  activeUrl = url;
+
+  if(url.includes(".mpd")){
+    playMPDNotice(channel, url);
+  }else{
+    useHLS_STABLE(url);
   }
-
-  await playActiveServer(currentServer());
 
   setTimeout(()=>{
     const btn = document.getElementById("closeBtn");
@@ -707,7 +603,7 @@ async function loadChannel(channel, element){
    เพราะเครื่องไม่รองรับ EME/ClearKey หรือ header/DRM ไม่ผ่าน
    เวอร์ชันนี้ไม่ฝืนเล่นในเว็บ เพื่อไม่ให้ค้าง/จอดำ
 */
-function playMPDNotice(channel, url, token){
+function playMPDNotice(channel, url){
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
   if(jwBox) jwBox.style.display = "none";
@@ -735,15 +631,12 @@ function playMPDNotice(channel, url, token){
           shakaPlayer.configure({drm:{clearKeys:{[channel.keyId]:channel.key}}});
         }
         shakaPlayer.load(url).then(()=>{
-          if(token !== activeLoadToken) return;
-          clearServerFailTimer();
           forceAudio100();
           video.play().catch(()=>{});
           setStatus("กำลังเล่น MPD");
         }).catch(e=>{
-          if(token !== activeLoadToken) return;
           console.log("MPD เล่นในเว็บไม่ได้:", e);
-          tryNextServer("MPD เล่นไม่ได้");
+          setStatus("MPD เล่นในเว็บนี้ไม่ได้ ให้กด PLAYER/MX", false);
         });
       }
     }
@@ -753,7 +646,7 @@ function playMPDNotice(channel, url, token){
 }
 
 /* ================= HLS STABLE CLASSIC ================= */
-function useHLS_STABLE(url, token){
+function useHLS_STABLE(url){
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
 
@@ -806,8 +699,6 @@ function useHLS_STABLE(url, token){
     currentHls.attachMedia(video);
 
     currentHls.on(Hls.Events.MANIFEST_PARSED, function(){
-      if(token !== activeLoadToken) return;
-      clearServerFailTimer();
       forceAudio100();
       video.play().catch(()=>{});
       setTimeout(()=>{ forceAudio100(); video.play().catch(()=>{}); },300);
@@ -830,8 +721,12 @@ function useHLS_STABLE(url, token){
           setStatus("สัญญาณวิดีโอสะดุด กำลังกู้คืน...");
           try{ currentHls.recoverMediaError(); }catch(e){}
         }else{
-          setStatus("เล่นไม่ได้ กำลังสลับ Server...", true);
-          tryNextServer("HLS Fatal");
+          setStatus("เล่นไม่ได้ กำลังลองโหลดใหม่...", false);
+          try{
+            currentHls.destroy();
+            currentHls = null;
+            setTimeout(()=>useHLS_STABLE(url), 1200);
+          }catch(e){}
         }
       }
     });
@@ -869,25 +764,6 @@ function useHLS_STABLE(url, token){
 
   }else{
     video.src = url;
-
-    const onPlaying = ()=>{
-      if(token !== activeLoadToken) return;
-      clearServerFailTimer();
-      setStatus("กำลังเล่น");
-      video.removeEventListener("playing", onPlaying);
-      video.removeEventListener("error", onError);
-    };
-
-    const onError = ()=>{
-      if(token !== activeLoadToken) return;
-      video.removeEventListener("playing", onPlaying);
-      video.removeEventListener("error", onError);
-      tryNextServer("Native HLS เล่นไม่ได้");
-    };
-
-    video.addEventListener("playing", onPlaying);
-    video.addEventListener("error", onError);
-
     setTimeout(()=>{
       forceAudio100();
       video.play().catch(()=>{});
@@ -896,8 +772,9 @@ function useHLS_STABLE(url, token){
 }
 
 function restartCurrent(){
-  if(activeChannel){
-    activeServerIndex = 0;
+  if(activeOriginalChannel){
+    loadChannel(activeOriginalChannel, activeElement);
+  }else if(activeChannel){
     loadChannel(activeChannel, activeElement);
   }
 }
@@ -951,7 +828,6 @@ function setupForceAutoHide(){
 }
 
 async function closePlayer(){
-  activeLoadToken++;
   await stopAllPlayers();
   const box = document.getElementById("player-container");
   box.classList.remove("controls-hidden");
@@ -972,23 +848,11 @@ function goHome(){
 document.addEventListener("keydown",function(e){
   const container = document.getElementById("player-container");
   if(container.style.display === "block"){
-    const buttons = Array.from(container.querySelectorAll(".player-btn"));
-
     if(e.key === "ArrowUp"){
       e.preventDefault();
       forceShowControls();
-      document.getElementById("closeBtn")?.focus();
-      return;
-    }
-
-    if((e.key === "ArrowLeft" || e.key === "ArrowRight") &&
-       document.activeElement &&
-       document.activeElement.classList.contains("player-btn")){
-      e.preventDefault();
-      forceShowControls();
-      const index = buttons.indexOf(document.activeElement);
-      const step = e.key === "ArrowRight" ? 1 : -1;
-      buttons[(index + step + buttons.length) % buttons.length].focus();
+      const closeBtn = document.getElementById("closeBtn");
+      if(closeBtn) closeBtn.focus();
       return;
     }
 
