@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1 SERVERS FIX</title>
+    <title>TIEA IPTV V2.2 LOOKONTV PROVIDER FIX</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -57,7 +57,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA IPTV V2.1 • SERVERS FIX</h2>
+    <h2 style="color:orange;text-align:center;">TIEA IPTV V2.2 • LOOKONTV PROVIDER FIX</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -89,20 +89,32 @@
     <script>
 const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 
+/* ================= LOOKONTV PROVIDER =================
+   เพิ่มเฉพาะ Provider นี้ โดยไม่แก้ Playback Engine เดิม
+*/
+const LOOKONTV_REFERER = "http://lookontv.net:2095/";
+
+function buildLookOnTvWorkerUrl(sourceUrl){
+  if(!sourceUrl) return "";
+  if(sourceUrl.includes("workers.dev/?url=")) return sourceUrl;
+  return WORKER_PROXY + encodeURIComponent(sourceUrl) +
+    "&referer=" + encodeURIComponent(LOOKONTV_REFERER);
+}
+
 const channels = [
 {
-  name:"test",
+  name:"LookOnTV 116073",
   logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQHDGbqHV94T6Ed74fTkKcXYhA&s=10",
   group:"หนัง",
   servers:[
     {
       name:"Main",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=http://vd257.proxy-cdn.ag:2005/live/play/ZDJwRFp5dHlkVUUwWlV0clozcDRTSEptVFdKM1oxQllaMnQ1T0ZKRldUQk5VR1ZGUnpoclkyTjFhejA9/115498",
+      file:buildLookOnTvWorkerUrl("http://lookontv.net:2095/play/live.php?mac=10:27:BE:2e:3d:e9&stream=116073&extension=m3u8"),
       drm:false
     },
     {
       name:"Backup",
-      file:"http://119.82.250.109:8080/nl.m3u8?id=1138",
+      file:"http://lookontv.net:2095/play/live.php?mac=10:27:BE:2e:3d:e9&stream=116073&extension=m3u8",
       drm:false
     }
   ]
@@ -790,7 +802,7 @@ async function closePlayer(){
 }
 
 function goHome(){
-  window.location.href = "https://tiea9999.github.io/tv/index.html";
+  window.location.href = "https://tiea9999.github.io/tv-online/index.html";
 }
 
 document.addEventListener("keydown",function(e){
