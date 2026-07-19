@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1A EXTERNAL AUTO OPEN</title>
+    <title>TIEA IPTV V2.1B REDIRECT RESOLVER EXPERIMENTAL</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -33,27 +33,9 @@
         .player-btn{background:rgba(0,0,0,.75);color:#fff;border:2px solid #fff;border-radius:12px;padding:10px 18px;font-size:20px;font-weight:bold;cursor:pointer}
         .player-btn:focus{outline:none;box-shadow:0 0 0 4px cyan}
         .status{position:fixed;bottom:15px;left:15px;right:15px;z-index:100001;text-align:center;color:#fff;background:rgba(0,0,0,.72);padding:8px 12px;border-radius:10px;display:none;font-size:14px;border:1px solid rgba(0,255,255,.35)}
+        #resolver-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:200000;display:none;max-width:calc(100% - 30px);padding:12px 18px;border-radius:12px;background:rgba(0,0,0,.9);color:#fff;border:1px solid cyan;font-weight:bold;text-align:center}
         @media(max-width:768px){#category-menu{justify-content:flex-start;width:calc(100% - 12px);padding:8px}#channel-list{width:calc(100% - 12px);grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:8px}.channel{min-height:112px;font-size:13px}.channel img{width:78px;height:70px}.player-btn{font-size:16px;padding:8px 12px}}
         @media(max-width:480px){#channel-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:5px}.channel{min-height:98px;font-size:11px;padding:6px 3px}.channel img{width:64px;height:58px;margin-bottom:5px}.category-btn{min-width:100px;font-size:14px;padding:9px 12px}}
-
-        #external-toast{
-          position:fixed;
-          left:50%;
-          bottom:28px;
-          transform:translateX(-50%);
-          z-index:200000;
-          display:none;
-          max-width:calc(100% - 30px);
-          padding:12px 18px;
-          border-radius:12px;
-          background:rgba(0,0,0,.88);
-          color:#fff;
-          border:1px solid rgba(0,255,255,.55);
-          font-size:16px;
-          font-weight:bold;
-          text-align:center;
-          box-shadow:0 4px 18px rgba(0,0,0,.45);
-        }
     </style>
 
 <style id="force-autohide-style">
@@ -76,8 +58,8 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <div id="external-toast">กำลังเปิด Player...</div>
-    <h2 style="color:orange;text-align:center;">TIEA IPTV V2.1A • EXTERNAL AUTO OPEN</h2>
+    <div id="resolver-toast">กำลังตรวจสอบลิงก์ปลายทาง...</div>
+    <h2 style="color:orange;text-align:center;">TIEA IPTV V2.1B • REDIRECT RESOLVER</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -114,16 +96,17 @@ const channels = [
   name:"LookOnTV 116073",
   logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQHDGbqHV94T6Ed74fTkKcXYhA&s=10",
   group:"หนัง",
-  externalOnly:true,
+  redirectResolve:true,
+  externalFallback:true,
   servers:[
     {
       name:"Main",
-      file:"http://88.135.69.66:2095/play/live.php?mac=10:27:BE:24:0e:b7&stream=115704&extension=m3u8",
+      file:"http://lookontv.net:2095/play/live.php?mac=10:27:BE:2e:3d:e9&stream=115704&extension=m3u8",
       drm:false
     }
   ]
 }, 
-
+    
 {
   name:"Worldcup",
   logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",
@@ -477,47 +460,88 @@ function openMX(url){
 }
 
 
-function showExternalToast(text="กำลังเปิด Player..."){
-  const toast = document.getElementById("external-toast");
-  if(!toast) return;
-  toast.textContent = text;
-  toast.style.display = "block";
-  clearTimeout(showExternalToast._timer);
-  showExternalToast._timer = setTimeout(()=>{
-    toast.style.display = "none";
-  }, 1800);
+function showResolverToast(text){
+  const box = document.getElementById("resolver-toast");
+  if(!box) return;
+  box.textContent = text || "";
+  box.style.display = text ? "block" : "none";
+  clearTimeout(showResolverToast._timer);
+  if(text){
+    showResolverToast._timer = setTimeout(()=>{ box.style.display = "none"; }, 3500);
+  }
 }
 
 function isAndroidDevice(){
   return /Android/i.test(navigator.userAgent || "");
 }
 
-function openExternalOnly(url){
+function openSystemPlayer(url){
   if(!url) return;
-
-  showExternalToast(isAndroidDevice() ? "กำลังเปิด Player ของเครื่อง..." : "กำลังเปิดในเบราว์เซอร์...");
-
   if(isAndroidDevice()){
     try{
       const u = new URL(url);
       const scheme = u.protocol.replace(":","");
       const hostPath = u.host + u.pathname + (u.search || "") + (u.hash || "");
-      const intent =
-        "intent://" + hostPath +
+      const intent = "intent://" + hostPath +
         "#Intent;scheme=" + scheme +
         ";action=android.intent.action.VIEW;type=video/*;" +
         "S.browser_fallback_url=" + encodeURIComponent(url) +
         ";end";
       window.location.href = intent;
-    }catch(e){
-      window.location.href = url;
-    }
-    return;
+      return;
+    }catch(e){}
   }
+  const w = window.open(url, "_blank", "noopener,noreferrer");
+  if(!w) window.location.href = url;
+}
 
-  const opened = window.open(url, "_blank", "noopener,noreferrer");
-  if(!opened){
-    window.location.href = url;
+async function resolveRedirectUrl(originalUrl){
+  const controller = new AbortController();
+  const timer = setTimeout(()=>controller.abort(), 8000);
+  try{
+    const response = await fetch(originalUrl, {
+      method:"GET",
+      redirect:"follow",
+      cache:"no-store",
+      signal:controller.signal
+    });
+    const finalUrl = response.url || originalUrl;
+    try{ if(response.body && response.body.cancel) await response.body.cancel(); }catch(e){}
+    return finalUrl;
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+async function playRedirectProvider(channel, element){
+  const originalUrl = firstChannelUrl(channel) || channel.file || "";
+  if(!originalUrl){ showResolverToast("ช่องนี้ยังไม่มีลิงก์"); return; }
+  showResolverToast("กำลังตามลิงก์ 302 ไปยังเซิร์ฟเวอร์ปลายทาง...");
+  try{
+    const finalUrl = await resolveRedirectUrl(originalUrl);
+    showResolverToast(finalUrl && finalUrl !== originalUrl ? "พบลิงก์ปลายทางแล้ว กำลังเล่น..." : "กำลังลองเล่นลิงก์เดิม...");
+    activeOriginalChannel = channel;
+    activeChannel = {name:channel.name,logo:channel.logo,group:channel.group,file:finalUrl,drm:false};
+    activeElement = element;
+    activeUrl = finalUrl;
+    document.querySelectorAll(".channel").forEach(ch=>ch.classList.remove("active"));
+    if(element) element.classList.add("active");
+    document.getElementById("player-container").style.display = "block";
+    forceShowControls();
+    await stopAllPlayers();
+    useHLS_STABLE(finalUrl);
+    setTimeout(()=>document.getElementById("closeBtn")?.focus(),300);
+  }catch(error){
+    console.log("REDIRECT RESOLVER ERROR:", error);
+    showResolverToast("อ่านลิงก์ปลายทางไม่ได้ กำลังเปิด Player ของเครื่อง...");
+    if(channel.externalFallback === true){
+      setTimeout(()=>openSystemPlayer(originalUrl),400);
+    }else{
+      document.getElementById("player-container").style.display = "block";
+      await stopAllPlayers();
+      activeUrl = originalUrl;
+      useHLS_STABLE(originalUrl);
+    }
   }
 }
 
@@ -578,13 +602,8 @@ function firstChannelUrl(channel){
 }
 
 async function loadChannel(channel, element){
-  if(channel && channel.externalOnly === true){
-    const externalUrl = firstChannelUrl(channel) || channel.file || "";
-    if(!externalUrl){
-      showExternalToast("ช่องนี้ยังไม่มีลิงก์");
-      return;
-    }
-    openExternalOnly(externalUrl);
+  if(channel && channel.redirectResolve === true){
+    await playRedirectProvider(channel, element);
     return;
   }
 
