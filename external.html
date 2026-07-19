@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIEA External Gateway</title>
+  <style>
+    html,body{
+      margin:0;
+      width:100%;
+      height:100%;
+      background:#000;
+      color:#fff;
+      font-family:Arial,sans-serif;
+    }
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+    }
+    .box{
+      max-width:680px;
+      padding:24px;
+    }
+    .title{
+      color:#00e5ff;
+      font-size:22px;
+      font-weight:bold;
+      margin-bottom:12px;
+    }
+    .message{
+      font-size:17px;
+      line-height:1.6;
+    }
+    .back{
+      display:inline-block;
+      margin-top:18px;
+      padding:11px 18px;
+      border:2px solid #fff;
+      border-radius:12px;
+      color:#fff;
+      text-decoration:none;
+      font-weight:bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <div class="title">TIEA External Gateway</div>
+    <div class="message" id="message">กำลังเปิดสตรีมโดยตรง...</div>
+    <a class="back" id="backBtn" href="./">กลับ TIEA</a>
+  </div>
+
+<script>
+(function(){
+  const params = new URLSearchParams(window.location.search);
+  const target = params.get("url") || "";
+  const message = document.getElementById("message");
+  const backBtn = document.getElementById("backBtn");
+
+  try{
+    const saved = sessionStorage.getItem("TIEA_EXTERNAL_RETURN");
+    if(saved) backBtn.href = saved;
+  }catch(e){}
+
+  if(!target){
+    message.textContent = "ไม่พบลิงก์สตรีม";
+    return;
+  }
+
+  let parsed;
+  try{
+    parsed = new URL(target);
+  }catch(e){
+    message.textContent = "รูปแบบลิงก์ไม่ถูกต้อง";
+    return;
+  }
+
+  if(parsed.protocol !== "http:" && parsed.protocol !== "https:"){
+    message.textContent = "รองรับเฉพาะลิงก์ HTTP และ HTTPS";
+    return;
+  }
+
+  message.textContent = "กำลังส่งไปยังเซิร์ฟเวอร์สตรีม...";
+
+  setTimeout(function(){
+    window.location.replace(parsed.href);
+  }, 180);
+})();
+</script>
+</body>
+</html>
