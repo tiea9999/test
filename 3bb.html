@@ -96,7 +96,8 @@
             <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
                 <button class="player-btn" onclick="openMX()">▶ MX</button>
-                <button class="player-btn" onclick="goHome()">🏠 HOME</button>
+                <button id="diag-btn" class="control-btn" tabindex="0" onclick="toggleMpdDiagnostic()" style="border-color:#00e5ff;color:#00e5ff;">📊 DIAG</button>
+        <button class="player-btn" onclick="goHome()">🏠 HOME</button>
             </div>
         </div>
         <div id="jw-player"></div>
