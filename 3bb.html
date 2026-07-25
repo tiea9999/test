@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB TIMELINE NORMALIZER TEST V8.1 AUTO INIT</title>
+    <title>TIEA IPTV V2.1D + 3BB TIMELINE NORMALIZER TEST V8.2 FIRST CHANNEL FIX</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB TIMELINE NORMALIZER TEST V8.1 AUTO INIT</div>
+          <div class="diag-title">3BB TIMELINE NORMALIZER TEST V8.2 FIRST CHANNEL FIX</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -673,15 +673,17 @@ async function loadChannel(channel, element){
   activeChannel = resolvedChannel;
   activeElement = element;
 
-  // V8.1: DIAG no longer depends on opening CINEMAX first.
-  setTimeout(()=>v81AutoInitDiagnostic(activeChannel), 30);
-
   document.querySelectorAll(".channel").forEach(ch=>ch.classList.remove("active"));
   if(element) element.classList.add("active");
 
   document.getElementById("player-container").style.display = "block";
   forceShowControls();
   await stopAllPlayers();
+
+  // V8.2: สำคัญมาก — bind DIAG หลัง stopAllPlayers()
+  // เพราะ stopAllPlayers() จะทำลาย Shaka/video state เดิม
+  // ถ้า bind ก่อนหน้านี้ ช่องแรกจะไม่มีข้อมูลจนกว่าจะเปิดช่องอื่นก่อน
+  setTimeout(()=>v81AutoInitDiagnostic(resolvedChannel), 0);
 
   const url = proxyUrl(resolvedChannel.file);
   activeUrl = url;
@@ -759,9 +761,15 @@ function toggleMpdDiagnostic(force){
   const panel = document.getElementById("mpd-diagnostic");
   if(!panel) return;
 
-  // V8.1: initialize from the current channel even if this is the
-  // very first channel opened after page load.
-  try{ v81AutoInitDiagnostic(activeChannel); }catch(e){}
+  // V8.2: ช่องแรกต้องตรวจได้ทันที แม้ยังไม่เคยเปิด CINEMAX
+  try{
+    if(activeChannel && activeChannel.file && activeChannel.file.includes(".mpd")){
+      if(!v7MpdUrl || v7MpdUrl !== activeChannel.file){
+        v7InspectMpd(activeChannel.file);
+      }
+    }
+    v81AutoInitDiagnostic(activeChannel);
+  }catch(e){}
 
   mpdDiagVisible = typeof force === "boolean" ? force : !mpdDiagVisible;
   panel.style.display = mpdDiagVisible ? "block" : "none";
@@ -1250,7 +1258,7 @@ function v81AutoInitDiagnostic(channel){
   try{ v6BindSeekEvents(); }catch(e){}
 
   // Refresh several times because Shaka/MPD state arrives asynchronously.
-  [0,100,250,500,900,1500,2500].forEach(ms=>{
+  [0,100,250,500,900,1500,2500,4000,6000,9000].forEach(ms=>{
     setTimeout(()=>{
       try{
         v8CalcBase();
@@ -1414,7 +1422,7 @@ function renderMpdDiagnostic(){
     ["V7 MPD URL", v7MpdUrl || "-"],
     ["V7 MPD Timeline", v7MpdSummary()],
     ["V8 Timeline Normalizer", v8Summary()],
-    ["V8.1 Auto Init", `channel=${v81InitChannel || "-"} | count=${v81InitCount}`],
+    ["V8.2 DIAG Bound", `active=${activeChannel?.name || "-"} | init=${v81InitChannel || "-"} | shaka=${shakaPlayer ? "YES":"NO"} | count=${v81InitCount}`],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1472,6 +1480,11 @@ function playMPDNotice(channel, url){
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
 
+        // V8.2: bind กับ Shaka instance ตัวจริงของช่องแรกทันที
+        deepDiagShakaEventsBound = false;
+        deepDiagBoundVideo = null;
+        setTimeout(()=>v81AutoInitDiagnostic(channel), 0);
+
         shakaPlayer.addEventListener("error", function(event){
           try{
             const detail = event.detail || {};
@@ -1504,13 +1517,18 @@ function playMPDNotice(channel, url){
           }
         }
 
+        // V8.2: DIAG ต้องเริ่มเก็บข้อมูลตั้งแต่ load() ครั้งแรก
+        v81AutoInitDiagnostic(channel);
+
         shakaPlayer.load(url).then(()=>{
           forceAudio100();
+          v81AutoInitDiagnostic(channel);
           setTimeout(()=>v8Observe(channel),300);
           video.play().catch(()=>{});
           setStatus("MPD โหลดสำเร็จ — ดูผลที่ 📊 DIAG", true);
         }).catch(e=>{
           console.log("MPD เล่นในเว็บไม่ได้:", e);
+          v81AutoInitDiagnostic(channel);
           setStatus("MPD โหลดไม่สำเร็จ — ดูผลที่ 📊 DIAG", false);
         });
       }else{
