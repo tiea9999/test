@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB TIMELINE NORMALIZER TEST V8</title>
+    <title>TIEA IPTV V2.1D + 3BB TIMELINE NORMALIZER TEST V8.1 AUTO INIT</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB TIMELINE NORMALIZER TEST V8</div>
+          <div class="diag-title">3BB TIMELINE NORMALIZER TEST V8.1 AUTO INIT</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -447,6 +447,8 @@ let v8Enabled = false;
 let v8RawTime = null;
 let v8NormalizedTime = null;
 let v8LogLines = [];
+let v81InitChannel = "";
+let v81InitCount = 0;
 
 
 
@@ -671,6 +673,9 @@ async function loadChannel(channel, element){
   activeChannel = resolvedChannel;
   activeElement = element;
 
+  // V8.1: DIAG no longer depends on opening CINEMAX first.
+  setTimeout(()=>v81AutoInitDiagnostic(activeChannel), 30);
+
   document.querySelectorAll(".channel").forEach(ch=>ch.classList.remove("active"));
   if(element) element.classList.add("active");
 
@@ -753,11 +758,18 @@ function bindDeepDiagEvents(){
 function toggleMpdDiagnostic(force){
   const panel = document.getElementById("mpd-diagnostic");
   if(!panel) return;
+
+  // V8.1: initialize from the current channel even if this is the
+  // very first channel opened after page load.
+  try{ v81AutoInitDiagnostic(activeChannel); }catch(e){}
+
   mpdDiagVisible = typeof force === "boolean" ? force : !mpdDiagVisible;
   panel.style.display = mpdDiagVisible ? "block" : "none";
 
   if(mpdDiagVisible){
-    bindDeepDiagEvents();
+    try{ bindDeepDiagEvents(); }catch(e){}
+    try{ bindDeepShakaEvents(); }catch(e){}
+    try{ v6BindSeekEvents(); }catch(e){}
     renderMpdDiagnostic();
     if(!mpdDiagTimer) mpdDiagTimer = setInterval(renderMpdDiagnostic, 1000);
   }else if(mpdDiagTimer){
@@ -1222,6 +1234,36 @@ function v8Observe(channel){
 function v8Summary(){
   return `enabled=${v8Enabled?"YES":"NO"} | base=${Number.isFinite(v8TimelineBase)?v8TimelineBase.toFixed(3):"-"} | raw=${Number.isFinite(v8RawTime)?v8RawTime.toFixed(3):"-"} | normalized=${Number.isFinite(v8NormalizedTime)?v8NormalizedTime.toFixed(3):"-"}`;
 }
+
+function v81AutoInitDiagnostic(channel){
+  const video = document.getElementById("html5-player");
+  if(!video) return;
+
+  v81InitChannel = String(channel?.name || activeChannel?.name || "-");
+  v81InitCount++;
+
+  // Reset the binding reference so the first-open channel is always bound.
+  deepDiagBoundVideo = null;
+
+  try{ bindDeepDiagEvents(); }catch(e){}
+  try{ bindDeepShakaEvents(); }catch(e){}
+  try{ v6BindSeekEvents(); }catch(e){}
+
+  // Refresh several times because Shaka/MPD state arrives asynchronously.
+  [0,100,250,500,900,1500,2500].forEach(ms=>{
+    setTimeout(()=>{
+      try{
+        v8CalcBase();
+        renderMpdDiagnostic();
+      }catch(e){}
+    },ms);
+  });
+
+  try{
+    v8Log(`AUTO INIT channel=${v81InitChannel} count=${v81InitCount}`);
+  }catch(e){}
+}
+
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
   const video = document.getElementById("html5-player");
@@ -1372,6 +1414,7 @@ function renderMpdDiagnostic(){
     ["V7 MPD URL", v7MpdUrl || "-"],
     ["V7 MPD Timeline", v7MpdSummary()],
     ["V8 Timeline Normalizer", v8Summary()],
+    ["V8.1 Auto Init", `channel=${v81InitChannel || "-"} | count=${v81InitCount}`],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1412,6 +1455,7 @@ function renderMpdDiagnostic(){
 */
 function playMPDNotice(channel, url){
   v7InspectMpd(url);
+  setTimeout(()=>v81AutoInitDiagnostic(channel), 20);
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
   if(jwBox) jwBox.style.display = "none";
