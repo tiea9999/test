@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB MPD TIMELINE INSPECTOR V7</title>
+    <title>TIEA IPTV V2.1D + 3BB TIMELINE NORMALIZER TEST V8</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB MPD TIMELINE INSPECTOR V7</div>
+          <div class="diag-title">3BB TIMELINE NORMALIZER TEST V8</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -442,6 +442,11 @@ let v6LastSeekTo = 0;
 let v7MpdInfo = null;
 let v7MpdError = "";
 let v7MpdUrl = "";
+let v8TimelineBase = null;
+let v8Enabled = false;
+let v8RawTime = null;
+let v8NormalizedTime = null;
+let v8LogLines = [];
 
 
 
@@ -645,6 +650,11 @@ async function loadChannel(channel, element){
   v7MpdInfo = null;
   v7MpdError = "";
   v7MpdUrl = "";
+  v8TimelineBase=null;
+  v8Enabled=false;
+  v8RawTime=null;
+  v8NormalizedTime=null;
+  v8LogLines=[];
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -1141,6 +1151,7 @@ async function v7InspectMpd(url){
       return;
     }
     v7MpdInfo = v7ComputeInfo(doc);
+    v8CalcBase();
   }catch(e){
     v7MpdError = e?.message || String(e);
   }
@@ -1171,6 +1182,45 @@ function v7MpdSummary(){
     `lastR=${x.lastR}`,
     `computedFirstSec=${x.computedFirstSec}`
   ].join(" | ");
+}
+
+function v8Log(msg){
+  const t=new Date().toLocaleTimeString("th-TH",{hour12:false});
+  v8LogLines.push(`${t} ${msg}`);
+  if(v8LogLines.length>80)v8LogLines.shift();
+}
+function v8CalcBase(){
+  v8TimelineBase=null;
+  if(!v7MpdInfo)return;
+  const ts=Number(v7MpdInfo.timescale);
+  const ft=Number(v7MpdInfo.firstT);
+  const pto=Number(v7MpdInfo.presentationTimeOffset);
+  if(Number.isFinite(ts)&&ts>0&&Number.isFinite(ft)){
+    v8TimelineBase=(ft-(Number.isFinite(pto)?pto:0))/ts;
+  }
+}
+function v8IsTestChannel(channel){
+  if(!channel)return false;
+  if(String(channel.name||"").toLowerCase()==="cinemax")return false;
+  return Number.isFinite(v8TimelineBase)&&v8TimelineBase>100000;
+}
+function v8Observe(channel){
+  const video=document.getElementById("html5-player");
+  if(!video)return;
+  v8CalcBase();
+  v8Enabled=v8IsTestChannel(channel);
+  v8Log(`${v8Enabled?"ARM":"BYPASS"} channel=${channel?.name||"-"} base=${Number.isFinite(v8TimelineBase)?v8TimelineBase.toFixed(3):"-"}`);
+  const sample=()=>{
+    const raw=Number(video.currentTime);
+    if(!Number.isFinite(raw))return;
+    v8RawTime=raw;
+    v8NormalizedTime=Number.isFinite(v8TimelineBase)?raw-v8TimelineBase:null;
+  };
+  ["loadedmetadata","durationchange","progress","canplay","playing","seeking","seeked","timeupdate"].forEach(ev=>video.addEventListener(ev,sample));
+  sample();
+}
+function v8Summary(){
+  return `enabled=${v8Enabled?"YES":"NO"} | base=${Number.isFinite(v8TimelineBase)?v8TimelineBase.toFixed(3):"-"} | raw=${Number.isFinite(v8RawTime)?v8RawTime.toFixed(3):"-"} | normalized=${Number.isFinite(v8NormalizedTime)?v8NormalizedTime.toFixed(3):"-"}`;
 }
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
@@ -1321,6 +1371,7 @@ function renderMpdDiagnostic(){
     ["V6 Last Seek", `${Number(v6LastSeekFrom||0).toFixed(3)} -> ${Number(v6LastSeekTo||0).toFixed(3)}`],
     ["V7 MPD URL", v7MpdUrl || "-"],
     ["V7 MPD Timeline", v7MpdSummary()],
+    ["V8 Timeline Normalizer", v8Summary()],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1347,7 +1398,11 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V7 SEGMENT TIMELINE</div>` +
   `<div class="diag-log">${diagEscape(v7MpdInfo?.timeline || "-")}</div>` +
   `<div class="diag-section">V7 REPRESENTATIONS</div>` +
-  `<div class="diag-log">${diagEscape(v7MpdInfo?.representations || "-")}</div>`;
+  `<div class="diag-log">${diagEscape(v7MpdInfo?.representations || "-")}</div>` +
+  `<div class="diag-section">V8 TIMELINE NORMALIZER TEST</div>` +
+  `<div class="diag-log">${diagEscape(v8Summary())}</div>` +
+  `<div class="diag-section">V8 NORMALIZER LOG</div>` +
+  `<div class="diag-log">${diagEscape(v8LogLines.length?v8LogLines.join("\n"):"ยังไม่มีข้อมูล")}</div>`;
 }
 
 /* ================= MPD =================
@@ -1407,6 +1462,7 @@ function playMPDNotice(channel, url){
 
         shakaPlayer.load(url).then(()=>{
           forceAudio100();
+          setTimeout(()=>v8Observe(channel),300);
           video.play().catch(()=>{});
           setStatus("MPD โหลดสำเร็จ — ดูผลที่ 📊 DIAG", true);
         }).catch(e=>{
