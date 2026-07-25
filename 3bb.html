@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB DEEP DECODE DIAGNOSTIC V3</title>
+    <title>TIEA IPTV V2.1D + 3BB DRM / DECODE DIAGNOSTIC V4</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB DEEP DECODE DIAGNOSTIC V3</div>
+          <div class="diag-title">3BB DRM / DECODE DIAGNOSTIC V4</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -348,20 +348,6 @@ const channels = [
   ]
 },
 {
-  name:"cinemax",
-  logo:"https://6395online.com:8443/logotv/movie/cinemax(2).png",
-  group:"หนัง",
-  servers:[
-    {
-      name:"Main",
-      file:"https://cco-streamer1.cdn.3bbtv.com:8443/3bb/live/107/107.mpd",
-      drm:true,
-      keyId:"f48caba466394e93b50780f21798787a",
-      key:"9a074a10db4342e7937076b3e52f6029"
-    }
-  ]
-},    
-{
   name:"hbo-signature",
   logo:"https://6395online.com:8443/logotv/movie/hbosignature.png",
   group:"หนัง",
@@ -425,6 +411,9 @@ let deepDiagLastTime = 0;
 let deepDiagLastSampleAt = 0;
 let deepDiagFrameDelta = 0;
 let deepDiagTimeDelta = 0;
+let deepDiagEncryptedInfo = [];
+let deepDiagShakaEventsBound = false;
+let deepDiagLastKeyStatusText = "-";
 
 
 
@@ -612,6 +601,9 @@ async function loadChannel(channel, element){
   deepDiagLastSampleAt = 0;
   deepDiagFrameDelta = 0;
   deepDiagTimeDelta = 0;
+  deepDiagEncryptedInfo = [];
+  deepDiagShakaEventsBound = false;
+  deepDiagLastKeyStatusText = "-";
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -672,24 +664,38 @@ function bindDeepDiagEvents(){
   if(!video || deepDiagBoundVideo === video) return;
   deepDiagBoundVideo = video;
 
-  const events = [
+  [
     "loadstart","loadedmetadata","loadeddata","canplay","canplaythrough",
     "play","playing","pause","waiting","stalled","suspend","seeking","seeked",
-    "encrypted","emptied","ended","error"
-  ];
-
-  events.forEach(name=>{
+    "emptied","ended","error"
+  ].forEach(name=>{
     video.addEventListener(name, ()=>{
       let detail = "";
       if(name === "error" && video.error){
         detail = `code=${video.error.code} message=${video.error.message || ""}`;
-      }else if(name === "encrypted"){
-        detail = `mediaKeys=${video.mediaKeys ? "YES" : "NO"}`;
       }else{
         detail = `t=${Number(video.currentTime||0).toFixed(1)} ready=${video.readyState} net=${video.networkState}`;
       }
       pushDeepDiagEvent(name.toUpperCase(), detail);
     });
+  });
+
+  video.addEventListener("encrypted", (ev)=>{
+    let len = 0, head = "-";
+    try{
+      len = ev.initData ? ev.initData.byteLength : 0;
+      if(ev.initData){
+        const bytes = new Uint8Array(ev.initData).slice(0,16);
+        head = Array.from(bytes).map(b=>b.toString(16).padStart(2,"0")).join("");
+      }
+    }catch(e){}
+    const info = {type:ev.initDataType || "unknown", length:len, head};
+    deepDiagEncryptedInfo.push(info);
+    if(deepDiagEncryptedInfo.length > 8) deepDiagEncryptedInfo.shift();
+    pushDeepDiagEvent(
+      "ENCRYPTED",
+      `type=${info.type} bytes=${info.length} head=${info.head} mediaKeys=${video.mediaKeys ? "YES" : "NO"}`
+    );
   });
 }
 
@@ -748,12 +754,75 @@ function mediaErrorText(video){
   return `${map[video.error.code] || "MEDIA_ERROR"} (${video.error.code}) ${video.error.message || ""}`.trim();
 }
 
+
+function bindDeepShakaEvents(){
+  if(!shakaPlayer || deepDiagShakaEventsBound) return;
+  deepDiagShakaEventsBound = true;
+
+  ["adaptation","variantchanged","trackschanged","buffering","streaming","error"].forEach(name=>{
+    try{
+      shakaPlayer.addEventListener(name, (ev)=>{
+        let detail = "";
+        try{
+          if(name === "buffering"){
+            detail = `buffering=${String(ev.buffering)}`;
+          }else if(name === "error"){
+            const d = ev.detail || {};
+            detail = `code=${d.code || "-"} severity=${d.severity || "-"} category=${d.category || "-"}`;
+          }else{
+            const tracks = shakaPlayer.getVariantTracks ? shakaPlayer.getVariantTracks() : [];
+            const active = tracks.find(t=>t.active);
+            if(active){
+              detail = `id=${active.id} bw=${Math.round((active.bandwidth||0)/1000)}kbps ${active.width||0}x${active.height||0} fps=${active.frameRate||"-"}`;
+            }
+          }
+        }catch(e){}
+        pushDeepDiagEvent("SHAKA "+name.toUpperCase(), detail);
+      });
+    }catch(e){}
+  });
+}
+
+function readKeyStatuses(){
+  try{
+    if(shakaPlayer && typeof shakaPlayer.getKeyStatuses === "function"){
+      const statuses = shakaPlayer.getKeyStatuses();
+      const parts = [];
+      if(statuses && typeof statuses.forEach === "function"){
+        statuses.forEach((status,keyId)=>{
+          parts.push(`${String(keyId)}:${status}`);
+        });
+      }
+      if(parts.length) deepDiagLastKeyStatusText = parts.join(" | ");
+    }
+  }catch(e){}
+  return deepDiagLastKeyStatusText || "-";
+}
+
+function readDrmInfo(){
+  try{
+    if(shakaPlayer && typeof shakaPlayer.getDrmInfo === "function"){
+      const info = shakaPlayer.getDrmInfo();
+      if(info){
+        return {
+          keySystem: info.keySystem || "-",
+          licenseServerUri: info.licenseServerUri || "-",
+          videoRobustness: info.videoRobustness || "-",
+          audioRobustness: info.audioRobustness || "-"
+        };
+      }
+    }
+  }catch(e){}
+  return null;
+}
+
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
   const video = document.getElementById("html5-player");
   if(!body || !video) return;
 
   bindDeepDiagEvents();
+  bindDeepShakaEvents();
 
   const frames = getDecodedFrames(video);
 
@@ -827,14 +896,34 @@ function renderMpdDiagnostic(){
       ? "Decoder ทำงาน"
       : "รอข้อมูลเพิ่ม";
 
+  let v4Hint = "-";
+  if(frames.total === 0 && video.readyState <= 1 && ahead > 0){
+    if(String(keyStatuses).toLowerCase().includes("usable")){
+      v4Hint = "Key usable แต่ media pipeline ยังไม่ผ่าน HAVE_METADATA";
+    }else if(String(keyStatuses) !== "-"){
+      v4Hint = "ดู Key Status: ยังไม่เห็นสถานะ usable";
+    }else{
+      v4Hint = "ยังอ่าน Key Status ไม่ได้; ดู InitData และ Shaka events";
+    }
+  }else if(frames.total > 0){
+    v4Hint = "Reference ผ่าน: key + decoder + media pipeline ทำงาน";
+  }
+
   const readyNames = ["HAVE_NOTHING","HAVE_METADATA","HAVE_CURRENT_DATA","HAVE_FUTURE_DATA","HAVE_ENOUGH_DATA"];
   const networkNames = ["NETWORK_EMPTY","NETWORK_IDLE","NETWORK_LOADING","NETWORK_NO_SOURCE"];
+
+  const drmInfo = readDrmInfo();
+  const keyStatuses = readKeyStatuses();
+  const encryptedSummary = deepDiagEncryptedInfo.length
+    ? deepDiagEncryptedInfo.map((x,i)=>`#${i+1} ${x.type} ${x.length}B ${x.head}`).join(" | ")
+    : "-";
 
   const rows = [
     ["Channel", activeChannel?.name || "-"],
     ["Playback", playback],
     ["Picture", picture],
     ["Diagnosis", diagnosis],
+    ["V4 Hint", v4Hint],
     ["Time", (video.currentTime||0).toFixed(1)+" sec"],
     ["Time Δ / sec", deepDiagTimeDelta.toFixed(2)],
     ["Video Size", width&&height ? `${width}x${height}` : "0x0"],
@@ -846,6 +935,13 @@ function renderMpdDiagnostic(){
     ["NetworkState", `${video.networkState} (${networkNames[video.networkState] || "?"})`],
     ["Paused / Seeking", `${video.paused} / ${video.seeking}`],
     ["MediaKeys", video.mediaKeys ? "ATTACHED" : "NONE"],
+    ["Key Status", keyStatuses],
+    ["DRM KeySystem", drmInfo?.keySystem || "-"],
+    ["DRM License URI", drmInfo?.licenseServerUri || "-"],
+    ["Video Robustness", drmInfo?.videoRobustness || "-"],
+    ["Audio Robustness", drmInfo?.audioRobustness || "-"],
+    ["Encrypted Events", String(deepDiagEncryptedInfo.length)],
+    ["InitData Summary", encryptedSummary],
     ["Media Error", mediaErrorText(video)],
     ["HTML5 Buffer Ahead", ahead.toFixed(1)+" sec"],
     ["HTML5 Buffered", getBufferedSummary(video)],
