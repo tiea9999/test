@@ -2,11 +2,11 @@
 <html lang="th">
 
 <head>
-<!-- TIEA BUILD: 3BB POST-PATCH LIVE EDGE TRACE V9.2 -->
+<!-- TIEA BUILD: 3BB POST-PATCH LIVE EDGE TRACE V9.2 FIX1 -->
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB POST-PATCH LIVE EDGE TRACE V9.2</title>
+    <title>TIEA IPTV V2.1D + 3BB POST-PATCH LIVE EDGE TRACE V9.2 FIX1</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -113,7 +113,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB POST-PATCH LIVE EDGE TRACE V9.2</div>
+          <div class="diag-title">3BB POST-PATCH LIVE EDGE TRACE V9.2 FIX1</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -1694,6 +1694,7 @@ function renderMpdDiagnostic(){
     ["V8.1 Auto Init", `channel=${v81InitChannel || "-"} | count=${v81InitCount}`],
     ["V9 Manifest Normalizer", v9Summary()],
     ["V9.2 Post-Patch Window", v92Summary()],
+    ["V9.2 FIX1 Loaded", "YES"],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1732,9 +1733,9 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V9.2 POST-PATCH LIVE EDGE</div>` +
   `<div class="diag-log">${diagEscape(v92Summary())}</div>` +
   `<div class="diag-section">V9.2 LIVE EDGE / PLAYER LOG</div>` +
-  `<div class="diag-log">${diagEscape(v92LiveEdgeLog.length?v92LiveEdgeLog.join("\n"):"ยังไม่มีข้อมูล")}</div>` +
+  `<div class="diag-log">${diagEscape(v92LiveEdgeLog.length ? v92LiveEdgeLog.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
   `<div class="diag-section">V9.2 SEGMENT RESPONSE LOG</div>` +
-  `<div class="diag-log">${diagEscape(v92SegmentLog.length?v92SegmentLog.join("\n"):"ยังไม่มีข้อมูล")}</div>`;
+  `<div class="diag-log">${diagEscape(v92SegmentLog.length ? v92SegmentLog.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
 }
 
 /* ================= MPD =================
