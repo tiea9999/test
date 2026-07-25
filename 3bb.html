@@ -2,11 +2,11 @@
 <html lang="th">
 
 <head>
-<!-- TIEA BUILD: 3BB POST-PATCH LIVE EDGE TRACE V9.2 FIX1 -->
+<!-- TIEA BUILD: 3BB FORCE LIVE EDGE TEST V9.3 -->
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB POST-PATCH LIVE EDGE TRACE V9.2 FIX1</title>
+    <title>TIEA IPTV V2.1D + 3BB FORCE LIVE EDGE TEST V9.3</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -113,7 +113,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB POST-PATCH LIVE EDGE TRACE V9.2 FIX1</div>
+          <div class="diag-title">3BB FORCE LIVE EDGE TEST V9.3</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -464,6 +464,12 @@ let v92LastBuffered = "-";
 let v92LastLiveEdge = "-";
 let v92LastPresentationStart = "-";
 let v92LastPresentationEnd = "-";
+let v93Applied = false;
+let v93Target = null;
+let v93Attempts = 0;
+let v93Log = [];
+let v93Timer = null;
+
 
 
 
@@ -687,6 +693,11 @@ async function loadChannel(channel, element){
   v92LastLiveEdge = "-";
   v92LastPresentationStart = "-";
   v92LastPresentationEnd = "-";
+  v93Applied = false;
+  v93Target = null;
+  v93Attempts = 0;
+  v93Log = [];
+  if(v93Timer){ clearInterval(v93Timer); v93Timer = null; }
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -1497,6 +1508,7 @@ function v92InstallSegmentTrace(player, channel){
       );
 
       setTimeout(v92CapturePlaybackWindow, 0);
+      setTimeout(()=>v93TryForceLiveEdge(channel), 0);
     }catch(e){
       v92Push(v92SegmentLog, `SEGMENT TRACE ERROR ${e?.message || String(e)}`, 24);
     }
@@ -1539,6 +1551,118 @@ function v92Summary(){
     `shakaStart=${v92LastPresentationStart}`,
     `shakaEnd=${v92LastPresentationEnd}`,
     `liveEdge=${v92LastLiveEdge}`
+  ].join(" | ");
+}
+
+function v93Push(msg){
+  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
+  v93Log.push(`${stamp} ${msg}`);
+  if(v93Log.length > 40) v93Log.splice(0, v93Log.length-40);
+}
+
+function v93ShouldForce(channel){
+  if(!channel) return false;
+  if(String(channel.name||"").toLowerCase() === "cinemax") return false;
+  return !!v9PatchApplied;
+}
+
+function v93GetRange(){
+  try{
+    if(shakaPlayer && typeof shakaPlayer.seekRange === "function"){
+      const r = shakaPlayer.seekRange();
+      if(r && Number.isFinite(r.start) && Number.isFinite(r.end)){
+        return {start:r.start, end:r.end};
+      }
+    }
+  }catch(e){}
+  return null;
+}
+
+function v93TryForceLiveEdge(channel){
+  if(!v93ShouldForce(channel)) return;
+
+  const video = document.getElementById("html5-player");
+  if(!video) return;
+
+  const r = v93GetRange();
+  if(!r) {
+    v93Push("WAIT no Shaka seekRange");
+    return;
+  }
+
+  const span = r.end - r.start;
+  if(!(span > 0)) {
+    v93Push(`WAIT invalid range ${r.start}-${r.end}`);
+    return;
+  }
+
+  // Stay slightly behind the end to avoid landing on an incomplete live segment.
+  const backoff = Math.min(3, Math.max(1, span * 0.08));
+  const target = Math.max(r.start + 0.25, r.end - backoff);
+  const current = Number(video.currentTime || 0);
+
+  v93Attempts++;
+  v93Target = target;
+
+  const inRange = current >= r.start - 0.25 && current <= r.end + 0.25;
+  const frames = getDecodedFrames(video);
+
+  if(inRange && frames.total > 0){
+    v93Applied = true;
+    v93Push(`PASS current=${current.toFixed(3)} target=${target.toFixed(3)} frames=${frames.total}`);
+    return;
+  }
+
+  try{
+    video.currentTime = target;
+    v93Applied = true;
+    v93Push(
+      `FORCE ${current.toFixed(3)} -> ${target.toFixed(3)} ` +
+      `range=${r.start.toFixed(3)}-${r.end.toFixed(3)} ready=${video.readyState} frames=${frames.total}`
+    );
+
+    const p = video.play();
+    if(p && typeof p.catch === "function"){
+      p.catch(e=>v93Push(`PLAY ERROR ${e?.message || String(e)}`));
+    }
+  }catch(e){
+    v93Push(`FORCE ERROR ${e?.message || String(e)}`);
+  }
+}
+
+function v93Start(channel){
+  if(!v93ShouldForce(channel)){
+    v93Push(`BYPASS channel=${channel?.name||"-"}`);
+    return;
+  }
+
+  if(v93Timer){
+    clearInterval(v93Timer);
+    v93Timer = null;
+  }
+
+  v93Push(`ARM channel=${channel?.name||"-"}`);
+
+  [250,600,1000,1600,2400,3500,5000].forEach(ms=>{
+    setTimeout(()=>v93TryForceLiveEdge(channel), ms);
+  });
+
+  let ticks = 0;
+  v93Timer = setInterval(()=>{
+    ticks++;
+    v93TryForceLiveEdge(channel);
+    if(ticks >= 12){
+      clearInterval(v93Timer);
+      v93Timer = null;
+    }
+  },1000);
+}
+
+function v93Summary(){
+  return [
+    `applied=${v93Applied ? "YES":"NO"}`,
+    `target=${Number.isFinite(v93Target) ? v93Target.toFixed(3) : "-"}`,
+    `attempts=${v93Attempts}`
   ].join(" | ");
 }
 function renderMpdDiagnostic(){
@@ -1695,6 +1819,7 @@ function renderMpdDiagnostic(){
     ["V9 Manifest Normalizer", v9Summary()],
     ["V9.2 Post-Patch Window", v92Summary()],
     ["V9.2 FIX1 Loaded", "YES"],
+    ["V9.3 Force Live Edge", v93Summary()],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1735,7 +1860,11 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V9.2 LIVE EDGE / PLAYER LOG</div>` +
   `<div class="diag-log">${diagEscape(v92LiveEdgeLog.length ? v92LiveEdgeLog.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
   `<div class="diag-section">V9.2 SEGMENT RESPONSE LOG</div>` +
-  `<div class="diag-log">${diagEscape(v92SegmentLog.length ? v92SegmentLog.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
+  `<div class="diag-log">${diagEscape(v92SegmentLog.length ? v92SegmentLog.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
+  `<div class="diag-section">V9.3 FORCE LIVE EDGE TEST</div>` +
+  `<div class="diag-log">${diagEscape(v93Summary())}</div>` +
+  `<div class="diag-section">V9.3 FORCE LOG</div>` +
+  `<div class="diag-log">${diagEscape(v93Log.length ? v93Log.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
 }
 
 /* ================= MPD =================
@@ -1801,6 +1930,7 @@ function playMPDNotice(channel, url){
 
         shakaPlayer.load(url).then(()=>{
           forceAudio100();
+          v93Start(channel);
           v92CapturePlaybackWindow();
           [300,800,1500,3000,5000,8000].forEach(ms=>setTimeout(v92CapturePlaybackWindow, ms));
           setTimeout(()=>v8Observe(channel),300);
