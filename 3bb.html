@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB TIMELINE NORMALIZER TEST V8.2 FIRST CHANNEL FIX</title>
+    <title>TIEA IPTV V2.1D + 3BB APPLY NORMALIZED TIMELINE V9</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB TIMELINE NORMALIZER TEST V8.2 FIRST CHANNEL FIX</div>
+          <div class="diag-title">3BB APPLY NORMALIZED TIMELINE V9</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -449,6 +449,12 @@ let v8NormalizedTime = null;
 let v8LogLines = [];
 let v81InitChannel = "";
 let v81InitCount = 0;
+let v9PatchApplied = false;
+let v9PatchBase = null;
+let v9PatchLog = [];
+let v9OriginalAST = "";
+let v9PatchedAST = "";
+
 
 
 
@@ -657,6 +663,11 @@ async function loadChannel(channel, element){
   v8RawTime=null;
   v8NormalizedTime=null;
   v8LogLines=[];
+  v9PatchApplied = false;
+  v9PatchBase = null;
+  v9PatchLog = [];
+  v9OriginalAST = "";
+  v9PatchedAST = "";
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -673,17 +684,15 @@ async function loadChannel(channel, element){
   activeChannel = resolvedChannel;
   activeElement = element;
 
+  // V8.1: DIAG no longer depends on opening CINEMAX first.
+  setTimeout(()=>v81AutoInitDiagnostic(activeChannel), 30);
+
   document.querySelectorAll(".channel").forEach(ch=>ch.classList.remove("active"));
   if(element) element.classList.add("active");
 
   document.getElementById("player-container").style.display = "block";
   forceShowControls();
   await stopAllPlayers();
-
-  // V8.2: สำคัญมาก — bind DIAG หลัง stopAllPlayers()
-  // เพราะ stopAllPlayers() จะทำลาย Shaka/video state เดิม
-  // ถ้า bind ก่อนหน้านี้ ช่องแรกจะไม่มีข้อมูลจนกว่าจะเปิดช่องอื่นก่อน
-  setTimeout(()=>v81AutoInitDiagnostic(resolvedChannel), 0);
 
   const url = proxyUrl(resolvedChannel.file);
   activeUrl = url;
@@ -761,15 +770,9 @@ function toggleMpdDiagnostic(force){
   const panel = document.getElementById("mpd-diagnostic");
   if(!panel) return;
 
-  // V8.2: ช่องแรกต้องตรวจได้ทันที แม้ยังไม่เคยเปิด CINEMAX
-  try{
-    if(activeChannel && activeChannel.file && activeChannel.file.includes(".mpd")){
-      if(!v7MpdUrl || v7MpdUrl !== activeChannel.file){
-        v7InspectMpd(activeChannel.file);
-      }
-    }
-    v81AutoInitDiagnostic(activeChannel);
-  }catch(e){}
+  // V8.1: initialize from the current channel even if this is the
+  // very first channel opened after page load.
+  try{ v81AutoInitDiagnostic(activeChannel); }catch(e){}
 
   mpdDiagVisible = typeof force === "boolean" ? force : !mpdDiagVisible;
   panel.style.display = mpdDiagVisible ? "block" : "none";
@@ -1258,7 +1261,7 @@ function v81AutoInitDiagnostic(channel){
   try{ v6BindSeekEvents(); }catch(e){}
 
   // Refresh several times because Shaka/MPD state arrives asynchronously.
-  [0,100,250,500,900,1500,2500,4000,6000,9000].forEach(ms=>{
+  [0,100,250,500,900,1500,2500].forEach(ms=>{
     setTimeout(()=>{
       try{
         v8CalcBase();
@@ -1272,6 +1275,145 @@ function v81AutoInitDiagnostic(channel){
   }catch(e){}
 }
 
+
+function v9Log(msg){
+  const t = new Date().toLocaleTimeString("th-TH",{hour12:false});
+  v9PatchLog.push(`${t} ${msg}`);
+  if(v9PatchLog.length > 80) v9PatchLog.shift();
+}
+
+function v9ShiftIsoTime(iso, seconds){
+  try{
+    const d = new Date(iso);
+    if(!Number.isFinite(d.getTime())) return iso;
+    return new Date(d.getTime() + seconds*1000).toISOString();
+  }catch(e){
+    return iso;
+  }
+}
+
+function v9ShouldPatchChannel(channel){
+  if(!channel) return false;
+  const name = String(channel.name || "").toLowerCase();
+
+  // Reference channel must never be touched.
+  if(name === "cinemax") return false;
+
+  const url = String(channel.file || "");
+  return url.includes(".mpd");
+}
+
+function v9NormalizeManifestText(text, channel){
+  v9PatchApplied = false;
+  v9PatchBase = null;
+  v9OriginalAST = "";
+  v9PatchedAST = "";
+
+  if(!v9ShouldPatchChannel(channel)) return text;
+
+  try{
+    const doc = new DOMParser().parseFromString(text, "application/xml");
+    if(doc.querySelector("parsererror")) return text;
+
+    const mpd = doc.documentElement;
+    if(!mpd || mpd.nodeName.toLowerCase() !== "mpd") return text;
+
+    const type = mpd.getAttribute("type") || "";
+    if(type.toLowerCase() !== "dynamic") return text;
+
+    const templates = Array.from(doc.querySelectorAll("SegmentTemplate"));
+    if(!templates.length) return text;
+
+    let detectedBase = null;
+
+    for(const st of templates){
+      const timescale = Number(st.getAttribute("timescale") || "1");
+      const timeline = st.querySelector("SegmentTimeline");
+      const firstS = timeline ? timeline.querySelector("S") : null;
+      if(!firstS || !Number.isFinite(timescale) || timescale <= 0) continue;
+
+      const firstT = Number(firstS.getAttribute("t"));
+      if(!Number.isFinite(firstT)) continue;
+
+      const existingPto = Number(st.getAttribute("presentationTimeOffset") || "0");
+      const base = (firstT - (Number.isFinite(existingPto) ? existingPto : 0)) / timescale;
+
+      // Only abnormal huge timelines are candidates.
+      if(base <= 100000) continue;
+
+      if(detectedBase === null) detectedBase = base;
+
+      // Normalize segment presentation time to start near 0.
+      st.setAttribute("presentationTimeOffset", String(firstT));
+    }
+
+    if(!Number.isFinite(detectedBase) || detectedBase <= 100000){
+      return text;
+    }
+
+    v9PatchBase = detectedBase;
+
+    // Keep live-edge math aligned after applying PTO.
+    const ast = mpd.getAttribute("availabilityStartTime");
+    if(ast){
+      v9OriginalAST = ast;
+      const shifted = v9ShiftIsoTime(ast, detectedBase);
+      mpd.setAttribute("availabilityStartTime", shifted);
+      v9PatchedAST = shifted;
+    }
+
+    v9PatchApplied = true;
+    v9Log(
+      `PATCH channel=${channel?.name||"-"} base=${detectedBase.toFixed(3)} ` +
+      `AST=${v9OriginalAST || "-"} -> ${v9PatchedAST || "-"}`
+    );
+
+    return new XMLSerializer().serializeToString(doc);
+  }catch(e){
+    v9Log(`PATCH ERROR ${e?.message || String(e)}`);
+    return text;
+  }
+}
+
+function v9InstallManifestResponseFilter(player, channel){
+  if(!player || !player.getNetworkingEngine) return;
+
+  const net = player.getNetworkingEngine();
+  if(!net || !net.registerResponseFilter) return;
+
+  const filter = (type, response)=>{
+    try{
+      const ManifestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
+      if(type !== ManifestType) return;
+      if(!response || !response.data) return;
+
+      const decoder = new TextDecoder("utf-8");
+      const encoder = new TextEncoder();
+      const original = decoder.decode(response.data);
+      const patched = v9NormalizeManifestText(original, channel);
+
+      if(v9PatchApplied && patched !== original){
+        response.data = encoder.encode(patched).buffer;
+        v9Log(`MANIFEST RESPONSE NORMALIZED uri=${response.uri || "-"}`);
+      }else{
+        v9Log(`MANIFEST BYPASS channel=${channel?.name||"-"}`);
+      }
+    }catch(e){
+      v9Log(`FILTER ERROR ${e?.message || String(e)}`);
+    }
+  };
+
+  net.registerResponseFilter(filter);
+}
+
+function v9Summary(){
+  return [
+    `applied=${v9PatchApplied ? "YES":"NO"}`,
+    `base=${Number.isFinite(v9PatchBase) ? v9PatchBase.toFixed(3) : "-"}`,
+    `ASTold=${v9OriginalAST || "-"}`,
+    `ASTnew=${v9PatchedAST || "-"}`
+  ].join(" | ");
+}
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
   const video = document.getElementById("html5-player");
@@ -1422,7 +1564,8 @@ function renderMpdDiagnostic(){
     ["V7 MPD URL", v7MpdUrl || "-"],
     ["V7 MPD Timeline", v7MpdSummary()],
     ["V8 Timeline Normalizer", v8Summary()],
-    ["V8.2 DIAG Bound", `active=${activeChannel?.name || "-"} | init=${v81InitChannel || "-"} | shaka=${shakaPlayer ? "YES":"NO"} | count=${v81InitCount}`],
+    ["V8.1 Auto Init", `channel=${v81InitChannel || "-"} | count=${v81InitCount}`],
+    ["V9 Manifest Normalizer", v9Summary()],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1453,7 +1596,11 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V8 TIMELINE NORMALIZER TEST</div>` +
   `<div class="diag-log">${diagEscape(v8Summary())}</div>` +
   `<div class="diag-section">V8 NORMALIZER LOG</div>` +
-  `<div class="diag-log">${diagEscape(v8LogLines.length?v8LogLines.join("\n"):"ยังไม่มีข้อมูล")}</div>`;
+  `<div class="diag-log">${diagEscape(v8LogLines.length?v8LogLines.join("\n"):"ยังไม่มีข้อมูล")}</div>` +
+  `<div class="diag-section">V9 MANIFEST TIMELINE NORMALIZER</div>` +
+  `<div class="diag-log">${diagEscape(v9Summary())}</div>` +
+  `<div class="diag-section">V9 PATCH LOG</div>` +
+  `<div class="diag-log">${diagEscape(v9PatchLog.length?v9PatchLog.join("\n"):"ยังไม่มีข้อมูล")}</div>`;
 }
 
 /* ================= MPD =================
@@ -1479,11 +1626,9 @@ function playMPDNotice(channel, url){
 
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
-
-        // V8.2: bind กับ Shaka instance ตัวจริงของช่องแรกทันที
-        deepDiagShakaEventsBound = false;
-        deepDiagBoundVideo = null;
-        setTimeout(()=>v81AutoInitDiagnostic(channel), 0);
+        // V9: normalize only abnormal dynamic MPD timelines.
+        // CINEMAX and normal timelines are always bypassed.
+        v9InstallManifestResponseFilter(shakaPlayer, channel);
 
         shakaPlayer.addEventListener("error", function(event){
           try{
@@ -1517,18 +1662,13 @@ function playMPDNotice(channel, url){
           }
         }
 
-        // V8.2: DIAG ต้องเริ่มเก็บข้อมูลตั้งแต่ load() ครั้งแรก
-        v81AutoInitDiagnostic(channel);
-
         shakaPlayer.load(url).then(()=>{
           forceAudio100();
-          v81AutoInitDiagnostic(channel);
           setTimeout(()=>v8Observe(channel),300);
           video.play().catch(()=>{});
           setStatus("MPD โหลดสำเร็จ — ดูผลที่ 📊 DIAG", true);
         }).catch(e=>{
           console.log("MPD เล่นในเว็บไม่ได้:", e);
-          v81AutoInitDiagnostic(channel);
           setStatus("MPD โหลดไม่สำเร็จ — ดูผลที่ 📊 DIAG", false);
         });
       }else{
