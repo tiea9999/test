@@ -2,11 +2,11 @@
 <html lang="th">
 
 <head>
-<!-- TIEA BUILD: 3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5 -->
+<!-- TIEA BUILD: 3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5 FIX1 -->
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5</title>
+    <title>TIEA IPTV V2.1D + 3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5 FIX1</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -113,7 +113,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5</div>
+          <div class="diag-title">3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5 FIX1</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -2137,6 +2137,7 @@ function renderMpdDiagnostic(){
     ["V9.5 Request Sequence", v95Summary()],
     ["V9.5 Last Video URI", v95LastVideoUri],
     ["V9.5 Last Audio URI", v95LastAudioUri],
+    ["V9.5 FIX1 Loaded", "YES"],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
