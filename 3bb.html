@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB ACTIVE SHAKA INSTANCE TRACE V5</title>
+    <title>TIEA IPTV V2.1D + 3BB SEEKING / TIMELINE TRACE V6</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB ACTIVE SHAKA INSTANCE TRACE V5</div>
+          <div class="diag-title">3BB SEEKING / TIMELINE TRACE V6</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -433,6 +433,13 @@ let deepDiagLastKeyStatusText = "-";
 let v5PlayerTrace = [];
 let v5LastPlayerSnapshot = "";
 let v5LastVideoSnapshot = "";
+let v6SeekTrace = [];
+let v6PatchedCurrentTime = false;
+let v6PatchedFastSeek = false;
+let v6LastSeekEventAt = 0;
+let v6LastSeekFrom = 0;
+let v6LastSeekTo = 0;
+
 
 
 
@@ -627,6 +634,10 @@ async function loadChannel(channel, element){
   v5PlayerTrace = [];
   v5LastPlayerSnapshot = "";
   v5LastVideoSnapshot = "";
+  v6SeekTrace = [];
+  v6LastSeekEventAt = 0;
+  v6LastSeekFrom = 0;
+  v6LastSeekTo = 0;
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -884,6 +895,146 @@ function v5AllVariantsSummary(){
   }catch(e){ return "ERROR " + (e?.message || String(e)); }
 }
 
+
+function v6PushSeekTrace(type, detail=""){
+  const stamp = new Date().toLocaleTimeString();
+  v6SeekTrace.push(`${stamp} ${type}${detail ? " | " + detail : ""}`);
+  if(v6SeekTrace.length > 24){
+    v6SeekTrace.splice(0, v6SeekTrace.length - 24);
+  }
+}
+
+function v6ShortStack(){
+  try{
+    const lines = String(new Error().stack || "").split("\n").slice(2,7);
+    return lines.map(x=>x.trim()).join(" <- ");
+  }catch(e){
+    return "-";
+  }
+}
+
+function v6PatchMediaSeeking(){
+  if(v6PatchedCurrentTime) return;
+  v6PatchedCurrentTime = true;
+
+  try{
+    const proto = HTMLMediaElement.prototype;
+    const desc = Object.getOwnPropertyDescriptor(proto, "currentTime");
+    if(desc && desc.get && desc.set){
+      Object.defineProperty(proto, "currentTime", {
+        configurable: desc.configurable,
+        enumerable: desc.enumerable,
+        get: function(){
+          return desc.get.call(this);
+        },
+        set: function(value){
+          const video = document.getElementById("html5-player");
+          if(this === video){
+            let before = 0;
+            try{ before = desc.get.call(this); }catch(e){}
+            const after = Number(value);
+            v6LastSeekFrom = Number(before || 0);
+            v6LastSeekTo = Number(after || 0);
+            v6PushSeekTrace(
+              "SET currentTime",
+              `${v6LastSeekFrom.toFixed(3)} -> ${v6LastSeekTo.toFixed(3)} | ${v6ShortStack()}`
+            );
+          }
+          return desc.set.call(this, value);
+        }
+      });
+    }
+  }catch(e){
+    v6PushSeekTrace("PATCH currentTime ERROR", e?.message || String(e));
+  }
+
+  try{
+    const proto = HTMLMediaElement.prototype;
+    if(typeof proto.fastSeek === "function" && !v6PatchedFastSeek){
+      const originalFastSeek = proto.fastSeek;
+      proto.fastSeek = function(value){
+        const video = document.getElementById("html5-player");
+        if(this === video){
+          let before = 0;
+          try{ before = this.currentTime || 0; }catch(e){}
+          v6PushSeekTrace(
+            "fastSeek",
+            `${Number(before).toFixed(3)} -> ${Number(value).toFixed(3)} | ${v6ShortStack()}`
+          );
+        }
+        return originalFastSeek.call(this, value);
+      };
+      v6PatchedFastSeek = true;
+    }
+  }catch(e){
+    v6PushSeekTrace("PATCH fastSeek ERROR", e?.message || String(e));
+  }
+}
+
+function v6BindSeekEvents(){
+  const video = document.getElementById("html5-player");
+  if(!video || video.dataset.v6SeekBound === "1") return;
+  video.dataset.v6SeekBound = "1";
+
+  video.addEventListener("seeking", ()=>{
+    const now = performance.now();
+    const delta = v6LastSeekEventAt ? Math.round(now - v6LastSeekEventAt) : 0;
+    v6LastSeekEventAt = now;
+    v6PushSeekTrace(
+      "SEEKING EVENT",
+      `t=${Number(video.currentTime||0).toFixed(3)} ready=${video.readyState} net=${video.networkState} Δ=${delta}ms`
+    );
+  });
+
+  video.addEventListener("seeked", ()=>{
+    v6PushSeekTrace(
+      "SEEKED EVENT",
+      `t=${Number(video.currentTime||0).toFixed(3)} ready=${video.readyState} net=${video.networkState}`
+    );
+  });
+
+  video.addEventListener("timeupdate", ()=>{
+    if(video.seeking){
+      v6PushSeekTrace(
+        "TIMEUPDATE while seeking",
+        `t=${Number(video.currentTime||0).toFixed(3)}`
+      );
+    }
+  });
+}
+
+function v6TimelineSnapshot(){
+  const video = document.getElementById("html5-player");
+  if(!video) return "-";
+
+  let seekable = "-";
+  try{
+    const arr = [];
+    for(let i=0;i<video.seekable.length;i++){
+      arr.push(`${video.seekable.start(i).toFixed(1)}-${video.seekable.end(i).toFixed(1)}`);
+    }
+    seekable = arr.length ? arr.join(", ") : "-";
+  }catch(e){}
+
+  let buffered = "-";
+  try{
+    const arr = [];
+    for(let i=0;i<video.buffered.length;i++){
+      arr.push(`${video.buffered.start(i).toFixed(1)}-${video.buffered.end(i).toFixed(1)}`);
+    }
+    buffered = arr.length ? arr.join(", ") : "-";
+  }catch(e){}
+
+  return [
+    `current=${Number(video.currentTime||0).toFixed(3)}`,
+    `duration=${Number.isFinite(video.duration) ? video.duration.toFixed(3) : String(video.duration)}`,
+    `seeking=${video.seeking}`,
+    `seekable=${seekable}`,
+    `buffered=${buffered}`
+  ].join(" | ");
+}
+
+v6PatchMediaSeeking();
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
   const video = document.getElementById("html5-player");
@@ -891,6 +1042,7 @@ function renderMpdDiagnostic(){
 
   bindDeepDiagEvents();
   bindDeepShakaEvents();
+  v6BindSeekEvents();
   v5CaptureTrace();
 
   const frames = getDecodedFrames(video);
@@ -1028,6 +1180,8 @@ function renderMpdDiagnostic(){
     ["DRM Config", activeChannel?.drm ? "ClearKey configured" : "ไม่ใช้/ไม่ระบุ"],
     ["V5 Player Instance", v5PlayerIdentity()],
     ["V5 Active Track", v5ActiveTrackSummary()],
+    ["V6 Timeline", v6TimelineSnapshot()],
+    ["V6 Last Seek", `${Number(v6LastSeekFrom||0).toFixed(3)} -> ${Number(v6LastSeekTo||0).toFixed(3)}`],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1046,7 +1200,9 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V5 ACTIVE SHAKA TRACE</div>` +
   `<div class="diag-log">${diagEscape(v5PlayerTrace.length ? v5PlayerTrace.join("\n") : "ยังไม่มี trace")}</div>` +
   `<div class="diag-section">V5 VARIANTS</div>` +
-  `<div class="diag-log">${diagEscape(v5AllVariantsSummary())}</div>`;
+  `<div class="diag-log">${diagEscape(v5AllVariantsSummary())}</div>` +
+  `<div class="diag-section">V6 SEEKING / TIMELINE TRACE</div>` +
+  `<div class="diag-log">${diagEscape(v6SeekTrace.length ? v6SeekTrace.join("\n") : "ยังไม่มี seek trace")}</div>`;
 }
 
 /* ================= MPD =================
