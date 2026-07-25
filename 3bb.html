@@ -2,11 +2,11 @@
 <html lang="th">
 
 <head>
-<!-- TIEA BUILD: 3BB FORCE LIVE EDGE TEST V9.3 -->
+<!-- TIEA BUILD: 3BB VIDEO SEGMENT / DECODER TRACE V9.4 -->
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB FORCE LIVE EDGE TEST V9.3</title>
+    <title>TIEA IPTV V2.1D + 3BB VIDEO SEGMENT / DECODER TRACE V9.4</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -113,7 +113,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB FORCE LIVE EDGE TEST V9.3</div>
+          <div class="diag-title">3BB VIDEO SEGMENT / DECODER TRACE V9.4</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -469,6 +469,19 @@ let v93Target = null;
 let v93Attempts = 0;
 let v93Log = [];
 let v93Timer = null;
+let v94VideoSegments = [];
+let v94AudioSegments = [];
+let v94OtherSegments = [];
+let v94VideoBytes = 0;
+let v94AudioBytes = 0;
+let v94VideoCount = 0;
+let v94AudioCount = 0;
+let v94LastFrames = 0;
+let v94LastDropped = 0;
+let v94LastVideoTrack = "-";
+let v94LastAudioTrack = "-";
+let v94DecoderState = "-";
+
 
 
 
@@ -697,6 +710,18 @@ async function loadChannel(channel, element){
   v93Target = null;
   v93Attempts = 0;
   v93Log = [];
+  v94VideoSegments = [];
+  v94AudioSegments = [];
+  v94OtherSegments = [];
+  v94VideoBytes = 0;
+  v94AudioBytes = 0;
+  v94VideoCount = 0;
+  v94AudioCount = 0;
+  v94LastFrames = 0;
+  v94LastDropped = 0;
+  v94LastVideoTrack = "-";
+  v94LastAudioTrack = "-";
+  v94DecoderState = "-";
   if(v93Timer){ clearInterval(v93Timer); v93Timer = null; }
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
@@ -1561,9 +1586,9 @@ function v93Push(msg){
 }
 
 function v93ShouldForce(channel){
-  if(!channel) return false;
-  if(String(channel.name||"").toLowerCase() === "cinemax") return false;
-  return !!v9PatchApplied;
+  // V9.4: ปิด Force Live Edge ทั้งหมด
+  // เพื่อดู decoder/segment ตามธรรมชาติ โดยไม่ให้ seek ซ้ำรบกวนผล
+  return false;
 }
 
 function v93GetRange(){
@@ -1663,6 +1688,153 @@ function v93Summary(){
     `applied=${v93Applied ? "YES":"NO"}`,
     `target=${Number.isFinite(v93Target) ? v93Target.toFixed(3) : "-"}`,
     `attempts=${v93Attempts}`
+  ].join(" | ");
+}
+
+function v94Push(list, text, max=18){
+  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
+  list.push(`${stamp} ${text}`);
+  if(list.length > max) list.splice(0, list.length-max);
+}
+
+function v94ClassifySegmentUri(uri){
+  const u = String(uri || "").toLowerCase();
+  if(
+    u.includes("/video/") ||
+    u.includes("video_") ||
+    u.includes("videoseg") ||
+    u.includes("track-video")
+  ) return "video";
+
+  if(
+    u.includes("/audio/") ||
+    u.includes("audio_") ||
+    u.includes("audioseg") ||
+    u.includes("track-audio")
+  ) return "audio";
+
+  return "other";
+}
+
+function v94CurrentTrackSummary(){
+  try{
+    if(!shakaPlayer || typeof shakaPlayer.getVariantTracks !== "function"){
+      return {video:"-", audio:"-"};
+    }
+    const tracks = shakaPlayer.getVariantTracks();
+    const active = tracks.find(t=>t.active);
+    if(!active) return {video:"NO ACTIVE", audio:"NO ACTIVE"};
+
+    return {
+      video: `id=${active.id ?? "-"} codec=${active.videoCodec || "-"} size=${active.width||0}x${active.height||0} fps=${active.frameRate||"-"} bw=${Math.round((active.bandwidth||0)/1000)}kbps`,
+      audio: `lang=${active.language || "-"} codec=${active.audioCodec || "-"} channels=${active.channelsCount || "-"}`
+    };
+  }catch(e){
+    return {video:"ERROR",audio:"ERROR"};
+  }
+}
+
+function v94CaptureDecoderState(){
+  const video = document.getElementById("html5-player");
+  if(!video) return;
+
+  const q = getDecodedFrames(video);
+  v94LastFrames = q.total;
+  v94LastDropped = q.dropped;
+
+  const t = v94CurrentTrackSummary();
+  v94LastVideoTrack = t.video;
+  v94LastAudioTrack = t.audio;
+
+  let state = "WAITING";
+  if(q.total > 0 && video.videoWidth > 0 && video.videoHeight > 0){
+    state = "VIDEO DECODING";
+  }else if(v94VideoCount > 0 && q.total === 0){
+    state = "VIDEO SEGMENTS ARRIVE / NO DECODED FRAMES";
+  }else if(v94VideoCount === 0 && v94AudioCount > 0){
+    state = "AUDIO ONLY SEGMENTS";
+  }else if(v94VideoCount === 0 && v94AudioCount === 0){
+    state = "NO MEDIA SEGMENTS";
+  }
+
+  v94DecoderState = state;
+}
+
+function v94InstallSegmentDecoderTrace(player, channel){
+  if(!player || !player.getNetworkingEngine) return;
+
+  const net = player.getNetworkingEngine();
+  if(!net || !net.registerResponseFilter) return;
+
+  const filter = (type, response)=>{
+    try{
+      const RT = shaka.net.NetworkingEngine.RequestType;
+      if(type !== RT.SEGMENT) return;
+
+      const uri = response?.uri || "-";
+      const bytes = Number(response?.data?.byteLength || 0);
+      const kind = v94ClassifySegmentUri(uri);
+
+      if(kind === "video"){
+        v94VideoCount++;
+        v94VideoBytes += bytes;
+        v94Push(
+          v94VideoSegments,
+          `VIDEO SEGMENT #${v94VideoCount} bytes=${bytes} uri=${uri}`
+        );
+      }else if(kind === "audio"){
+        v94AudioCount++;
+        v94AudioBytes += bytes;
+        v94Push(
+          v94AudioSegments,
+          `AUDIO SEGMENT #${v94AudioCount} bytes=${bytes} uri=${uri}`
+        );
+      }else{
+        v94Push(
+          v94OtherSegments,
+          `OTHER SEGMENT bytes=${bytes} uri=${uri}`,
+          10
+        );
+      }
+
+      setTimeout(v94CaptureDecoderState, 0);
+    }catch(e){
+      v94Push(v94OtherSegments, `TRACE ERROR ${e?.message || String(e)}`, 10);
+    }
+  };
+
+  net.registerResponseFilter(filter);
+
+  const video = document.getElementById("html5-player");
+  if(video && video.dataset.v94DecoderBound !== "1"){
+    video.dataset.v94DecoderBound = "1";
+
+    [
+      "loadedmetadata","loadeddata","canplay","playing",
+      "waiting","stalled","progress","timeupdate","error"
+    ].forEach(name=>{
+      video.addEventListener(name, ()=>{
+        v94CaptureDecoderState();
+      });
+    });
+  }
+
+  v94Push(v94OtherSegments, `ARM channel=${channel?.name || "-"}`, 10);
+
+  [300,800,1500,2500,4000,6000,9000].forEach(ms=>{
+    setTimeout(v94CaptureDecoderState, ms);
+  });
+}
+
+function v94Summary(){
+  return [
+    `decoder=${v94DecoderState}`,
+    `videoSegments=${v94VideoCount}`,
+    `videoBytes=${v94VideoBytes}`,
+    `audioSegments=${v94AudioCount}`,
+    `audioBytes=${v94AudioBytes}`,
+    `decodedFrames=${v94LastFrames}`,
+    `dropped=${v94LastDropped}`
   ].join(" | ");
 }
 function renderMpdDiagnostic(){
@@ -1820,6 +1992,9 @@ function renderMpdDiagnostic(){
     ["V9.2 Post-Patch Window", v92Summary()],
     ["V9.2 FIX1 Loaded", "YES"],
     ["V9.3 Force Live Edge", v93Summary()],
+    ["V9.4 Decoder Trace", v94Summary()],
+    ["V9.4 Video Track", v94LastVideoTrack],
+    ["V9.4 Audio Track", v94LastAudioTrack],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1864,7 +2039,15 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V9.3 FORCE LIVE EDGE TEST</div>` +
   `<div class="diag-log">${diagEscape(v93Summary())}</div>` +
   `<div class="diag-section">V9.3 FORCE LOG</div>` +
-  `<div class="diag-log">${diagEscape(v93Log.length ? v93Log.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
+  `<div class="diag-log">${diagEscape(v93Log.length ? v93Log.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
+  `<div class="diag-section">V9.4 VIDEO SEGMENT / DECODER TRACE</div>` +
+  `<div class="diag-log">${diagEscape(v94Summary())}</div>` +
+  `<div class="diag-section">V9.4 VIDEO SEGMENTS</div>` +
+  `<div class="diag-log">${diagEscape(v94VideoSegments.length ? v94VideoSegments.join("\n") : "ยังไม่มี VIDEO segment")}</div>` +
+  `<div class="diag-section">V9.4 AUDIO SEGMENTS</div>` +
+  `<div class="diag-log">${diagEscape(v94AudioSegments.length ? v94AudioSegments.join("\n") : "ยังไม่มี AUDIO segment")}</div>` +
+  `<div class="diag-section">V9.4 OTHER SEGMENTS</div>` +
+  `<div class="diag-log">${diagEscape(v94OtherSegments.length ? v94OtherSegments.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
 }
 
 /* ================= MPD =================
@@ -1890,6 +2073,7 @@ function playMPDNotice(channel, url){
 
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
+        v94InstallSegmentDecoderTrace(shakaPlayer, channel);
         v92InstallSegmentTrace(shakaPlayer, channel);
         v92BindPlayerEvents(shakaPlayer);
         // V9: normalize only abnormal dynamic MPD timelines.
