@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB SEEKING / TIMELINE TRACE V6</title>
+    <title>TIEA IPTV V2.1D + 3BB MPD TIMELINE INSPECTOR V7</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB SEEKING / TIMELINE TRACE V6</div>
+          <div class="diag-title">3BB MPD TIMELINE INSPECTOR V7</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -439,6 +439,10 @@ let v6PatchedFastSeek = false;
 let v6LastSeekEventAt = 0;
 let v6LastSeekFrom = 0;
 let v6LastSeekTo = 0;
+let v7MpdInfo = null;
+let v7MpdError = "";
+let v7MpdUrl = "";
+
 
 
 
@@ -638,6 +642,9 @@ async function loadChannel(channel, element){
   v6LastSeekEventAt = 0;
   v6LastSeekFrom = 0;
   v6LastSeekTo = 0;
+  v7MpdInfo = null;
+  v7MpdError = "";
+  v7MpdUrl = "";
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -1035,6 +1042,136 @@ function v6TimelineSnapshot(){
 }
 
 v6PatchMediaSeeking();
+
+function v7Attr(node,name){
+  return node ? node.getAttribute(name) : null;
+}
+
+function v7SegmentTimelineSummary(doc){
+  try{
+    const st = doc.querySelector("SegmentTimeline");
+    if(!st) return "-";
+    const rows = Array.from(st.querySelectorAll("S")).slice(0,10).map((s,i)=>
+      `S${i+1}: t=${s.getAttribute("t")||"-"} d=${s.getAttribute("d")||"-"} r=${s.getAttribute("r")||"0"}`
+    );
+    return rows.length ? rows.join(" | ") : "-";
+  }catch(e){
+    return "ERROR " + (e?.message || String(e));
+  }
+}
+
+function v7RepresentationSummary(doc){
+  try{
+    const reps = Array.from(doc.querySelectorAll("Representation")).slice(0,10);
+    if(!reps.length) return "-";
+    return reps.map((r,i)=>{
+      const p = r.parentElement;
+      return `#${i+1} id=${v7Attr(r,"id")||"-"} bw=${v7Attr(r,"bandwidth")||"-"} codecs=${v7Attr(r,"codecs")||v7Attr(p,"codecs")||"-"} mime=${v7Attr(r,"mimeType")||v7Attr(p,"mimeType")||"-"} size=${v7Attr(r,"width")||"-"}x${v7Attr(r,"height")||"-"}`;
+    }).join(" | ");
+  }catch(e){
+    return "ERROR " + (e?.message || String(e));
+  }
+}
+
+function v7ComputeInfo(doc){
+  const mpd = doc.documentElement;
+  const period = doc.querySelector("Period");
+  const st = doc.querySelector("SegmentTemplate");
+  const sNodes = Array.from(doc.querySelectorAll("SegmentTimeline S"));
+  const firstS = sNodes[0] || null;
+  const lastS = sNodes[sNodes.length-1] || null;
+
+  const timescale = st ? (v7Attr(st,"timescale") || "-") : "-";
+  const pto = st ? (v7Attr(st,"presentationTimeOffset") || "-") : "-";
+  const firstT = firstS ? (v7Attr(firstS,"t") || "-") : "-";
+
+  let computedFirstSec = "-";
+  try{
+    const ts = Number(timescale);
+    const t = Number(firstT);
+    const p = Number(pto);
+    if(Number.isFinite(ts) && ts > 0 && Number.isFinite(t)){
+      computedFirstSec = ((t - (Number.isFinite(p)?p:0))/ts).toFixed(3);
+    }
+  }catch(e){}
+
+  return {
+    type: v7Attr(mpd,"type") || "-",
+    availabilityStartTime: v7Attr(mpd,"availabilityStartTime") || "-",
+    publishTime: v7Attr(mpd,"publishTime") || "-",
+    minimumUpdatePeriod: v7Attr(mpd,"minimumUpdatePeriod") || "-",
+    timeShiftBufferDepth: v7Attr(mpd,"timeShiftBufferDepth") || "-",
+    suggestedPresentationDelay: v7Attr(mpd,"suggestedPresentationDelay") || "-",
+    mediaPresentationDuration: v7Attr(mpd,"mediaPresentationDuration") || "-",
+    periodStart: v7Attr(period,"start") || "-",
+    periodDuration: v7Attr(period,"duration") || "-",
+    timescale,
+    presentationTimeOffset: pto,
+    startNumber: st ? (v7Attr(st,"startNumber") || "-") : "-",
+    duration: st ? (v7Attr(st,"duration") || "-") : "-",
+    firstT,
+    firstD: firstS ? (v7Attr(firstS,"d") || "-") : "-",
+    lastT: lastS ? (v7Attr(lastS,"t") || "-") : "-",
+    lastD: lastS ? (v7Attr(lastS,"d") || "-") : "-",
+    lastR: lastS ? (v7Attr(lastS,"r") || "0") : "-",
+    computedFirstSec,
+    timeline: v7SegmentTimelineSummary(doc),
+    representations: v7RepresentationSummary(doc)
+  };
+}
+
+async function v7InspectMpd(url){
+  v7MpdUrl = url || "";
+  v7MpdInfo = null;
+  v7MpdError = "";
+
+  if(!url || !String(url).includes(".mpd")) return;
+
+  try{
+    const res = await fetch(url,{cache:"no-store"});
+    const text = await res.text();
+    if(!res.ok){
+      v7MpdError = `HTTP ${res.status}`;
+      return;
+    }
+
+    const doc = new DOMParser().parseFromString(text,"application/xml");
+    if(doc.querySelector("parsererror")){
+      v7MpdError = "XML PARSE ERROR";
+      return;
+    }
+    v7MpdInfo = v7ComputeInfo(doc);
+  }catch(e){
+    v7MpdError = e?.message || String(e);
+  }
+}
+
+function v7MpdSummary(){
+  if(v7MpdError) return "ERROR: " + v7MpdError;
+  if(!v7MpdInfo) return "ยังไม่มีข้อมูล";
+  const x = v7MpdInfo;
+  return [
+    `type=${x.type}`,
+    `AST=${x.availabilityStartTime}`,
+    `publish=${x.publishTime}`,
+    `MUP=${x.minimumUpdatePeriod}`,
+    `TSBD=${x.timeShiftBufferDepth}`,
+    `SPD=${x.suggestedPresentationDelay}`,
+    `MPDdur=${x.mediaPresentationDuration}`,
+    `PeriodStart=${x.periodStart}`,
+    `PeriodDur=${x.periodDuration}`,
+    `timescale=${x.timescale}`,
+    `PTO=${x.presentationTimeOffset}`,
+    `startNumber=${x.startNumber}`,
+    `duration=${x.duration}`,
+    `firstT=${x.firstT}`,
+    `firstD=${x.firstD}`,
+    `lastT=${x.lastT}`,
+    `lastD=${x.lastD}`,
+    `lastR=${x.lastR}`,
+    `computedFirstSec=${x.computedFirstSec}`
+  ].join(" | ");
+}
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
   const video = document.getElementById("html5-player");
@@ -1182,6 +1319,8 @@ function renderMpdDiagnostic(){
     ["V5 Active Track", v5ActiveTrackSummary()],
     ["V6 Timeline", v6TimelineSnapshot()],
     ["V6 Last Seek", `${Number(v6LastSeekFrom||0).toFixed(3)} -> ${Number(v6LastSeekTo||0).toFixed(3)}`],
+    ["V7 MPD URL", v7MpdUrl || "-"],
+    ["V7 MPD Timeline", v7MpdSummary()],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1202,7 +1341,13 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V5 VARIANTS</div>` +
   `<div class="diag-log">${diagEscape(v5AllVariantsSummary())}</div>` +
   `<div class="diag-section">V6 SEEKING / TIMELINE TRACE</div>` +
-  `<div class="diag-log">${diagEscape(v6SeekTrace.length ? v6SeekTrace.join("\n") : "ยังไม่มี seek trace")}</div>`;
+  `<div class="diag-log">${diagEscape(v6SeekTrace.length ? v6SeekTrace.join("\n") : "ยังไม่มี seek trace")}</div>` +
+  `<div class="diag-section">V7 MPD TIMELINE INSPECTOR</div>` +
+  `<div class="diag-log">${diagEscape(v7MpdError ? "ERROR: "+v7MpdError : v7MpdSummary())}</div>` +
+  `<div class="diag-section">V7 SEGMENT TIMELINE</div>` +
+  `<div class="diag-log">${diagEscape(v7MpdInfo?.timeline || "-")}</div>` +
+  `<div class="diag-section">V7 REPRESENTATIONS</div>` +
+  `<div class="diag-log">${diagEscape(v7MpdInfo?.representations || "-")}</div>`;
 }
 
 /* ================= MPD =================
@@ -1211,6 +1356,7 @@ function renderMpdDiagnostic(){
    เวอร์ชันนี้ไม่ฝืนเล่นในเว็บ เพื่อไม่ให้ค้าง/จอดำ
 */
 function playMPDNotice(channel, url){
+  v7InspectMpd(url);
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
   if(jwBox) jwBox.style.display = "none";
