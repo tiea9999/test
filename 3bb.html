@@ -2,11 +2,11 @@
 <html lang="th">
 
 <head>
-<!-- TIEA BUILD: 3BB VIDEO SEGMENT / DECODER TRACE V9.4 -->
+<!-- TIEA BUILD: 3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5 -->
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB VIDEO SEGMENT / DECODER TRACE V9.4</title>
+    <title>TIEA IPTV V2.1D + 3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -113,7 +113,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB VIDEO SEGMENT / DECODER TRACE V9.4</div>
+          <div class="diag-title">3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -481,6 +481,21 @@ let v94LastDropped = 0;
 let v94LastVideoTrack = "-";
 let v94LastAudioTrack = "-";
 let v94DecoderState = "-";
+let v95RequestLog = [];
+let v95ResponseLog = [];
+let v95VideoReqCount = 0;
+let v95AudioReqCount = 0;
+let v95OtherReqCount = 0;
+let v95VideoRespCount = 0;
+let v95AudioRespCount = 0;
+let v95OtherRespCount = 0;
+let v95VideoInitCount = 0;
+let v95VideoMediaCount = 0;
+let v95AudioInitCount = 0;
+let v95AudioMediaCount = 0;
+let v95LastVideoUri = "-";
+let v95LastAudioUri = "-";
+
 
 
 
@@ -722,6 +737,20 @@ async function loadChannel(channel, element){
   v94LastVideoTrack = "-";
   v94LastAudioTrack = "-";
   v94DecoderState = "-";
+  v95RequestLog = [];
+  v95ResponseLog = [];
+  v95VideoReqCount = 0;
+  v95AudioReqCount = 0;
+  v95OtherReqCount = 0;
+  v95VideoRespCount = 0;
+  v95AudioRespCount = 0;
+  v95OtherRespCount = 0;
+  v95VideoInitCount = 0;
+  v95VideoMediaCount = 0;
+  v95AudioInitCount = 0;
+  v95AudioMediaCount = 0;
+  v95LastVideoUri = "-";
+  v95LastAudioUri = "-";
   if(v93Timer){ clearInterval(v93Timer); v93Timer = null; }
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
@@ -1837,6 +1866,116 @@ function v94Summary(){
     `dropped=${v94LastDropped}`
   ].join(" | ");
 }
+
+function v95Push(list, msg, max=32){
+  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
+  list.push(`${stamp} ${msg}`);
+  if(list.length > max) list.splice(0, list.length-max);
+}
+
+function v95Classify(uri){
+  const u = String(uri || "").toLowerCase();
+  let kind = "other";
+  if(u.includes("/video/") || u.includes("video_") || u.includes("videoseg")) kind = "video";
+  else if(u.includes("/audio/") || u.includes("audio_") || u.includes("audioseg")) kind = "audio";
+
+  let phase = "media";
+  if(
+    u.includes("init") ||
+    u.includes("initialization") ||
+    /\/0\.m4s(?:$|\?)/.test(u) ||
+    /segment_0(?:\D|$)/.test(u)
+  ) phase = "init";
+
+  return {kind, phase};
+}
+
+function v95InstallRequestSequenceTrace(player, channel){
+  if(!player || !player.getNetworkingEngine) return;
+  const net = player.getNetworkingEngine();
+  if(!net) return;
+
+  if(net.registerRequestFilter){
+    net.registerRequestFilter((type, request)=>{
+      try{
+        const RT = shaka.net.NetworkingEngine.RequestType;
+        if(type !== RT.SEGMENT) return;
+
+        const uri = request?.uris?.[0] || "-";
+        const c = v95Classify(uri);
+
+        if(c.kind === "video"){
+          v95VideoReqCount++;
+          v95LastVideoUri = uri;
+          if(c.phase === "init") v95VideoInitCount++;
+          else v95VideoMediaCount++;
+        }else if(c.kind === "audio"){
+          v95AudioReqCount++;
+          v95LastAudioUri = uri;
+          if(c.phase === "init") v95AudioInitCount++;
+          else v95AudioMediaCount++;
+        }else{
+          v95OtherReqCount++;
+        }
+
+        v95Push(
+          v95RequestLog,
+          `REQ ${c.kind.toUpperCase()} ${c.phase.toUpperCase()} #${
+            c.kind==="video" ? v95VideoReqCount :
+            c.kind==="audio" ? v95AudioReqCount : v95OtherReqCount
+          } uri=${uri}`
+        );
+      }catch(e){
+        v95Push(v95RequestLog, `REQ TRACE ERROR ${e?.message || String(e)}`);
+      }
+    });
+  }
+
+  if(net.registerResponseFilter){
+    net.registerResponseFilter((type, response)=>{
+      try{
+        const RT = shaka.net.NetworkingEngine.RequestType;
+        if(type !== RT.SEGMENT) return;
+
+        const uri = response?.uri || "-";
+        const bytes = Number(response?.data?.byteLength || 0);
+        const c = v95Classify(uri);
+
+        if(c.kind === "video"){
+          v95VideoRespCount++;
+          v95LastVideoUri = uri;
+        }else if(c.kind === "audio"){
+          v95AudioRespCount++;
+          v95LastAudioUri = uri;
+        }else{
+          v95OtherRespCount++;
+        }
+
+        v95Push(
+          v95ResponseLog,
+          `RESP ${c.kind.toUpperCase()} ${c.phase.toUpperCase()} bytes=${bytes} uri=${uri}`
+        );
+      }catch(e){
+        v95Push(v95ResponseLog, `RESP TRACE ERROR ${e?.message || String(e)}`);
+      }
+    });
+  }
+
+  v95Push(v95RequestLog, `ARM channel=${channel?.name || "-"}`);
+}
+
+function v95Summary(){
+  return [
+    `videoReq=${v95VideoReqCount}`,
+    `videoResp=${v95VideoRespCount}`,
+    `videoInit=${v95VideoInitCount}`,
+    `videoMedia=${v95VideoMediaCount}`,
+    `audioReq=${v95AudioReqCount}`,
+    `audioResp=${v95AudioRespCount}`,
+    `audioInit=${v95AudioInitCount}`,
+    `audioMedia=${v95AudioMediaCount}`
+  ].join(" | ");
+}
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
   const video = document.getElementById("html5-player");
@@ -1995,6 +2134,9 @@ function renderMpdDiagnostic(){
     ["V9.4 Decoder Trace", v94Summary()],
     ["V9.4 Video Track", v94LastVideoTrack],
     ["V9.4 Audio Track", v94LastAudioTrack],
+    ["V9.5 Request Sequence", v95Summary()],
+    ["V9.5 Last Video URI", v95LastVideoUri],
+    ["V9.5 Last Audio URI", v95LastAudioUri],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -2047,7 +2189,13 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V9.4 AUDIO SEGMENTS</div>` +
   `<div class="diag-log">${diagEscape(v94AudioSegments.length ? v94AudioSegments.join("\n") : "ยังไม่มี AUDIO segment")}</div>` +
   `<div class="diag-section">V9.4 OTHER SEGMENTS</div>` +
-  `<div class="diag-log">${diagEscape(v94OtherSegments.length ? v94OtherSegments.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
+  `<div class="diag-log">${diagEscape(v94OtherSegments.length ? v94OtherSegments.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
+  `<div class="diag-section">V9.5 VIDEO REQUEST / SEGMENT SEQUENCE TRACE</div>` +
+  `<div class="diag-log">${diagEscape(v95Summary())}</div>` +
+  `<div class="diag-section">V9.5 REQUEST LOG</div>` +
+  `<div class="diag-log">${diagEscape(v95RequestLog.length ? v95RequestLog.join("\n") : "ยังไม่มี request")}</div>` +
+  `<div class="diag-section">V9.5 RESPONSE LOG</div>` +
+  `<div class="diag-log">${diagEscape(v95ResponseLog.length ? v95ResponseLog.join("\n") : "ยังไม่มี response")}</div>`;
 }
 
 /* ================= MPD =================
@@ -2073,6 +2221,7 @@ function playMPDNotice(channel, url){
 
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
+        v95InstallRequestSequenceTrace(shakaPlayer, channel);
         v94InstallSegmentDecoderTrace(shakaPlayer, channel);
         v92InstallSegmentTrace(shakaPlayer, channel);
         v92BindPlayerEvents(shakaPlayer);
