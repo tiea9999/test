@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB DRM / DECODE DIAGNOSTIC V4</title>
+    <title>TIEA IPTV V2.1D + 3BB ACTIVE SHAKA INSTANCE TRACE V5</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -111,7 +111,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB DRM / DECODE DIAGNOSTIC V4</div>
+          <div class="diag-title">3BB ACTIVE SHAKA INSTANCE TRACE V5</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -304,7 +304,7 @@ const channels = [
   servers:[
     {
       name:"Main",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=http://api.plus-server.sbs/play.php?key=1234&ch=truesportsd7",
+      file:"https://flow.dooflixlive.com/dooflix_x1/truesport7/chunks.m3u8?nimblesessionid=8809920&wmsAuthSign=c2VydmVyX3RpbWU9MDcvMjMvMjAyNiAwMjozNzoyMCBQTSZoYXNoX3ZhbHVlPXFRc2dPc3I0cFFrZ3JsMVFXaUo4Zmc9PSZ2YWxpZG1pbnV0ZXM9NSZzdHJtX2xlbj0xMCZpZD13ZWItMzQ2NDI4",
       drm:false
     },
     {
@@ -348,20 +348,6 @@ const channels = [
   ]
 },
 {
-  name:"cinemax",
-  logo:"https://6395online.com:8443/logotv/movie/cinemax(2).png",
-  group:"หนัง",
-  servers:[
-    {
-      name:"Main",
-      file:"https://cri-streamer1.cdn.3bbtv.com:8443/3bb/live/107/107.mpd",
-      drm:true,
-      keyId:"f48caba466394e93b50780f21798787a",
-      key:"9a074a10db4342e7937076b3e52f6029"
-    }
-  ]
-},    
-{
   name:"hbo-signature",
   logo:"https://6395online.com:8443/logotv/movie/hbosignature.png",
   group:"หนัง",
@@ -377,6 +363,22 @@ const channels = [
 },
 
     
+
+{
+  name:"cinemax",
+  logo:"https://6395online.com:8443/logotv/movie/cinemax(2).png",
+  group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://cri-streamer1.cdn.3bbtv.com:8443/3bb/live/107/107.mpd",
+      drm:true,
+      keyId:"f48caba466394e93b50780f21798787a",
+      key:"9a074a10db4342e7937076b3e52f6029"
+    }
+  ]
+},
+
 {name:"TV5HD",logo:"https://6395online.com:8443/logotv/freetv/hd-ch5.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true,group:"ดิจิตอล"},
 {name:"NBT",logo:"https://6395online.com:8443/logotv/freetv/sd-nbt.png",file:"https://cdn-edge.iiptvcdn.com/live_event/smil:f180-054a-38d7-ce66-f7cf.smil/playlist.m3u8",drm:false,group:"ดิจิตอล"},
 {name:"ThaiPBS",logo:"https://6395online.com:8443/logotv/freetv/hd-tpbs.png",file:"https://thaipbs-ophctt.cdn.byteark.com/live/playlist.m3u8",drm:false,group:"ดิจิตอล"},
@@ -428,6 +430,10 @@ let deepDiagTimeDelta = 0;
 let deepDiagEncryptedInfo = [];
 let deepDiagShakaEventsBound = false;
 let deepDiagLastKeyStatusText = "-";
+let v5PlayerTrace = [];
+let v5LastPlayerSnapshot = "";
+let v5LastVideoSnapshot = "";
+
 
 
 
@@ -618,6 +624,9 @@ async function loadChannel(channel, element){
   deepDiagEncryptedInfo = [];
   deepDiagShakaEventsBound = false;
   deepDiagLastKeyStatusText = "-";
+  v5PlayerTrace = [];
+  v5LastPlayerSnapshot = "";
+  v5LastVideoSnapshot = "";
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -830,6 +839,51 @@ function readDrmInfo(){
   return null;
 }
 
+
+function v5PlayerIdentity(){
+  try{
+    if(!shakaPlayer) return "NONE";
+    const tracks = shakaPlayer.getVariantTracks ? shakaPlayer.getVariantTracks() : [];
+    const active = tracks.find(t=>t.active);
+    const video = document.getElementById("html5-player");
+    return `tracks=${tracks.length} active=${active?.id ?? "-"} mediaKeys=${video?.mediaKeys ? "YES":"NO"}`;
+  }catch(e){ return "ERROR " + (e?.message || String(e)); }
+}
+
+function v5CaptureTrace(){
+  const video = document.getElementById("html5-player");
+  if(!video) return;
+  const ps = v5PlayerIdentity();
+  const vs = `ready=${video.readyState} net=${video.networkState} paused=${video.paused} seeking=${video.seeking} t=${Number(video.currentTime||0).toFixed(1)} size=${video.videoWidth||0}x${video.videoHeight||0} mediaKeys=${video.mediaKeys?"YES":"NO"}`;
+  if(ps !== v5LastPlayerSnapshot){
+    v5PlayerTrace.push(`${new Date().toLocaleTimeString()} PLAYER ${ps}`);
+    v5LastPlayerSnapshot = ps;
+  }
+  if(vs !== v5LastVideoSnapshot){
+    v5PlayerTrace.push(`${new Date().toLocaleTimeString()} VIDEO ${vs}`);
+    v5LastVideoSnapshot = vs;
+  }
+  if(v5PlayerTrace.length > 16) v5PlayerTrace.splice(0, v5PlayerTrace.length - 16);
+}
+
+function v5ActiveTrackSummary(){
+  try{
+    if(!shakaPlayer || !shakaPlayer.getVariantTracks) return "-";
+    const t = shakaPlayer.getVariantTracks().find(x=>x.active);
+    if(!t) return "NO ACTIVE VARIANT";
+    return `id=${t.id ?? "-"} bw=${Math.round((t.bandwidth||0)/1000)}kbps video=${t.videoCodec||"-"} audio=${t.audioCodec||"-"} size=${t.width||0}x${t.height||0} fps=${t.frameRate||"-"} app=${t.allowedByApplication!==false?"Y":"N"} key=${t.allowedByKeySystem!==false?"Y":"N"}`;
+  }catch(e){ return "ERROR " + (e?.message || String(e)); }
+}
+
+function v5AllVariantsSummary(){
+  try{
+    if(!shakaPlayer || !shakaPlayer.getVariantTracks) return "-";
+    return shakaPlayer.getVariantTracks().map(t =>
+      `id=${t.id} ${t.active?"ACTIVE":"idle"} ${t.width||0}x${t.height||0} fps=${t.frameRate||"-"} bw=${Math.round((t.bandwidth||0)/1000)}k v=${t.videoCodec||"-"} a=${t.audioCodec||"-"} app=${t.allowedByApplication!==false?"Y":"N"} key=${t.allowedByKeySystem!==false?"Y":"N"}`
+    ).join("\n");
+  }catch(e){ return "ERROR " + (e?.message || String(e)); }
+}
+
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
   const video = document.getElementById("html5-player");
@@ -837,6 +891,7 @@ function renderMpdDiagnostic(){
 
   bindDeepDiagEvents();
   bindDeepShakaEvents();
+  v5CaptureTrace();
 
   const frames = getDecodedFrames(video);
 
@@ -971,6 +1026,8 @@ function renderMpdDiagnostic(){
     ["DRM Time", Number.isFinite(stats.drmTime) ? stats.drmTime.toFixed(3)+" sec" : "-"],
     ["License Time", Number.isFinite(stats.licenseTime) ? stats.licenseTime.toFixed(3)+" sec" : "-"],
     ["DRM Config", activeChannel?.drm ? "ClearKey configured" : "ไม่ใช้/ไม่ระบุ"],
+    ["V5 Player Instance", v5PlayerIdentity()],
+    ["V5 Active Track", v5ActiveTrackSummary()],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -985,7 +1042,11 @@ function renderMpdDiagnostic(){
     return `<div class="diag-row"><div class="diag-key">${diagEscape(k)}</div><div class="diag-value ${cls}">${diagEscape(v)}</div></div>`;
   }).join("") +
   `<div class="diag-section">EVENT LOG (ล่าสุด)</div>` +
-  `<div class="diag-log">${diagEscape(deepDiagEvents.length ? deepDiagEvents.join("\n") : "ยังไม่มี event")}</div>`;
+  `<div class="diag-log">${diagEscape(deepDiagEvents.length ? deepDiagEvents.join("\n") : "ยังไม่มี event")}</div>` +
+  `<div class="diag-section">V5 ACTIVE SHAKA TRACE</div>` +
+  `<div class="diag-log">${diagEscape(v5PlayerTrace.length ? v5PlayerTrace.join("\n") : "ยังไม่มี trace")}</div>` +
+  `<div class="diag-section">V5 VARIANTS</div>` +
+  `<div class="diag-log">${diagEscape(v5AllVariantsSummary())}</div>`;
 }
 
 /* ================= MPD =================
