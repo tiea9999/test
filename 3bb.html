@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB ACTIVE DIAGNOSTIC V2</title>
+    <title>TIEA IPTV V2.1D + 3BB DEEP DECODE DIAGNOSTIC V3</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -61,6 +61,14 @@
         #mpd-diagnostic .diag-row:first-of-type{border-top:0}
         #mpd-diagnostic .diag-key{color:#9fd8ff}
         #mpd-diagnostic .diag-value{word-break:break-word}
+        #mpd-diagnostic .diag-section{
+          margin-top:8px;padding-top:7px;border-top:1px solid #00e5ff;
+          color:#00e5ff;font-weight:900
+        }
+        #mpd-diagnostic .diag-log{
+          margin-top:5px;padding:6px;background:rgba(0,0,0,.35);
+          border-radius:7px;color:#cfd8dc;font-size:11px;white-space:pre-wrap
+        }
 
 </style>
 
@@ -96,15 +104,14 @@
             <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
                 <button class="player-btn" onclick="openMX()">▶ MX</button>
-                <button id="diag-btn" class="control-btn" tabindex="0" onclick="toggleMpdDiagnostic()" style="border-color:#00e5ff;color:#00e5ff;">📊 DIAG</button>
-        <button class="player-btn" onclick="goHome()">🏠 HOME</button>
+                <button class="player-btn" onclick="goHome()">🏠 HOME</button>
             </div>
         </div>
         <div id="jw-player"></div>
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB ACTIVE PLAYER DIAGNOSTIC V2</div>
+          <div class="diag-title">3BB DEEP DECODE DIAGNOSTIC V3</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -397,6 +404,14 @@ let mpdDiagTimer = null;
 let mpdDiagLoadState = "IDLE";
 let mpdDiagLastError = "";
 let mpdDiagVisible = false;
+let deepDiagEvents = [];
+let deepDiagBoundVideo = null;
+let deepDiagLastFrameCount = 0;
+let deepDiagLastTime = 0;
+let deepDiagLastSampleAt = 0;
+let deepDiagFrameDelta = 0;
+let deepDiagTimeDelta = 0;
+
 
 
 function setStatus(text, autoHide=true){
@@ -577,6 +592,12 @@ function firstChannelUrl(channel){
 async function loadChannel(channel, element){
   activeOriginalChannel = channel;
   activeServerIndex = 0;
+  deepDiagEvents = [];
+  deepDiagLastFrameCount = 0;
+  deepDiagLastTime = 0;
+  deepDiagLastSampleAt = 0;
+  deepDiagFrameDelta = 0;
+  deepDiagTimeDelta = 0;
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -617,6 +638,7 @@ async function loadChannel(channel, element){
 
 
 
+
 function diagEscape(value){
   return String(value ?? "")
     .replace(/&/g,"&amp;")
@@ -625,83 +647,221 @@ function diagEscape(value){
     .replace(/"/g,"&quot;");
 }
 
+function pushDeepDiagEvent(name, detail=""){
+  const stamp = new Date().toLocaleTimeString();
+  deepDiagEvents.push(`${stamp} ${name}${detail ? " | " + detail : ""}`);
+  if(deepDiagEvents.length > 12) deepDiagEvents.splice(0, deepDiagEvents.length - 12);
+}
+
+function bindDeepDiagEvents(){
+  const video = document.getElementById("html5-player");
+  if(!video || deepDiagBoundVideo === video) return;
+  deepDiagBoundVideo = video;
+
+  const events = [
+    "loadstart","loadedmetadata","loadeddata","canplay","canplaythrough",
+    "play","playing","pause","waiting","stalled","suspend","seeking","seeked",
+    "encrypted","emptied","ended","error"
+  ];
+
+  events.forEach(name=>{
+    video.addEventListener(name, ()=>{
+      let detail = "";
+      if(name === "error" && video.error){
+        detail = `code=${video.error.code} message=${video.error.message || ""}`;
+      }else if(name === "encrypted"){
+        detail = `mediaKeys=${video.mediaKeys ? "YES" : "NO"}`;
+      }else{
+        detail = `t=${Number(video.currentTime||0).toFixed(1)} ready=${video.readyState} net=${video.networkState}`;
+      }
+      pushDeepDiagEvent(name.toUpperCase(), detail);
+    });
+  });
+}
+
 function toggleMpdDiagnostic(force){
-  const panel=document.getElementById("mpd-diagnostic");
-  if(!panel)return;
-  mpdDiagVisible=typeof force==="boolean"?force:!mpdDiagVisible;
-  panel.style.display=mpdDiagVisible?"block":"none";
+  const panel = document.getElementById("mpd-diagnostic");
+  if(!panel) return;
+  mpdDiagVisible = typeof force === "boolean" ? force : !mpdDiagVisible;
+  panel.style.display = mpdDiagVisible ? "block" : "none";
+
   if(mpdDiagVisible){
+    bindDeepDiagEvents();
     renderMpdDiagnostic();
-    if(!mpdDiagTimer)mpdDiagTimer=setInterval(renderMpdDiagnostic,1000);
+    if(!mpdDiagTimer) mpdDiagTimer = setInterval(renderMpdDiagnostic, 1000);
   }else if(mpdDiagTimer){
     clearInterval(mpdDiagTimer);
-    mpdDiagTimer=null;
+    mpdDiagTimer = null;
   }
 }
 
 function getDecodedFrames(video){
   try{
-    if(video && typeof video.getVideoPlaybackQuality==="function"){
-      const q=video.getVideoPlaybackQuality();
-      return {total:Number(q.totalVideoFrames||0),dropped:Number(q.droppedVideoFrames||0)};
+    if(video && typeof video.getVideoPlaybackQuality === "function"){
+      const q = video.getVideoPlaybackQuality();
+      return {
+        total: Number(q.totalVideoFrames || 0),
+        dropped: Number(q.droppedVideoFrames || 0),
+        corrupted: Number(q.corruptedVideoFrames || 0)
+      };
     }
   }catch(e){}
-  return {total:0,dropped:0};
+  return {
+    total: Number(video?.webkitDecodedFrameCount || 0),
+    dropped: Number(video?.webkitDroppedFrameCount || 0),
+    corrupted: 0
+  };
+}
+
+function getBufferedSummary(video){
+  const ranges = [];
+  try{
+    for(let i=0;i<video.buffered.length;i++){
+      ranges.push(`${video.buffered.start(i).toFixed(1)}-${video.buffered.end(i).toFixed(1)}`);
+    }
+  }catch(e){}
+  return ranges.length ? ranges.join(", ") : "-";
+}
+
+function mediaErrorText(video){
+  if(!video || !video.error) return "-";
+  const map = {
+    1:"MEDIA_ERR_ABORTED",
+    2:"MEDIA_ERR_NETWORK",
+    3:"MEDIA_ERR_DECODE",
+    4:"MEDIA_ERR_SRC_NOT_SUPPORTED"
+  };
+  return `${map[video.error.code] || "MEDIA_ERROR"} (${video.error.code}) ${video.error.message || ""}`.trim();
 }
 
 function renderMpdDiagnostic(){
-  const body=document.getElementById("mpd-diagnostic-body");
-  const video=document.getElementById("html5-player");
-  if(!body||!video)return;
+  const body = document.getElementById("mpd-diagnostic-body");
+  const video = document.getElementById("html5-player");
+  if(!body || !video) return;
 
-  const frames=getDecodedFrames(video);
-  let buffered=0;
-  try{
-    if(video.buffered&&video.buffered.length){
-      buffered=Math.max(0,video.buffered.end(video.buffered.length-1)-video.currentTime);
-    }
-  }catch(e){}
+  bindDeepDiagEvents();
 
-  let track=null, stats={};
+  const frames = getDecodedFrames(video);
+
+  if(deepDiagLastSampleAt){
+    deepDiagFrameDelta = frames.total - deepDiagLastFrameCount;
+    deepDiagTimeDelta = Number(video.currentTime || 0) - deepDiagLastTime;
+  }
+  deepDiagLastFrameCount = frames.total;
+  deepDiagLastTime = Number(video.currentTime || 0);
+  deepDiagLastSampleAt = performance.now();
+
+  let track = null;
+  let tracks = [];
+  let stats = {};
+  let bufferedInfo = null;
+
   try{
     if(shakaPlayer){
-      const tracks=shakaPlayer.getVariantTracks?shakaPlayer.getVariantTracks():[];
-      track=tracks.find(t=>t.active)||tracks[0]||null;
-      stats=shakaPlayer.getStats?shakaPlayer.getStats():{};
+      tracks = shakaPlayer.getVariantTracks ? shakaPlayer.getVariantTracks() : [];
+      track = tracks.find(t=>t.active) || tracks[0] || null;
+      stats = shakaPlayer.getStats ? shakaPlayer.getStats() : {};
+      bufferedInfo = shakaPlayer.getBufferedInfo ? shakaPlayer.getBufferedInfo() : null;
+    }
+  }catch(e){
+    pushDeepDiagEvent("DIAG SHAKA READ ERROR", e?.message || String(e));
+  }
+
+  const width = video.videoWidth || track?.width || 0;
+  const height = video.videoHeight || track?.height || 0;
+  const codec = track?.videoCodec || track?.codecs || "";
+  const audioCodec = track?.audioCodec || "";
+  const picture = (width>0 && height>0 && frames.total>0) ? "YES" : "NO / WAIT";
+  const playback = video.paused ? "PAUSED" : (video.readyState>=2 ? "PLAYING" : "LOADING");
+
+  let ahead = 0;
+  try{
+    if(video.buffered && video.buffered.length){
+      for(let i=0;i<video.buffered.length;i++){
+        if(video.currentTime >= video.buffered.start(i) && video.currentTime <= video.buffered.end(i)){
+          ahead = Math.max(0, video.buffered.end(i) - video.currentTime);
+          break;
+        }
+      }
     }
   }catch(e){}
 
-  const width=video.videoWidth||track?.width||0;
-  const height=video.videoHeight||track?.height||0;
-  const codec=track?.videoCodec||track?.codecs||"";
-  const audioCodec=track?.audioCodec||"";
-  const picture=(width>0&&height>0&&frames.total>0)?"YES":"NO / WAIT";
-  const playback=video.paused?"PAUSED":(video.readyState>=2?"PLAYING":"LOADING");
+  const activeVariant = track ? [
+    `id=${track.id ?? "-"}`,
+    `bw=${track.bandwidth ? Math.round(track.bandwidth/1000)+"kbps" : "-"}`,
+    `fps=${track.frameRate || "-"}`,
+    `lang=${track.language || "-"}`,
+    `primary=${!!track.primary}`
+  ].join(" ") : "-";
 
-  const rows=[
-    ["Channel",activeChannel?.name||"-"],
-    ["Playback",playback],
-    ["Time",(video.currentTime||0).toFixed(1)+" sec"],
-    ["Video Size",width&&height?width+"x"+height:"0x0"],
-    ["Decoded Frames",String(frames.total)],
-    ["Dropped Frames",String(frames.dropped)],
-    ["Picture",picture],
-    ["Video Codec",codec||"-"],
-    ["Audio Codec",audioCodec||"-"],
-    ["Video Track",track?"FOUND":"ไม่พบ/Player อื่น"],
-    ["ReadyState",String(video.readyState)],
-    ["Buffer",buffered.toFixed(1)+" sec"],
-    ["Bandwidth",stats.estimatedBandwidth?Math.round(stats.estimatedBandwidth/1000)+" kbps":"-"],
-    ["DRM",activeChannel?.drm?"ClearKey configured":"ไม่ใช้/ไม่ระบุ"],
-    ["Mode","INSPECT ACTIVE PLAYER ONLY"]
+  const formatRanges = arr => Array.isArray(arr) && arr.length
+    ? arr.map(r=>`${r.start.toFixed(1)}-${r.end.toFixed(1)}`).join("|")
+    : "-";
+
+  const shakaBuffer = bufferedInfo ? [
+    `total:${formatRanges(bufferedInfo.total)}`,
+    `video:${formatRanges(bufferedInfo.video)}`,
+    `audio:${formatRanges(bufferedInfo.audio)}`
+  ].join(" / ") : "-";
+
+  const diagnosis =
+    frames.total === 0 && video.readyState <= 1 && ahead > 0
+      ? "ข้อมูลมีใน Buffer แต่ decoder ยังไม่เริ่ม"
+      : frames.total === 0 && video.readyState >= 2
+      ? "มี Media Data แต่ยังไม่มี decoded frame"
+      : frames.total > 0
+      ? "Decoder ทำงาน"
+      : "รอข้อมูลเพิ่ม";
+
+  const readyNames = ["HAVE_NOTHING","HAVE_METADATA","HAVE_CURRENT_DATA","HAVE_FUTURE_DATA","HAVE_ENOUGH_DATA"];
+  const networkNames = ["NETWORK_EMPTY","NETWORK_IDLE","NETWORK_LOADING","NETWORK_NO_SOURCE"];
+
+  const rows = [
+    ["Channel", activeChannel?.name || "-"],
+    ["Playback", playback],
+    ["Picture", picture],
+    ["Diagnosis", diagnosis],
+    ["Time", (video.currentTime||0).toFixed(1)+" sec"],
+    ["Time Δ / sec", deepDiagTimeDelta.toFixed(2)],
+    ["Video Size", width&&height ? `${width}x${height}` : "0x0"],
+    ["Decoded Frames", String(frames.total)],
+    ["Frames Δ / sec", String(deepDiagFrameDelta)],
+    ["Dropped Frames", String(frames.dropped)],
+    ["Corrupted Frames", String(frames.corrupted)],
+    ["ReadyState", `${video.readyState} (${readyNames[video.readyState] || "?"})`],
+    ["NetworkState", `${video.networkState} (${networkNames[video.networkState] || "?"})`],
+    ["Paused / Seeking", `${video.paused} / ${video.seeking}`],
+    ["MediaKeys", video.mediaKeys ? "ATTACHED" : "NONE"],
+    ["Media Error", mediaErrorText(video)],
+    ["HTML5 Buffer Ahead", ahead.toFixed(1)+" sec"],
+    ["HTML5 Buffered", getBufferedSummary(video)],
+    ["Variant Count", String(tracks.length)],
+    ["Active Variant", activeVariant],
+    ["Video Codec", codec || "-"],
+    ["Audio Codec", audioCodec || "-"],
+    ["Video Track", track ? "FOUND" : "ไม่พบ/Player อื่น"],
+    ["Shaka Buffer", shakaBuffer],
+    ["Est. Bandwidth", stats.estimatedBandwidth ? Math.round(stats.estimatedBandwidth/1000)+" kbps" : "-"],
+    ["Stream Bandwidth", stats.streamBandwidth ? Math.round(stats.streamBandwidth/1000)+" kbps" : "-"],
+    ["Load Latency", Number.isFinite(stats.loadLatency) ? stats.loadLatency.toFixed(2)+" sec" : "-"],
+    ["DRM Time", Number.isFinite(stats.drmTime) ? stats.drmTime.toFixed(3)+" sec" : "-"],
+    ["License Time", Number.isFinite(stats.licenseTime) ? stats.licenseTime.toFixed(3)+" sec" : "-"],
+    ["DRM Config", activeChannel?.drm ? "ClearKey configured" : "ไม่ใช้/ไม่ระบุ"],
+    ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
-  body.innerHTML=rows.map(([k,v])=>{
-    let cls="";
-    if(k==="Picture")cls=v==="YES"?"diag-ok":"diag-warn";
-    if(k==="Playback")cls=v==="PLAYING"?"diag-ok":"diag-warn";
+  body.innerHTML = rows.map(([k,v])=>{
+    let cls = "";
+    if(k==="Picture") cls = v==="YES" ? "diag-ok" : "diag-warn";
+    if(k==="Playback") cls = v==="PLAYING" ? "diag-ok" : "diag-warn";
+    if(k==="Diagnosis"){
+      cls = v==="Decoder ทำงาน" ? "diag-ok" : (v.includes("decoder") ? "diag-bad" : "diag-warn");
+    }
+    if(k==="Media Error" && v !== "-") cls = "diag-bad";
     return `<div class="diag-row"><div class="diag-key">${diagEscape(k)}</div><div class="diag-value ${cls}">${diagEscape(v)}</div></div>`;
-  }).join("");
+  }).join("") +
+  `<div class="diag-section">EVENT LOG (ล่าสุด)</div>` +
+  `<div class="diag-log">${diagEscape(deepDiagEvents.length ? deepDiagEvents.join("\n") : "ยังไม่มี event")}</div>`;
 }
 
 /* ================= MPD =================
@@ -729,7 +889,11 @@ function playMPDNotice(channel, url){
         shakaPlayer.addEventListener("error", function(event){
           try{
             const detail = event.detail || {};
-            }catch(e){}
+            pushDeepDiagEvent(
+              "SHAKA ERROR",
+              `code=${detail.code || "-"} severity=${detail.severity || "-"} category=${detail.category || "-"}`
+            );
+          }catch(e){}
         });
 
         shakaPlayer.configure({
