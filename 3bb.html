@@ -2,11 +2,11 @@
 <html lang="th">
 
 <head>
-<!-- TIEA BUILD: 3BB TIMELINE NORMALIZER V9.1 -->
+<!-- TIEA BUILD: 3BB POST-PATCH LIVE EDGE TRACE V9.2 -->
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB TIMELINE NORMALIZER V9.1</title>
+    <title>TIEA IPTV V2.1D + 3BB POST-PATCH LIVE EDGE TRACE V9.2</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -113,7 +113,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB TIMELINE NORMALIZER V9.1</div>
+          <div class="diag-title">3BB POST-PATCH LIVE EDGE TRACE V9.2</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -456,6 +456,15 @@ let v9PatchBase = null;
 let v9PatchLog = [];
 let v9OriginalAST = "";
 let v9PatchedAST = "";
+let v92SegmentLog = [];
+let v92LiveEdgeLog = [];
+let v92LastSeekRange = "-";
+let v92LastPlayhead = "-";
+let v92LastBuffered = "-";
+let v92LastLiveEdge = "-";
+let v92LastPresentationStart = "-";
+let v92LastPresentationEnd = "-";
+
 
 
 
@@ -670,6 +679,14 @@ async function loadChannel(channel, element){
   v9PatchLog = [];
   v9OriginalAST = "";
   v9PatchedAST = "";
+  v92SegmentLog = [];
+  v92LiveEdgeLog = [];
+  v92LastSeekRange = "-";
+  v92LastPlayhead = "-";
+  v92LastBuffered = "-";
+  v92LastLiveEdge = "-";
+  v92LastPresentationStart = "-";
+  v92LastPresentationEnd = "-";
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -1416,6 +1433,114 @@ function v9Summary(){
     `ASTnew=${v9PatchedAST || "-"}`
   ].join(" | ");
 }
+
+function v92Push(list, text, max=30){
+  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
+  list.push(`${stamp} ${text}`);
+  if(list.length > max) list.splice(0, list.length-max);
+}
+
+function v92RangeSummary(ranges){
+  try{
+    const out = [];
+    for(let i=0;i<ranges.length;i++){
+      out.push(`${ranges.start(i).toFixed(3)}-${ranges.end(i).toFixed(3)}`);
+    }
+    return out.length ? out.join(", ") : "-";
+  }catch(e){
+    return "-";
+  }
+}
+
+function v92CapturePlaybackWindow(){
+  const video = document.getElementById("html5-player");
+  if(!video) return;
+
+  v92LastPlayhead = Number.isFinite(video.currentTime) ? video.currentTime.toFixed(3) : "-";
+  v92LastSeekRange = v92RangeSummary(video.seekable);
+  v92LastBuffered = v92RangeSummary(video.buffered);
+
+  try{
+    if(shakaPlayer && typeof shakaPlayer.seekRange === "function"){
+      const r = shakaPlayer.seekRange();
+      if(r){
+        v92LastPresentationStart = Number.isFinite(r.start) ? r.start.toFixed(3) : "-";
+        v92LastPresentationEnd = Number.isFinite(r.end) ? r.end.toFixed(3) : "-";
+        v92LastLiveEdge = v92LastPresentationEnd;
+      }
+    }
+  }catch(e){}
+
+  v92Push(
+    v92LiveEdgeLog,
+    `playhead=${v92LastPlayhead} seekable=${v92LastSeekRange} buffered=${v92LastBuffered} shakaRange=${v92LastPresentationStart}-${v92LastPresentationEnd}`,
+    20
+  );
+}
+
+function v92InstallSegmentTrace(player, channel){
+  if(!player || !player.getNetworkingEngine) return;
+  const net = player.getNetworkingEngine();
+  if(!net || !net.registerResponseFilter) return;
+
+  const filter = (type, response)=>{
+    try{
+      const RT = shaka.net.NetworkingEngine.RequestType;
+      if(type !== RT.SEGMENT) return;
+
+      const uri = response?.uri || "-";
+      const size = response?.data?.byteLength || 0;
+      v92Push(
+        v92SegmentLog,
+        `SEGMENT OK channel=${channel?.name||"-"} bytes=${size} uri=${uri}`,
+        24
+      );
+
+      setTimeout(v92CapturePlaybackWindow, 0);
+    }catch(e){
+      v92Push(v92SegmentLog, `SEGMENT TRACE ERROR ${e?.message || String(e)}`, 24);
+    }
+  };
+
+  net.registerResponseFilter(filter);
+}
+
+function v92BindPlayerEvents(player){
+  if(!player || player.__v92Bound) return;
+  player.__v92Bound = true;
+
+  [
+    "buffering","adaptation","variantchanged","streaming",
+    "trackschanged","error"
+  ].forEach(name=>{
+    try{
+      player.addEventListener(name, ev=>{
+        let detail = "";
+        try{
+          if(name === "buffering"){
+            detail = `buffering=${String(ev.buffering)}`;
+          }else if(name === "error"){
+            const d = ev.detail || {};
+            detail = `code=${d.code||"-"} severity=${d.severity||"-"} category=${d.category||"-"}`;
+          }
+        }catch(e){}
+        v92Push(v92LiveEdgeLog, `SHAKA ${name.toUpperCase()} ${detail}`, 20);
+        setTimeout(v92CapturePlaybackWindow, 0);
+      });
+    }catch(e){}
+  });
+}
+
+function v92Summary(){
+  return [
+    `playhead=${v92LastPlayhead}`,
+    `seekable=${v92LastSeekRange}`,
+    `buffered=${v92LastBuffered}`,
+    `shakaStart=${v92LastPresentationStart}`,
+    `shakaEnd=${v92LastPresentationEnd}`,
+    `liveEdge=${v92LastLiveEdge}`
+  ].join(" | ");
+}
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
   const video = document.getElementById("html5-player");
@@ -1568,6 +1693,7 @@ function renderMpdDiagnostic(){
     ["V8 Timeline Normalizer", v8Summary()],
     ["V8.1 Auto Init", `channel=${v81InitChannel || "-"} | count=${v81InitCount}`],
     ["V9 Manifest Normalizer", v9Summary()],
+    ["V9.2 Post-Patch Window", v92Summary()],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -1602,7 +1728,13 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V9 MANIFEST TIMELINE NORMALIZER</div>` +
   `<div class="diag-log">${diagEscape(v9Summary())}</div>` +
   `<div class="diag-section">V9 PATCH LOG</div>` +
-  `<div class="diag-log">${diagEscape(v9PatchLog.length?v9PatchLog.join("\n"):"ยังไม่มีข้อมูล")}</div>`;
+  `<div class="diag-log">${diagEscape(v9PatchLog.length?v9PatchLog.join("\n"):"ยังไม่มีข้อมูล")}</div>` +
+  `<div class="diag-section">V9.2 POST-PATCH LIVE EDGE</div>` +
+  `<div class="diag-log">${diagEscape(v92Summary())}</div>` +
+  `<div class="diag-section">V9.2 LIVE EDGE / PLAYER LOG</div>` +
+  `<div class="diag-log">${diagEscape(v92LiveEdgeLog.length?v92LiveEdgeLog.join("\n"):"ยังไม่มีข้อมูล")}</div>` +
+  `<div class="diag-section">V9.2 SEGMENT RESPONSE LOG</div>` +
+  `<div class="diag-log">${diagEscape(v92SegmentLog.length?v92SegmentLog.join("\n"):"ยังไม่มีข้อมูล")}</div>`;
 }
 
 /* ================= MPD =================
@@ -1628,6 +1760,8 @@ function playMPDNotice(channel, url){
 
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
+        v92InstallSegmentTrace(shakaPlayer, channel);
+        v92BindPlayerEvents(shakaPlayer);
         // V9: normalize only abnormal dynamic MPD timelines.
         // CINEMAX and normal timelines are always bypassed.
         v9InstallManifestResponseFilter(shakaPlayer, channel);
@@ -1666,6 +1800,8 @@ function playMPDNotice(channel, url){
 
         shakaPlayer.load(url).then(()=>{
           forceAudio100();
+          v92CapturePlaybackWindow();
+          [300,800,1500,3000,5000,8000].forEach(ms=>setTimeout(v92CapturePlaybackWindow, ms));
           setTimeout(()=>v8Observe(channel),300);
           video.play().catch(()=>{});
           setStatus("MPD โหลดสำเร็จ — ดูผลที่ 📊 DIAG", true);
