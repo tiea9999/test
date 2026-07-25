@@ -2,11 +2,11 @@
 <html lang="th">
 
 <head>
-<!-- TIEA BUILD: 3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5 FIX1 -->
+<!-- TIEA BUILD: 3BB INIT SEGMENT / MP4 BOX TRACE V9.6 -->
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5 FIX1</title>
+    <title>TIEA IPTV V2.1D + 3BB INIT SEGMENT / MP4 BOX TRACE V9.6</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -113,7 +113,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="mpd-diagnostic">
-          <div class="diag-title">3BB VIDEO REQUEST / SEGMENT SEQUENCE TRACE V9.5 FIX1</div>
+          <div class="diag-title">3BB INIT SEGMENT / MP4 BOX TRACE V9.6</div>
           <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
         </div>
     </div>
@@ -495,6 +495,14 @@ let v95AudioInitCount = 0;
 let v95AudioMediaCount = 0;
 let v95LastVideoUri = "-";
 let v95LastAudioUri = "-";
+let v96BoxLog = [];
+let v96InitLikeCount = 0;
+let v96MediaLikeCount = 0;
+let v96UnknownBoxCount = 0;
+let v96LastBoxSummary = "-";
+let v96LastInitUri = "-";
+let v96LastMediaUri = "-";
+
 
 
 
@@ -751,6 +759,13 @@ async function loadChannel(channel, element){
   v95AudioMediaCount = 0;
   v95LastVideoUri = "-";
   v95LastAudioUri = "-";
+  v96BoxLog = [];
+  v96InitLikeCount = 0;
+  v96MediaLikeCount = 0;
+  v96UnknownBoxCount = 0;
+  v96LastBoxSummary = "-";
+  v96LastInitUri = "-";
+  v96LastMediaUri = "-";
   if(v93Timer){ clearInterval(v93Timer); v93Timer = null; }
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
@@ -1976,6 +1991,127 @@ function v95Summary(){
     `audioMedia=${v95AudioMediaCount}`
   ].join(" | ");
 }
+
+function v96Push(msg, max=40){
+  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
+  v96BoxLog.push(`${stamp} ${msg}`);
+  if(v96BoxLog.length > max) v96BoxLog.splice(0, v96BoxLog.length-max);
+}
+
+function v96Ascii4(data, offset){
+  try{
+    const u = new Uint8Array(data, offset, 4);
+    return String.fromCharCode(u[0],u[1],u[2],u[3]);
+  }catch(e){
+    return "????";
+  }
+}
+
+function v96U32(data, offset){
+  try{
+    const dv = new DataView(data, offset, 4);
+    return dv.getUint32(0);
+  }catch(e){
+    return 0;
+  }
+}
+
+function v96ParseMp4Boxes(buffer){
+  const out = [];
+  if(!buffer || !buffer.byteLength) return out;
+
+  let off = 0;
+  let guard = 0;
+  const total = buffer.byteLength;
+
+  while(off + 8 <= total && guard < 24){
+    guard++;
+
+    let size = v96U32(buffer, off);
+    const type = v96Ascii4(buffer, off + 4);
+    let header = 8;
+
+    if(size === 1){
+      if(off + 16 > total) break;
+      const dv = new DataView(buffer, off + 8, 8);
+      const high = dv.getUint32(0);
+      const low = dv.getUint32(4);
+      size = high * 4294967296 + low;
+      header = 16;
+    }else if(size === 0){
+      size = total - off;
+    }
+
+    if(!Number.isFinite(size) || size < header || off + size > total){
+      out.push(`${type}(invalid:${size})`);
+      break;
+    }
+
+    out.push(`${type}(${size})`);
+    off += size;
+  }
+
+  return out;
+}
+
+function v96ClassifyBoxes(boxes){
+  const types = boxes.map(x => String(x).split("(")[0]);
+  const hasFtyp = types.includes("ftyp");
+  const hasMoov = types.includes("moov");
+  const hasMoof = types.includes("moof");
+  const hasMdat = types.includes("mdat");
+
+  if(hasFtyp || hasMoov) return "INIT";
+  if(hasMoof || hasMdat) return "MEDIA";
+  return "UNKNOWN";
+}
+
+function v96InstallMp4BoxTrace(player, channel){
+  if(!player || !player.getNetworkingEngine) return;
+  const net = player.getNetworkingEngine();
+  if(!net || !net.registerResponseFilter) return;
+
+  net.registerResponseFilter((type, response)=>{
+    try{
+      const RT = shaka.net.NetworkingEngine.RequestType;
+      if(type !== RT.SEGMENT) return;
+      if(!response || !response.data) return;
+
+      const uri = response.uri || "-";
+      const bytes = Number(response.data.byteLength || 0);
+      const boxes = v96ParseMp4Boxes(response.data);
+      const cls = v96ClassifyBoxes(boxes);
+
+      if(cls === "INIT"){
+        v96InitLikeCount++;
+        v96LastInitUri = uri;
+      }else if(cls === "MEDIA"){
+        v96MediaLikeCount++;
+        v96LastMediaUri = uri;
+      }else{
+        v96UnknownBoxCount++;
+      }
+
+      v96LastBoxSummary = boxes.length ? boxes.join(" | ") : "(no boxes)";
+      v96Push(
+        `${cls} bytes=${bytes} boxes=${v96LastBoxSummary} uri=${uri}`
+      );
+    }catch(e){
+      v96Push(`BOX TRACE ERROR ${e?.message || String(e)}`);
+    }
+  });
+
+  v96Push(`ARM channel=${channel?.name || "-"}`);
+}
+
+function v96Summary(){
+  return [
+    `initLike=${v96InitLikeCount}`,
+    `mediaLike=${v96MediaLikeCount}`,
+    `unknown=${v96UnknownBoxCount}`,
+    `lastBoxes=${v96LastBoxSummary}`
+  ].join(" | ");
+}
 function renderMpdDiagnostic(){
   const body = document.getElementById("mpd-diagnostic-body");
   const video = document.getElementById("html5-player");
@@ -2138,6 +2274,9 @@ function renderMpdDiagnostic(){
     ["V9.5 Last Video URI", v95LastVideoUri],
     ["V9.5 Last Audio URI", v95LastAudioUri],
     ["V9.5 FIX1 Loaded", "YES"],
+    ["V9.6 MP4 Box Trace", v96Summary()],
+    ["V9.6 Last INIT URI", v96LastInitUri],
+    ["V9.6 Last MEDIA URI", v96LastMediaUri],
     ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
   ];
 
@@ -2196,7 +2335,11 @@ function renderMpdDiagnostic(){
   `<div class="diag-section">V9.5 REQUEST LOG</div>` +
   `<div class="diag-log">${diagEscape(v95RequestLog.length ? v95RequestLog.join("\n") : "ยังไม่มี request")}</div>` +
   `<div class="diag-section">V9.5 RESPONSE LOG</div>` +
-  `<div class="diag-log">${diagEscape(v95ResponseLog.length ? v95ResponseLog.join("\n") : "ยังไม่มี response")}</div>`;
+  `<div class="diag-log">${diagEscape(v95ResponseLog.length ? v95ResponseLog.join("\n") : "ยังไม่มี response")}</div>` +
+  `<div class="diag-section">V9.6 INIT SEGMENT / MP4 BOX TRACE</div>` +
+  `<div class="diag-log">${diagEscape(v96Summary())}</div>` +
+  `<div class="diag-section">V9.6 BOX LOG</div>` +
+  `<div class="diag-log">${diagEscape(v96BoxLog.length ? v96BoxLog.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
 }
 
 /* ================= MPD =================
@@ -2222,6 +2365,7 @@ function playMPDNotice(channel, url){
 
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
+        v96InstallMp4BoxTrace(shakaPlayer, channel);
         v95InstallRequestSequenceTrace(shakaPlayer, channel);
         v94InstallSegmentDecoderTrace(shakaPlayer, channel);
         v92InstallSegmentTrace(shakaPlayer, channel);
