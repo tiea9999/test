@@ -2,11 +2,10 @@
 <html lang="th">
 
 <head>
-<!-- TIEA BUILD: 3BB INIT SEGMENT / MP4 BOX TRACE V9.6 -->
-
+<!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA IPTV V2.1D + 3BB INIT SEGMENT / MP4 BOX TRACE V9.6</title>
+    <title>3BB ROLLBACK STABLE V2.1 BASE</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -37,42 +36,7 @@
         .status{position:fixed;bottom:15px;left:15px;right:15px;z-index:100001;text-align:center;color:#fff;background:rgba(0,0,0,.72);padding:8px 12px;border-radius:10px;display:none;font-size:14px;border:1px solid rgba(0,255,255,.35)}
         @media(max-width:768px){#category-menu{justify-content:flex-start;width:calc(100% - 12px);padding:8px}#channel-list{width:calc(100% - 12px);grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;padding:8px}.channel{min-height:112px;font-size:13px}.channel img{width:78px;height:70px}.player-btn{font-size:16px;padding:8px 12px}}
         @media(max-width:480px){#channel-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:5px}.channel{min-height:98px;font-size:11px;padding:6px 3px}.channel img{width:64px;height:58px;margin-bottom:5px}.category-btn{min-width:100px;font-size:14px;padding:9px 12px}}
-    
-        #mpd-diagnostic{
-          position:absolute;
-          right:14px;
-          bottom:14px;
-          z-index:100003;
-          width:min(430px,calc(100vw - 28px));
-          max-height:48vh;
-          overflow:auto;
-          display:none;
-          background:rgba(3,14,24,.94);
-          border:1px solid #00e5ff;
-          border-radius:12px;
-          padding:10px 12px;
-          color:#fff;
-          font:600 13px/1.45 Consolas,monospace;
-          box-shadow:0 8px 26px rgba(0,0,0,.55);
-        }
-        #mpd-diagnostic .diag-title{color:#00e5ff;font:900 15px Arial,sans-serif;margin-bottom:7px}
-        #mpd-diagnostic .diag-ok{color:#00e676}
-        #mpd-diagnostic .diag-warn{color:#ffc400}
-        #mpd-diagnostic .diag-bad{color:#ff5252}
-        #mpd-diagnostic .diag-row{display:grid;grid-template-columns:132px 1fr;gap:8px;border-top:1px solid rgba(255,255,255,.08);padding:3px 0}
-        #mpd-diagnostic .diag-row:first-of-type{border-top:0}
-        #mpd-diagnostic .diag-key{color:#9fd8ff}
-        #mpd-diagnostic .diag-value{word-break:break-word}
-        #mpd-diagnostic .diag-section{
-          margin-top:8px;padding-top:7px;border-top:1px solid #00e5ff;
-          color:#00e5ff;font-weight:900
-        }
-        #mpd-diagnostic .diag-log{
-          margin-top:5px;padding:6px;background:rgba(0,0,0,.35);
-          border-radius:7px;color:#cfd8dc;font-size:11px;white-space:pre-wrap
-        }
-
-</style>
+    </style>
 
 <style id="force-autohide-style">
 #player-container.force-hide-controls .player-controls,
@@ -94,14 +58,13 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA IPTV V2.1D • AUTO EXTERNAL GATEWAY</h2>
+    <h2 style="color:orange;text-align:center;">3BB ROLLBACK STABLE • V2.1 BASE</h2>
 
     <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
                 <button class="player-btn" id="closeBtn" onclick="closePlayer()">X</button>
                 <button class="player-btn" onclick="restartCurrent()">↻ รีโหลด</button>
-                <button class="player-btn" id="diagBtn" onclick="toggleMpdDiagnostic()">📊 DIAG</button>
             </div>
             <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
@@ -112,10 +75,6 @@
         <div id="jw-player"></div>
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
-        <div id="mpd-diagnostic">
-          <div class="diag-title">3BB INIT SEGMENT / MP4 BOX TRACE V9.6</div>
-          <div id="mpd-diagnostic-body">ยังไม่มีข้อมูล</div>
-        </div>
     </div>
 
     <div id="category-menu">
@@ -133,19 +92,40 @@ const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 
 const channels = [
 {
-  name:"LookOnTV 116073",
-  logo:"https://www.neolutionesport.com/wp-content/uploads/2016/11/test.png",
+  name:"test",
+  logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQHDGbqHV94T6Ed74fTkKcXYhA&s=10",
   group:"หนัง",
   servers:[
     {
       name:"Main",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fd11k1mnrgfposz.cloudfront.net%2Fplaylist_1920x1080.m3u8&referer=https%3A%2F%2Fsultanovic.info%2Findex%2Fsport%2F0-193",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=http%3A%2F%2Fmacete.xyz%3A2095%2Fplay%2Flive.php%3Fmac%3D00%3A1A%3A79%3AAB%3AED%3A5A%26stream%3D115833%26extension%3Dm3u8&referer=https%3A%2F%2Fwww.madoball.com%2F",
+      drm:false
+    },
+    {
+      name:"Backup",
+      file:"http://macete.xyz:2095/play/live.php?mac=00:1A:79:AB:ED:5A&stream=115833&extension=m3u8",
       drm:false
     }
   ]
 }, 
-
-
+    
+{
+  name:"Worldcup",
+  logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSMu7gQoNOKnWwlQQPvEjV00BkjefHBjYE-OQ&s",
+  group:"กีฬา",
+  servers:[
+    {
+      name:"Main",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/82290/playlist.m3u8",
+      drm:false
+    },
+    {
+      name:"Backup",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/82290/playlist.m3u8",
+      drm:false
+    }
+  ]
+}, 
 {
   name:"Bein 1",
   logo:"https://6395online.com:8443/logotv/sport/bein1.png",
@@ -170,7 +150,7 @@ const channels = [
   servers:[
     {
       name:"Main",
-      file:"",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/7423/playlist.m3u8",
       drm:false
     },
     {
@@ -289,12 +269,12 @@ const channels = [
   servers:[
     {
       name:"Main",
-      file:"https://live22.yei7784.xyz/tsp5/tracks-v1a1/mono.m3u8",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/2888/playlist.m3u8",
       drm:false
     },
     {
       name:"Backup",
-         file:"https://drift.dooflixlive.com/dooflix_x1/truesport5/chunks.m3u8?nimblesessionid=456097&wmsAuthSign=c2VydmVyX3RpbWU9MDcvMjMvMjAyNiAwMjowNDoyMSBQTSZoYXNoX3ZhbHVlPTZmay9ZOGZZZXppR05WTkRzcUlVaFE9PSZ2YWxpZG1pbnV0ZXM9NSZzdHJtX2xlbj0xMCZpZD13ZWItMzQ2NDI4",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/tsp5/playlist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F&referer=https://warpdooball.net/",
       drm:false
     }
   ]
@@ -306,7 +286,7 @@ const channels = [
   servers:[
     {
       name:"Main",
-      file:"https://flow.dooflixlive.com/dooflix_x1/truesport7/chunks.m3u8?nimblesessionid=8809920&wmsAuthSign=c2VydmVyX3RpbWU9MDcvMjMvMjAyNiAwMjozNzoyMCBQTSZoYXNoX3ZhbHVlPXFRc2dPc3I0cFFrZ3JsMVFXaUo4Zmc9PSZ2YWxpZG1pbnV0ZXM9NSZzdHJtX2xlbj0xMCZpZD13ZWItMzQ2NDI4",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.googlecdnforstreaming.live%2Flive%2Ftsp7%2Fplaylist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F",
       drm:false
     },
     {
@@ -344,30 +324,15 @@ const channels = [
   servers:[
     {
       name:"Main",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=http://tiea1.3bbddns.com:28470/12.m3u8",
-      drm:false
-    }
-  ]
-},
-{
-  name:"hbo-signature",
-  logo:"https://6395online.com:8443/logotv/movie/hbosignature.png",
-  group:"หนัง",
-  servers:[
-    {
-      name:"Main",
-      file:"https://cri-streamer1.cdn.3bbtv.com:8443/3bb/live/104/104.mpd",
+      file:"https://cri-streamer1.cdn.3bbtv.com:8443/3bb/live/107/107.mpd",
       drm:true,
-      keyId:"0db89bae851440a5994f5893ad480494",
-      key:"d88ef77eaedf4451a65be2e0bf6eabde"
+      keyId:"07b138f30ad3441ca5a2f476e550af25",
+      key:"826ee4deef4b45cfafd5f79a591b15c6"
     }
   ]
 },
-
-    
-
 {
-  name:"cinemax",
+  name:"CINEMAX",
   logo:"https://6395online.com:8443/logotv/movie/cinemax(2).png",
   group:"หนัง",
   servers:[
@@ -381,6 +346,7 @@ const channels = [
   ]
 },
 
+    
 {name:"TV5HD",logo:"https://6395online.com:8443/logotv/freetv/hd-ch5.png",file:"https://cri-streamer3.cdn.3bbtv.com:8443/3bb/live/5/5.mpd",keyId:"87db4361f7894655a4656e9c8b935a02",key:"b025a4b950df41158a87cfc8d6f2ac34",drm:true,group:"ดิจิตอล"},
 {name:"NBT",logo:"https://6395online.com:8443/logotv/freetv/sd-nbt.png",file:"https://cdn-edge.iiptvcdn.com/live_event/smil:f180-054a-38d7-ce66-f7cf.smil/playlist.m3u8",drm:false,group:"ดิจิตอล"},
 {name:"ThaiPBS",logo:"https://6395online.com:8443/logotv/freetv/hd-tpbs.png",file:"https://thaipbs-ophctt.cdn.byteark.com/live/playlist.m3u8",drm:false,group:"ดิจิตอล"},
@@ -418,101 +384,6 @@ let activeOriginalChannel = null;
 let activeElement = null;
 let activeUrl = "";
 let activeServerIndex = 0;
-let mpdDiagTimer = null;
-let mpdDiagLoadState = "IDLE";
-let mpdDiagLastError = "";
-let mpdDiagVisible = false;
-let deepDiagEvents = [];
-let deepDiagBoundVideo = null;
-let deepDiagLastFrameCount = 0;
-let deepDiagLastTime = 0;
-let deepDiagLastSampleAt = 0;
-let deepDiagFrameDelta = 0;
-let deepDiagTimeDelta = 0;
-let deepDiagEncryptedInfo = [];
-let deepDiagShakaEventsBound = false;
-let deepDiagLastKeyStatusText = "-";
-let v5PlayerTrace = [];
-let v5LastPlayerSnapshot = "";
-let v5LastVideoSnapshot = "";
-let v6SeekTrace = [];
-let v6PatchedCurrentTime = false;
-let v6PatchedFastSeek = false;
-let v6LastSeekEventAt = 0;
-let v6LastSeekFrom = 0;
-let v6LastSeekTo = 0;
-let v7MpdInfo = null;
-let v7MpdError = "";
-let v7MpdUrl = "";
-let v8TimelineBase = null;
-let v8Enabled = false;
-let v8RawTime = null;
-let v8NormalizedTime = null;
-let v8LogLines = [];
-let v81InitChannel = "";
-let v81InitCount = 0;
-let v9PatchApplied = false;
-let v9PatchBase = null;
-let v9PatchLog = [];
-let v9OriginalAST = "";
-let v9PatchedAST = "";
-let v92SegmentLog = [];
-let v92LiveEdgeLog = [];
-let v92LastSeekRange = "-";
-let v92LastPlayhead = "-";
-let v92LastBuffered = "-";
-let v92LastLiveEdge = "-";
-let v92LastPresentationStart = "-";
-let v92LastPresentationEnd = "-";
-let v93Applied = false;
-let v93Target = null;
-let v93Attempts = 0;
-let v93Log = [];
-let v93Timer = null;
-let v94VideoSegments = [];
-let v94AudioSegments = [];
-let v94OtherSegments = [];
-let v94VideoBytes = 0;
-let v94AudioBytes = 0;
-let v94VideoCount = 0;
-let v94AudioCount = 0;
-let v94LastFrames = 0;
-let v94LastDropped = 0;
-let v94LastVideoTrack = "-";
-let v94LastAudioTrack = "-";
-let v94DecoderState = "-";
-let v95RequestLog = [];
-let v95ResponseLog = [];
-let v95VideoReqCount = 0;
-let v95AudioReqCount = 0;
-let v95OtherReqCount = 0;
-let v95VideoRespCount = 0;
-let v95AudioRespCount = 0;
-let v95OtherRespCount = 0;
-let v95VideoInitCount = 0;
-let v95VideoMediaCount = 0;
-let v95AudioInitCount = 0;
-let v95AudioMediaCount = 0;
-let v95LastVideoUri = "-";
-let v95LastAudioUri = "-";
-let v96BoxLog = [];
-let v96InitLikeCount = 0;
-let v96MediaLikeCount = 0;
-let v96UnknownBoxCount = 0;
-let v96LastBoxSummary = "-";
-let v96LastInitUri = "-";
-let v96LastMediaUri = "-";
-
-
-
-
-
-
-
-
-
-
-
 
 function setStatus(text, autoHide=true){
   const box = document.getElementById("status");
@@ -590,51 +461,8 @@ function openMX(url){
   }
 }
 
-
-function isExternalGatewayUrl(url){
-  if(!url) return false;
-
-  let value = String(url).trim().toLowerCase();
-
-  // ถ้าเป็น Worker ของ TIEA ให้ตรวจ URL ต้นทางที่อยู่ในพารามิเตอร์ url
-  try{
-    const parsed = new URL(value);
-    const nested = parsed.searchParams.get("url");
-    if(nested){
-      try{
-        value = decodeURIComponent(nested).toLowerCase();
-      }catch(e){
-        value = nested.toLowerCase();
-      }
-    }
-  }catch(e){}
-
-  return (
-    value.includes("play/live.php") ||
-    value.includes("mac=") ||
-    value.includes(":2095/") ||
-    value.includes("lookontv.") ||
-    value.includes("ultratv.")
-  );
-}
-
-function openExternalGateway(url){
-  if(!url) return;
-
-  const gatewayUrl = new URL("external.html", window.location.href);
-  gatewayUrl.searchParams.set("url", url);
-
-  try{
-    sessionStorage.setItem("TIEA_EXTERNAL_RETURN", window.location.href);
-  }catch(e){}
-
-  // ใช้แท็บเดิม ไม่ใช้ window.open
-  window.location.assign(gatewayUrl.href);
-}
-
 async function stopAllPlayers(){
   const video = document.getElementById("html5-player");
-
 
   if(hlsWatchdog){
     clearInterval(hlsWatchdog);
@@ -692,81 +520,6 @@ function firstChannelUrl(channel){
 async function loadChannel(channel, element){
   activeOriginalChannel = channel;
   activeServerIndex = 0;
-  deepDiagEvents = [];
-  deepDiagLastFrameCount = 0;
-  deepDiagLastTime = 0;
-  deepDiagLastSampleAt = 0;
-  deepDiagFrameDelta = 0;
-  deepDiagTimeDelta = 0;
-  deepDiagEncryptedInfo = [];
-  deepDiagShakaEventsBound = false;
-  deepDiagLastKeyStatusText = "-";
-  v5PlayerTrace = [];
-  v5LastPlayerSnapshot = "";
-  v5LastVideoSnapshot = "";
-  v6SeekTrace = [];
-  v6LastSeekEventAt = 0;
-  v6LastSeekFrom = 0;
-  v6LastSeekTo = 0;
-  v7MpdInfo = null;
-  v7MpdError = "";
-  v7MpdUrl = "";
-  v8TimelineBase=null;
-  v8Enabled=false;
-  v8RawTime=null;
-  v8NormalizedTime=null;
-  v8LogLines=[];
-  v9PatchApplied = false;
-  v9PatchBase = null;
-  v9PatchLog = [];
-  v9OriginalAST = "";
-  v9PatchedAST = "";
-  v92SegmentLog = [];
-  v92LiveEdgeLog = [];
-  v92LastSeekRange = "-";
-  v92LastPlayhead = "-";
-  v92LastBuffered = "-";
-  v92LastLiveEdge = "-";
-  v92LastPresentationStart = "-";
-  v92LastPresentationEnd = "-";
-  v93Applied = false;
-  v93Target = null;
-  v93Attempts = 0;
-  v93Log = [];
-  v94VideoSegments = [];
-  v94AudioSegments = [];
-  v94OtherSegments = [];
-  v94VideoBytes = 0;
-  v94AudioBytes = 0;
-  v94VideoCount = 0;
-  v94AudioCount = 0;
-  v94LastFrames = 0;
-  v94LastDropped = 0;
-  v94LastVideoTrack = "-";
-  v94LastAudioTrack = "-";
-  v94DecoderState = "-";
-  v95RequestLog = [];
-  v95ResponseLog = [];
-  v95VideoReqCount = 0;
-  v95AudioReqCount = 0;
-  v95OtherReqCount = 0;
-  v95VideoRespCount = 0;
-  v95AudioRespCount = 0;
-  v95OtherRespCount = 0;
-  v95VideoInitCount = 0;
-  v95VideoMediaCount = 0;
-  v95AudioInitCount = 0;
-  v95AudioMediaCount = 0;
-  v95LastVideoUri = "-";
-  v95LastAudioUri = "-";
-  v96BoxLog = [];
-  v96InitLikeCount = 0;
-  v96MediaLikeCount = 0;
-  v96UnknownBoxCount = 0;
-  v96LastBoxSummary = "-";
-  v96LastInitUri = "-";
-  v96LastMediaUri = "-";
-  if(v93Timer){ clearInterval(v93Timer); v93Timer = null; }
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -774,17 +527,8 @@ async function loadChannel(channel, element){
     return;
   }
 
-  // ตรวจลิงก์อัตโนมัติ: MAC / :2095 / play/live.php / LookOnTV / UltraTV
-  if(isExternalGatewayUrl(resolvedChannel.file)){
-    openExternalGateway(resolvedChannel.file);
-    return;
-  }
-
   activeChannel = resolvedChannel;
   activeElement = element;
-
-  // V8.1: DIAG no longer depends on opening CINEMAX first.
-  setTimeout(()=>v81AutoInitDiagnostic(activeChannel), 30);
 
   document.querySelectorAll(".channel").forEach(ch=>ch.classList.remove("active"));
   if(element) element.classList.add("active");
@@ -808,1548 +552,12 @@ async function loadChannel(channel, element){
   },300);
 }
 
-
-
-
-function diagEscape(value){
-  return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;");
-}
-
-function pushDeepDiagEvent(name, detail=""){
-  const stamp = new Date().toLocaleTimeString();
-  deepDiagEvents.push(`${stamp} ${name}${detail ? " | " + detail : ""}`);
-  if(deepDiagEvents.length > 12) deepDiagEvents.splice(0, deepDiagEvents.length - 12);
-}
-
-function bindDeepDiagEvents(){
-  const video = document.getElementById("html5-player");
-  if(!video || deepDiagBoundVideo === video) return;
-  deepDiagBoundVideo = video;
-
-  [
-    "loadstart","loadedmetadata","loadeddata","canplay","canplaythrough",
-    "play","playing","pause","waiting","stalled","suspend","seeking","seeked",
-    "emptied","ended","error"
-  ].forEach(name=>{
-    video.addEventListener(name, ()=>{
-      let detail = "";
-      if(name === "error" && video.error){
-        detail = `code=${video.error.code} message=${video.error.message || ""}`;
-      }else{
-        detail = `t=${Number(video.currentTime||0).toFixed(1)} ready=${video.readyState} net=${video.networkState}`;
-      }
-      pushDeepDiagEvent(name.toUpperCase(), detail);
-    });
-  });
-
-  video.addEventListener("encrypted", (ev)=>{
-    let len = 0, head = "-";
-    try{
-      len = ev.initData ? ev.initData.byteLength : 0;
-      if(ev.initData){
-        const bytes = new Uint8Array(ev.initData).slice(0,16);
-        head = Array.from(bytes).map(b=>b.toString(16).padStart(2,"0")).join("");
-      }
-    }catch(e){}
-    const info = {type:ev.initDataType || "unknown", length:len, head};
-    deepDiagEncryptedInfo.push(info);
-    if(deepDiagEncryptedInfo.length > 8) deepDiagEncryptedInfo.shift();
-    pushDeepDiagEvent(
-      "ENCRYPTED",
-      `type=${info.type} bytes=${info.length} head=${info.head} mediaKeys=${video.mediaKeys ? "YES" : "NO"}`
-    );
-  });
-}
-
-function toggleMpdDiagnostic(force){
-  const panel = document.getElementById("mpd-diagnostic");
-  if(!panel) return;
-
-  // V8.1: initialize from the current channel even if this is the
-  // very first channel opened after page load.
-  try{ v81AutoInitDiagnostic(activeChannel); }catch(e){}
-
-  mpdDiagVisible = typeof force === "boolean" ? force : !mpdDiagVisible;
-  panel.style.display = mpdDiagVisible ? "block" : "none";
-
-  if(mpdDiagVisible){
-    try{ bindDeepDiagEvents(); }catch(e){}
-    try{ bindDeepShakaEvents(); }catch(e){}
-    try{ v6BindSeekEvents(); }catch(e){}
-    renderMpdDiagnostic();
-    if(!mpdDiagTimer) mpdDiagTimer = setInterval(renderMpdDiagnostic, 1000);
-  }else if(mpdDiagTimer){
-    clearInterval(mpdDiagTimer);
-    mpdDiagTimer = null;
-  }
-}
-
-function getDecodedFrames(video){
-  try{
-    if(video && typeof video.getVideoPlaybackQuality === "function"){
-      const q = video.getVideoPlaybackQuality();
-      return {
-        total: Number(q.totalVideoFrames || 0),
-        dropped: Number(q.droppedVideoFrames || 0),
-        corrupted: Number(q.corruptedVideoFrames || 0)
-      };
-    }
-  }catch(e){}
-  return {
-    total: Number(video?.webkitDecodedFrameCount || 0),
-    dropped: Number(video?.webkitDroppedFrameCount || 0),
-    corrupted: 0
-  };
-}
-
-function getBufferedSummary(video){
-  const ranges = [];
-  try{
-    for(let i=0;i<video.buffered.length;i++){
-      ranges.push(`${video.buffered.start(i).toFixed(1)}-${video.buffered.end(i).toFixed(1)}`);
-    }
-  }catch(e){}
-  return ranges.length ? ranges.join(", ") : "-";
-}
-
-function mediaErrorText(video){
-  if(!video || !video.error) return "-";
-  const map = {
-    1:"MEDIA_ERR_ABORTED",
-    2:"MEDIA_ERR_NETWORK",
-    3:"MEDIA_ERR_DECODE",
-    4:"MEDIA_ERR_SRC_NOT_SUPPORTED"
-  };
-  return `${map[video.error.code] || "MEDIA_ERROR"} (${video.error.code}) ${video.error.message || ""}`.trim();
-}
-
-
-function bindDeepShakaEvents(){
-  if(!shakaPlayer || deepDiagShakaEventsBound) return;
-  deepDiagShakaEventsBound = true;
-
-  ["adaptation","variantchanged","trackschanged","buffering","streaming","error"].forEach(name=>{
-    try{
-      shakaPlayer.addEventListener(name, (ev)=>{
-        let detail = "";
-        try{
-          if(name === "buffering"){
-            detail = `buffering=${String(ev.buffering)}`;
-          }else if(name === "error"){
-            const d = ev.detail || {};
-            detail = `code=${d.code || "-"} severity=${d.severity || "-"} category=${d.category || "-"}`;
-          }else{
-            const tracks = shakaPlayer.getVariantTracks ? shakaPlayer.getVariantTracks() : [];
-            const active = tracks.find(t=>t.active);
-            if(active){
-              detail = `id=${active.id} bw=${Math.round((active.bandwidth||0)/1000)}kbps ${active.width||0}x${active.height||0} fps=${active.frameRate||"-"}`;
-            }
-          }
-        }catch(e){}
-        pushDeepDiagEvent("SHAKA "+name.toUpperCase(), detail);
-      });
-    }catch(e){}
-  });
-}
-
-function readKeyStatuses(){
-  try{
-    if(shakaPlayer && typeof shakaPlayer.getKeyStatuses === "function"){
-      const statuses = shakaPlayer.getKeyStatuses();
-      const parts = [];
-      if(statuses && typeof statuses.forEach === "function"){
-        statuses.forEach((status,keyId)=>{
-          parts.push(`${String(keyId)}:${status}`);
-        });
-      }
-      if(parts.length) deepDiagLastKeyStatusText = parts.join(" | ");
-    }
-  }catch(e){}
-  return deepDiagLastKeyStatusText || "-";
-}
-
-function readDrmInfo(){
-  try{
-    if(shakaPlayer && typeof shakaPlayer.getDrmInfo === "function"){
-      const info = shakaPlayer.getDrmInfo();
-      if(info){
-        return {
-          keySystem: info.keySystem || "-",
-          licenseServerUri: info.licenseServerUri || "-",
-          videoRobustness: info.videoRobustness || "-",
-          audioRobustness: info.audioRobustness || "-"
-        };
-      }
-    }
-  }catch(e){}
-  return null;
-}
-
-
-function v5PlayerIdentity(){
-  try{
-    if(!shakaPlayer) return "NONE";
-    const tracks = shakaPlayer.getVariantTracks ? shakaPlayer.getVariantTracks() : [];
-    const active = tracks.find(t=>t.active);
-    const video = document.getElementById("html5-player");
-    return `tracks=${tracks.length} active=${active?.id ?? "-"} mediaKeys=${video?.mediaKeys ? "YES":"NO"}`;
-  }catch(e){ return "ERROR " + (e?.message || String(e)); }
-}
-
-function v5CaptureTrace(){
-  const video = document.getElementById("html5-player");
-  if(!video) return;
-  const ps = v5PlayerIdentity();
-  const vs = `ready=${video.readyState} net=${video.networkState} paused=${video.paused} seeking=${video.seeking} t=${Number(video.currentTime||0).toFixed(1)} size=${video.videoWidth||0}x${video.videoHeight||0} mediaKeys=${video.mediaKeys?"YES":"NO"}`;
-  if(ps !== v5LastPlayerSnapshot){
-    v5PlayerTrace.push(`${new Date().toLocaleTimeString()} PLAYER ${ps}`);
-    v5LastPlayerSnapshot = ps;
-  }
-  if(vs !== v5LastVideoSnapshot){
-    v5PlayerTrace.push(`${new Date().toLocaleTimeString()} VIDEO ${vs}`);
-    v5LastVideoSnapshot = vs;
-  }
-  if(v5PlayerTrace.length > 16) v5PlayerTrace.splice(0, v5PlayerTrace.length - 16);
-}
-
-function v5ActiveTrackSummary(){
-  try{
-    if(!shakaPlayer || !shakaPlayer.getVariantTracks) return "-";
-    const t = shakaPlayer.getVariantTracks().find(x=>x.active);
-    if(!t) return "NO ACTIVE VARIANT";
-    return `id=${t.id ?? "-"} bw=${Math.round((t.bandwidth||0)/1000)}kbps video=${t.videoCodec||"-"} audio=${t.audioCodec||"-"} size=${t.width||0}x${t.height||0} fps=${t.frameRate||"-"} app=${t.allowedByApplication!==false?"Y":"N"} key=${t.allowedByKeySystem!==false?"Y":"N"}`;
-  }catch(e){ return "ERROR " + (e?.message || String(e)); }
-}
-
-function v5AllVariantsSummary(){
-  try{
-    if(!shakaPlayer || !shakaPlayer.getVariantTracks) return "-";
-    return shakaPlayer.getVariantTracks().map(t =>
-      `id=${t.id} ${t.active?"ACTIVE":"idle"} ${t.width||0}x${t.height||0} fps=${t.frameRate||"-"} bw=${Math.round((t.bandwidth||0)/1000)}k v=${t.videoCodec||"-"} a=${t.audioCodec||"-"} app=${t.allowedByApplication!==false?"Y":"N"} key=${t.allowedByKeySystem!==false?"Y":"N"}`
-    ).join("\n");
-  }catch(e){ return "ERROR " + (e?.message || String(e)); }
-}
-
-
-function v6PushSeekTrace(type, detail=""){
-  const stamp = new Date().toLocaleTimeString();
-  v6SeekTrace.push(`${stamp} ${type}${detail ? " | " + detail : ""}`);
-  if(v6SeekTrace.length > 24){
-    v6SeekTrace.splice(0, v6SeekTrace.length - 24);
-  }
-}
-
-function v6ShortStack(){
-  try{
-    const lines = String(new Error().stack || "").split("\n").slice(2,7);
-    return lines.map(x=>x.trim()).join(" <- ");
-  }catch(e){
-    return "-";
-  }
-}
-
-function v6PatchMediaSeeking(){
-  if(v6PatchedCurrentTime) return;
-  v6PatchedCurrentTime = true;
-
-  try{
-    const proto = HTMLMediaElement.prototype;
-    const desc = Object.getOwnPropertyDescriptor(proto, "currentTime");
-    if(desc && desc.get && desc.set){
-      Object.defineProperty(proto, "currentTime", {
-        configurable: desc.configurable,
-        enumerable: desc.enumerable,
-        get: function(){
-          return desc.get.call(this);
-        },
-        set: function(value){
-          const video = document.getElementById("html5-player");
-          if(this === video){
-            let before = 0;
-            try{ before = desc.get.call(this); }catch(e){}
-            const after = Number(value);
-            v6LastSeekFrom = Number(before || 0);
-            v6LastSeekTo = Number(after || 0);
-            v6PushSeekTrace(
-              "SET currentTime",
-              `${v6LastSeekFrom.toFixed(3)} -> ${v6LastSeekTo.toFixed(3)} | ${v6ShortStack()}`
-            );
-          }
-          return desc.set.call(this, value);
-        }
-      });
-    }
-  }catch(e){
-    v6PushSeekTrace("PATCH currentTime ERROR", e?.message || String(e));
-  }
-
-  try{
-    const proto = HTMLMediaElement.prototype;
-    if(typeof proto.fastSeek === "function" && !v6PatchedFastSeek){
-      const originalFastSeek = proto.fastSeek;
-      proto.fastSeek = function(value){
-        const video = document.getElementById("html5-player");
-        if(this === video){
-          let before = 0;
-          try{ before = this.currentTime || 0; }catch(e){}
-          v6PushSeekTrace(
-            "fastSeek",
-            `${Number(before).toFixed(3)} -> ${Number(value).toFixed(3)} | ${v6ShortStack()}`
-          );
-        }
-        return originalFastSeek.call(this, value);
-      };
-      v6PatchedFastSeek = true;
-    }
-  }catch(e){
-    v6PushSeekTrace("PATCH fastSeek ERROR", e?.message || String(e));
-  }
-}
-
-function v6BindSeekEvents(){
-  const video = document.getElementById("html5-player");
-  if(!video || video.dataset.v6SeekBound === "1") return;
-  video.dataset.v6SeekBound = "1";
-
-  video.addEventListener("seeking", ()=>{
-    const now = performance.now();
-    const delta = v6LastSeekEventAt ? Math.round(now - v6LastSeekEventAt) : 0;
-    v6LastSeekEventAt = now;
-    v6PushSeekTrace(
-      "SEEKING EVENT",
-      `t=${Number(video.currentTime||0).toFixed(3)} ready=${video.readyState} net=${video.networkState} Δ=${delta}ms`
-    );
-  });
-
-  video.addEventListener("seeked", ()=>{
-    v6PushSeekTrace(
-      "SEEKED EVENT",
-      `t=${Number(video.currentTime||0).toFixed(3)} ready=${video.readyState} net=${video.networkState}`
-    );
-  });
-
-  video.addEventListener("timeupdate", ()=>{
-    if(video.seeking){
-      v6PushSeekTrace(
-        "TIMEUPDATE while seeking",
-        `t=${Number(video.currentTime||0).toFixed(3)}`
-      );
-    }
-  });
-}
-
-function v6TimelineSnapshot(){
-  const video = document.getElementById("html5-player");
-  if(!video) return "-";
-
-  let seekable = "-";
-  try{
-    const arr = [];
-    for(let i=0;i<video.seekable.length;i++){
-      arr.push(`${video.seekable.start(i).toFixed(1)}-${video.seekable.end(i).toFixed(1)}`);
-    }
-    seekable = arr.length ? arr.join(", ") : "-";
-  }catch(e){}
-
-  let buffered = "-";
-  try{
-    const arr = [];
-    for(let i=0;i<video.buffered.length;i++){
-      arr.push(`${video.buffered.start(i).toFixed(1)}-${video.buffered.end(i).toFixed(1)}`);
-    }
-    buffered = arr.length ? arr.join(", ") : "-";
-  }catch(e){}
-
-  return [
-    `current=${Number(video.currentTime||0).toFixed(3)}`,
-    `duration=${Number.isFinite(video.duration) ? video.duration.toFixed(3) : String(video.duration)}`,
-    `seeking=${video.seeking}`,
-    `seekable=${seekable}`,
-    `buffered=${buffered}`
-  ].join(" | ");
-}
-
-v6PatchMediaSeeking();
-
-function v7Attr(node,name){
-  return node ? node.getAttribute(name) : null;
-}
-
-function v7SegmentTimelineSummary(doc){
-  try{
-    const st = doc.querySelector("SegmentTimeline");
-    if(!st) return "-";
-    const rows = Array.from(st.querySelectorAll("S")).slice(0,10).map((s,i)=>
-      `S${i+1}: t=${s.getAttribute("t")||"-"} d=${s.getAttribute("d")||"-"} r=${s.getAttribute("r")||"0"}`
-    );
-    return rows.length ? rows.join(" | ") : "-";
-  }catch(e){
-    return "ERROR " + (e?.message || String(e));
-  }
-}
-
-function v7RepresentationSummary(doc){
-  try{
-    const reps = Array.from(doc.querySelectorAll("Representation")).slice(0,10);
-    if(!reps.length) return "-";
-    return reps.map((r,i)=>{
-      const p = r.parentElement;
-      return `#${i+1} id=${v7Attr(r,"id")||"-"} bw=${v7Attr(r,"bandwidth")||"-"} codecs=${v7Attr(r,"codecs")||v7Attr(p,"codecs")||"-"} mime=${v7Attr(r,"mimeType")||v7Attr(p,"mimeType")||"-"} size=${v7Attr(r,"width")||"-"}x${v7Attr(r,"height")||"-"}`;
-    }).join(" | ");
-  }catch(e){
-    return "ERROR " + (e?.message || String(e));
-  }
-}
-
-function v7ComputeInfo(doc){
-  const mpd = doc.documentElement;
-  const period = doc.querySelector("Period");
-  const st = doc.querySelector("SegmentTemplate");
-  const sNodes = Array.from(doc.querySelectorAll("SegmentTimeline S"));
-  const firstS = sNodes[0] || null;
-  const lastS = sNodes[sNodes.length-1] || null;
-
-  const timescale = st ? (v7Attr(st,"timescale") || "-") : "-";
-  const pto = st ? (v7Attr(st,"presentationTimeOffset") || "-") : "-";
-  const firstT = firstS ? (v7Attr(firstS,"t") || "-") : "-";
-
-  let computedFirstSec = "-";
-  try{
-    const ts = Number(timescale);
-    const t = Number(firstT);
-    const p = Number(pto);
-    if(Number.isFinite(ts) && ts > 0 && Number.isFinite(t)){
-      computedFirstSec = ((t - (Number.isFinite(p)?p:0))/ts).toFixed(3);
-    }
-  }catch(e){}
-
-  return {
-    type: v7Attr(mpd,"type") || "-",
-    availabilityStartTime: v7Attr(mpd,"availabilityStartTime") || "-",
-    publishTime: v7Attr(mpd,"publishTime") || "-",
-    minimumUpdatePeriod: v7Attr(mpd,"minimumUpdatePeriod") || "-",
-    timeShiftBufferDepth: v7Attr(mpd,"timeShiftBufferDepth") || "-",
-    suggestedPresentationDelay: v7Attr(mpd,"suggestedPresentationDelay") || "-",
-    mediaPresentationDuration: v7Attr(mpd,"mediaPresentationDuration") || "-",
-    periodStart: v7Attr(period,"start") || "-",
-    periodDuration: v7Attr(period,"duration") || "-",
-    timescale,
-    presentationTimeOffset: pto,
-    startNumber: st ? (v7Attr(st,"startNumber") || "-") : "-",
-    duration: st ? (v7Attr(st,"duration") || "-") : "-",
-    firstT,
-    firstD: firstS ? (v7Attr(firstS,"d") || "-") : "-",
-    lastT: lastS ? (v7Attr(lastS,"t") || "-") : "-",
-    lastD: lastS ? (v7Attr(lastS,"d") || "-") : "-",
-    lastR: lastS ? (v7Attr(lastS,"r") || "0") : "-",
-    computedFirstSec,
-    timeline: v7SegmentTimelineSummary(doc),
-    representations: v7RepresentationSummary(doc)
-  };
-}
-
-async function v7InspectMpd(url){
-  v7MpdUrl = url || "";
-  v7MpdInfo = null;
-  v7MpdError = "";
-
-  if(!url || !String(url).includes(".mpd")) return;
-
-  try{
-    const res = await fetch(url,{cache:"no-store"});
-    const text = await res.text();
-    if(!res.ok){
-      v7MpdError = `HTTP ${res.status}`;
-      return;
-    }
-
-    const doc = new DOMParser().parseFromString(text,"application/xml");
-    if(doc.querySelector("parsererror")){
-      v7MpdError = "XML PARSE ERROR";
-      return;
-    }
-    v7MpdInfo = v7ComputeInfo(doc);
-    v8CalcBase();
-  }catch(e){
-    v7MpdError = e?.message || String(e);
-  }
-}
-
-function v7MpdSummary(){
-  if(v7MpdError) return "ERROR: " + v7MpdError;
-  if(!v7MpdInfo) return "ยังไม่มีข้อมูล";
-  const x = v7MpdInfo;
-  return [
-    `type=${x.type}`,
-    `AST=${x.availabilityStartTime}`,
-    `publish=${x.publishTime}`,
-    `MUP=${x.minimumUpdatePeriod}`,
-    `TSBD=${x.timeShiftBufferDepth}`,
-    `SPD=${x.suggestedPresentationDelay}`,
-    `MPDdur=${x.mediaPresentationDuration}`,
-    `PeriodStart=${x.periodStart}`,
-    `PeriodDur=${x.periodDuration}`,
-    `timescale=${x.timescale}`,
-    `PTO=${x.presentationTimeOffset}`,
-    `startNumber=${x.startNumber}`,
-    `duration=${x.duration}`,
-    `firstT=${x.firstT}`,
-    `firstD=${x.firstD}`,
-    `lastT=${x.lastT}`,
-    `lastD=${x.lastD}`,
-    `lastR=${x.lastR}`,
-    `computedFirstSec=${x.computedFirstSec}`
-  ].join(" | ");
-}
-
-function v8Log(msg){
-  const t=new Date().toLocaleTimeString("th-TH",{hour12:false});
-  v8LogLines.push(`${t} ${msg}`);
-  if(v8LogLines.length>80)v8LogLines.shift();
-}
-function v8CalcBase(){
-  v8TimelineBase=null;
-  if(!v7MpdInfo)return;
-  const ts=Number(v7MpdInfo.timescale);
-  const ft=Number(v7MpdInfo.firstT);
-  const pto=Number(v7MpdInfo.presentationTimeOffset);
-  if(Number.isFinite(ts)&&ts>0&&Number.isFinite(ft)){
-    v8TimelineBase=(ft-(Number.isFinite(pto)?pto:0))/ts;
-  }
-}
-function v8IsTestChannel(channel){
-  if(!channel)return false;
-  if(String(channel.name||"").toLowerCase()==="cinemax")return false;
-  return Number.isFinite(v8TimelineBase)&&v8TimelineBase>100000;
-}
-function v8Observe(channel){
-  const video=document.getElementById("html5-player");
-  if(!video)return;
-  v8CalcBase();
-  v8Enabled=v8IsTestChannel(channel);
-  v8Log(`${v8Enabled?"ARM":"BYPASS"} channel=${channel?.name||"-"} base=${Number.isFinite(v8TimelineBase)?v8TimelineBase.toFixed(3):"-"}`);
-  const sample=()=>{
-    const raw=Number(video.currentTime);
-    if(!Number.isFinite(raw))return;
-    v8RawTime=raw;
-    v8NormalizedTime=Number.isFinite(v8TimelineBase)?raw-v8TimelineBase:null;
-  };
-  ["loadedmetadata","durationchange","progress","canplay","playing","seeking","seeked","timeupdate"].forEach(ev=>video.addEventListener(ev,sample));
-  sample();
-}
-function v8Summary(){
-  return `enabled=${v8Enabled?"YES":"NO"} | base=${Number.isFinite(v8TimelineBase)?v8TimelineBase.toFixed(3):"-"} | raw=${Number.isFinite(v8RawTime)?v8RawTime.toFixed(3):"-"} | normalized=${Number.isFinite(v8NormalizedTime)?v8NormalizedTime.toFixed(3):"-"}`;
-}
-
-function v81AutoInitDiagnostic(channel){
-  const video = document.getElementById("html5-player");
-  if(!video) return;
-
-  v81InitChannel = String(channel?.name || activeChannel?.name || "-");
-  v81InitCount++;
-
-  // Reset the binding reference so the first-open channel is always bound.
-  deepDiagBoundVideo = null;
-
-  try{ bindDeepDiagEvents(); }catch(e){}
-  try{ bindDeepShakaEvents(); }catch(e){}
-  try{ v6BindSeekEvents(); }catch(e){}
-
-  // Refresh several times because Shaka/MPD state arrives asynchronously.
-  [0,100,250,500,900,1500,2500].forEach(ms=>{
-    setTimeout(()=>{
-      try{
-        v8CalcBase();
-        renderMpdDiagnostic();
-      }catch(e){}
-    },ms);
-  });
-
-  try{
-    v8Log(`AUTO INIT channel=${v81InitChannel} count=${v81InitCount}`);
-  }catch(e){}
-}
-
-
-function v9Log(msg){
-  const t = new Date().toLocaleTimeString("th-TH",{hour12:false});
-  v9PatchLog.push(`${t} ${msg}`);
-  if(v9PatchLog.length > 80) v9PatchLog.shift();
-}
-
-function v9ShiftIsoTime(iso, seconds){
-  try{
-    const d = new Date(iso);
-    if(!Number.isFinite(d.getTime())) return iso;
-    return new Date(d.getTime() + seconds*1000).toISOString();
-  }catch(e){
-    return iso;
-  }
-}
-
-function v9ShouldPatchChannel(channel){
-  if(!channel) return false;
-  const name = String(channel.name || "").toLowerCase();
-
-  // Reference channel must never be touched.
-  if(name === "cinemax") return false;
-
-  const url = String(channel.file || "");
-  return url.includes(".mpd");
-}
-
-function v9NormalizeManifestText(text, channel){
-  v9PatchApplied = false;
-  v9PatchBase = null;
-  v9OriginalAST = "";
-  v9PatchedAST = "";
-
-  if(!v9ShouldPatchChannel(channel)) return text;
-
-  try{
-    const doc = new DOMParser().parseFromString(text, "application/xml");
-    if(doc.querySelector("parsererror")) return text;
-
-    const mpd = doc.documentElement;
-    if(!mpd || mpd.nodeName.toLowerCase() !== "mpd") return text;
-
-    const type = mpd.getAttribute("type") || "";
-    if(type.toLowerCase() !== "dynamic") return text;
-
-    const templates = Array.from(doc.querySelectorAll("SegmentTemplate"));
-    if(!templates.length) return text;
-
-    let detectedBase = null;
-
-    for(const st of templates){
-      const timescale = Number(st.getAttribute("timescale") || "1");
-      const timeline = st.querySelector("SegmentTimeline");
-      const firstS = timeline ? timeline.querySelector("S") : null;
-      if(!firstS || !Number.isFinite(timescale) || timescale <= 0) continue;
-
-      const firstT = Number(firstS.getAttribute("t"));
-      if(!Number.isFinite(firstT)) continue;
-
-      const existingPto = Number(st.getAttribute("presentationTimeOffset") || "0");
-      const base = (firstT - (Number.isFinite(existingPto) ? existingPto : 0)) / timescale;
-
-      // Only abnormal huge timelines are candidates.
-      if(base <= 100000) continue;
-
-      if(detectedBase === null) detectedBase = base;
-
-      // Normalize segment presentation time to start near 0.
-      st.setAttribute("presentationTimeOffset", String(firstT));
-    }
-
-    if(!Number.isFinite(detectedBase) || detectedBase <= 100000){
-      return text;
-    }
-
-    v9PatchBase = detectedBase;
-
-    // Keep live-edge math aligned after applying PTO.
-    const ast = mpd.getAttribute("availabilityStartTime");
-    if(ast){
-      v9OriginalAST = ast;
-      const shifted = v9ShiftIsoTime(ast, detectedBase);
-      mpd.setAttribute("availabilityStartTime", shifted);
-      v9PatchedAST = shifted;
-    }
-
-    v9PatchApplied = true;
-    v9Log(
-      `PATCH channel=${channel?.name||"-"} base=${detectedBase.toFixed(3)} ` +
-      `AST=${v9OriginalAST || "-"} -> ${v9PatchedAST || "-"}`
-    );
-
-    return new XMLSerializer().serializeToString(doc);
-  }catch(e){
-    v9Log(`PATCH ERROR ${e?.message || String(e)}`);
-    return text;
-  }
-}
-
-function v9InstallManifestResponseFilter(player, channel){
-  if(!player || !player.getNetworkingEngine) return;
-
-  const net = player.getNetworkingEngine();
-  if(!net || !net.registerResponseFilter) return;
-
-  const filter = (type, response)=>{
-    try{
-      const ManifestType = shaka.net.NetworkingEngine.RequestType.MANIFEST;
-      if(type !== ManifestType) return;
-      if(!response || !response.data) return;
-
-      const decoder = new TextDecoder("utf-8");
-      const encoder = new TextEncoder();
-      const original = decoder.decode(response.data);
-      const patched = v9NormalizeManifestText(original, channel);
-
-      if(v9PatchApplied && patched !== original){
-        response.data = encoder.encode(patched).buffer;
-        v9Log(`MANIFEST RESPONSE NORMALIZED uri=${response.uri || "-"}`);
-      }else{
-        v9Log(`MANIFEST BYPASS channel=${channel?.name||"-"}`);
-      }
-    }catch(e){
-      v9Log(`FILTER ERROR ${e?.message || String(e)}`);
-    }
-  };
-
-  net.registerResponseFilter(filter);
-}
-
-function v9Summary(){
-  return [
-    `applied=${v9PatchApplied ? "YES":"NO"}`,
-    `base=${Number.isFinite(v9PatchBase) ? v9PatchBase.toFixed(3) : "-"}`,
-    `ASTold=${v9OriginalAST || "-"}`,
-    `ASTnew=${v9PatchedAST || "-"}`
-  ].join(" | ");
-}
-
-function v92Push(list, text, max=30){
-  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
-  list.push(`${stamp} ${text}`);
-  if(list.length > max) list.splice(0, list.length-max);
-}
-
-function v92RangeSummary(ranges){
-  try{
-    const out = [];
-    for(let i=0;i<ranges.length;i++){
-      out.push(`${ranges.start(i).toFixed(3)}-${ranges.end(i).toFixed(3)}`);
-    }
-    return out.length ? out.join(", ") : "-";
-  }catch(e){
-    return "-";
-  }
-}
-
-function v92CapturePlaybackWindow(){
-  const video = document.getElementById("html5-player");
-  if(!video) return;
-
-  v92LastPlayhead = Number.isFinite(video.currentTime) ? video.currentTime.toFixed(3) : "-";
-  v92LastSeekRange = v92RangeSummary(video.seekable);
-  v92LastBuffered = v92RangeSummary(video.buffered);
-
-  try{
-    if(shakaPlayer && typeof shakaPlayer.seekRange === "function"){
-      const r = shakaPlayer.seekRange();
-      if(r){
-        v92LastPresentationStart = Number.isFinite(r.start) ? r.start.toFixed(3) : "-";
-        v92LastPresentationEnd = Number.isFinite(r.end) ? r.end.toFixed(3) : "-";
-        v92LastLiveEdge = v92LastPresentationEnd;
-      }
-    }
-  }catch(e){}
-
-  v92Push(
-    v92LiveEdgeLog,
-    `playhead=${v92LastPlayhead} seekable=${v92LastSeekRange} buffered=${v92LastBuffered} shakaRange=${v92LastPresentationStart}-${v92LastPresentationEnd}`,
-    20
-  );
-}
-
-function v92InstallSegmentTrace(player, channel){
-  if(!player || !player.getNetworkingEngine) return;
-  const net = player.getNetworkingEngine();
-  if(!net || !net.registerResponseFilter) return;
-
-  const filter = (type, response)=>{
-    try{
-      const RT = shaka.net.NetworkingEngine.RequestType;
-      if(type !== RT.SEGMENT) return;
-
-      const uri = response?.uri || "-";
-      const size = response?.data?.byteLength || 0;
-      v92Push(
-        v92SegmentLog,
-        `SEGMENT OK channel=${channel?.name||"-"} bytes=${size} uri=${uri}`,
-        24
-      );
-
-      setTimeout(v92CapturePlaybackWindow, 0);
-      setTimeout(()=>v93TryForceLiveEdge(channel), 0);
-    }catch(e){
-      v92Push(v92SegmentLog, `SEGMENT TRACE ERROR ${e?.message || String(e)}`, 24);
-    }
-  };
-
-  net.registerResponseFilter(filter);
-}
-
-function v92BindPlayerEvents(player){
-  if(!player || player.__v92Bound) return;
-  player.__v92Bound = true;
-
-  [
-    "buffering","adaptation","variantchanged","streaming",
-    "trackschanged","error"
-  ].forEach(name=>{
-    try{
-      player.addEventListener(name, ev=>{
-        let detail = "";
-        try{
-          if(name === "buffering"){
-            detail = `buffering=${String(ev.buffering)}`;
-          }else if(name === "error"){
-            const d = ev.detail || {};
-            detail = `code=${d.code||"-"} severity=${d.severity||"-"} category=${d.category||"-"}`;
-          }
-        }catch(e){}
-        v92Push(v92LiveEdgeLog, `SHAKA ${name.toUpperCase()} ${detail}`, 20);
-        setTimeout(v92CapturePlaybackWindow, 0);
-      });
-    }catch(e){}
-  });
-}
-
-function v92Summary(){
-  return [
-    `playhead=${v92LastPlayhead}`,
-    `seekable=${v92LastSeekRange}`,
-    `buffered=${v92LastBuffered}`,
-    `shakaStart=${v92LastPresentationStart}`,
-    `shakaEnd=${v92LastPresentationEnd}`,
-    `liveEdge=${v92LastLiveEdge}`
-  ].join(" | ");
-}
-
-function v93Push(msg){
-  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
-  v93Log.push(`${stamp} ${msg}`);
-  if(v93Log.length > 40) v93Log.splice(0, v93Log.length-40);
-}
-
-function v93ShouldForce(channel){
-  // V9.4: ปิด Force Live Edge ทั้งหมด
-  // เพื่อดู decoder/segment ตามธรรมชาติ โดยไม่ให้ seek ซ้ำรบกวนผล
-  return false;
-}
-
-function v93GetRange(){
-  try{
-    if(shakaPlayer && typeof shakaPlayer.seekRange === "function"){
-      const r = shakaPlayer.seekRange();
-      if(r && Number.isFinite(r.start) && Number.isFinite(r.end)){
-        return {start:r.start, end:r.end};
-      }
-    }
-  }catch(e){}
-  return null;
-}
-
-function v93TryForceLiveEdge(channel){
-  if(!v93ShouldForce(channel)) return;
-
-  const video = document.getElementById("html5-player");
-  if(!video) return;
-
-  const r = v93GetRange();
-  if(!r) {
-    v93Push("WAIT no Shaka seekRange");
-    return;
-  }
-
-  const span = r.end - r.start;
-  if(!(span > 0)) {
-    v93Push(`WAIT invalid range ${r.start}-${r.end}`);
-    return;
-  }
-
-  // Stay slightly behind the end to avoid landing on an incomplete live segment.
-  const backoff = Math.min(3, Math.max(1, span * 0.08));
-  const target = Math.max(r.start + 0.25, r.end - backoff);
-  const current = Number(video.currentTime || 0);
-
-  v93Attempts++;
-  v93Target = target;
-
-  const inRange = current >= r.start - 0.25 && current <= r.end + 0.25;
-  const frames = getDecodedFrames(video);
-
-  if(inRange && frames.total > 0){
-    v93Applied = true;
-    v93Push(`PASS current=${current.toFixed(3)} target=${target.toFixed(3)} frames=${frames.total}`);
-    return;
-  }
-
-  try{
-    video.currentTime = target;
-    v93Applied = true;
-    v93Push(
-      `FORCE ${current.toFixed(3)} -> ${target.toFixed(3)} ` +
-      `range=${r.start.toFixed(3)}-${r.end.toFixed(3)} ready=${video.readyState} frames=${frames.total}`
-    );
-
-    const p = video.play();
-    if(p && typeof p.catch === "function"){
-      p.catch(e=>v93Push(`PLAY ERROR ${e?.message || String(e)}`));
-    }
-  }catch(e){
-    v93Push(`FORCE ERROR ${e?.message || String(e)}`);
-  }
-}
-
-function v93Start(channel){
-  if(!v93ShouldForce(channel)){
-    v93Push(`BYPASS channel=${channel?.name||"-"}`);
-    return;
-  }
-
-  if(v93Timer){
-    clearInterval(v93Timer);
-    v93Timer = null;
-  }
-
-  v93Push(`ARM channel=${channel?.name||"-"}`);
-
-  [250,600,1000,1600,2400,3500,5000].forEach(ms=>{
-    setTimeout(()=>v93TryForceLiveEdge(channel), ms);
-  });
-
-  let ticks = 0;
-  v93Timer = setInterval(()=>{
-    ticks++;
-    v93TryForceLiveEdge(channel);
-    if(ticks >= 12){
-      clearInterval(v93Timer);
-      v93Timer = null;
-    }
-  },1000);
-}
-
-function v93Summary(){
-  return [
-    `applied=${v93Applied ? "YES":"NO"}`,
-    `target=${Number.isFinite(v93Target) ? v93Target.toFixed(3) : "-"}`,
-    `attempts=${v93Attempts}`
-  ].join(" | ");
-}
-
-function v94Push(list, text, max=18){
-  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
-  list.push(`${stamp} ${text}`);
-  if(list.length > max) list.splice(0, list.length-max);
-}
-
-function v94ClassifySegmentUri(uri){
-  const u = String(uri || "").toLowerCase();
-  if(
-    u.includes("/video/") ||
-    u.includes("video_") ||
-    u.includes("videoseg") ||
-    u.includes("track-video")
-  ) return "video";
-
-  if(
-    u.includes("/audio/") ||
-    u.includes("audio_") ||
-    u.includes("audioseg") ||
-    u.includes("track-audio")
-  ) return "audio";
-
-  return "other";
-}
-
-function v94CurrentTrackSummary(){
-  try{
-    if(!shakaPlayer || typeof shakaPlayer.getVariantTracks !== "function"){
-      return {video:"-", audio:"-"};
-    }
-    const tracks = shakaPlayer.getVariantTracks();
-    const active = tracks.find(t=>t.active);
-    if(!active) return {video:"NO ACTIVE", audio:"NO ACTIVE"};
-
-    return {
-      video: `id=${active.id ?? "-"} codec=${active.videoCodec || "-"} size=${active.width||0}x${active.height||0} fps=${active.frameRate||"-"} bw=${Math.round((active.bandwidth||0)/1000)}kbps`,
-      audio: `lang=${active.language || "-"} codec=${active.audioCodec || "-"} channels=${active.channelsCount || "-"}`
-    };
-  }catch(e){
-    return {video:"ERROR",audio:"ERROR"};
-  }
-}
-
-function v94CaptureDecoderState(){
-  const video = document.getElementById("html5-player");
-  if(!video) return;
-
-  const q = getDecodedFrames(video);
-  v94LastFrames = q.total;
-  v94LastDropped = q.dropped;
-
-  const t = v94CurrentTrackSummary();
-  v94LastVideoTrack = t.video;
-  v94LastAudioTrack = t.audio;
-
-  let state = "WAITING";
-  if(q.total > 0 && video.videoWidth > 0 && video.videoHeight > 0){
-    state = "VIDEO DECODING";
-  }else if(v94VideoCount > 0 && q.total === 0){
-    state = "VIDEO SEGMENTS ARRIVE / NO DECODED FRAMES";
-  }else if(v94VideoCount === 0 && v94AudioCount > 0){
-    state = "AUDIO ONLY SEGMENTS";
-  }else if(v94VideoCount === 0 && v94AudioCount === 0){
-    state = "NO MEDIA SEGMENTS";
-  }
-
-  v94DecoderState = state;
-}
-
-function v94InstallSegmentDecoderTrace(player, channel){
-  if(!player || !player.getNetworkingEngine) return;
-
-  const net = player.getNetworkingEngine();
-  if(!net || !net.registerResponseFilter) return;
-
-  const filter = (type, response)=>{
-    try{
-      const RT = shaka.net.NetworkingEngine.RequestType;
-      if(type !== RT.SEGMENT) return;
-
-      const uri = response?.uri || "-";
-      const bytes = Number(response?.data?.byteLength || 0);
-      const kind = v94ClassifySegmentUri(uri);
-
-      if(kind === "video"){
-        v94VideoCount++;
-        v94VideoBytes += bytes;
-        v94Push(
-          v94VideoSegments,
-          `VIDEO SEGMENT #${v94VideoCount} bytes=${bytes} uri=${uri}`
-        );
-      }else if(kind === "audio"){
-        v94AudioCount++;
-        v94AudioBytes += bytes;
-        v94Push(
-          v94AudioSegments,
-          `AUDIO SEGMENT #${v94AudioCount} bytes=${bytes} uri=${uri}`
-        );
-      }else{
-        v94Push(
-          v94OtherSegments,
-          `OTHER SEGMENT bytes=${bytes} uri=${uri}`,
-          10
-        );
-      }
-
-      setTimeout(v94CaptureDecoderState, 0);
-    }catch(e){
-      v94Push(v94OtherSegments, `TRACE ERROR ${e?.message || String(e)}`, 10);
-    }
-  };
-
-  net.registerResponseFilter(filter);
-
-  const video = document.getElementById("html5-player");
-  if(video && video.dataset.v94DecoderBound !== "1"){
-    video.dataset.v94DecoderBound = "1";
-
-    [
-      "loadedmetadata","loadeddata","canplay","playing",
-      "waiting","stalled","progress","timeupdate","error"
-    ].forEach(name=>{
-      video.addEventListener(name, ()=>{
-        v94CaptureDecoderState();
-      });
-    });
-  }
-
-  v94Push(v94OtherSegments, `ARM channel=${channel?.name || "-"}`, 10);
-
-  [300,800,1500,2500,4000,6000,9000].forEach(ms=>{
-    setTimeout(v94CaptureDecoderState, ms);
-  });
-}
-
-function v94Summary(){
-  return [
-    `decoder=${v94DecoderState}`,
-    `videoSegments=${v94VideoCount}`,
-    `videoBytes=${v94VideoBytes}`,
-    `audioSegments=${v94AudioCount}`,
-    `audioBytes=${v94AudioBytes}`,
-    `decodedFrames=${v94LastFrames}`,
-    `dropped=${v94LastDropped}`
-  ].join(" | ");
-}
-
-function v95Push(list, msg, max=32){
-  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
-  list.push(`${stamp} ${msg}`);
-  if(list.length > max) list.splice(0, list.length-max);
-}
-
-function v95Classify(uri){
-  const u = String(uri || "").toLowerCase();
-  let kind = "other";
-  if(u.includes("/video/") || u.includes("video_") || u.includes("videoseg")) kind = "video";
-  else if(u.includes("/audio/") || u.includes("audio_") || u.includes("audioseg")) kind = "audio";
-
-  let phase = "media";
-  if(
-    u.includes("init") ||
-    u.includes("initialization") ||
-    /\/0\.m4s(?:$|\?)/.test(u) ||
-    /segment_0(?:\D|$)/.test(u)
-  ) phase = "init";
-
-  return {kind, phase};
-}
-
-function v95InstallRequestSequenceTrace(player, channel){
-  if(!player || !player.getNetworkingEngine) return;
-  const net = player.getNetworkingEngine();
-  if(!net) return;
-
-  if(net.registerRequestFilter){
-    net.registerRequestFilter((type, request)=>{
-      try{
-        const RT = shaka.net.NetworkingEngine.RequestType;
-        if(type !== RT.SEGMENT) return;
-
-        const uri = request?.uris?.[0] || "-";
-        const c = v95Classify(uri);
-
-        if(c.kind === "video"){
-          v95VideoReqCount++;
-          v95LastVideoUri = uri;
-          if(c.phase === "init") v95VideoInitCount++;
-          else v95VideoMediaCount++;
-        }else if(c.kind === "audio"){
-          v95AudioReqCount++;
-          v95LastAudioUri = uri;
-          if(c.phase === "init") v95AudioInitCount++;
-          else v95AudioMediaCount++;
-        }else{
-          v95OtherReqCount++;
-        }
-
-        v95Push(
-          v95RequestLog,
-          `REQ ${c.kind.toUpperCase()} ${c.phase.toUpperCase()} #${
-            c.kind==="video" ? v95VideoReqCount :
-            c.kind==="audio" ? v95AudioReqCount : v95OtherReqCount
-          } uri=${uri}`
-        );
-      }catch(e){
-        v95Push(v95RequestLog, `REQ TRACE ERROR ${e?.message || String(e)}`);
-      }
-    });
-  }
-
-  if(net.registerResponseFilter){
-    net.registerResponseFilter((type, response)=>{
-      try{
-        const RT = shaka.net.NetworkingEngine.RequestType;
-        if(type !== RT.SEGMENT) return;
-
-        const uri = response?.uri || "-";
-        const bytes = Number(response?.data?.byteLength || 0);
-        const c = v95Classify(uri);
-
-        if(c.kind === "video"){
-          v95VideoRespCount++;
-          v95LastVideoUri = uri;
-        }else if(c.kind === "audio"){
-          v95AudioRespCount++;
-          v95LastAudioUri = uri;
-        }else{
-          v95OtherRespCount++;
-        }
-
-        v95Push(
-          v95ResponseLog,
-          `RESP ${c.kind.toUpperCase()} ${c.phase.toUpperCase()} bytes=${bytes} uri=${uri}`
-        );
-      }catch(e){
-        v95Push(v95ResponseLog, `RESP TRACE ERROR ${e?.message || String(e)}`);
-      }
-    });
-  }
-
-  v95Push(v95RequestLog, `ARM channel=${channel?.name || "-"}`);
-}
-
-function v95Summary(){
-  return [
-    `videoReq=${v95VideoReqCount}`,
-    `videoResp=${v95VideoRespCount}`,
-    `videoInit=${v95VideoInitCount}`,
-    `videoMedia=${v95VideoMediaCount}`,
-    `audioReq=${v95AudioReqCount}`,
-    `audioResp=${v95AudioRespCount}`,
-    `audioInit=${v95AudioInitCount}`,
-    `audioMedia=${v95AudioMediaCount}`
-  ].join(" | ");
-}
-
-function v96Push(msg, max=40){
-  const stamp = new Date().toLocaleTimeString("th-TH",{hour12:false});
-  v96BoxLog.push(`${stamp} ${msg}`);
-  if(v96BoxLog.length > max) v96BoxLog.splice(0, v96BoxLog.length-max);
-}
-
-function v96Ascii4(data, offset){
-  try{
-    const u = new Uint8Array(data, offset, 4);
-    return String.fromCharCode(u[0],u[1],u[2],u[3]);
-  }catch(e){
-    return "????";
-  }
-}
-
-function v96U32(data, offset){
-  try{
-    const dv = new DataView(data, offset, 4);
-    return dv.getUint32(0);
-  }catch(e){
-    return 0;
-  }
-}
-
-function v96ParseMp4Boxes(buffer){
-  const out = [];
-  if(!buffer || !buffer.byteLength) return out;
-
-  let off = 0;
-  let guard = 0;
-  const total = buffer.byteLength;
-
-  while(off + 8 <= total && guard < 24){
-    guard++;
-
-    let size = v96U32(buffer, off);
-    const type = v96Ascii4(buffer, off + 4);
-    let header = 8;
-
-    if(size === 1){
-      if(off + 16 > total) break;
-      const dv = new DataView(buffer, off + 8, 8);
-      const high = dv.getUint32(0);
-      const low = dv.getUint32(4);
-      size = high * 4294967296 + low;
-      header = 16;
-    }else if(size === 0){
-      size = total - off;
-    }
-
-    if(!Number.isFinite(size) || size < header || off + size > total){
-      out.push(`${type}(invalid:${size})`);
-      break;
-    }
-
-    out.push(`${type}(${size})`);
-    off += size;
-  }
-
-  return out;
-}
-
-function v96ClassifyBoxes(boxes){
-  const types = boxes.map(x => String(x).split("(")[0]);
-  const hasFtyp = types.includes("ftyp");
-  const hasMoov = types.includes("moov");
-  const hasMoof = types.includes("moof");
-  const hasMdat = types.includes("mdat");
-
-  if(hasFtyp || hasMoov) return "INIT";
-  if(hasMoof || hasMdat) return "MEDIA";
-  return "UNKNOWN";
-}
-
-function v96InstallMp4BoxTrace(player, channel){
-  if(!player || !player.getNetworkingEngine) return;
-  const net = player.getNetworkingEngine();
-  if(!net || !net.registerResponseFilter) return;
-
-  net.registerResponseFilter((type, response)=>{
-    try{
-      const RT = shaka.net.NetworkingEngine.RequestType;
-      if(type !== RT.SEGMENT) return;
-      if(!response || !response.data) return;
-
-      const uri = response.uri || "-";
-      const bytes = Number(response.data.byteLength || 0);
-      const boxes = v96ParseMp4Boxes(response.data);
-      const cls = v96ClassifyBoxes(boxes);
-
-      if(cls === "INIT"){
-        v96InitLikeCount++;
-        v96LastInitUri = uri;
-      }else if(cls === "MEDIA"){
-        v96MediaLikeCount++;
-        v96LastMediaUri = uri;
-      }else{
-        v96UnknownBoxCount++;
-      }
-
-      v96LastBoxSummary = boxes.length ? boxes.join(" | ") : "(no boxes)";
-      v96Push(
-        `${cls} bytes=${bytes} boxes=${v96LastBoxSummary} uri=${uri}`
-      );
-    }catch(e){
-      v96Push(`BOX TRACE ERROR ${e?.message || String(e)}`);
-    }
-  });
-
-  v96Push(`ARM channel=${channel?.name || "-"}`);
-}
-
-function v96Summary(){
-  return [
-    `initLike=${v96InitLikeCount}`,
-    `mediaLike=${v96MediaLikeCount}`,
-    `unknown=${v96UnknownBoxCount}`,
-    `lastBoxes=${v96LastBoxSummary}`
-  ].join(" | ");
-}
-function renderMpdDiagnostic(){
-  const body = document.getElementById("mpd-diagnostic-body");
-  const video = document.getElementById("html5-player");
-  if(!body || !video) return;
-
-  bindDeepDiagEvents();
-  bindDeepShakaEvents();
-  v6BindSeekEvents();
-  v5CaptureTrace();
-
-  const frames = getDecodedFrames(video);
-
-  if(deepDiagLastSampleAt){
-    deepDiagFrameDelta = frames.total - deepDiagLastFrameCount;
-    deepDiagTimeDelta = Number(video.currentTime || 0) - deepDiagLastTime;
-  }
-  deepDiagLastFrameCount = frames.total;
-  deepDiagLastTime = Number(video.currentTime || 0);
-  deepDiagLastSampleAt = performance.now();
-
-  let track = null;
-  let tracks = [];
-  let stats = {};
-  let bufferedInfo = null;
-
-  try{
-    if(shakaPlayer){
-      tracks = shakaPlayer.getVariantTracks ? shakaPlayer.getVariantTracks() : [];
-      track = tracks.find(t=>t.active) || tracks[0] || null;
-      stats = shakaPlayer.getStats ? shakaPlayer.getStats() : {};
-      bufferedInfo = shakaPlayer.getBufferedInfo ? shakaPlayer.getBufferedInfo() : null;
-    }
-  }catch(e){
-    pushDeepDiagEvent("DIAG SHAKA READ ERROR", e?.message || String(e));
-  }
-
-  const width = video.videoWidth || track?.width || 0;
-  const height = video.videoHeight || track?.height || 0;
-  const codec = track?.videoCodec || track?.codecs || "";
-  const audioCodec = track?.audioCodec || "";
-  const picture = (width>0 && height>0 && frames.total>0) ? "YES" : "NO / WAIT";
-  const playback = video.paused ? "PAUSED" : (video.readyState>=2 ? "PLAYING" : "LOADING");
-
-  let ahead = 0;
-  try{
-    if(video.buffered && video.buffered.length){
-      for(let i=0;i<video.buffered.length;i++){
-        if(video.currentTime >= video.buffered.start(i) && video.currentTime <= video.buffered.end(i)){
-          ahead = Math.max(0, video.buffered.end(i) - video.currentTime);
-          break;
-        }
-      }
-    }
-  }catch(e){}
-
-  const activeVariant = track ? [
-    `id=${track.id ?? "-"}`,
-    `bw=${track.bandwidth ? Math.round(track.bandwidth/1000)+"kbps" : "-"}`,
-    `fps=${track.frameRate || "-"}`,
-    `lang=${track.language || "-"}`,
-    `primary=${!!track.primary}`
-  ].join(" ") : "-";
-
-  const formatRanges = arr => Array.isArray(arr) && arr.length
-    ? arr.map(r=>`${r.start.toFixed(1)}-${r.end.toFixed(1)}`).join("|")
-    : "-";
-
-  const shakaBuffer = bufferedInfo ? [
-    `total:${formatRanges(bufferedInfo.total)}`,
-    `video:${formatRanges(bufferedInfo.video)}`,
-    `audio:${formatRanges(bufferedInfo.audio)}`
-  ].join(" / ") : "-";
-
-  const diagnosis =
-    frames.total === 0 && video.readyState <= 1 && ahead > 0
-      ? "ข้อมูลมีใน Buffer แต่ decoder ยังไม่เริ่ม"
-      : frames.total === 0 && video.readyState >= 2
-      ? "มี Media Data แต่ยังไม่มี decoded frame"
-      : frames.total > 0
-      ? "Decoder ทำงาน"
-      : "รอข้อมูลเพิ่ม";
-
-  let v4Hint = "-";
-  if(frames.total === 0 && video.readyState <= 1 && ahead > 0){
-    if(String(keyStatuses).toLowerCase().includes("usable")){
-      v4Hint = "Key usable แต่ media pipeline ยังไม่ผ่าน HAVE_METADATA";
-    }else if(String(keyStatuses) !== "-"){
-      v4Hint = "ดู Key Status: ยังไม่เห็นสถานะ usable";
-    }else{
-      v4Hint = "ยังอ่าน Key Status ไม่ได้; ดู InitData และ Shaka events";
-    }
-  }else if(frames.total > 0){
-    v4Hint = "Reference ผ่าน: key + decoder + media pipeline ทำงาน";
-  }
-
-  const readyNames = ["HAVE_NOTHING","HAVE_METADATA","HAVE_CURRENT_DATA","HAVE_FUTURE_DATA","HAVE_ENOUGH_DATA"];
-  const networkNames = ["NETWORK_EMPTY","NETWORK_IDLE","NETWORK_LOADING","NETWORK_NO_SOURCE"];
-
-  const drmInfo = readDrmInfo();
-  const keyStatuses = readKeyStatuses();
-  const encryptedSummary = deepDiagEncryptedInfo.length
-    ? deepDiagEncryptedInfo.map((x,i)=>`#${i+1} ${x.type} ${x.length}B ${x.head}`).join(" | ")
-    : "-";
-
-  const rows = [
-    ["Channel", activeChannel?.name || "-"],
-    ["Playback", playback],
-    ["Picture", picture],
-    ["Diagnosis", diagnosis],
-    ["V4 Hint", v4Hint],
-    ["Time", (video.currentTime||0).toFixed(1)+" sec"],
-    ["Time Δ / sec", deepDiagTimeDelta.toFixed(2)],
-    ["Video Size", width&&height ? `${width}x${height}` : "0x0"],
-    ["Decoded Frames", String(frames.total)],
-    ["Frames Δ / sec", String(deepDiagFrameDelta)],
-    ["Dropped Frames", String(frames.dropped)],
-    ["Corrupted Frames", String(frames.corrupted)],
-    ["ReadyState", `${video.readyState} (${readyNames[video.readyState] || "?"})`],
-    ["NetworkState", `${video.networkState} (${networkNames[video.networkState] || "?"})`],
-    ["Paused / Seeking", `${video.paused} / ${video.seeking}`],
-    ["MediaKeys", video.mediaKeys ? "ATTACHED" : "NONE"],
-    ["Key Status", keyStatuses],
-    ["DRM KeySystem", drmInfo?.keySystem || "-"],
-    ["DRM License URI", drmInfo?.licenseServerUri || "-"],
-    ["Video Robustness", drmInfo?.videoRobustness || "-"],
-    ["Audio Robustness", drmInfo?.audioRobustness || "-"],
-    ["Encrypted Events", String(deepDiagEncryptedInfo.length)],
-    ["InitData Summary", encryptedSummary],
-    ["Media Error", mediaErrorText(video)],
-    ["HTML5 Buffer Ahead", ahead.toFixed(1)+" sec"],
-    ["HTML5 Buffered", getBufferedSummary(video)],
-    ["Variant Count", String(tracks.length)],
-    ["Active Variant", activeVariant],
-    ["Video Codec", codec || "-"],
-    ["Audio Codec", audioCodec || "-"],
-    ["Video Track", track ? "FOUND" : "ไม่พบ/Player อื่น"],
-    ["Shaka Buffer", shakaBuffer],
-    ["Est. Bandwidth", stats.estimatedBandwidth ? Math.round(stats.estimatedBandwidth/1000)+" kbps" : "-"],
-    ["Stream Bandwidth", stats.streamBandwidth ? Math.round(stats.streamBandwidth/1000)+" kbps" : "-"],
-    ["Load Latency", Number.isFinite(stats.loadLatency) ? stats.loadLatency.toFixed(2)+" sec" : "-"],
-    ["DRM Time", Number.isFinite(stats.drmTime) ? stats.drmTime.toFixed(3)+" sec" : "-"],
-    ["License Time", Number.isFinite(stats.licenseTime) ? stats.licenseTime.toFixed(3)+" sec" : "-"],
-    ["DRM Config", activeChannel?.drm ? "ClearKey configured" : "ไม่ใช้/ไม่ระบุ"],
-    ["V5 Player Instance", v5PlayerIdentity()],
-    ["V5 Active Track", v5ActiveTrackSummary()],
-    ["V6 Timeline", v6TimelineSnapshot()],
-    ["V6 Last Seek", `${Number(v6LastSeekFrom||0).toFixed(3)} -> ${Number(v6LastSeekTo||0).toFixed(3)}`],
-    ["V7 MPD URL", v7MpdUrl || "-"],
-    ["V7 MPD Timeline", v7MpdSummary()],
-    ["V8 Timeline Normalizer", v8Summary()],
-    ["V8.1 Auto Init", `channel=${v81InitChannel || "-"} | count=${v81InitCount}`],
-    ["V9 Manifest Normalizer", v9Summary()],
-    ["V9.2 Post-Patch Window", v92Summary()],
-    ["V9.2 FIX1 Loaded", "YES"],
-    ["V9.3 Force Live Edge", v93Summary()],
-    ["V9.4 Decoder Trace", v94Summary()],
-    ["V9.4 Video Track", v94LastVideoTrack],
-    ["V9.4 Audio Track", v94LastAudioTrack],
-    ["V9.5 Request Sequence", v95Summary()],
-    ["V9.5 Last Video URI", v95LastVideoUri],
-    ["V9.5 Last Audio URI", v95LastAudioUri],
-    ["V9.5 FIX1 Loaded", "YES"],
-    ["V9.6 MP4 Box Trace", v96Summary()],
-    ["V9.6 Last INIT URI", v96LastInitUri],
-    ["V9.6 Last MEDIA URI", v96LastMediaUri],
-    ["Mode", "INSPECT ACTIVE PLAYER ONLY"]
-  ];
-
-  body.innerHTML = rows.map(([k,v])=>{
-    let cls = "";
-    if(k==="Picture") cls = v==="YES" ? "diag-ok" : "diag-warn";
-    if(k==="Playback") cls = v==="PLAYING" ? "diag-ok" : "diag-warn";
-    if(k==="Diagnosis"){
-      cls = v==="Decoder ทำงาน" ? "diag-ok" : (v.includes("decoder") ? "diag-bad" : "diag-warn");
-    }
-    if(k==="Media Error" && v !== "-") cls = "diag-bad";
-    return `<div class="diag-row"><div class="diag-key">${diagEscape(k)}</div><div class="diag-value ${cls}">${diagEscape(v)}</div></div>`;
-  }).join("") +
-  `<div class="diag-section">EVENT LOG (ล่าสุด)</div>` +
-  `<div class="diag-log">${diagEscape(deepDiagEvents.length ? deepDiagEvents.join("\n") : "ยังไม่มี event")}</div>` +
-  `<div class="diag-section">V5 ACTIVE SHAKA TRACE</div>` +
-  `<div class="diag-log">${diagEscape(v5PlayerTrace.length ? v5PlayerTrace.join("\n") : "ยังไม่มี trace")}</div>` +
-  `<div class="diag-section">V5 VARIANTS</div>` +
-  `<div class="diag-log">${diagEscape(v5AllVariantsSummary())}</div>` +
-  `<div class="diag-section">V6 SEEKING / TIMELINE TRACE</div>` +
-  `<div class="diag-log">${diagEscape(v6SeekTrace.length ? v6SeekTrace.join("\n") : "ยังไม่มี seek trace")}</div>` +
-  `<div class="diag-section">V7 MPD TIMELINE INSPECTOR</div>` +
-  `<div class="diag-log">${diagEscape(v7MpdError ? "ERROR: "+v7MpdError : v7MpdSummary())}</div>` +
-  `<div class="diag-section">V7 SEGMENT TIMELINE</div>` +
-  `<div class="diag-log">${diagEscape(v7MpdInfo?.timeline || "-")}</div>` +
-  `<div class="diag-section">V7 REPRESENTATIONS</div>` +
-  `<div class="diag-log">${diagEscape(v7MpdInfo?.representations || "-")}</div>` +
-  `<div class="diag-section">V8 TIMELINE NORMALIZER TEST</div>` +
-  `<div class="diag-log">${diagEscape(v8Summary())}</div>` +
-  `<div class="diag-section">V8 NORMALIZER LOG</div>` +
-  `<div class="diag-log">${diagEscape(v8LogLines.length?v8LogLines.join("\n"):"ยังไม่มีข้อมูล")}</div>` +
-  `<div class="diag-section">V9 MANIFEST TIMELINE NORMALIZER</div>` +
-  `<div class="diag-log">${diagEscape(v9Summary())}</div>` +
-  `<div class="diag-section">V9 PATCH LOG</div>` +
-  `<div class="diag-log">${diagEscape(v9PatchLog.length?v9PatchLog.join("\n"):"ยังไม่มีข้อมูล")}</div>` +
-  `<div class="diag-section">V9.2 POST-PATCH LIVE EDGE</div>` +
-  `<div class="diag-log">${diagEscape(v92Summary())}</div>` +
-  `<div class="diag-section">V9.2 LIVE EDGE / PLAYER LOG</div>` +
-  `<div class="diag-log">${diagEscape(v92LiveEdgeLog.length ? v92LiveEdgeLog.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
-  `<div class="diag-section">V9.2 SEGMENT RESPONSE LOG</div>` +
-  `<div class="diag-log">${diagEscape(v92SegmentLog.length ? v92SegmentLog.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
-  `<div class="diag-section">V9.3 FORCE LIVE EDGE TEST</div>` +
-  `<div class="diag-log">${diagEscape(v93Summary())}</div>` +
-  `<div class="diag-section">V9.3 FORCE LOG</div>` +
-  `<div class="diag-log">${diagEscape(v93Log.length ? v93Log.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
-  `<div class="diag-section">V9.4 VIDEO SEGMENT / DECODER TRACE</div>` +
-  `<div class="diag-log">${diagEscape(v94Summary())}</div>` +
-  `<div class="diag-section">V9.4 VIDEO SEGMENTS</div>` +
-  `<div class="diag-log">${diagEscape(v94VideoSegments.length ? v94VideoSegments.join("\n") : "ยังไม่มี VIDEO segment")}</div>` +
-  `<div class="diag-section">V9.4 AUDIO SEGMENTS</div>` +
-  `<div class="diag-log">${diagEscape(v94AudioSegments.length ? v94AudioSegments.join("\n") : "ยังไม่มี AUDIO segment")}</div>` +
-  `<div class="diag-section">V9.4 OTHER SEGMENTS</div>` +
-  `<div class="diag-log">${diagEscape(v94OtherSegments.length ? v94OtherSegments.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
-  `<div class="diag-section">V9.5 VIDEO REQUEST / SEGMENT SEQUENCE TRACE</div>` +
-  `<div class="diag-log">${diagEscape(v95Summary())}</div>` +
-  `<div class="diag-section">V9.5 REQUEST LOG</div>` +
-  `<div class="diag-log">${diagEscape(v95RequestLog.length ? v95RequestLog.join("\n") : "ยังไม่มี request")}</div>` +
-  `<div class="diag-section">V9.5 RESPONSE LOG</div>` +
-  `<div class="diag-log">${diagEscape(v95ResponseLog.length ? v95ResponseLog.join("\n") : "ยังไม่มี response")}</div>` +
-  `<div class="diag-section">V9.6 INIT SEGMENT / MP4 BOX TRACE</div>` +
-  `<div class="diag-log">${diagEscape(v96Summary())}</div>` +
-  `<div class="diag-section">V9.6 BOX LOG</div>` +
-  `<div class="diag-log">${diagEscape(v96BoxLog.length ? v96BoxLog.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
-}
-
 /* ================= MPD =================
    หมายเหตุ: MPD/DRM หลายช่องไม่เล่นใน WebView/Smart TV browser
    เพราะเครื่องไม่รองรับ EME/ClearKey หรือ header/DRM ไม่ผ่าน
    เวอร์ชันนี้ไม่ฝืนเล่นในเว็บ เพื่อไม่ให้ค้าง/จอดำ
 */
 function playMPDNotice(channel, url){
-  v7InspectMpd(url);
-  setTimeout(()=>v81AutoInitDiagnostic(channel), 20);
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
   if(jwBox) jwBox.style.display = "none";
@@ -2357,33 +565,14 @@ function playMPDNotice(channel, url){
   video.controls = true;
   forceAudio100();
 
-  setStatus("กำลังตรวจ MPD/DRM ด้วย Shaka...", false);
+  setStatus("ไฟล์ MPD/DRM เล่นในเว็บนี้ไม่ได้ในบางเครื่อง ให้กด PLAYER หรือ MX", false);
 
+  // ลองด้วย Shaka แบบไม่บังคับ ถ้าเครื่องรองรับจะเล่นได้ ถ้าไม่รองรับจะไม่ค้าง
   try{
     if(window.shaka){
       shaka.polyfill.installAll();
-
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
-        v96InstallMp4BoxTrace(shakaPlayer, channel);
-        v95InstallRequestSequenceTrace(shakaPlayer, channel);
-        v94InstallSegmentDecoderTrace(shakaPlayer, channel);
-        v92InstallSegmentTrace(shakaPlayer, channel);
-        v92BindPlayerEvents(shakaPlayer);
-        // V9: normalize only abnormal dynamic MPD timelines.
-        // CINEMAX and normal timelines are always bypassed.
-        v9InstallManifestResponseFilter(shakaPlayer, channel);
-
-        shakaPlayer.addEventListener("error", function(event){
-          try{
-            const detail = event.detail || {};
-            pushDeepDiagEvent(
-              "SHAKA ERROR",
-              `code=${detail.code || "-"} severity=${detail.severity || "-"} category=${detail.category || "-"}`
-            );
-          }catch(e){}
-        });
-
         shakaPlayer.configure({
           streaming:{
             bufferingGoal: 30,
@@ -2392,47 +581,21 @@ function playMPDNotice(channel, url){
             retryParameters:{maxAttempts:4,baseDelay:1000,backoffFactor:1.5,timeout:25000}
           }
         });
-
         if(channel.drm){
-          if(channel.keyId && channel.key){
-            shakaPlayer.configure({
-              drm:{
-                clearKeys:{
-                  [channel.keyId]:channel.key
-                }
-              }
-            });
-          }else{
-          }
+          shakaPlayer.configure({drm:{clearKeys:{[channel.keyId]:channel.key}}});
         }
-
         shakaPlayer.load(url).then(()=>{
           forceAudio100();
-          v93Start(channel);
-          v92CapturePlaybackWindow();
-          [300,800,1500,3000,5000,8000].forEach(ms=>setTimeout(v92CapturePlaybackWindow, ms));
-          setTimeout(()=>v8Observe(channel),300);
           video.play().catch(()=>{});
-          setStatus("MPD โหลดสำเร็จ — ดูผลที่ 📊 DIAG", true);
+          setStatus("กำลังเล่น MPD");
         }).catch(e=>{
           console.log("MPD เล่นในเว็บไม่ได้:", e);
-          setStatus("MPD โหลดไม่สำเร็จ — ดูผลที่ 📊 DIAG", false);
+          setStatus("MPD เล่นในเว็บนี้ไม่ได้ ให้กด PLAYER/MX", false);
         });
-      }else{
-        mpdDiagLoadState = "FAIL";
-        setStatus("อุปกรณ์นี้ไม่รองรับ Shaka/EME — ดู 📊 DIAG", false);
-        renderMpdDiagnostic();
       }
-    }else{
-      mpdDiagLoadState = "FAIL";
-      setStatus("ไม่พบ Shaka Player", false);
-      renderMpdDiagnostic();
     }
   }catch(e){
     console.log("MPD ERROR:", e);
-    mpdDiagLoadState = "FAIL";
-    setStatus("MPD ERROR — ดู 📊 DIAG", false);
-    renderMpdDiagnostic();
   }
 }
 
@@ -2628,7 +791,7 @@ async function closePlayer(){
 }
 
 function goHome(){
-  window.location.href = "https://tiea9999.github.io/tv/index.html";
+  window.location.href = "https://tiea9999.github.io/tv-online/index.html";
 }
 
 document.addEventListener("keydown",function(e){
