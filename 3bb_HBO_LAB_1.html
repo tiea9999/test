@@ -2,13 +2,14 @@
 <html lang="th">
 
 <head>
+<!-- LAB6: READ-ONLY DRM KEY-ID INSPECTOR / NO KEY EXTRACTION / NO SEEK / NO MPD PATCH -->
 <!-- LAB5: READ-ONLY SHAKA ERROR 4012 TRACE / NO SEEK / NO MPD PATCH / NO FORCE -->
 <!-- LAB2: HBO FAMILY TESTED AGAINST CINEMAX REFERENCE / NO TIMELINE PATCH / NO FORCE SEEK -->
 <!-- HBO LAB 1: COPY OF V2.1 STABLE / CINEMAX REFERENCE / NO TIMELINE PATCH / NO FORCE SEEK -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB HBO FAMILY LAB 5 • ERROR 4012 TRACE FIX1</title>
+    <title>3BB HBO FAMILY LAB 6 • DRM KEY INSPECTOR</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -92,7 +93,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 5 • ERROR 4012 TRACE FIX1</h2>
+    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 6 • DRM KEY INSPECTOR</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -434,6 +435,11 @@ let lab5SegmentSeen = false;
 let lab5LicenseSeen = false;
 let lab5ClearKeyCount = 0;
 let lab5ClearKeyIds = [];
+let lab6ConfiguredKeyId = "-";
+let lab6MissingKeyIds = [];
+let lab6RestrictedKeyStatuses = [];
+let lab6KeyMatch = "-";
+
 
 
 
@@ -524,6 +530,7 @@ function lab5InstallReadOnlyTrace(player,channel){
             data:d.data,
             handled:d.handled
           });
+          lab6UpdateFromErrorDetail(d);
           lab5Push(lab5PlayerLog,`ERROR ${lab5LastErrorDetail}`);
         }else if(name==="buffering"){
           lab5Push(lab5PlayerLog,`BUFFERING ${String(ev?.buffering)}`);
@@ -548,6 +555,56 @@ function lab5Summary(){
   ].join(" | ");
 }
 
+
+function lab6NormKid(v){
+  return String(v||"").toLowerCase().replace(/[^0-9a-f]/g,"");
+}
+
+function lab6GetConfiguredKid(){
+  try{
+    let kid = activeChannel?.keyId || "-";
+    if((!kid || kid==="-") && Array.isArray(activeChannel?.servers)){
+      const s = activeChannel.servers[activeServerIndex] || activeChannel.servers[0];
+      kid = s?.keyId || "-";
+    }
+    lab6ConfiguredKeyId = kid || "-";
+  }catch(e){
+    lab6ConfiguredKeyId = "-";
+  }
+}
+
+function lab6UpdateFromErrorDetail(detail){
+  try{
+    const data = Array.isArray(detail?.data) ? detail.data : [];
+    const first = data[0] || {};
+    lab6MissingKeyIds = Array.isArray(first.missingKeys) ? first.missingKeys.slice() : [];
+    lab6RestrictedKeyStatuses = Array.isArray(first.restrictedKeyStatuses) ? first.restrictedKeyStatuses.slice() : [];
+  }catch(e){
+    lab6MissingKeyIds = [];
+    lab6RestrictedKeyStatuses = [];
+  }
+  lab6GetConfiguredKid();
+
+  const cfg = lab6NormKid(lab6ConfiguredKeyId);
+  const missing = lab6MissingKeyIds.map(lab6NormKid).filter(Boolean);
+
+  if(!cfg || cfg==="-"){
+    lab6KeyMatch = "NO CONFIGURED KID";
+  }else if(!missing.length){
+    lab6KeyMatch = "NO MISSING KID REPORTED";
+  }else{
+    lab6KeyMatch = missing.includes(cfg) ? "MATCHES MISSING KID" : "MISMATCH";
+  }
+}
+
+function lab6Summary(){
+  return [
+    `configuredKID=${lab6ConfiguredKeyId}`,
+    `missingKIDs=${lab6MissingKeyIds.length?lab6MissingKeyIds.join(","):"-"}`,
+    `restricted=${lab6RestrictedKeyStatuses.length?lab6RestrictedKeyStatuses.join(","):"-"}`,
+    `result=${lab6KeyMatch}`
+  ].join(" | ");
+}
 function lab4Esc(v){
   return String(v ?? "")
     .replace(/&/g,"&amp;").replace(/</g,"&lt;")
@@ -630,7 +687,10 @@ function renderLab4Diag(){
     ["Estimated BW", stats.estimatedBandwidth ? Math.round(stats.estimatedBandwidth/1000)+" kbps" : "-"],
     ["Shaka Error", lab4LastShakaError],
     ["LAB5 Trace", lab5Summary()],
-    ["LAB5 Error Detail", lab5LastErrorDetail]
+    ["LAB5 Error Detail", lab5LastErrorDetail],
+    ["LAB6 Configured KID", lab6ConfiguredKeyId],
+    ["LAB6 Missing KID", lab6MissingKeyIds.length ? lab6MissingKeyIds.join(",") : "-"],
+    ["LAB6 Key Compare", lab6KeyMatch]
   ];
 
   body.innerHTML = rows.map(([k,v])=>{
@@ -649,6 +709,11 @@ function renderLab4Diag(){
     `<div class="lab5-log">${lab4Esc(lab5PlayerLog.length ? lab5PlayerLog.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
     `<div class="lab5-section">LAB5 NETWORK TRACE</div>` +
     `<div class="lab5-log">${lab4Esc(lab5NetworkLog.length ? lab5NetworkLog.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
+
+
+  body.innerHTML +=
+    `<div class="lab5-section">LAB6 DRM KEY-ID INSPECTOR</div>` +
+    `<div class="lab5-log">${lab4Esc(lab6Summary())}</div>`;
 
 }
 
@@ -810,6 +875,11 @@ async function loadChannel(channel, element){
   lab5LicenseSeen = false;
   lab5ClearKeyCount = 0;
   lab5ClearKeyIds = [];
+  lab6ConfiguredKeyId = "-";
+  lab6MissingKeyIds = [];
+  lab6RestrictedKeyStatuses = [];
+  lab6KeyMatch = "-";
+  setTimeout(lab6GetConfiguredKid,0);
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
