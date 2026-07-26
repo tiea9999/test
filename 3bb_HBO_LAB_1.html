@@ -2,12 +2,13 @@
 <html lang="th">
 
 <head>
+<!-- LAB5: READ-ONLY SHAKA ERROR 4012 TRACE / NO SEEK / NO MPD PATCH / NO FORCE -->
 <!-- LAB2: HBO FAMILY TESTED AGAINST CINEMAX REFERENCE / NO TIMELINE PATCH / NO FORCE SEEK -->
 <!-- HBO LAB 1: COPY OF V2.1 STABLE / CINEMAX REFERENCE / NO TIMELINE PATCH / NO FORCE SEEK -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB HBO FAMILY LAB 4 • READ ONLY DIAG</title>
+    <title>3BB HBO FAMILY LAB 5 • ERROR 4012 TRACE</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -73,12 +74,25 @@
 #lab4-diag .bad{color:#ff5252}
 </style>
 
+
+<style id="lab5-trace-style">
+#lab4-diag .lab5-section{
+  margin-top:10px;padding-top:8px;border-top:1px solid #00e5ff;
+  color:#00e5ff;font-weight:900;
+}
+#lab4-diag .lab5-log{
+  margin-top:5px;padding:8px;background:rgba(0,0,0,.35);
+  border-radius:8px;white-space:pre-wrap;word-break:break-all;
+  color:#d7f7ff;font-weight:600;
+}
+</style>
+
 </head>
 
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 4 • READ ONLY DIAG</h2>
+    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 5 • ERROR 4012 TRACE</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -412,7 +426,127 @@ let activeServerIndex = 0;
 let lab4DiagVisible = false;
 let lab4DiagTimer = null;
 let lab4LastShakaError = "-";
+let lab5LastErrorDetail = "-";
+let lab5NetworkLog = [];
+let lab5PlayerLog = [];
+let lab5ManifestSeen = false;
+let lab5SegmentSeen = false;
+let lab5LicenseSeen = false;
+let lab5ClearKeyCount = 0;
+let lab5ClearKeyIds = [];
 
+
+
+
+function lab5Push(list,msg,max=40){
+  const t=new Date().toLocaleTimeString("th-TH",{hour12:false});
+  list.push(`${t} ${msg}`);
+  if(list.length>max) list.splice(0,list.length-max);
+}
+
+function lab5SafeJson(obj){
+  try{
+    return JSON.stringify(obj,(k,v)=>{
+      if(k==="stack") return undefined;
+      if(v instanceof ArrayBuffer) return `[ArrayBuffer ${v.byteLength}]`;
+      if(ArrayBuffer.isView(v)) return `[${v.constructor?.name||"TypedArray"} ${v.byteLength}]`;
+      return v;
+    });
+  }catch(e){
+    try{return String(obj)}catch(err){return "-"}
+  }
+}
+
+function lab5ReqTypeName(type){
+  try{
+    const RT=shaka.net.NetworkingEngine.RequestType;
+    const pairs=[
+      ["MANIFEST",RT.MANIFEST],["SEGMENT",RT.SEGMENT],["LICENSE",RT.LICENSE],
+      ["APP",RT.APP],["TIMING",RT.TIMING],["SERVER_CERTIFICATE",RT.SERVER_CERTIFICATE]
+    ];
+    const hit=pairs.find(x=>x[1]===type);
+    return hit?hit[0]:String(type);
+  }catch(e){return String(type)}
+}
+
+function lab5CaptureClearKeyConfig(){
+  try{
+    if(!shakaPlayer || typeof shakaPlayer.getConfiguration!=="function") return;
+    const cfg=shakaPlayer.getConfiguration();
+    const keys=cfg?.drm?.clearKeys || {};
+    lab5ClearKeyIds=Object.keys(keys);
+    lab5ClearKeyCount=lab5ClearKeyIds.length;
+  }catch(e){}
+}
+
+function lab5InstallReadOnlyTrace(player,channel){
+  if(!player || player.__lab5Bound) return;
+  player.__lab5Bound=true;
+
+  lab5CaptureClearKeyConfig();
+
+  try{
+    const net=player.getNetworkingEngine?.();
+    if(net){
+      if(net.registerRequestFilter){
+        net.registerRequestFilter((type,request)=>{
+          const name=lab5ReqTypeName(type);
+          const uri=request?.uris?.[0] || "-";
+          if(name==="MANIFEST") lab5ManifestSeen=true;
+          if(name==="SEGMENT") lab5SegmentSeen=true;
+          if(name==="LICENSE") lab5LicenseSeen=true;
+          lab5Push(lab5NetworkLog,`REQ ${name} uri=${uri}`);
+        });
+      }
+      if(net.registerResponseFilter){
+        net.registerResponseFilter((type,response)=>{
+          const name=lab5ReqTypeName(type);
+          const uri=response?.uri || "-";
+          const bytes=response?.data?.byteLength || 0;
+          lab5Push(lab5NetworkLog,`RESP ${name} bytes=${bytes} uri=${uri}`);
+        });
+      }
+    }
+  }catch(e){
+    lab5Push(lab5NetworkLog,`NETWORK TRACE SETUP ERROR ${e?.message||e}`);
+  }
+
+  const events=["error","buffering","adaptation","variantchanged","streaming","trackschanged","expirationupdated"];
+  events.forEach(name=>{
+    try{
+      player.addEventListener(name,ev=>{
+        if(name==="error"){
+          const d=ev?.detail || {};
+          lab5LastErrorDetail=lab5SafeJson({
+            severity:d.severity,
+            category:d.category,
+            code:d.code,
+            data:d.data,
+            handled:d.handled
+          });
+          lab5Push(lab5PlayerLog,`ERROR ${lab5LastErrorDetail}`);
+        }else if(name==="buffering"){
+          lab5Push(lab5PlayerLog,`BUFFERING ${String(ev?.buffering)}`);
+        }else{
+          lab5Push(lab5PlayerLog,`${name.toUpperCase()}`);
+        }
+        lab5CaptureClearKeyConfig();
+      });
+    }catch(e){}
+  });
+
+  lab5Push(lab5PlayerLog,`ARM channel=${channel?.name||"-"}`);
+}
+
+function lab5Summary(){
+  return [
+    `manifest=${lab5ManifestSeen?"YES":"NO"}`,
+    `segment=${lab5SegmentSeen?"YES":"NO"}`,
+    `license=${lab5LicenseSeen?"YES":"NO"}`,
+    `clearKeys=${lab5ClearKeyCount}`,
+    `keyIds=${lab5ClearKeyIds.length?lab5ClearKeyIds.join(","):"-"}`
+  ].join(" | ");
+}
 
 function lab4Esc(v){
   return String(v ?? "")
@@ -494,7 +628,9 @@ function renderLab4Diag(){
     ["Audio Codec", active?.audioCodec || "-"],
     ["Resolution", active ? `${active.width||0}x${active.height||0}` : "-"],
     ["Estimated BW", stats.estimatedBandwidth ? Math.round(stats.estimatedBandwidth/1000)+" kbps" : "-"],
-    ["Shaka Error", lab4LastShakaError]
+    ["Shaka Error", lab4LastShakaError],
+    ["LAB5 Trace", lab5Summary()],
+    ["LAB5 Error Detail", lab5LastErrorDetail]
   ];
 
   body.innerHTML = rows.map(([k,v])=>{
@@ -504,6 +640,15 @@ function renderLab4Diag(){
     if(k==="Shaka Error" && v!=="-") cls="bad";
     return `<div class="lab4-row"><div class="lab4-key">${lab4Esc(k)}</div><div class="lab4-val ${cls}">${lab4Esc(v)}</div></div>`;
   }).join("");
+
+  body.innerHTML +=
+    `<div class="lab5-section">LAB5 SHAKA ERROR 4012 DETAIL</div>` +
+    `<div class="lab5-log">${lab4Esc(lab5LastErrorDetail)}</div>` +
+    `<div class="lab5-section">LAB5 PLAYER EVENT LOG</div>` +
+    `<div class="lab5-log">${lab4Esc(lab5PlayerLog.length?lab5PlayerLog.join("\n"):"ยังไม่มีข้อมูล")}</div>` +
+    `<div class="lab5-section">LAB5 NETWORK TRACE</div>` +
+    `<div class="lab5-log">${lab4Esc(lab5NetworkLog.length?lab5NetworkLog.join("\n"):"ยังไม่มีข้อมูล")}</div>`;
+
 }
 
 function toggleLab4Diag(){
@@ -656,6 +801,14 @@ async function loadChannel(channel, element){
   activeOriginalChannel = channel;
   activeServerIndex = 0;
   lab4LastShakaError = "-";
+  lab5LastErrorDetail = "-";
+  lab5NetworkLog = [];
+  lab5PlayerLog = [];
+  lab5ManifestSeen = false;
+  lab5SegmentSeen = false;
+  lab5LicenseSeen = false;
+  lab5ClearKeyCount = 0;
+  lab5ClearKeyIds = [];
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -709,6 +862,7 @@ function playMPDNotice(channel, url){
       shaka.polyfill.installAll();
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
+        lab5InstallReadOnlyTrace(shakaPlayer, channel);
         lab4LastShakaError = "-";
         shakaPlayer.addEventListener("error", function(event){
           try{
