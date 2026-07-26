@@ -2,6 +2,7 @@
 <html lang="th">
 
 <head>
+<!-- LAB7: READ-ONLY DRM CONFIG VERIFY / NO KEY EXTRACTION / NO SEEK / NO MPD PATCH -->
 <!-- LAB6: READ-ONLY DRM KEY-ID INSPECTOR / NO KEY EXTRACTION / NO SEEK / NO MPD PATCH -->
 <!-- LAB5: READ-ONLY SHAKA ERROR 4012 TRACE / NO SEEK / NO MPD PATCH / NO FORCE -->
 <!-- LAB2: HBO FAMILY TESTED AGAINST CINEMAX REFERENCE / NO TIMELINE PATCH / NO FORCE SEEK -->
@@ -9,7 +10,7 @@
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB HBO FAMILY LAB 6 • DRM KEY INSPECTOR</title>
+    <title>3BB HBO FAMILY LAB 7 • DRM CONFIG VERIFY</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -93,7 +94,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 6 • DRM KEY INSPECTOR</h2>
+    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 7 • DRM CONFIG VERIFY</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -439,6 +440,12 @@ let lab6ConfiguredKeyId = "-";
 let lab6MissingKeyIds = [];
 let lab6RestrictedKeyStatuses = [];
 let lab6KeyMatch = "-";
+let lab7ConfiguredKeyMasked = "-";
+let lab7ConfiguredKeyLength = 0;
+let lab7ClearKeyMapIds = [];
+let lab7ConfigPairStatus = "-";
+let lab7RequestedKidPresentInMap = "-";
+
 
 
 
@@ -490,6 +497,7 @@ function lab5InstallReadOnlyTrace(player,channel){
   player.__lab5Bound=true;
 
   lab5CaptureClearKeyConfig();
+  setTimeout(lab7InspectConfig,0);
 
   try{
     const net=player.getNetworkingEngine?.();
@@ -531,6 +539,7 @@ function lab5InstallReadOnlyTrace(player,channel){
             handled:d.handled
           });
           lab6UpdateFromErrorDetail(d);
+          lab7InspectConfig();
           lab5Push(lab5PlayerLog,`ERROR ${lab5LastErrorDetail}`);
         }else if(name==="buffering"){
           lab5Push(lab5PlayerLog,`BUFFERING ${String(ev?.buffering)}`);
@@ -603,6 +612,81 @@ function lab6Summary(){
     `missingKIDs=${lab6MissingKeyIds.length?lab6MissingKeyIds.join(","):"-"}`,
     `restricted=${lab6RestrictedKeyStatuses.length?lab6RestrictedKeyStatuses.join(","):"-"}`,
     `result=${lab6KeyMatch}`
+  ].join(" | ");
+}
+
+function lab7MaskKey(v){
+  const s = String(v||"");
+  if(!s) return "-";
+  if(s.length <= 8) return "*".repeat(s.length);
+  return s.slice(0,4) + "…" + s.slice(-4);
+}
+
+function lab7GetServer(){
+  try{
+    if(Array.isArray(activeOriginalChannel?.servers)){
+      return activeOriginalChannel.servers[activeServerIndex] || activeOriginalChannel.servers[0] || null;
+    }
+    if(Array.isArray(activeChannel?.servers)){
+      return activeChannel.servers[activeServerIndex] || activeChannel.servers[0] || null;
+    }
+  }catch(e){}
+  return null;
+}
+
+function lab7InspectConfig(){
+  try{
+    const s = lab7GetServer();
+    const configuredKid = s?.keyId || activeChannel?.keyId || "-";
+    const configuredKey = s?.key || activeChannel?.key || "";
+
+    lab7ConfiguredKeyMasked = lab7MaskKey(configuredKey);
+    lab7ConfiguredKeyLength = String(configuredKey||"").length;
+
+    let mapIds = [];
+    try{
+      if(shakaPlayer && typeof shakaPlayer.getConfiguration === "function"){
+        const cfg = shakaPlayer.getConfiguration();
+        mapIds = Object.keys(cfg?.drm?.clearKeys || {});
+      }
+    }catch(e){}
+    lab7ClearKeyMapIds = mapIds;
+
+    const cfgKid = lab6NormKid(configuredKid);
+    const mapNorm = mapIds.map(lab6NormKid).filter(Boolean);
+    const missingNorm = lab6MissingKeyIds.map(lab6NormKid).filter(Boolean);
+
+    if(!cfgKid){
+      lab7ConfigPairStatus = "NO CONFIGURED KID";
+    }else if(!configuredKey){
+      lab7ConfigPairStatus = "KID PRESENT / KEY EMPTY";
+    }else if(configuredKey.length !== 32){
+      lab7ConfigPairStatus = `KEY LENGTH ${configuredKey.length} (EXPECTED 32 HEX)`;
+    }else if(mapNorm.length && !mapNorm.includes(cfgKid)){
+      lab7ConfigPairStatus = "CONFIG KID NOT PRESENT IN SHAKA CLEARKEY MAP";
+    }else{
+      lab7ConfigPairStatus = "CONFIG PAIR LOADED";
+    }
+
+    if(!missingNorm.length){
+      lab7RequestedKidPresentInMap = "NO MISSING KID REPORTED";
+    }else{
+      const hit = missingNorm.some(k => mapNorm.includes(k));
+      lab7RequestedKidPresentInMap = hit ? "YES" : "NO";
+    }
+  }catch(e){
+    lab7ConfigPairStatus = "INSPECT ERROR";
+  }
+}
+
+function lab7Summary(){
+  return [
+    `configuredKID=${lab6ConfiguredKeyId}`,
+    `configuredKey=${lab7ConfiguredKeyMasked}`,
+    `keyLen=${lab7ConfiguredKeyLength}`,
+    `clearKeyMapIDs=${lab7ClearKeyMapIds.length?lab7ClearKeyMapIds.join(","):"-"}`,
+    `pairStatus=${lab7ConfigPairStatus}`,
+    `missingKidInMap=${lab7RequestedKidPresentInMap}`
   ].join(" | ");
 }
 function lab4Esc(v){
@@ -690,7 +774,12 @@ function renderLab4Diag(){
     ["LAB5 Error Detail", lab5LastErrorDetail],
     ["LAB6 Configured KID", lab6ConfiguredKeyId],
     ["LAB6 Missing KID", lab6MissingKeyIds.length ? lab6MissingKeyIds.join(",") : "-"],
-    ["LAB6 Key Compare", lab6KeyMatch]
+    ["LAB6 Key Compare", lab6KeyMatch],
+    ["LAB7 Configured Key", lab7ConfiguredKeyMasked],
+    ["LAB7 Key Length", String(lab7ConfiguredKeyLength)],
+    ["LAB7 ClearKey Map IDs", lab7ClearKeyMapIds.length ? lab7ClearKeyMapIds.join(",") : "-"],
+    ["LAB7 Pair Status", lab7ConfigPairStatus],
+    ["LAB7 Missing KID In Map", lab7RequestedKidPresentInMap]
   ];
 
   body.innerHTML = rows.map(([k,v])=>{
@@ -714,6 +803,11 @@ function renderLab4Diag(){
   body.innerHTML +=
     `<div class="lab5-section">LAB6 DRM KEY-ID INSPECTOR</div>` +
     `<div class="lab5-log">${lab4Esc(lab6Summary())}</div>`;
+
+
+  body.innerHTML +=
+    `<div class="lab5-section">LAB7 DRM CONFIG VERIFY</div>` +
+    `<div class="lab5-log">${lab4Esc(lab7Summary())}</div>`;
 
 }
 
@@ -879,6 +973,12 @@ async function loadChannel(channel, element){
   lab6MissingKeyIds = [];
   lab6RestrictedKeyStatuses = [];
   lab6KeyMatch = "-";
+  lab7ConfiguredKeyMasked = "-";
+  lab7ConfiguredKeyLength = 0;
+  lab7ClearKeyMapIds = [];
+  lab7ConfigPairStatus = "-";
+  lab7RequestedKidPresentInMap = "-";
+  setTimeout(lab7InspectConfig,0);
   setTimeout(lab6GetConfiguredKid,0);
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
