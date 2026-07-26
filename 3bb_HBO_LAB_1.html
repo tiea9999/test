@@ -7,7 +7,7 @@
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB HBO FAMILY LAB 3 • HOME FIXED</title>
+    <title>3BB HBO FAMILY LAB 4 • READ ONLY DIAG</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -55,18 +55,37 @@
 }
 </style>
 
+
+<style id="lab4-diag-style">
+#lab4-diag{
+  position:absolute; right:14px; bottom:14px; z-index:100005;
+  width:min(460px,calc(100vw - 28px)); max-height:52vh; overflow:auto;
+  display:none; background:rgba(3,14,24,.96); border:1px solid #00e5ff;
+  border-radius:12px; padding:10px 12px; color:#fff;
+  font:600 13px/1.45 Consolas,monospace; box-shadow:0 8px 26px rgba(0,0,0,.55);
+}
+#lab4-diag .lab4-title{color:#00e5ff;font:900 15px Arial,sans-serif;margin-bottom:7px}
+#lab4-diag .lab4-row{display:grid;grid-template-columns:150px 1fr;gap:8px;border-top:1px solid rgba(255,255,255,.08);padding:4px 0}
+#lab4-diag .lab4-key{color:#9fd8ff}
+#lab4-diag .lab4-val{word-break:break-word}
+#lab4-diag .ok{color:#00e676}
+#lab4-diag .warn{color:#ffc400}
+#lab4-diag .bad{color:#ff5252}
+</style>
+
 </head>
 
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 3 • HOME FIXED</h2>
+    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 4 • READ ONLY DIAG</h2>
 
     <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
                 <button class="player-btn" id="closeBtn" onclick="closePlayer()">X</button>
                 <button class="player-btn" onclick="restartCurrent()">↻ รีโหลด</button>
+                <button class="player-btn" id="lab4DiagBtn" onclick="toggleLab4Diag()">📊 DIAG</button>
             </div>
             <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
@@ -77,6 +96,10 @@
         <div id="jw-player"></div>
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
+        <div id="lab4-diag">
+          <div class="lab4-title">LAB4 READ ONLY DIAG</div>
+          <div id="lab4-diag-body">ยังไม่มีข้อมูล</div>
+        </div>
     </div>
 
     <div id="category-menu">
@@ -386,6 +409,116 @@ let activeOriginalChannel = null;
 let activeElement = null;
 let activeUrl = "";
 let activeServerIndex = 0;
+let lab4DiagVisible = false;
+let lab4DiagTimer = null;
+let lab4LastShakaError = "-";
+
+
+function lab4Esc(v){
+  return String(v ?? "")
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function lab4Frames(video){
+  try{
+    if(video && typeof video.getVideoPlaybackQuality === "function"){
+      const q = video.getVideoPlaybackQuality();
+      return {
+        decoded:Number(q.totalVideoFrames||0),
+        dropped:Number(q.droppedVideoFrames||0),
+        corrupted:Number(q.corruptedVideoFrames||0)
+      };
+    }
+  }catch(e){}
+  return {
+    decoded:Number(video?.webkitDecodedFrameCount||0),
+    dropped:Number(video?.webkitDroppedFrameCount||0),
+    corrupted:0
+  };
+}
+
+function lab4Buffered(video){
+  const out=[];
+  try{
+    for(let i=0;i<video.buffered.length;i++){
+      out.push(`${video.buffered.start(i).toFixed(1)}-${video.buffered.end(i).toFixed(1)}`);
+    }
+  }catch(e){}
+  return out.length ? out.join(", ") : "-";
+}
+
+function lab4SeekRange(){
+  try{
+    if(shakaPlayer && typeof shakaPlayer.seekRange === "function"){
+      const r = shakaPlayer.seekRange();
+      if(r) return `${Number(r.start).toFixed(3)} - ${Number(r.end).toFixed(3)}`;
+    }
+  }catch(e){}
+  return "-";
+}
+
+function renderLab4Diag(){
+  const body=document.getElementById("lab4-diag-body");
+  const video=document.getElementById("html5-player");
+  if(!body || !video) return;
+
+  let tracks=[], active=null, stats={};
+  try{
+    if(shakaPlayer){
+      tracks = shakaPlayer.getVariantTracks ? shakaPlayer.getVariantTracks() : [];
+      active = tracks.find(t=>t.active) || tracks[0] || null;
+      stats = shakaPlayer.getStats ? shakaPlayer.getStats() : {};
+    }
+  }catch(e){}
+
+  const f=lab4Frames(video);
+  const rows=[
+    ["Channel", activeChannel?.name || "-"],
+    ["URL", activeUrl || activeChannel?.file || "-"],
+    ["Player", activeUrl?.includes(".mpd") ? "Shaka / DASH" : "HLS"],
+    ["DRM Config", activeChannel?.drm ? "ClearKey configured" : "ไม่ใช้"],
+    ["MediaKeys", video.mediaKeys ? "ATTACHED" : "NONE"],
+    ["Playback", video.paused ? "PAUSED" : (video.readyState>=2 ? "PLAYING" : "LOADING")],
+    ["ReadyState", String(video.readyState)],
+    ["NetworkState", String(video.networkState)],
+    ["Video Size", `${video.videoWidth||0}x${video.videoHeight||0}`],
+    ["Decoded Frames", String(f.decoded)],
+    ["Dropped Frames", String(f.dropped)],
+    ["Corrupted Frames", String(f.corrupted)],
+    ["Buffered", lab4Buffered(video)],
+    ["Shaka SeekRange", lab4SeekRange()],
+    ["Variant Count", String(tracks.length)],
+    ["Active Variant", active ? `id=${active.id??"-"} bw=${Math.round((active.bandwidth||0)/1000)}kbps fps=${active.frameRate||"-"}` : "-"],
+    ["Video Codec", active?.videoCodec || active?.codecs || "-"],
+    ["Audio Codec", active?.audioCodec || "-"],
+    ["Resolution", active ? `${active.width||0}x${active.height||0}` : "-"],
+    ["Estimated BW", stats.estimatedBandwidth ? Math.round(stats.estimatedBandwidth/1000)+" kbps" : "-"],
+    ["Shaka Error", lab4LastShakaError]
+  ];
+
+  body.innerHTML = rows.map(([k,v])=>{
+    let cls="";
+    if(k==="MediaKeys") cls = v==="ATTACHED" ? "ok":"warn";
+    if(k==="Decoded Frames") cls = Number(v)>0 ? "ok":"warn";
+    if(k==="Shaka Error" && v!=="-") cls="bad";
+    return `<div class="lab4-row"><div class="lab4-key">${lab4Esc(k)}</div><div class="lab4-val ${cls}">${lab4Esc(v)}</div></div>`;
+  }).join("");
+}
+
+function toggleLab4Diag(){
+  const panel=document.getElementById("lab4-diag");
+  if(!panel) return;
+  lab4DiagVisible=!lab4DiagVisible;
+  panel.style.display=lab4DiagVisible?"block":"none";
+  if(lab4DiagVisible){
+    renderLab4Diag();
+    if(!lab4DiagTimer) lab4DiagTimer=setInterval(renderLab4Diag,1000);
+  }else if(lab4DiagTimer){
+    clearInterval(lab4DiagTimer);
+    lab4DiagTimer=null;
+  }
+}
 
 function setStatus(text, autoHide=true){
   const box = document.getElementById("status");
@@ -522,6 +655,7 @@ function firstChannelUrl(channel){
 async function loadChannel(channel, element){
   activeOriginalChannel = channel;
   activeServerIndex = 0;
+  lab4LastShakaError = "-";
 
   const resolvedChannel = resolveChannel(channel, activeServerIndex);
   if(!resolvedChannel || !resolvedChannel.file){
@@ -575,6 +709,15 @@ function playMPDNotice(channel, url){
       shaka.polyfill.installAll();
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
+        lab4LastShakaError = "-";
+        shakaPlayer.addEventListener("error", function(event){
+          try{
+            const d = event.detail || {};
+            lab4LastShakaError = `code=${d.code||"-"} severity=${d.severity||"-"} category=${d.category||"-"}`;
+          }catch(e){
+            lab4LastShakaError = "unknown";
+          }
+        });
         shakaPlayer.configure({
           streaming:{
             bufferingGoal: 30,
