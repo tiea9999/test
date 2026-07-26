@@ -8,7 +8,7 @@
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB HBO FAMILY LAB 5 • ERROR 4012 TRACE</title>
+    <title>3BB HBO FAMILY LAB 5 • ERROR 4012 TRACE FIX1</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -92,7 +92,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 5 • ERROR 4012 TRACE</h2>
+    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 5 • ERROR 4012 TRACE FIX1</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -641,13 +641,14 @@ function renderLab4Diag(){
     return `<div class="lab4-row"><div class="lab4-key">${lab4Esc(k)}</div><div class="lab4-val ${cls}">${lab4Esc(v)}</div></div>`;
   }).join("");
 
+
   body.innerHTML +=
     `<div class="lab5-section">LAB5 SHAKA ERROR 4012 DETAIL</div>` +
     `<div class="lab5-log">${lab4Esc(lab5LastErrorDetail)}</div>` +
     `<div class="lab5-section">LAB5 PLAYER EVENT LOG</div>` +
-    `<div class="lab5-log">${lab4Esc(lab5PlayerLog.length?lab5PlayerLog.join("\n"):"ยังไม่มีข้อมูล")}</div>` +
+    `<div class="lab5-log">${lab4Esc(lab5PlayerLog.length ? lab5PlayerLog.join("\n") : "ยังไม่มีข้อมูล")}</div>` +
     `<div class="lab5-section">LAB5 NETWORK TRACE</div>` +
-    `<div class="lab5-log">${lab4Esc(lab5NetworkLog.length?lab5NetworkLog.join("\n"):"ยังไม่มีข้อมูล")}</div>`;
+    `<div class="lab5-log">${lab4Esc(lab5NetworkLog.length ? lab5NetworkLog.join("\n") : "ยังไม่มีข้อมูล")}</div>`;
 
 }
 
