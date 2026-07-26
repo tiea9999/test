@@ -2,10 +2,11 @@
 <html lang="th">
 
 <head>
+<!-- LAB10: HBO FAMILY AUTO-MATCHES AN EXISTING CLEARKEY PAIR FROM THE CURRENT CHANNEL LIST. STABLE BASE SOURCE UNCHANGED. -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB HBO FAMILY LAB9 KEY RESOLVER</title>
+    <title>3BB HBO FAMILY LAB10 • AUTO MATCH EXISTING CLEARKEY</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -58,14 +59,14 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB9 • KEY RESOLVER</h2>
+    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB10 • AUTO MATCH EXISTING CLEARKEY</h2>
 
     <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
                 <button class="player-btn" id="closeBtn" onclick="closePlayer()">X</button>
                 <button class="player-btn" onclick="restartCurrent()">↻ รีโหลด</button>
-                <button class="player-btn" onclick="toggleLab9Diag()">📊 DIAG</button>
+                <button class="player-btn" onclick="toggleLab10Diag()">📊 DIAG</button>
             </div>
             <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
@@ -76,7 +77,7 @@
         <div id="jw-player"></div>
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
-        <div id="lab9-diag" style="display:none;position:absolute;right:14px;bottom:14px;z-index:100005;width:min(520px,calc(100vw - 28px));max-height:62vh;overflow:auto;background:rgba(3,14,24,.97);border:1px solid #00e5ff;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.45 Consolas,monospace;"></div>
+        <div id="lab10-diag" style="display:none;position:absolute;right:14px;bottom:14px;z-index:100005;width:min(520px,calc(100vw - 28px));max-height:62vh;overflow:auto;background:rgba(3,14,24,.97);border:1px solid #00e5ff;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.45 Consolas,monospace;"></div>
     </div>
 
     <div id="category-menu">
@@ -386,72 +387,82 @@ let activeOriginalChannel = null;
 let activeElement = null;
 let activeUrl = "";
 let activeServerIndex = 0;
-let lab9LastError = "-";
-let lab9MissingKids = [];
-let lab9ObservedKids = [];
-let lab9ConfiguredKeys = {};
+let lab10LastError = "-";
+let lab10MissingKids = [];
+let lab10MatchedKid = "-";
+let lab10MatchedFrom = "-";
+let lab10Applied = false;
 
 
 
-function lab9Esc(v){
+function lab10Esc(v){
   return String(v ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
-function lab9NormKid(v){
+function lab10NormHex(v){
   return String(v||"").toLowerCase().replace(/[^0-9a-f]/g,"");
 }
-function lab9Hex32(v){
-  return /^[0-9a-f]{32}$/i.test(String(v||""));
-}
-function lab9CollectConfiguredKeys(){
-  const out={};
-  try{
-    for(const ch of channels){
-      const servers = Array.isArray(ch.servers) ? ch.servers : [ch];
-      for(const s of servers){
-        const kid=lab9NormKid(s && s.keyId);
-        const key=String((s && s.key)||"").toLowerCase().replace(/[^0-9a-f]/g,"");
-        if(lab9Hex32(kid) && lab9Hex32(key)) out[kid]=key;
+function lab10BuildKnownKeyMap(){
+  const map = {};
+  for(const ch of channels){
+    const servers = Array.isArray(ch.servers) ? ch.servers : [ch];
+    for(const s of servers){
+      const kid = lab10NormHex(s?.keyId);
+      const key = lab10NormHex(s?.key);
+      if(kid.length===32 && key.length===32){
+        map[kid] = {key, source:ch.name || "unknown"};
       }
     }
-  }catch(e){}
-  lab9ConfiguredKeys=out;
-  return out;
+  }
+  return map;
 }
-function lab9ActivePair(){
-  const kid=lab9NormKid(activeChannel?.keyId);
-  const key=String(activeChannel?.key||"").toLowerCase().replace(/[^0-9a-f]/g,"");
-  return {kid:kid||"-",key:key||"-"};
+function lab10IsTargetChannel(channel){
+  return String(channel?.name||"").trim().toUpperCase()==="HBO FAMILY";
 }
-function lab9Resolution(){
-  const pair=lab9ActivePair();
-  const map=lab9CollectConfiguredKeys();
-  const missing=lab9MissingKids.map(lab9NormKid).filter(Boolean);
-  const rows=missing.map(kid=>({
-    kid,
-    found:!!map[kid],
-    key:map[kid]||"-",
-    isActive:kid===pair.kid
-  }));
-  return {pair,map,missing,rows};
+function lab10ApplyExistingMatch(channel){
+  // Only HBO FAMILY is modified in LAB10.
+  if(!lab10IsTargetChannel(channel)) return channel;
+
+  const requiredKid = "f48caba466394e93b50780f21798787a";
+  const known = lab10BuildKnownKeyMap();
+  const hit = known[requiredKid];
+
+  if(!hit){
+    lab10Applied = false;
+    lab10MatchedKid = "-";
+    lab10MatchedFrom = "NOT FOUND";
+    return channel;
+  }
+
+  // Clone so original channel list stays untouched at runtime.
+  const patched = Object.assign({}, channel, {
+    drm:true,
+    keyId:requiredKid,
+    key:hit.key
+  });
+
+  lab10Applied = true;
+  lab10MatchedKid = requiredKid;
+  lab10MatchedFrom = hit.source;
+  return patched;
 }
-function renderLab9Diag(){
-  const box=document.getElementById("lab9-diag");
+function renderLab10Diag(){
+  const box=document.getElementById("lab10-diag");
   const video=document.getElementById("html5-player");
   if(!box || !video) return;
+
   let tracks=[], active=null;
   try{
     tracks=shakaPlayer?.getVariantTracks?.()||[];
     active=tracks.find(t=>t.active)||null;
   }catch(e){}
+
   let decoded=0,dropped=0;
   try{
     const q=video.getVideoPlaybackQuality();
-    decoded=q.totalVideoFrames||0; dropped=q.droppedVideoFrames||0;
+    decoded=q.totalVideoFrames||0;
+    dropped=q.droppedVideoFrames||0;
   }catch(e){}
-  const r=lab9Resolution();
-  const resolutionRows = r.rows.length
-    ? r.rows.map(x=>`<div style="padding:5px 0;border-top:1px solid rgba(255,255,255,.08)"><b style="color:#9fd8ff">Required KID</b> ${lab9Esc(x.kid)}<br><b style="color:#9fd8ff">Known key in current channel list</b> ${x.found?"YES":"NO"}<br><b style="color:#9fd8ff">Pair status</b> ${x.isActive?"ACTIVE KID":"DIFFERENT FROM ACTIVE KID"}</div>`).join("")
-    : '<div>No missing KID reported yet.</div>';
+
   const rows=[
     ["Channel",activeChannel?.name||"-"],
     ["URL",activeUrl||"-"],
@@ -462,29 +473,30 @@ function renderLab9Diag(){
     ["Dropped Frames",dropped],
     ["Variant Count",tracks.length],
     ["Active Variant",active?`id=${active.id} ${active.width||0}x${active.height||0}`:"-"],
-    ["Configured KID",r.pair.kid],
-    ["Configured Key","present="+(r.pair.key!=="-")],
-    ["Missing KID(s)",r.missing.length?r.missing.join(","):"-"],
-    ["Known ClearKey pairs",Object.keys(r.map).length],
-    ["Shaka Error",lab9LastError]
+    ["Auto Match Applied",lab10Applied?"YES":"NO"],
+    ["Matched KID",lab10MatchedKid],
+    ["Matched From",lab10MatchedFrom],
+    ["Current Configured KID",activeChannel?.keyId||"-"],
+    ["Missing KID(s)",lab10MissingKids.length?lab10MissingKids.join(","):"-"],
+    ["Shaka Error",lab10LastError]
   ];
-  box.innerHTML='<div style="color:#00e5ff;font:900 15px Arial;margin-bottom:7px">LAB9 HBO FAMILY • KEY RESOLVER DIAG</div>'+
-    rows.map(([k,v])=>`<div style="display:grid;grid-template-columns:155px 1fr;gap:8px;border-top:1px solid rgba(255,255,255,.09);padding:4px 0"><span style="color:#9fd8ff">${lab9Esc(k)}</span><span style="word-break:break-word">${lab9Esc(v)}</span></div>`).join("")+
-    '<div style="margin-top:9px;color:#00e5ff;font-weight:900">REQUIRED KID RESOLUTION</div>'+resolutionRows+
-    '<div style="margin-top:9px;color:#ffd54f">READ-ONLY: LAB9 does not replace or guess DRM keys.</div>';
+
+  box.innerHTML='<div style="color:#00e5ff;font:900 15px Arial;margin-bottom:7px">LAB10 HBO FAMILY • AUTO MATCH EXISTING CLEARKEY</div>'+
+    rows.map(([k,v])=>`<div style="display:grid;grid-template-columns:160px 1fr;gap:8px;border-top:1px solid rgba(255,255,255,.09);padding:4px 0"><span style="color:#9fd8ff">${lab10Esc(k)}</span><span style="word-break:break-word">${lab10Esc(v)}</span></div>`).join("");
 }
-let lab9DiagTimer=null;
-function toggleLab9Diag(){
-  const box=document.getElementById("lab9-diag");
+let lab10DiagTimer=null;
+function toggleLab10Diag(){
+  const box=document.getElementById("lab10-diag");
   if(!box)return;
   const show=box.style.display==="none";
   box.style.display=show?"block":"none";
   if(show){
-    renderLab9Diag();
-    clearInterval(lab9DiagTimer);
-    lab9DiagTimer=setInterval(renderLab9Diag,1000);
+    renderLab10Diag();
+    clearInterval(lab10DiagTimer);
+    lab10DiagTimer=setInterval(renderLab10Diag,1000);
   }else{
-    clearInterval(lab9DiagTimer); lab9DiagTimer=null;
+    clearInterval(lab10DiagTimer);
+    lab10DiagTimer=null;
   }
 }
 
@@ -624,7 +636,8 @@ async function loadChannel(channel, element){
   activeOriginalChannel = channel;
   activeServerIndex = 0;
 
-  const resolvedChannel = resolveChannel(channel, activeServerIndex);
+  let resolvedChannel = resolveChannel(channel, activeServerIndex);
+  resolvedChannel = lab10ApplyExistingMatch(resolvedChannel);
   if(!resolvedChannel || !resolvedChannel.file){
     setStatus("ช่องนี้ยังไม่มีลิงก์", false);
     return;
@@ -676,17 +689,16 @@ function playMPDNotice(channel, url){
       shaka.polyfill.installAll();
       if(shaka.Player.isBrowserSupported()){
         shakaPlayer = new shaka.Player(video);
-        lab9LastError="-";
-        lab9MissingKids=[];
-        lab9ObservedKids=[];
+        lab10LastError="-";
+        lab10MissingKids=[];
         shakaPlayer.addEventListener("error", function(event){
           try{
             const d=event.detail||{};
-            lab9LastError=`code=${d.code||"-"} severity=${d.severity||"-"} category=${d.category||"-"}`;
+            lab10LastError=`code=${d.code||"-"} severity=${d.severity||"-"} category=${d.category||"-"}`;
             const data=Array.isArray(d.data)?d.data:[];
             for(const item of data){
               if(item && Array.isArray(item.missingKeys)){
-                lab9MissingKids=[...new Set(lab9MissingKids.concat(item.missingKeys.map(lab9NormKid).filter(Boolean)))];
+                lab10MissingKids=[...new Set(item.missingKeys.map(lab10NormHex).filter(Boolean))];
               }
             }
           }catch(e){}
