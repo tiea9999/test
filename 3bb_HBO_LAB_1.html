@@ -2,6 +2,7 @@
 <html lang="th">
 
 <head>
+<!-- LAB8: READ-ONLY MPD DRM KID INSPECTOR / NO DRM CHANGE / NO SEEK / NO TIMELINE PATCH -->
 <!-- LAB7: READ-ONLY DRM CONFIG VERIFY / NO KEY EXTRACTION / NO SEEK / NO MPD PATCH -->
 <!-- LAB6: READ-ONLY DRM KEY-ID INSPECTOR / NO KEY EXTRACTION / NO SEEK / NO MPD PATCH -->
 <!-- LAB5: READ-ONLY SHAKA ERROR 4012 TRACE / NO SEEK / NO MPD PATCH / NO FORCE -->
@@ -10,7 +11,7 @@
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB HBO FAMILY LAB 7 • DRM CONFIG VERIFY</title>
+    <title>3BB HBO FAMILY LAB 8 • MPD DRM KID INSPECTOR</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -94,7 +95,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 7 • DRM CONFIG VERIFY</h2>
+    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB 8 • MPD DRM KID INSPECTOR</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -445,6 +446,12 @@ let lab7ConfiguredKeyLength = 0;
 let lab7ClearKeyMapIds = [];
 let lab7ConfigPairStatus = "-";
 let lab7RequestedKidPresentInMap = "-";
+let lab8MpdKids = [];
+let lab8VideoKids = [];
+let lab8AudioKids = [];
+let lab8MpdStatus = "WAIT";
+let lab8Compare = "-";
+
 
 
 
@@ -540,6 +547,7 @@ function lab5InstallReadOnlyTrace(player,channel){
           });
           lab6UpdateFromErrorDetail(d);
           lab7InspectConfig();
+          setTimeout(lab8InspectMpd, 0);
           lab5Push(lab5PlayerLog,`ERROR ${lab5LastErrorDetail}`);
         }else if(name==="buffering"){
           lab5Push(lab5PlayerLog,`BUFFERING ${String(ev?.buffering)}`);
@@ -615,6 +623,91 @@ function lab6Summary(){
   ].join(" | ");
 }
 
+
+function lab8NormKid(v){
+  return String(v||"").toLowerCase().replace(/^urn:uuid:/,"").replace(/[^0-9a-f]/g,"");
+}
+
+function lab8Unique(arr){
+  return [...new Set((arr||[]).map(lab8NormKid).filter(x => x.length === 32))];
+}
+
+function lab8CollectKidsFromElement(el){
+  const out = [];
+  if(!el) return out;
+  const nodes = [el, ...el.querySelectorAll("*")];
+  for(const n of nodes){
+    for(const a of Array.from(n.attributes || [])){
+      const name = String(a.name||"").toLowerCase();
+      if(name.includes("default_kid") || name.endsWith(":default_kid")){
+        out.push(a.value);
+      }
+    }
+  }
+  return lab8Unique(out);
+}
+
+async function lab8InspectMpd(){
+  try{
+    lab8MpdStatus = "FETCHING";
+    const url = activeChannel?.url || lab7GetServer()?.url || "";
+    if(!url){
+      lab8MpdStatus = "NO MPD URL";
+      return;
+    }
+
+    const r = await fetch(url, {cache:"no-store"});
+    if(!r.ok){
+      lab8MpdStatus = "MPD HTTP " + r.status;
+      return;
+    }
+    const text = await r.text();
+    const xml = new DOMParser().parseFromString(text, "application/xml");
+    if(xml.querySelector("parsererror")){
+      lab8MpdStatus = "MPD XML PARSE ERROR";
+      return;
+    }
+
+    lab8MpdKids = lab8CollectKidsFromElement(xml.documentElement);
+    const video = [];
+    const audio = [];
+
+    for(const a of xml.querySelectorAll("AdaptationSet")){
+      const ct = String(a.getAttribute("contentType") || a.getAttribute("mimeType") || "").toLowerCase();
+      const kids = lab8CollectKidsFromElement(a);
+      if(ct.includes("video")) video.push(...kids);
+      if(ct.includes("audio")) audio.push(...kids);
+    }
+
+    lab8VideoKids = lab8Unique(video);
+    lab8AudioKids = lab8Unique(audio);
+
+    const configured = lab8NormKid(lab6ConfiguredKeyId);
+    const missing = lab8Unique(lab6MissingKeyIds);
+
+    const all = new Set(lab8MpdKids);
+    const cfgIn = configured ? all.has(configured) : false;
+    const missingIn = missing.filter(k => all.has(k));
+
+    lab8Compare =
+      `configuredInMPD=${cfgIn ? "YES" : "NO"} | ` +
+      `missingInMPD=${missingIn.length ? missingIn.join(",") : "NO"}`;
+
+    lab8MpdStatus = "OK";
+  }catch(e){
+    lab8MpdStatus = "ERROR " + (e?.message || String(e));
+  }
+}
+
+function lab8Summary(){
+  return [
+    `status=${lab8MpdStatus}`,
+    `mpdKIDs=${lab8MpdKids.length ? lab8MpdKids.join(",") : "-"}`,
+    `videoKIDs=${lab8VideoKids.length ? lab8VideoKids.join(",") : "-"}`,
+    `audioKIDs=${lab8AudioKids.length ? lab8AudioKids.join(",") : "-"}`,
+    lab8Compare
+  ].join(" | ");
+}
 function lab7MaskKey(v){
   const s = String(v||"");
   if(!s) return "-";
@@ -779,7 +872,12 @@ function renderLab4Diag(){
     ["LAB7 Key Length", String(lab7ConfiguredKeyLength)],
     ["LAB7 ClearKey Map IDs", lab7ClearKeyMapIds.length ? lab7ClearKeyMapIds.join(",") : "-"],
     ["LAB7 Pair Status", lab7ConfigPairStatus],
-    ["LAB7 Missing KID In Map", lab7RequestedKidPresentInMap]
+    ["LAB7 Missing KID In Map", lab7RequestedKidPresentInMap],
+    ["LAB8 MPD Status", lab8MpdStatus],
+    ["LAB8 MPD KIDs", lab8MpdKids.length ? lab8MpdKids.join(",") : "-"],
+    ["LAB8 Video KIDs", lab8VideoKids.length ? lab8VideoKids.join(",") : "-"],
+    ["LAB8 Audio KIDs", lab8AudioKids.length ? lab8AudioKids.join(",") : "-"],
+    ["LAB8 Compare", lab8Compare]
   ];
 
   body.innerHTML = rows.map(([k,v])=>{
@@ -808,6 +906,11 @@ function renderLab4Diag(){
   body.innerHTML +=
     `<div class="lab5-section">LAB7 DRM CONFIG VERIFY</div>` +
     `<div class="lab5-log">${lab4Esc(lab7Summary())}</div>`;
+
+
+  body.innerHTML +=
+    `<div class="lab5-section">LAB8 MPD DRM KID INSPECTOR</div>` +
+    `<div class="lab5-log">${lab4Esc(lab8Summary())}</div>`;
 
 }
 
@@ -978,6 +1081,12 @@ async function loadChannel(channel, element){
   lab7ClearKeyMapIds = [];
   lab7ConfigPairStatus = "-";
   lab7RequestedKidPresentInMap = "-";
+  lab8MpdKids = [];
+  lab8VideoKids = [];
+  lab8AudioKids = [];
+  lab8MpdStatus = "WAIT";
+  lab8Compare = "-";
+  setTimeout(lab8InspectMpd, 300);
   setTimeout(lab7InspectConfig,0);
   setTimeout(lab6GetConfiguredKid,0);
 
