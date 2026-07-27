@@ -101,7 +101,7 @@ const channels = [
   servers:[
     {
       name:"Main",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=http%3A%2F%2Fmacete.xyz%3A2095%2Fplay%2Flive.php%3Fmac%3D00%3A1A%3A79%3AAB%3AED%3A5A%26stream%3D115833%26extension%3Dm3u8&referer=https%3A%2F%2Fwww.madoball.com%2F",
+      file:"https://movieproxy.tawatchai250958.workers.dev/debug8990?id=warner01",
       drm:false
     },
     {
@@ -118,12 +118,22 @@ logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQ
   group:"หนัง",
   servers:[
     {
-      name:"Main",
       file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=warner01&utm_source=chatgpt.com",
       drm:false
     }
   ]
-}, 
+},
+{
+  name:"test",
+logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQHDGbqHV94T6Ed74fTkKcXYhA&s=10",
+  group:"หนัง",
+  servers:[
+    {
+      file:"https://dov.streaming-api.xyz/kicksballcom/hbo/chunks.m3u8?nimblesessionid=41937&wmsAuthSign=c2VydmVyX3RpbWU9Ny8yNy8yMDI2IDQ6MjU6MTMgQU0maGFzaF92YWx1ZT1vNHBBV21Cd05pVVdDRWcwZFV1bDR3PT0mdmFsaWRtaW51dGVzPTIw",
+      drm:false
+    }
+  ]
+},
 {
   name:"Bein 1",
   logo:"https://6395online.com:8443/logotv/sport/bein1.png",
@@ -344,6 +354,7 @@ logo:"https://6395online.com:8443/logotv/movie/Mono29p.jpg",
     {name:"Backup2",file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/2819/playlist.m3u8",drm:false},
   ]
 },
+
 {
   name:"HBO FAMILY",
   logo:"https://6395online.com:8443/logotv/movie/hbofamily.png",
@@ -420,6 +431,11 @@ logo:"https://6395online.com:8443/logotv/movie/Mono29p.jpg",
 let currentHls = null;
 let shakaPlayer = null;
 let hlsWatchdog = null;
+
+// HLS Live Resume Recovery
+let hlsPauseStartedAt = 0;
+let hlsResumeRecovering = false;
+
 let activeChannel = null;
 let activeOriginalChannel = null;
 let activeElement = null;
@@ -681,6 +697,11 @@ async function stopAllPlayers(){
   }
 
   try{
+    video.onpause = null;
+    video.onplay = null;
+    hlsPauseStartedAt = 0;
+    hlsResumeRecovering = false;
+
     video.pause();
     video.removeAttribute("src");
     video.load();
@@ -886,6 +907,45 @@ function useHLS_STABLE(url){
     currentHls.loadSource(url);
     currentHls.attachMedia(video);
 
+    // ===== HLS LIVE PAUSE / RESUME RECOVERY =====
+    // จำเวลาที่ผู้ใช้กดพักเอง
+    video.onpause = function(){
+      if(!currentHls) return;
+      hlsPauseStartedAt = Date.now();
+    };
+
+    // เมื่อกดเล่นต่อ ถ้าพักไว้นาน ให้กลับไป live edge ใหม่
+    video.onplay = function(){
+      if(!currentHls || hlsResumeRecovering) return;
+
+      const pausedMs = hlsPauseStartedAt ? (Date.now() - hlsPauseStartedAt) : 0;
+      hlsPauseStartedAt = 0;
+
+      // พักเกิน 5 วินาที หรือ buffer เดิมใช้ต่อไม่ได้
+      if(pausedMs >= 5000 || video.readyState < 2){
+        hlsResumeRecovering = true;
+        setStatus("กำลังกลับสู่สัญญาณสด...");
+
+        try{
+          currentHls.startLoad(-1);
+
+          const livePos = currentHls.liveSyncPosition;
+          if(Number.isFinite(livePos) && livePos > 0){
+            // ขยับเข้าใกล้ live edge โดยไม่ force seek ถ้าอยู่ใกล้อยู่แล้ว
+            if(Math.abs(video.currentTime - livePos) > 3){
+              video.currentTime = Math.max(0, livePos);
+            }
+          }
+        }catch(e){}
+
+        setTimeout(()=>{
+          hlsResumeRecovering = false;
+          forceAudio100();
+          video.play().catch(()=>{});
+        }, 350);
+      }
+    };
+
     currentHls.on(Hls.Events.MANIFEST_PARSED, function(){
       forceAudio100();
       video.play().catch(()=>{});
@@ -928,8 +988,20 @@ function useHLS_STABLE(url){
 
       forceAudio100();
 
-      if(video.paused || video.readyState < 2){
-        try{ currentHls.startLoad(); }catch(e){}
+      // ผู้ใช้กดพักเอง: อย่าฝืน play อัตโนมัติ
+      if(video.paused){
+        return;
+      }
+
+      // ถ้ากำลังเล่นแต่ buffer/readyState หลุด ให้ดึง live edge ใหม่
+      if(video.readyState < 2){
+        try{
+          currentHls.startLoad(-1);
+          const livePos = currentHls.liveSyncPosition;
+          if(Number.isFinite(livePos) && livePos > 0){
+            video.currentTime = Math.max(0, livePos);
+          }
+        }catch(e){}
         video.play().catch(()=>{});
         return;
       }
@@ -943,8 +1015,14 @@ function useHLS_STABLE(url){
       lastTime = video.currentTime;
 
       if(stuckCount >= 4){
-        setStatus("ภาพค้าง กำลังกู้คืน...");
-        try{ currentHls.startLoad(); }catch(e){}
+        setStatus("ภาพค้าง กำลังกู้คืนสัญญาณสด...");
+        try{
+          currentHls.startLoad(-1);
+          const livePos = currentHls.liveSyncPosition;
+          if(Number.isFinite(livePos) && livePos > 0){
+            video.currentTime = Math.max(0, livePos);
+          }
+        }catch(e){}
         video.play().catch(()=>{});
         stuckCount = 0;
       }
