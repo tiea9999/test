@@ -6,7 +6,7 @@
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB DIRECT KEY ROLLBACK TEST</title>
+    <title>3BB FREE TV DIAG TEST</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -59,7 +59,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB DIRECT KEY ROLLBACK TEST • USE CHANNEL KEY ONLY</h2>
+    <h2 style="color:orange;text-align:center;">3BB FREE TV DIAG TEST • CINEMAX REFERENCE</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -485,8 +485,7 @@ function lab14ChannelKey(channel){
 }
 
 function lab14ApplyExistingMatch(channel){
-  // ROLLBACK TEST:
-  // ช่อง 3BB ใช้ keyId/key ของตัวเองตรง ๆ ห้าม auto-match / ห้ามสลับ KID
+  // FREE-TV TEST: use this channel's configured keyId/key exactly as written.
   lab14Applied = false;
   lab14RequiredKid = "-";
   lab14MatchedKid = channel?.keyId || "-";
@@ -516,12 +515,16 @@ function renderLab10Diag(){
     ["Channel",activeChannel?.name||"-"],
     ["URL",activeUrl||"-"],
     ["Playback",video.paused?(video.readyState<2?"LOADING":"PAUSED"):"PLAYING"],
+    ["Time",Number(video.currentTime||0).toFixed(1)+" sec"],
     ["ReadyState",video.readyState],
+    ["Video Size",(video.videoWidth||0)+"x"+(video.videoHeight||0)],
     ["MediaKeys",video.mediaKeys?"ATTACHED":"NONE"],
     ["Decoded Frames",decoded],
     ["Dropped Frames",dropped],
     ["Variant Count",tracks.length],
     ["Active Variant",active?`id=${active.id} ${active.width||0}x${active.height||0}`:"-"],
+    ["Video Codec",active?.videoCodec || active?.codecs || "-"],
+    ["Audio Codec",active?.audioCodec || "-"],
     ["Error-Triggered Override",lab14Applied?"YES":"NO"],
     ["Shaka Missing KID",lab14RequiredKid],
     ["Resolver Reload Count",lab14ReloadCount],
@@ -533,7 +536,7 @@ function renderLab10Diag(){
     ["Shaka Error",lab14LastError]
   ];
 
-  box.innerHTML='<div style="color:#00e5ff;font:900 15px Arial;margin-bottom:7px">LAB14 • PERSISTENT RESOLVED KID CACHE</div>'+
+  box.innerHTML='<div style="color:#00e5ff;font:900 15px Arial;margin-bottom:7px">3BB FREE TV • CINEMAX REFERENCE DIAG</div>'+
     rows.map(([k,v])=>`<div style="display:grid;grid-template-columns:160px 1fr;gap:8px;border-top:1px solid rgba(255,255,255,.09);padding:4px 0"><span style="color:#9fd8ff">${lab14Esc(k)}</span><span style="word-break:break-word">${lab14Esc(v)}</span></div>`).join("");
 }
 let lab14DiagTimer=null;
@@ -758,9 +761,7 @@ function playMPDNotice(channel, url){
                   lab14ResolvedKidCache[lab14ChannelKey(activeChannel)] = exact;
                 }
 
-                // ROLLBACK TEST:
-                // บันทึก Missing KID ไว้ดูใน DIAG เท่านั้น
-                // ห้ามสลับ keyId/key และห้าม reload ช่องอัตโนมัติ
+                // DIAG ONLY: record missing KID; never change key or reload automatically.
                 lab14ResolvedOnce = false;
                 lab14ReloadCount = 0;
               }
