@@ -6,7 +6,7 @@
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB LAB14 • PERSISTENT RESOLVED KID CACHE</title>
+    <title>3BB DIRECT KEY ROLLBACK TEST</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -59,7 +59,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB HBO FAMILY LAB14 • AUTO MATCH EXISTING CLEARKEY</h2>
+    <h2 style="color:orange;text-align:center;">3BB DIRECT KEY ROLLBACK TEST • USE CHANNEL KEY ONLY</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -438,11 +438,6 @@ logo:"https://6395online.com:8443/logotv/movie/Mono29p.jpg",
 let currentHls = null;
 let shakaPlayer = null;
 let hlsWatchdog = null;
-
-// ใช้เฉพาะ movieproxy / warner01 เท่านั้น
-let warnerPauseStartedAt = 0;
-let warnerResumeRecovering = false;
-
 let activeChannel = null;
 let activeOriginalChannel = null;
 let activeElement = null;
@@ -490,64 +485,12 @@ function lab14ChannelKey(channel){
 }
 
 function lab14ApplyExistingMatch(channel){
-  if(!lab14IsDrmChannel(channel)) return channel;
-
-  const known = lab14BuildKnownKeyMap();
-  const channelKey = lab14ChannelKey(channel);
-  const configuredKid = lab14NormHex(channel?.keyId);
-
-  // 1) ใช้ KID ที่ช่องนี้เคยพิสูจน์แล้วใน session นี้ก่อน
-  const cachedKid = lab14NormHex(lab14ResolvedKidCache[channelKey]);
-  if(cachedKid.length===32 && known[cachedKid]){
-    const hit = known[cachedKid];
-    lab14Applied = (cachedKid !== configuredKid);
-    lab14RequiredKid = cachedKid;
-    lab14MatchedKid = cachedKid;
-    lab14MatchedFrom = hit.source;
-    return Object.assign({}, channel, {
-      drm:true,
-      keyId:cachedKid,
-      key:hit.key
-    });
-  }
-
-  // 2) ถ้า Shaka เพิ่งรายงาน Missing KID ให้ใช้ KID ที่ตรงกับคู่ local
-  const missingExact = (lab14MissingKids || [])
-    .map(lab14NormHex)
-    .find(kid => kid.length===32 && known[kid]);
-
-  if(missingExact){
-    const hit = known[missingExact];
-    lab14ResolvedKidCache[channelKey] = missingExact;
-    lab14Applied = (missingExact !== configuredKid);
-    lab14RequiredKid = missingExact;
-    lab14MatchedKid = missingExact;
-    lab14MatchedFrom = hit.source;
-    return Object.assign({}, channel, {
-      drm:true,
-      keyId:missingExact,
-      key:hit.key
-    });
-  }
-
-  // 3) ช่องปกติยังใช้ KID/Key ของตัวเอง 100%
-  if(configuredKid.length===32 && known[configuredKid]){
-    const hit = known[configuredKid];
-    lab14Applied = false;
-    lab14RequiredKid = "-";
-    lab14MatchedKid = configuredKid;
-    lab14MatchedFrom = channel.name || hit.source;
-    return Object.assign({}, channel, {
-      drm:true,
-      keyId:configuredKid,
-      key:hit.key
-    });
-  }
-
+  // ROLLBACK TEST:
+  // ช่อง 3BB ใช้ keyId/key ของตัวเองตรง ๆ ห้าม auto-match / ห้ามสลับ KID
   lab14Applied = false;
   lab14RequiredKid = "-";
-  lab14MatchedKid = configuredKid || "-";
-  lab14MatchedFrom = "KEEP ORIGINAL / NO EXACT LOCAL PAIR";
+  lab14MatchedKid = channel?.keyId || "-";
+  lab14MatchedFrom = "CHANNEL CONFIG";
   return channel;
 }
 
@@ -815,17 +758,11 @@ function playMPDNotice(channel, url){
                   lab14ResolvedKidCache[lab14ChannelKey(activeChannel)] = exact;
                 }
 
-                // Safety: never loop. One resolver restart maximum.
-                if(exact && !lab14ResolvedOnce && lab14IsDrmChannel(activeChannel)){
-                  const currentKid = lab14NormHex(activeChannel?.keyId);
-                  if(currentKid !== exact){
-                    lab14ResolvedOnce = true;
-                    lab14ReloadCount = 1;
-                    setTimeout(() => {
-                      try { loadChannel(activeChannel); } catch(e) {}
-                    }, 0);
-                  }
-                }
+                // ROLLBACK TEST:
+                // บันทึก Missing KID ไว้ดูใน DIAG เท่านั้น
+                // ห้ามสลับ keyId/key และห้าม reload ช่องอัตโนมัติ
+                lab14ResolvedOnce = false;
+                lab14ReloadCount = 0;
               }
             }
           }catch(e){}
@@ -909,53 +846,6 @@ function useHLS_STABLE(url){
     currentHls.loadSource(url);
     currentHls.attachMedia(video);
 
-    // ===== RESUME RECOVERY เฉพาะ movieproxy / warner01 =====
-    const isWarnerResumeSource =
-      url.includes("movieproxy.tawatchai250958.workers.dev") &&
-      url.includes("warner01");
-
-    if(isWarnerResumeSource){
-      video.onpause = function(){
-        if(!currentHls) return;
-        warnerPauseStartedAt = Date.now();
-      };
-
-      video.onplay = function(){
-        if(!currentHls || warnerResumeRecovering) return;
-
-        const pausedMs = warnerPauseStartedAt
-          ? (Date.now() - warnerPauseStartedAt)
-          : 0;
-        warnerPauseStartedAt = 0;
-
-        if(pausedMs >= 5000 || video.readyState < 2){
-          warnerResumeRecovering = true;
-          setStatus("กำลังกลับสู่สัญญาณสด...");
-
-          try{
-            currentHls.startLoad(-1);
-            const livePos = currentHls.liveSyncPosition;
-            if(Number.isFinite(livePos) && livePos > 0 &&
-               Math.abs(video.currentTime - livePos) > 3){
-              video.currentTime = Math.max(0, livePos);
-            }
-          }catch(e){}
-
-          setTimeout(()=>{
-            warnerResumeRecovering = false;
-            forceAudio100();
-            video.play().catch(()=>{});
-          },350);
-        }
-      };
-    }else{
-      // HLS ช่องอื่นใช้พฤติกรรมเดิม 100%
-      video.onpause = null;
-      video.onplay = null;
-      warnerPauseStartedAt = 0;
-      warnerResumeRecovering = false;
-    }
-
     currentHls.on(Hls.Events.MANIFEST_PARSED, function(){
       forceAudio100();
       video.play().catch(()=>{});
@@ -999,15 +889,6 @@ function useHLS_STABLE(url){
       forceAudio100();
 
       if(video.paused || video.readyState < 2){
-        const isWarnerResumeSource =
-          url.includes("movieproxy.tawatchai250958.workers.dev") &&
-          url.includes("warner01");
-
-        if(isWarnerResumeSource && video.paused){
-          // ผู้ใช้กดพักเอง: รอให้ผู้ใช้กด Play
-          return;
-        }
-
         try{ currentHls.startLoad(); }catch(e){}
         video.play().catch(()=>{});
         return;
