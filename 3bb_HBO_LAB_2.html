@@ -439,9 +439,9 @@ let currentHls = null;
 let shakaPlayer = null;
 let hlsWatchdog = null;
 
-// HLS Live Resume Recovery
-let hlsPauseStartedAt = 0;
-let hlsResumeRecovering = false;
+// ใช้เฉพาะ movieproxy / warner01 เท่านั้น
+let warnerPauseStartedAt = 0;
+let warnerResumeRecovering = false;
 
 let activeChannel = null;
 let activeOriginalChannel = null;
@@ -704,11 +704,6 @@ async function stopAllPlayers(){
   }
 
   try{
-    video.onpause = null;
-    video.onplay = null;
-    hlsPauseStartedAt = 0;
-    hlsResumeRecovering = false;
-
     video.pause();
     video.removeAttribute("src");
     video.load();
@@ -914,44 +909,52 @@ function useHLS_STABLE(url){
     currentHls.loadSource(url);
     currentHls.attachMedia(video);
 
-    // ===== HLS LIVE PAUSE / RESUME RECOVERY =====
-    // จำเวลาที่ผู้ใช้กดพักเอง
-    video.onpause = function(){
-      if(!currentHls) return;
-      hlsPauseStartedAt = Date.now();
-    };
+    // ===== RESUME RECOVERY เฉพาะ movieproxy / warner01 =====
+    const isWarnerResumeSource =
+      url.includes("movieproxy.tawatchai250958.workers.dev") &&
+      url.includes("warner01");
 
-    // เมื่อกดเล่นต่อ ถ้าพักไว้นาน ให้กลับไป live edge ใหม่
-    video.onplay = function(){
-      if(!currentHls || hlsResumeRecovering) return;
+    if(isWarnerResumeSource){
+      video.onpause = function(){
+        if(!currentHls) return;
+        warnerPauseStartedAt = Date.now();
+      };
 
-      const pausedMs = hlsPauseStartedAt ? (Date.now() - hlsPauseStartedAt) : 0;
-      hlsPauseStartedAt = 0;
+      video.onplay = function(){
+        if(!currentHls || warnerResumeRecovering) return;
 
-      // พักเกิน 5 วินาที หรือ buffer เดิมใช้ต่อไม่ได้
-      if(pausedMs >= 5000 || video.readyState < 2){
-        hlsResumeRecovering = true;
-        setStatus("กำลังกลับสู่สัญญาณสด...");
+        const pausedMs = warnerPauseStartedAt
+          ? (Date.now() - warnerPauseStartedAt)
+          : 0;
+        warnerPauseStartedAt = 0;
 
-        try{
-          currentHls.startLoad(-1);
+        if(pausedMs >= 5000 || video.readyState < 2){
+          warnerResumeRecovering = true;
+          setStatus("กำลังกลับสู่สัญญาณสด...");
 
-          const livePos = currentHls.liveSyncPosition;
-          if(Number.isFinite(livePos) && livePos > 0){
-            // ขยับเข้าใกล้ live edge โดยไม่ force seek ถ้าอยู่ใกล้อยู่แล้ว
-            if(Math.abs(video.currentTime - livePos) > 3){
+          try{
+            currentHls.startLoad(-1);
+            const livePos = currentHls.liveSyncPosition;
+            if(Number.isFinite(livePos) && livePos > 0 &&
+               Math.abs(video.currentTime - livePos) > 3){
               video.currentTime = Math.max(0, livePos);
             }
-          }
-        }catch(e){}
+          }catch(e){}
 
-        setTimeout(()=>{
-          hlsResumeRecovering = false;
-          forceAudio100();
-          video.play().catch(()=>{});
-        }, 350);
-      }
-    };
+          setTimeout(()=>{
+            warnerResumeRecovering = false;
+            forceAudio100();
+            video.play().catch(()=>{});
+          },350);
+        }
+      };
+    }else{
+      // HLS ช่องอื่นใช้พฤติกรรมเดิม 100%
+      video.onpause = null;
+      video.onplay = null;
+      warnerPauseStartedAt = 0;
+      warnerResumeRecovering = false;
+    }
 
     currentHls.on(Hls.Events.MANIFEST_PARSED, function(){
       forceAudio100();
@@ -995,20 +998,17 @@ function useHLS_STABLE(url){
 
       forceAudio100();
 
-      // ผู้ใช้กดพักเอง: อย่าฝืน play อัตโนมัติ
-      if(video.paused){
-        return;
-      }
+      if(video.paused || video.readyState < 2){
+        const isWarnerResumeSource =
+          url.includes("movieproxy.tawatchai250958.workers.dev") &&
+          url.includes("warner01");
 
-      // ถ้ากำลังเล่นแต่ buffer/readyState หลุด ให้ดึง live edge ใหม่
-      if(video.readyState < 2){
-        try{
-          currentHls.startLoad(-1);
-          const livePos = currentHls.liveSyncPosition;
-          if(Number.isFinite(livePos) && livePos > 0){
-            video.currentTime = Math.max(0, livePos);
-          }
-        }catch(e){}
+        if(isWarnerResumeSource && video.paused){
+          // ผู้ใช้กดพักเอง: รอให้ผู้ใช้กด Play
+          return;
+        }
+
+        try{ currentHls.startLoad(); }catch(e){}
         video.play().catch(()=>{});
         return;
       }
@@ -1022,14 +1022,8 @@ function useHLS_STABLE(url){
       lastTime = video.currentTime;
 
       if(stuckCount >= 4){
-        setStatus("ภาพค้าง กำลังกู้คืนสัญญาณสด...");
-        try{
-          currentHls.startLoad(-1);
-          const livePos = currentHls.liveSyncPosition;
-          if(Number.isFinite(livePos) && livePos > 0){
-            video.currentTime = Math.max(0, livePos);
-          }
-        }catch(e){}
+        setStatus("ภาพค้าง กำลังกู้คืน...");
+        try{ currentHls.startLoad(); }catch(e){}
         video.play().catch(()=>{});
         stuckCount = 0;
       }
