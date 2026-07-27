@@ -438,6 +438,11 @@ logo:"https://6395online.com:8443/logotv/movie/Mono29p.jpg",
 let currentHls = null;
 let shakaPlayer = null;
 let hlsWatchdog = null;
+
+// HLS Live Resume Recovery
+let hlsPauseStartedAt = 0;
+let hlsResumeRecovering = false;
+
 let activeChannel = null;
 let activeOriginalChannel = null;
 let activeElement = null;
@@ -699,6 +704,11 @@ async function stopAllPlayers(){
   }
 
   try{
+    video.onpause = null;
+    video.onplay = null;
+    hlsPauseStartedAt = 0;
+    hlsResumeRecovering = false;
+
     video.pause();
     video.removeAttribute("src");
     video.load();
@@ -904,6 +914,45 @@ function useHLS_STABLE(url){
     currentHls.loadSource(url);
     currentHls.attachMedia(video);
 
+    // ===== HLS LIVE PAUSE / RESUME RECOVERY =====
+    // จำเวลาที่ผู้ใช้กดพักเอง
+    video.onpause = function(){
+      if(!currentHls) return;
+      hlsPauseStartedAt = Date.now();
+    };
+
+    // เมื่อกดเล่นต่อ ถ้าพักไว้นาน ให้กลับไป live edge ใหม่
+    video.onplay = function(){
+      if(!currentHls || hlsResumeRecovering) return;
+
+      const pausedMs = hlsPauseStartedAt ? (Date.now() - hlsPauseStartedAt) : 0;
+      hlsPauseStartedAt = 0;
+
+      // พักเกิน 5 วินาที หรือ buffer เดิมใช้ต่อไม่ได้
+      if(pausedMs >= 5000 || video.readyState < 2){
+        hlsResumeRecovering = true;
+        setStatus("กำลังกลับสู่สัญญาณสด...");
+
+        try{
+          currentHls.startLoad(-1);
+
+          const livePos = currentHls.liveSyncPosition;
+          if(Number.isFinite(livePos) && livePos > 0){
+            // ขยับเข้าใกล้ live edge โดยไม่ force seek ถ้าอยู่ใกล้อยู่แล้ว
+            if(Math.abs(video.currentTime - livePos) > 3){
+              video.currentTime = Math.max(0, livePos);
+            }
+          }
+        }catch(e){}
+
+        setTimeout(()=>{
+          hlsResumeRecovering = false;
+          forceAudio100();
+          video.play().catch(()=>{});
+        }, 350);
+      }
+    };
+
     currentHls.on(Hls.Events.MANIFEST_PARSED, function(){
       forceAudio100();
       video.play().catch(()=>{});
@@ -946,8 +995,20 @@ function useHLS_STABLE(url){
 
       forceAudio100();
 
-      if(video.paused || video.readyState < 2){
-        try{ currentHls.startLoad(); }catch(e){}
+      // ผู้ใช้กดพักเอง: อย่าฝืน play อัตโนมัติ
+      if(video.paused){
+        return;
+      }
+
+      // ถ้ากำลังเล่นแต่ buffer/readyState หลุด ให้ดึง live edge ใหม่
+      if(video.readyState < 2){
+        try{
+          currentHls.startLoad(-1);
+          const livePos = currentHls.liveSyncPosition;
+          if(Number.isFinite(livePos) && livePos > 0){
+            video.currentTime = Math.max(0, livePos);
+          }
+        }catch(e){}
         video.play().catch(()=>{});
         return;
       }
@@ -961,8 +1022,14 @@ function useHLS_STABLE(url){
       lastTime = video.currentTime;
 
       if(stuckCount >= 4){
-        setStatus("ภาพค้าง กำลังกู้คืน...");
-        try{ currentHls.startLoad(); }catch(e){}
+        setStatus("ภาพค้าง กำลังกู้คืนสัญญาณสด...");
+        try{
+          currentHls.startLoad(-1);
+          const livePos = currentHls.liveSyncPosition;
+          if(Number.isFinite(livePos) && livePos > 0){
+            video.currentTime = Math.max(0, livePos);
+          }
+        }catch(e){}
         video.play().catch(()=>{});
         stuckCount = 0;
       }
