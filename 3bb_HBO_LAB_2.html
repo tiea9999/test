@@ -2,12 +2,12 @@
 <html lang="th">
 
 <head>
-<!-- TIEA 3BB V2.2 STABLE Build 2201: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
+<!-- TIEA 3BB V2.3 PROJECTOR SAFE Build 2301: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
 <!-- LAB14: REQUIRED/MISSING KID HAS PRIORITY OVER CONFIGURED KID. USES ONLY EXISTING LOCAL CLEARKEY PAIRS. ONE RELOAD MAX. LAB10/STABLE BASE UNCHANGED. -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA 3BB V2.2 STABLE</title>
+    <title>TIEA 3BB V2.3 PROJECTOR SAFE</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -60,7 +60,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.2 STABLE • Build 2201</h2>
+    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.3 PROJECTOR SAFE • Build 2301</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -69,6 +69,7 @@
                 <button class="player-btn" onclick="restartCurrent()">↻ รีโหลด</button>
                 <button class="player-btn" onclick="toggleLab10Diag()">📊 DIAG</button>
                 <button class="player-btn" onclick="togglePlaybackLog()">🧾 LOG</button>
+                <button class="player-btn" id="safeModeBtn" onclick="toggleProjectorSafe()">📽 SAFE</button>
             </div>
             <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
@@ -612,6 +613,117 @@ let currentServerName = "Main";
 let lastPlaybackStartedAt = 0;
 const playbackLogs = [];
 
+// V2.3 PROJECTOR SAFE
+let projectorSafeMode = true;
+let audioOnlyTimer = null;
+let audioOnlyRetryDone = false;
+let selectedSafeLevel = -1;
+const VOLUME_PROFILE = {
+  mpd: 1.00,
+  movieproxy: 0.38,
+  iptvworker: 0.40,
+  otherHls: 0.55
+};
+
+function sourceVolume(url){
+  const u = String(url || "").toLowerCase();
+  if(u.includes(".mpd")) return VOLUME_PROFILE.mpd;
+  if(u.includes("movieproxy.tawatchai250958.workers.dev")) return VOLUME_PROFILE.movieproxy;
+  if(u.includes("iptv.tawatchai250958.workers.dev")) return VOLUME_PROFILE.iptvworker;
+  return VOLUME_PROFILE.otherHls;
+}
+
+function applyBalancedVolume(url){
+  const video = document.getElementById("html5-player");
+  if(!video) return;
+  try{
+    video.muted = false;
+    video.defaultMuted = false;
+    video.volume = sourceVolume(url);
+  }catch(e){}
+}
+
+function toggleProjectorSafe(){
+  projectorSafeMode = !projectorSafeMode;
+  const btn = document.getElementById("safeModeBtn");
+  if(btn) btn.textContent = projectorSafeMode ? "📽 SAFE ON" : "📽 SAFE OFF";
+  addPlaybackLog("SAFE", projectorSafeMode ? "เปิดโหมดโปรเจคเตอร์" : "ปิดโหมดโปรเจคเตอร์");
+  setStatus(projectorSafeMode ? "เปิดโหมดโปรเจคเตอร์แล้ว" : "ปิดโหมดโปรเจคเตอร์แล้ว");
+  if(activeOriginalChannel || activeChannel) restartCurrent();
+}
+
+function codecLooksAvc(level){
+  const codec = String(level?.videoCodec || level?.codecSet || level?.attrs?.CODECS || "").toLowerCase();
+  return !codec || codec.includes("avc1") || codec.includes("h264");
+}
+
+function chooseProjectorSafeLevel(levels){
+  if(!Array.isArray(levels) || !levels.length) return -1;
+  const candidates = levels
+    .map((level,index)=>({level,index}))
+    .filter(x=>codecLooksAvc(x.level))
+    .filter(x=>(x.level.height || 0) <= 720 || !(x.level.height));
+  const list = candidates.length ? candidates : levels.map((level,index)=>({level,index}));
+  list.sort((a,b)=>{
+    const ah=a.level.height||9999, bh=b.level.height||9999;
+    if(ah!==bh) return bh-ah;
+    return (a.level.bitrate||0)-(b.level.bitrate||0);
+  });
+  return list[0]?.index ?? 0;
+}
+
+function clearAudioOnlyWatch(){
+  if(audioOnlyTimer){
+    clearTimeout(audioOnlyTimer);
+    audioOnlyTimer = null;
+  }
+}
+
+function startAudioOnlyWatch(url){
+  clearAudioOnlyWatch();
+  audioOnlyTimer = setTimeout(async ()=>{
+    const video = document.getElementById("html5-player");
+    if(!video || document.getElementById("player-container").style.display !== "block") return;
+    let decoded = 0;
+    try{ decoded = video.getVideoPlaybackQuality().totalVideoFrames || 0; }catch(e){}
+    const timeMoving = video.currentTime > 2;
+    const noPicture = video.videoWidth === 0 || video.videoHeight === 0 || decoded === 0;
+
+    if(timeMoving && noPicture){
+      addPlaybackLog("VIDEO", "มีเสียงแต่ไม่มีภาพ");
+      setStatus("ตรวจพบมีเสียงแต่ไม่มีภาพ กำลังเปลี่ยนโหมดภาพ...", true);
+
+      if(currentHls && !audioOnlyRetryDone){
+        audioOnlyRetryDone = true;
+        try{
+          if(selectedSafeLevel >= 0){
+            currentHls.currentLevel = selectedSafeLevel;
+            currentHls.nextLevel = selectedSafeLevel;
+            currentHls.loadLevel = selectedSafeLevel;
+          }else{
+            currentHls.currentLevel = 0;
+          }
+          currentHls.recoverMediaError();
+          currentHls.startLoad(-1);
+          video.play().catch(()=>{});
+          addPlaybackLog("RECOVER", "บังคับ H.264/720p และกู้ Media");
+          startAudioOnlyWatch(url);
+          return;
+        }catch(e){
+          addPlaybackLog("ERROR", "กู้ภาพไม่สำเร็จ: " + e.message);
+        }
+      }
+
+      if(canSwitchServer()){
+        switchToNextServer("มีเสียงแต่ไม่มีภาพ");
+      }else{
+        setStatus("ลิงก์นี้ Codec ภาพไม่รองรับโปรเจคเตอร์ ให้กด PLAYER/MX", false);
+        addPlaybackLog("UNSUPPORTED", "Codec ภาพไม่รองรับ Browser ของโปรเจคเตอร์");
+      }
+    }
+  }, 6500);
+}
+
 function addPlaybackLog(type, message){
   const item = {
     time: new Date().toLocaleTimeString("th-TH"),
@@ -632,7 +744,7 @@ function renderPlaybackLog(){
     `[${x.time}] [${x.type}] [${x.channel}] [${x.server}] ${x.message}`
   );
   box.innerHTML =
-    '<div style="color:orange;font:900 15px Arial;margin-bottom:8px">TIEA 3BB V2.2 • บันทึกการเล่น</div>' +
+    '<div style="color:orange;font:900 15px Arial;margin-bottom:8px">TIEA 3BB V2.3 • บันทึกการเล่น</div>' +
     '<div style="margin-bottom:8px;color:#ffd180">สลับ Server แล้ว '+serverSwitchCount+' ครั้ง</div>' +
     '<pre style="margin:0;white-space:pre-wrap;word-break:break-word;color:#fff">'+
     lab14Esc(rows.join("\n") || "ยังไม่มีบันทึก")+'</pre>';
@@ -677,6 +789,8 @@ async function switchToNextServer(reason){
     activeOriginalChannel.servers?.[activeServerIndex]?.name ||
     ("Backup " + activeServerIndex);
   activeUrl = proxyUrl(next.file);
+  audioOnlyRetryDone = false;
+  selectedSafeLevel = -1;
 
   addPlaybackLog("SWITCH", "สลับไป " + currentServerName + " เพราะ " + reason);
   setStatus("กำลังสลับ Server...", true);
@@ -845,12 +959,8 @@ async function warmStream(url){
 function startFastWarmup(){FAST_WARM_URLS.forEach((url,index)=>setTimeout(()=>warmStream(url),250+(index*700)));}
 
 function forceAudio100(){
-  const video = document.getElementById("html5-player");
-  try{
-    video.muted = false;
-    video.defaultMuted = false;
-    video.volume = 1.0;
-  }catch(e){}
+  // V2.3: เลิกบังคับเสียง 100% และปรับตามชนิดต้นทาง
+  applyBalancedVolume(activeUrl);
 }
 
 function openExternal(url){
@@ -889,6 +999,7 @@ function openMX(url){
 
 async function stopAllPlayers(){
   const video = document.getElementById("html5-player");
+  clearAudioOnlyWatch();
 
   if(hlsWatchdog){
     clearInterval(hlsWatchdog);
@@ -952,6 +1063,8 @@ async function loadChannel(channel, element){
   currentServerName = Array.isArray(channel.servers) && channel.servers[0]?.name
     ? channel.servers[0].name : "Main";
   playbackAttemptToken++;
+  audioOnlyRetryDone = false;
+  selectedSafeLevel = -1;
 
   let resolvedChannel = resolveChannel(channel, activeServerIndex);
   resolvedChannel = lab14ApplyExistingMatch(resolvedChannel);
@@ -1043,8 +1156,9 @@ function playMPDNotice(channel, url){
           shakaPlayer.configure({drm:{clearKeys:{[channel.keyId]:channel.key}}});
         }
         shakaPlayer.load(url).then(()=>{
-          forceAudio100();
+          applyBalancedVolume(url);
           video.play().catch(()=>{});
+          startAudioOnlyWatch(url);
           setStatus("กำลังเล่น MPD • " + currentServerName);
           markPlaybackSuccess("MPD");
         }).catch(e=>{
@@ -1106,6 +1220,7 @@ function useHLS_STABLE(url){
 
       startFragPrefetch: true,
       capLevelToPlayerSize: true,
+      maxHdcpLevel: "TYPE-0",
       testBandwidth: false,
       abrEwmaDefaultEstimate: 1200000
     });
@@ -1113,10 +1228,23 @@ function useHLS_STABLE(url){
     currentHls.loadSource(url);
     currentHls.attachMedia(video);
 
-    currentHls.on(Hls.Events.MANIFEST_PARSED, function(){
-      forceAudio100();
+    currentHls.on(Hls.Events.MANIFEST_PARSED, function(event, data){
+      if(projectorSafeMode){
+        selectedSafeLevel = chooseProjectorSafeLevel(data?.levels || currentHls.levels || []);
+        if(selectedSafeLevel >= 0){
+          try{
+            currentHls.startLevel = selectedSafeLevel;
+            currentHls.currentLevel = selectedSafeLevel;
+            currentHls.nextLevel = selectedSafeLevel;
+            addPlaybackLog("SAFE", "เลือกภาพระดับ " + selectedSafeLevel + " สำหรับโปรเจคเตอร์");
+          }catch(e){}
+        }
+      }
+
+      applyBalancedVolume(url);
       video.play().catch(()=>{});
-      setTimeout(()=>{ forceAudio100(); video.play().catch(()=>{}); },300);
+      setTimeout(()=>{ applyBalancedVolume(url); video.play().catch(()=>{}); },300);
+      startAudioOnlyWatch(url);
       setStatus("กำลังเล่น HLS • " + currentServerName);
       markPlaybackSuccess("HLS");
     });
@@ -1165,7 +1293,7 @@ function useHLS_STABLE(url){
       if(document.getElementById("player-container").style.display !== "block") return;
       if(!currentHls) return;
 
-      forceAudio100();
+      applyBalancedVolume(url);
 
       if(video.paused || video.readyState < 2){
         try{ currentHls.startLoad(); }catch(e){}
@@ -1200,8 +1328,9 @@ function useHLS_STABLE(url){
   }else{
     video.src = url;
     setTimeout(()=>{
-      forceAudio100();
+      applyBalancedVolume(url);
       video.play().catch(()=>{});
+      startAudioOnlyWatch(url);
     },300);
   }
 }
@@ -1216,6 +1345,8 @@ async function restartCurrent(){
 
   activeChannel = lab14ApplyExistingMatch(resolved);
   activeUrl = proxyUrl(activeChannel.file);
+  audioOnlyRetryDone = false;
+  selectedSafeLevel = -1;
   await stopAllPlayers();
 
   if(activeUrl.includes(".mpd")) playMPDNotice(activeChannel, activeUrl);
@@ -1336,6 +1467,7 @@ function setupCategoryMenu(){
 }
 document.addEventListener("DOMContentLoaded",function(){
   setupForceAutoHide();
+  const safeBtn=document.getElementById("safeModeBtn"); if(safeBtn) safeBtn.textContent="📽 SAFE ON";
   setupCategoryMenu();
   renderCategory("ดิจิตอล");
   startFastWarmup();
