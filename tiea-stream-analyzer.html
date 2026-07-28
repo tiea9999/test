@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>TIEA Developer Center V4.2 ภาษาไทย</title>
+<title>TIEA Developer Center V4.3 FINAL ภาษาไทย</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#05080d;color:#fff;font-family:Tahoma,Arial,sans-serif}
@@ -28,8 +28,8 @@ pre{white-space:pre-wrap;word-break:break-word;background:#05080d;border:1px sol
 </head>
 <body>
 <header>
-<h1>TIEA Developer Center V4.2 ภาษาไทย</h1>
-<div class="muted">ศูนย์วิเคราะห์สตรีม • V4.2 Build 4201</div>
+<h1>TIEA Developer Center V4.3 FINAL ภาษาไทย</h1>
+<div class="muted">ศูนย์วิเคราะห์สตรีม • V4.3 FINAL Build 4301</div>
 <div class="actions">
 <button class="primary" onclick="compareTwo()">▶ เปรียบเทียบ Warner ↔ Cinemax</button>
 <button class="good" onclick="diagnose()">🤖 วิเคราะห์อัตโนมัติ</button>
@@ -65,8 +65,12 @@ pre{white-space:pre-wrap;word-break:break-word;background:#05080d;border:1px sol
 <div class="kpi"><b>ช่องที่ทดสอบ</b><span id="dbTested">0</span></div>
 <div class="kpi"><b>เล่นได้จริง</b><span id="dbPlayers">0</span></div>
 <div class="kpi"><b>เล่นไม่ได้</b><span id="dbFailed">0</span></div>
-<div class="kpi"><b>สุขภาพระบบ</b><span id="dbHealth">-</span></div>
+<div class="kpi"><b>สุขภาพระบบ</b><span id="dbHealth">-</span><div id="dbStars" style="font-size:18px;margin-top:4px">☆☆☆☆☆</div></div>
 <div class="kpi"><b>ผลรวม</b><span id="dbResult">รอทดสอบ</span></div>
+</div>
+<div class="panel result">
+<h3>สรุปอัตโนมัติ</h3>
+<div id="autoSummary">ยังไม่มีผลการทดสอบ</div>
 </div>
 <div class="panel"><h3>เลือกช่อง</h3><div class="channels">
 <button onclick="runOne('warner')">Warner</button><button onclick="runOne('cinemax')">Cinemax</button>
@@ -223,10 +227,10 @@ function renderBlackBox(){
  $("bbDiagnosis").textContent=msg;
 }
 function exportBlackBox(){
- const head=`TIEA BLACK BOX V4.2 Build 4201\nสร้างเมื่อ: ${new Date().toLocaleString("th-TH")}\nอุปกรณ์: ${navigator.userAgent}\nอาการหมุน: ${blackBox.stalls}\nชิ้นส่วนโหลดช้า: ${blackBox.slowSegments}\nเวลาหมุนนานสุด: ${blackBox.longestStall.toFixed(1)} วินาที\nBuffer ต่ำสุด: ${blackBox.minBuffer===null?"-":blackBox.minBuffer.toFixed(1)+" วินาที"}\n\n`;
+ const head=`TIEA BLACK BOX V4.3 FINAL Build 4301\nสร้างเมื่อ: ${new Date().toLocaleString("th-TH")}\nอุปกรณ์: ${navigator.userAgent}\nอาการหมุน: ${blackBox.stalls}\nชิ้นส่วนโหลดช้า: ${blackBox.slowSegments}\nเวลาหมุนนานสุด: ${blackBox.longestStall.toFixed(1)} วินาที\nBuffer ต่ำสุด: ${blackBox.minBuffer===null?"-":blackBox.minBuffer.toFixed(1)+" วินาที"}\n\n`;
  const body=blackBox.events.map(e=>JSON.stringify(e)).join("\n");
  const b=new Blob([head+body],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");
- a.href=URL.createObjectURL(b);a.download="tiea-black-box-v4.2-build4201.txt";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ a.href=URL.createObjectURL(b);a.download="tiea-black-box-v4.3-final-build4301.txt";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 const $=id=>document.getElementById(id), safe=s=>String(s).replace(/[^a-z0-9_-]/gi,"_"), now=()=>new Date().toLocaleTimeString("th-TH");
 function dot(id,state,text){$(id).className="dot "+state;$(id.replace("dot","st")).textContent=text}
@@ -247,6 +251,63 @@ function resultState(r){
  const failed=fatal||(!hasManifest&&r?.settled)||((m.decoded||0)===0&&r?.settled);
  return {fatal,hasManifest,decoded,hasSize,currentlyPlaying,passed,failed};
 }
+
+function starText(percent){
+ const filled=Math.max(0,Math.min(5,Math.round(percent/20)));
+ return "★".repeat(filled)+"☆".repeat(5-filled);
+}
+function explainFailure(r){
+ const m=r?.metrics||{}, text=(r?.timeline||[]).join(" ").toLowerCase();
+ const causes=[],actions=[];
+ if(r?.fatalError && text.includes("manifestloaderror")){
+  causes.push("โหลดรายการสตรีมไม่สำเร็จ");
+  actions.push("ตรวจ URL, Worker และสถานะต้นทาง");
+ } else if(r?.fatalError){
+  causes.push("เกิดข้อผิดพลาดร้ายแรงของ HLS");
+  actions.push("ตรวจรายละเอียดในบันทึกการทำงาน");
+ }
+ if(!r?.manifest){
+  causes.push("ยังไม่พบ Manifest");
+  actions.push("ตรวจว่าลิงก์ตอบกลับเป็นไฟล์ M3U8 จริง");
+ }
+ if((m.decoded||0)===0){
+  causes.push("ยังไม่มีภาพที่ถอดรหัส");
+  actions.push("ตรวจ Codec หรือความเข้ากันได้ของอุปกรณ์");
+ }
+ if((m.width||0)===0 || (m.height||0)===0){
+  causes.push("ความละเอียดยังเป็น 0x0");
+ }
+ if((m.buffer||0)<1 && (m.decoded||0)>0){
+  causes.push("วิดีโอสำรองต่ำ");
+  actions.push("ตรวจเครือข่ายหรือต้นทางที่ส่งข้อมูลไม่สม่ำเสมอ");
+ }
+ return {
+  causes:[...new Set(causes)],
+  actions:[...new Set(actions)]
+ };
+}
+function updateAutoSummary(summary){
+ if(!$("autoSummary"))return;
+ if(!summary.tested){
+  $("autoSummary").innerHTML="ยังไม่มีผลการทดสอบ";
+  return;
+ }
+ const failedRows=Object.values(reports).filter(r=>resultState(r).failed);
+ let html=`<b>${summary.status}</b><br>ทดสอบ ${summary.tested} ช่อง • เล่นได้จริง ${summary.passed} • เล่นไม่ได้ ${summary.failed} • สุขภาพระบบ ${summary.health}% ${starText(summary.health)}`;
+ if(failedRows.length){
+  html+="<br><br><b>รายการที่มีปัญหา</b>";
+  failedRows.forEach(r=>{
+   const ex=explainFailure(r);
+   html+=`<br>❌ ${r.label}`;
+   if(ex.causes.length)html+=`<br>สาเหตุ: ${ex.causes.join(", ")}`;
+   if(ex.actions.length)html+=`<br>คำแนะนำ: ${ex.actions.join(", ")}`;
+  });
+ } else {
+  html+="<br><br>✅ ทุกช่องที่ทดสอบผ่านเกณฑ์";
+ }
+ $("autoSummary").innerHTML=html;
+}
+
 function updateSummary(){
  const rows=Object.values(reports);
  let passed=0,failed=0,pending=0,playing=0;
@@ -271,7 +332,10 @@ function updateSummary(){
   else if(pending>0)status=`กำลังตรวจ ${passed}/${tested}`;
  }
  $("dbResult").textContent=status;
- return {tested,passed,failed,pending,playing,health,status};
+ $("dbStars").textContent=tested?starText(health):"☆☆☆☆☆";
+ const summary={tested,passed,failed,pending,playing,health,status};
+ updateAutoSummary(summary);
+ return summary;
 }
 function makeCard(id,label){const k=safe(id);let c=$("card-"+k);if(c)return c;c=document.createElement("article");c.className="card";c.id="card-"+k;c.innerHTML=`<div class="head"><b>${label}</b><span class="badge" id="badge-${k}">กำลังรอ</span></div><video id="video-${k}" controls autoplay muted playsinline></video><div class="metrics"><div class="kpi"><b>ความละเอียด</b><span id="res-${k}">0x0</span></div><div class="kpi"><b>ภาพที่ถอดรหัส</b><span id="dec-${k}">0</span></div><div class="kpi"><b>ภาพที่ตก</b><span id="drop-${k}">0</span></div><div class="kpi"><b>ภาพต่อวินาที</b><span id="fps-${k}">0</span></div><div class="kpi"><b>วิดีโอสำรอง</b><span id="buf-${k}">0s</span></div><div class="kpi"><b>อัตราข้อมูล</b><span id="bit-${k}">0 kbps</span></div></div><div class="tabs"><button onclick="stopOne('${id}')">หยุดช่องนี้</button></div><pre id="log-${k}"></pre>`;$("cards").prepend(c);return c}
 function runOne(id){runStream(id,BASE+encodeURIComponent(id),id.toUpperCase())}
@@ -338,17 +402,9 @@ function diagnose(){
  if(!rows.length){$("diagBox").textContent="ยังไม่มีข้อมูล กรุณาทดสอบอย่างน้อย 1 ช่องก่อน";return}
  let pass=0,fail=0,pending=0,html="<h3>ผลวิเคราะห์ตามการเล่นจริง</h3>";
  rows.forEach(r=>{
-  const m=r.metrics||{},s=resultState(r);
+  const m=r.metrics||{},s=resultState(r),ex=explainFailure(r);
   if(s.passed)pass++; else if(s.failed)fail++; else pending++;
-  let advice=[],status="กำลังตรวจ";
-  if(s.passed)status="ผ่าน";
-  else if(s.failed)status="เล่นไม่ได้";
-  if(!s.hasManifest)advice.push("ยังไม่พบรายการสตรีม");
-  if(s.fatal)advice.push("พบข้อผิดพลาดร้ายแรง");
-  if(!s.decoded)advice.push("ภาพที่ถอดรหัสยังเป็น 0");
-  if(!s.hasSize)advice.push("ความละเอียดยังเป็น 0x0");
-  if(r.errors)advice.push("พบข้อผิดพลาด "+r.errors+" ครั้ง");
-  if((m.buffer||0)<1&&s.decoded)advice.push("วิดีโอสำรองต่ำ อาจหมุน");
+  let status=s.passed?"ผ่าน":s.failed?"เล่นไม่ได้":"กำลังตรวจ";
   html+=`<div class="panel"><b>${s.passed?"✅":s.failed?"❌":"⏳"} ${r.label} — ${status}</b>
   <br>รายการสตรีม: ${s.hasManifest?"ปกติ":"ยังไม่พบ"}
   <br>ถอดรหัสภาพ: ${s.decoded?"ทำงาน":"ยังไม่ทำงาน"}
@@ -357,7 +413,8 @@ function diagnose(){
   <br>วิดีโอสำรอง: ${m.buffer||0} วินาที
   <br>ข้อผิดพลาด: ${r.errors}
   ${r.fatalError?"<br><b>สถานะ:</b> Fatal Error":""}
-  ${advice.length?"<br><b>คำแนะนำ:</b> "+advice.join(", "):""}</div>`;
+  ${ex.causes.length?"<br><b>สาเหตุที่เป็นไปได้:</b> "+ex.causes.join(", "):""}
+  ${ex.actions.length?"<br><b>คำแนะนำ:</b> "+ex.actions.join(", "):""}</div>`;
  });
  const total=rows.length,health=Math.round((pass/total)*100);
  let summary;
@@ -366,7 +423,7 @@ function diagnose(){
  else if(fail===total)summary=`เล่นไม่ได้ทั้งหมด ${fail}/${total} ช่อง`;
  else summary=`กำลังตรวจ ${pass}/${total} ช่อง`;
  $("diagBox").className="panel result "+(fail?"fail":pending?"":"pass");
- $("diagBox").innerHTML=html+`<h3>สรุป: ${summary}</h3><p>สุขภาพระบบ ${health}% • เล่นไม่ได้ ${fail} ช่อง • กำลังตรวจ ${pending} ช่อง</p>`;
+ $("diagBox").innerHTML=html+`<h3>สรุป: ${summary}</h3><p>สุขภาพระบบ ${health}% ${starText(health)} • เล่นไม่ได้ ${fail} ช่อง • กำลังตรวจ ${pending} ช่อง</p>`;
  updateSummary();
  document.querySelector('[data-view="diagnosis"]').click();
 }
@@ -375,8 +432,53 @@ function updatePerf(){let d=0,x=0;Object.values(reports).forEach(r=>{d+=r.metric
 function runLab(){const name=$("labName").value.trim()||"การทดสอบ",value=$("labValue").value.trim();if(!value)return alert("กรุณาใส่ลิงก์หรือรหัสช่อง");const id="lab_"+Date.now();runStream(id,value.startsWith("http")?value:BASE+encodeURIComponent(value),name);setTimeout(()=>{const r=reports[id],m=r.metrics||{},rec={date:new Date().toISOString(),name,value,result:m.decoded>0?"ผ่าน":"ต้องตรวจเพิ่ม"};const h=JSON.parse(localStorage.getItem("tieaV4History")||"[]");h.unshift(rec);localStorage.setItem("tieaV4History",JSON.stringify(h.slice(0,50)));renderHistory()},12000)}
 function renderHistory(){const h=JSON.parse(localStorage.getItem("tieaV4History")||"[]");$("history").innerHTML=h.length?h.map(x=>`<div class="panel"><b>${x.result==="ผ่าน"?"✅":"⚠️"} ${x.name}</b><br>${new Date(x.date).toLocaleString("th-TH")}<br>${x.value}<br>ผล: ${x.result}</div>`).join(""):"<div class='panel'>ยังไม่มีประวัติ</div>"}
 function clearHistory(){if(confirm("ล้างประวัติทั้งหมดหรือไม่")){localStorage.removeItem("tieaV4History");renderHistory()}}
-function exportTxt(){let out="TIEA Developer Center V4.2 ภาษาไทย\nV4.2 Build 4201\nสร้างเมื่อ: "+new Date().toISOString()+"\n\n";Object.values(reports).forEach(r=>out+=`ช่อง: ${r.label}\nลิงก์: ${r.url}\nรายการสตรีม: ${r.manifest}\nข้อผิดพลาด: ${r.errors}\nค่าการเล่น: ${JSON.stringify(r.metrics,null,2)}\n\n`);const b=new Blob([out],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="tiea-developer-report-v4.2-thai.txt";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-loadBlackBox();renderHistory();updatePerf();updateSummary();log("ระบบ","TIEA Developer Center V4.2 ภาษาไทย พร้อมใช้งาน");
+function exportTxt(){
+ const s=updateSummary();
+ let out="TIEA Developer Center V4.3 FINAL ภาษาไทย\nV4.3 FINAL Build 4301\n";
+ out+="สร้างเมื่อ: "+new Date().toLocaleString("th-TH")+"\n";
+ out+="อุปกรณ์: "+navigator.userAgent+"\n\n";
+ out+="สรุปผล\n";
+ out+=`ทดสอบทั้งหมด : ${s.tested} ช่อง\n`;
+ out+=`เล่นได้จริง    : ${s.passed} ช่อง\n`;
+ out+=`เล่นไม่ได้     : ${s.failed} ช่อง\n`;
+ out+=`กำลังตรวจ     : ${s.pending} ช่อง\n`;
+ out+=`สุขภาพระบบ    : ${s.health}% ${starText(s.health)}\n`;
+ out+=`ผลรวม          : ${s.status}\n\n`;
+ const failedRows=Object.values(reports).filter(r=>resultState(r).failed);
+ if(failedRows.length){
+  out+="รายการที่มีปัญหา\n";
+  failedRows.forEach(r=>{
+   const ex=explainFailure(r);
+   out+=`- ${r.label}\n`;
+   out+=`  URL: ${r.url}\n`;
+   out+=`  สาเหตุ: ${ex.causes.length?ex.causes.join(", "):"ยังระบุไม่ได้"}\n`;
+   out+=`  คำแนะนำ: ${ex.actions.length?ex.actions.join(", "):"ตรวจบันทึกการทำงาน"}\n`;
+   out+=`  Metrics: ${JSON.stringify(r.metrics)}\n`;
+   out+=`  Errors: ${r.errors}\n\n`;
+  });
+ } else {
+  out+="รายการที่มีปัญหา\n- ไม่มี ทุกช่องผ่านเกณฑ์\n\n";
+ }
+ out+="รายละเอียดทุกช่อง\n";
+ Object.values(reports).forEach(r=>{
+  const rs=resultState(r);
+  out+=`\n====================\n`;
+  out+=`ช่อง: ${r.label}\n`;
+  out+=`สถานะ: ${rs.passed?"ผ่าน":rs.failed?"เล่นไม่ได้":"กำลังตรวจ"}\n`;
+  out+=`ลิงก์: ${r.url}\n`;
+  out+=`Manifest: ${r.manifest}\n`;
+  out+=`Fatal Error: ${r.fatalError}\n`;
+  out+=`ข้อผิดพลาด: ${r.errors}\n`;
+  out+=`ค่าการเล่น: ${JSON.stringify(r.metrics,null,2)}\n`;
+  out+=`ลำดับการทำงาน:\n${(r.timeline||[]).join("\n")}\n`;
+ });
+ const b=new Blob([out],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");
+ a.href=URL.createObjectURL(b);
+ a.download="tiea-developer-report-v4.3-final-thai.txt";
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+renderHistory();updatePerf();updateSummary();log("ระบบ","TIEA Developer Center V4.3 FINAL ภาษาไทย พร้อมใช้งาน");
 </script>
 </body>
 </html>
