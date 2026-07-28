@@ -2,12 +2,12 @@
 <html lang="th">
 
 <head>
-<!-- TIEA 3BB V2.3 PROJECTOR SAFE Build 2301: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
+<!-- TIEA 3BB V2.4 ANALYZER ENGINE LAB Build 2401: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
 <!-- LAB14: REQUIRED/MISSING KID HAS PRIORITY OVER CONFIGURED KID. USES ONLY EXISTING LOCAL CLEARKEY PAIRS. ONE RELOAD MAX. LAB10/STABLE BASE UNCHANGED. -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA 3BB V2.3 PROJECTOR SAFE</title>
+    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -60,7 +60,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.3 PROJECTOR SAFE • Build 2301</h2>
+    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.4 ANALYZER ENGINE LAB • Build 2401</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -1174,14 +1174,20 @@ function playMPDNotice(channel, url){
   }
 }
 
-/* ================= HLS STABLE CLASSIC ================= */
+/* ================= HLS ANALYZER ENGINE LAB ================= */
 function useHLS_STABLE(url){
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
 
   if(jwBox) jwBox.style.display = "none";
   video.style.display = "block";
+  video.style.opacity = "1";
+  video.style.visibility = "visible";
+  video.style.transform = "translateZ(0)";
   video.controls = true;
+  video.autoplay = true;
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
   forceAudio100();
 
   if(currentHls){
@@ -1194,144 +1200,79 @@ function useHLS_STABLE(url){
     hlsWatchdog = null;
   }
 
-  if(Hls.isSupported() && url.includes(".m3u8")){
-    setStatus("กำลังโหลด HLS...");
+  if(window.Hls && Hls.isSupported()){
+    setStatus("กำลังโหลดด้วย Analyzer Engine...");
+    addPlaybackLog("ENGINE", "เริ่ม HLS แบบเดียวกับ TIEA Stream Analyzer");
 
     currentHls = new Hls({
       enableWorker: true,
       lowLatencyMode: false,
-
-      // สูตรเดิมที่นิ่งกว่า: ไม่ล็อกคุณภาพแข็งเกินไป
-      maxBufferLength: 30,
-      maxMaxBufferLength: 60,
-      backBufferLength: 20,
-      maxBufferHole: 0.5,
-      highBufferWatchdogPeriod: 3,
-
-      manifestLoadingMaxRetry: 5,
-      manifestLoadingRetryDelay: 1000,
-      manifestLoadingMaxRetryTimeout: 8000,
-      levelLoadingMaxRetry: 5,
-      levelLoadingRetryDelay: 1000,
-      levelLoadingMaxRetryTimeout: 8000,
-      fragLoadingMaxRetry: 6,
-      fragLoadingRetryDelay: 1000,
-      fragLoadingMaxRetryTimeout: 10000,
-
+      autoStartLoad: true,
       startFragPrefetch: true,
-      capLevelToPlayerSize: true,
-      maxHdcpLevel: "TYPE-0",
-      testBandwidth: false,
-      abrEwmaDefaultEstimate: 1200000
+      backBufferLength: 30,
+      maxBufferLength: 20,
+      maxMaxBufferLength: 40,
+      fragLoadingMaxRetry: 4,
+      manifestLoadingMaxRetry: 3,
+      levelLoadingMaxRetry: 3
     });
 
-    currentHls.loadSource(url);
     currentHls.attachMedia(video);
 
-    currentHls.on(Hls.Events.MANIFEST_PARSED, function(event, data){
-      if(projectorSafeMode){
-        selectedSafeLevel = chooseProjectorSafeLevel(data?.levels || currentHls.levels || []);
-        if(selectedSafeLevel >= 0){
-          try{
-            currentHls.startLevel = selectedSafeLevel;
-            currentHls.currentLevel = selectedSafeLevel;
-            currentHls.nextLevel = selectedSafeLevel;
-            addPlaybackLog("SAFE", "เลือกภาพระดับ " + selectedSafeLevel + " สำหรับโปรเจคเตอร์");
-          }catch(e){}
-        }
-      }
-
-      applyBalancedVolume(url);
-      video.play().catch(()=>{});
-      setTimeout(()=>{ applyBalancedVolume(url); video.play().catch(()=>{}); },300);
-      startAudioOnlyWatch(url);
-      setStatus("กำลังเล่น HLS • " + currentServerName);
-      markPlaybackSuccess("HLS");
+    currentHls.on(Hls.Events.MEDIA_ATTACHED, function(){
+      addPlaybackLog("HLS", "MEDIA_ATTACHED");
+      currentHls.loadSource(url);
     });
 
-    currentHls.on(Hls.Events.BUFFER_STALLED, function(){
-      setStatus("กำลังเติมบัฟเฟอร์...", true);
-      addPlaybackLog("BUFFER", "Buffer stalled");
+    currentHls.on(Hls.Events.MANIFEST_PARSED, function(event, data){
+      addPlaybackLog("HLS", "MANIFEST_PARSED levels=" + ((data && data.levels) ? data.levels.length : 0));
+      applyBalancedVolume(url);
+      video.play().catch(function(){
+        setStatus("กด PLAY หนึ่งครั้งเพื่อเริ่มเล่น", true);
+      });
+      setStatus("กำลังเล่น HLS • Analyzer Engine • " + currentServerName);
+      markPlaybackSuccess("HLS ANALYZER");
+    });
+
+    currentHls.on(Hls.Events.FRAG_LOADED, function(event, data){
+      const loaded = data && data.frag && data.frag.stats ? (data.frag.stats.loaded || 0) : 0;
+      addPlaybackLog("HLS", "FRAG_LOADED " + loaded + " bytes");
+    });
+
+    currentHls.on(Hls.Events.FRAG_PARSED, function(){
+      addPlaybackLog("HLS", "FRAG_PARSED");
     });
 
     currentHls.on(Hls.Events.ERROR, function(event, data){
-      console.log("HLS ERROR:", data);
       if(!currentHls) return;
+      const detail = `${data.type || "unknown"}/${data.details || "unknown"}`;
+      addPlaybackLog(data.fatal ? "FATAL" : "WARN", "HLS " + detail);
 
-      if(data.fatal){
-        const detail = `${data.type || "unknown"}/${data.details || "unknown"}`;
-        if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
-          setStatus("Main มีปัญหา กำลังตรวจ Backup...");
-          handlePlaybackFailure("HLS Network Fatal: " + detail, true);
-        }else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
-          setStatus("สัญญาณวิดีโอสะดุด กำลังกู้คืน...");
-          addPlaybackLog("RECOVER", "HLS Media Fatal: " + detail);
-          try{
-            currentHls.recoverMediaError();
-            setTimeout(()=>{
-              const videoNow = document.getElementById("html5-player");
-              if(videoNow && (videoNow.readyState < 2 || videoNow.paused)){
-                handlePlaybackFailure("กู้ Media Error ไม่สำเร็จ: " + detail, true);
-              }
-            }, 3500);
-          }catch(e){
-            handlePlaybackFailure("Media recovery exception: " + e.message, true);
-          }
-        }else{
-          setStatus("เล่นไม่ได้ กำลังสลับ Server...");
-          handlePlaybackFailure("HLS Fatal: " + detail, true);
-        }
+      if(!data.fatal) return;
+
+      if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
+        try{ currentHls.startLoad(); }catch(e){}
+      }else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
+        try{ currentHls.recoverMediaError(); }catch(e){}
       }else{
-        addPlaybackLog("WARN", `HLS ${data.type || "-"} / ${data.details || "-"}`);
+        handlePlaybackFailure("HLS Fatal: " + detail, true);
       }
     });
 
-    // watchdog แบบเบา ไม่รีโหลดถี่เกินไป
-    let lastTime = 0;
-    let stuckCount = 0;
-    hlsWatchdog = setInterval(()=>{
-      if(document.getElementById("player-container").style.display !== "block") return;
-      if(!currentHls) return;
-
+    video.addEventListener("playing", function analyzerPlaying(){
       applyBalancedVolume(url);
+      addPlaybackLog("VIDEO", "PLAYING " + (video.videoWidth || 0) + "x" + (video.videoHeight || 0));
+      setStatus("กำลังเล่น • " + (video.videoWidth || 0) + "x" + (video.videoHeight || 0));
+      video.removeEventListener("playing", analyzerPlaying);
+    });
 
-      if(video.paused || video.readyState < 2){
-        try{ currentHls.startLoad(); }catch(e){}
-        video.play().catch(()=>{});
-        return;
-      }
-
-      if(Math.abs(video.currentTime - lastTime) < 0.05){
-        stuckCount++;
-      }else{
-        stuckCount = 0;
-      }
-
-      lastTime = video.currentTime;
-
-      if(stuckCount >= 4){
-        setStatus("ภาพค้าง กำลังกู้คืน...");
-        addPlaybackLog("STUCK", "เวลาเล่นไม่เดินประมาณ 12 วินาที");
-        try{ currentHls.startLoad(); }catch(e){}
-        video.play().catch(()=>{});
-        stuckCount = 0;
-
-        setTimeout(()=>{
-          if(document.getElementById("player-container").style.display !== "block") return;
-          if(video.paused || video.readyState < 2){
-            handlePlaybackFailure("กู้ภาพค้างไม่สำเร็จ", false);
-          }
-        }, 4500);
-      }
-    }, 3000);
-
-  }else{
+  }else if(video.canPlayType("application/vnd.apple.mpegurl")){
+    addPlaybackLog("ENGINE", "NATIVE HLS MODE");
     video.src = url;
-    setTimeout(()=>{
-      applyBalancedVolume(url);
-      video.play().catch(()=>{});
-      startAudioOnlyWatch(url);
-    },300);
+    video.play().catch(()=>{});
+  }else{
+    setStatus("อุปกรณ์นี้ไม่รองรับ HLS/MSE", true);
+    handlePlaybackFailure("NO HLS/MSE SUPPORT", true);
   }
 }
 
