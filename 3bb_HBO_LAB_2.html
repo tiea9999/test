@@ -2,11 +2,12 @@
 <html lang="th">
 
 <head>
+<!-- TIEA 3BB V2.2 STABLE Build 2201: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
 <!-- LAB14: REQUIRED/MISSING KID HAS PRIORITY OVER CONFIGURED KID. USES ONLY EXISTING LOCAL CLEARKEY PAIRS. ONE RELOAD MAX. LAB10/STABLE BASE UNCHANGED. -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3BB FREE TV DIAG TEST</title>
+    <title>TIEA 3BB V2.2 STABLE</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -59,7 +60,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">3BB FREE TV DIAG TEST • CINEMAX REFERENCE</h2>
+    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.2 STABLE • Build 2201</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -67,6 +68,7 @@
                 <button class="player-btn" id="closeBtn" onclick="closePlayer()">X</button>
                 <button class="player-btn" onclick="restartCurrent()">↻ รีโหลด</button>
                 <button class="player-btn" onclick="toggleLab10Diag()">📊 DIAG</button>
+                <button class="player-btn" onclick="togglePlaybackLog()">🧾 LOG</button>
             </div>
             <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
@@ -78,6 +80,7 @@
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
         <div id="lab14-diag" style="display:none;position:absolute;right:14px;bottom:14px;z-index:100005;width:min(520px,calc(100vw - 28px));max-height:62vh;overflow:auto;background:rgba(3,14,24,.97);border:1px solid #00e5ff;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.45 Consolas,monospace;"></div>
+        <div id="playback-log" style="display:none;position:absolute;left:14px;bottom:14px;z-index:100006;width:min(600px,calc(100vw - 28px));max-height:58vh;overflow:auto;background:rgba(12,8,3,.97);border:1px solid orange;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.5 Consolas,monospace;"></div>
     </div>
 
     <div id="category-menu">
@@ -601,6 +604,111 @@ let lab14RequiredKid = "-";
 let lab14ReloadCount = 0;
 const lab14ResolvedKidCache = Object.create(null);
 
+// V2.2 STABLE: ระบบสลับ Main → Backup แบบจำกัดรอบ
+let playbackAttemptToken = 0;
+let serverFailureCount = 0;
+let serverSwitchCount = 0;
+let currentServerName = "Main";
+let lastPlaybackStartedAt = 0;
+const playbackLogs = [];
+
+function addPlaybackLog(type, message){
+  const item = {
+    time: new Date().toLocaleTimeString("th-TH"),
+    type: type || "INFO",
+    channel: activeOriginalChannel?.name || activeChannel?.name || "-",
+    server: currentServerName || "-",
+    message: String(message || "")
+  };
+  playbackLogs.push(item);
+  if(playbackLogs.length > 300) playbackLogs.shift();
+  renderPlaybackLog();
+}
+
+function renderPlaybackLog(){
+  const box = document.getElementById("playback-log");
+  if(!box) return;
+  const rows = playbackLogs.slice(-180).map(x =>
+    `[${x.time}] [${x.type}] [${x.channel}] [${x.server}] ${x.message}`
+  );
+  box.innerHTML =
+    '<div style="color:orange;font:900 15px Arial;margin-bottom:8px">TIEA 3BB V2.2 • บันทึกการเล่น</div>' +
+    '<div style="margin-bottom:8px;color:#ffd180">สลับ Server แล้ว '+serverSwitchCount+' ครั้ง</div>' +
+    '<pre style="margin:0;white-space:pre-wrap;word-break:break-word;color:#fff">'+
+    lab14Esc(rows.join("\n") || "ยังไม่มีบันทึก")+'</pre>';
+}
+
+function togglePlaybackLog(){
+  const box = document.getElementById("playback-log");
+  if(!box) return;
+  box.style.display = box.style.display === "none" ? "block" : "none";
+  renderPlaybackLog();
+}
+
+function getServerCount(){
+  return Array.isArray(activeOriginalChannel?.servers) ? activeOriginalChannel.servers.length : 1;
+}
+
+function canSwitchServer(){
+  return Array.isArray(activeOriginalChannel?.servers) &&
+         activeServerIndex + 1 < activeOriginalChannel.servers.length;
+}
+
+async function switchToNextServer(reason){
+  if(!canSwitchServer()){
+    addPlaybackLog("FAIL", "ไม่มี Backup เหลือ: " + reason);
+    setStatus("ทุก Server เล่นไม่ได้", false);
+    return false;
+  }
+
+  activeServerIndex++;
+  serverSwitchCount++;
+  serverFailureCount = 0;
+
+  let next = resolveChannel(activeOriginalChannel, activeServerIndex);
+  next = lab14ApplyExistingMatch(next);
+  if(!next || !next.file){
+    addPlaybackLog("FAIL", "Backup ไม่มีลิงก์");
+    return switchToNextServer("Backup ไม่มีลิงก์");
+  }
+
+  activeChannel = next;
+  currentServerName =
+    activeOriginalChannel.servers?.[activeServerIndex]?.name ||
+    ("Backup " + activeServerIndex);
+  activeUrl = proxyUrl(next.file);
+
+  addPlaybackLog("SWITCH", "สลับไป " + currentServerName + " เพราะ " + reason);
+  setStatus("กำลังสลับ Server...", true);
+
+  await stopAllPlayers();
+  const myToken = ++playbackAttemptToken;
+
+  setTimeout(()=>{
+    if(myToken !== playbackAttemptToken) return;
+    if(activeUrl.includes(".mpd")) playMPDNotice(next, activeUrl);
+    else useHLS_STABLE(activeUrl);
+  }, 500);
+
+  return true;
+}
+
+function markPlaybackSuccess(kind){
+  serverFailureCount = 0;
+  lastPlaybackStartedAt = Date.now();
+  addPlaybackLog("PLAY", "เล่นสำเร็จผ่าน " + currentServerName + " • " + kind);
+}
+
+function handlePlaybackFailure(reason, fatal=true){
+  serverFailureCount++;
+  addPlaybackLog(fatal ? "ERROR" : "WARN", reason);
+
+  // จำกัดการสลับ: Fatal สลับทันที / ปัญหาชั่วคราวรอ 2 ครั้ง
+  if(fatal || serverFailureCount >= 2){
+    switchToNextServer(reason);
+  }
+}
+
 
 
 
@@ -811,6 +919,7 @@ async function stopAllPlayers(){
 }
 
 
+
 function resolveChannel(channel, serverIndex=0){
   if(Array.isArray(channel.servers) && channel.servers.length){
     const server = channel.servers[serverIndex] || channel.servers[0];
@@ -838,6 +947,11 @@ function firstChannelUrl(channel){
 async function loadChannel(channel, element){
   activeOriginalChannel = channel;
   activeServerIndex = 0;
+  serverFailureCount = 0;
+  serverSwitchCount = 0;
+  currentServerName = Array.isArray(channel.servers) && channel.servers[0]?.name
+    ? channel.servers[0].name : "Main";
+  playbackAttemptToken++;
 
   let resolvedChannel = resolveChannel(channel, activeServerIndex);
   resolvedChannel = lab14ApplyExistingMatch(resolvedChannel);
@@ -858,6 +972,7 @@ async function loadChannel(channel, element){
 
   const url = proxyUrl(resolvedChannel.file);
   activeUrl = url;
+  addPlaybackLog("OPEN", "เริ่มเปิด " + currentServerName + " • " + url);
 
   if(url.includes(".mpd")){
     playMPDNotice(resolvedChannel, url);
@@ -930,15 +1045,18 @@ function playMPDNotice(channel, url){
         shakaPlayer.load(url).then(()=>{
           forceAudio100();
           video.play().catch(()=>{});
-          setStatus("กำลังเล่น MPD");
+          setStatus("กำลังเล่น MPD • " + currentServerName);
+          markPlaybackSuccess("MPD");
         }).catch(e=>{
           console.log("MPD เล่นในเว็บไม่ได้:", e);
-          setStatus("MPD เล่นในเว็บนี้ไม่ได้ ให้กด PLAYER/MX", false);
+          setStatus("MPD เล่นไม่ได้ กำลังตรวจ Backup...", true);
+          handlePlaybackFailure("MPD load error: " + (e?.message || e), true);
         });
       }
     }
   }catch(e){
     console.log("MPD ERROR:", e);
+    handlePlaybackFailure("MPD exception: " + (e?.message || e), true);
   }
 }
 
@@ -999,11 +1117,13 @@ function useHLS_STABLE(url){
       forceAudio100();
       video.play().catch(()=>{});
       setTimeout(()=>{ forceAudio100(); video.play().catch(()=>{}); },300);
-      setStatus("กำลังเล่น HLS");
+      setStatus("กำลังเล่น HLS • " + currentServerName);
+      markPlaybackSuccess("HLS");
     });
 
     currentHls.on(Hls.Events.BUFFER_STALLED, function(){
       setStatus("กำลังเติมบัฟเฟอร์...", true);
+      addPlaybackLog("BUFFER", "Buffer stalled");
     });
 
     currentHls.on(Hls.Events.ERROR, function(event, data){
@@ -1011,20 +1131,30 @@ function useHLS_STABLE(url){
       if(!currentHls) return;
 
       if(data.fatal){
+        const detail = `${data.type || "unknown"}/${data.details || "unknown"}`;
         if(data.type === Hls.ErrorTypes.NETWORK_ERROR){
-          setStatus("เน็ตเวิร์กสะดุด กำลังโหลดต่อ...");
-          try{ currentHls.startLoad(); }catch(e){}
+          setStatus("Main มีปัญหา กำลังตรวจ Backup...");
+          handlePlaybackFailure("HLS Network Fatal: " + detail, true);
         }else if(data.type === Hls.ErrorTypes.MEDIA_ERROR){
           setStatus("สัญญาณวิดีโอสะดุด กำลังกู้คืน...");
-          try{ currentHls.recoverMediaError(); }catch(e){}
-        }else{
-          setStatus("เล่นไม่ได้ กำลังลองโหลดใหม่...", false);
+          addPlaybackLog("RECOVER", "HLS Media Fatal: " + detail);
           try{
-            currentHls.destroy();
-            currentHls = null;
-            setTimeout(()=>useHLS_STABLE(url), 1200);
-          }catch(e){}
+            currentHls.recoverMediaError();
+            setTimeout(()=>{
+              const videoNow = document.getElementById("html5-player");
+              if(videoNow && (videoNow.readyState < 2 || videoNow.paused)){
+                handlePlaybackFailure("กู้ Media Error ไม่สำเร็จ: " + detail, true);
+              }
+            }, 3500);
+          }catch(e){
+            handlePlaybackFailure("Media recovery exception: " + e.message, true);
+          }
+        }else{
+          setStatus("เล่นไม่ได้ กำลังสลับ Server...");
+          handlePlaybackFailure("HLS Fatal: " + detail, true);
         }
+      }else{
+        addPlaybackLog("WARN", `HLS ${data.type || "-"} / ${data.details || "-"}`);
       }
     });
 
@@ -1053,9 +1183,17 @@ function useHLS_STABLE(url){
 
       if(stuckCount >= 4){
         setStatus("ภาพค้าง กำลังกู้คืน...");
+        addPlaybackLog("STUCK", "เวลาเล่นไม่เดินประมาณ 12 วินาที");
         try{ currentHls.startLoad(); }catch(e){}
         video.play().catch(()=>{});
         stuckCount = 0;
+
+        setTimeout(()=>{
+          if(document.getElementById("player-container").style.display !== "block") return;
+          if(video.paused || video.readyState < 2){
+            handlePlaybackFailure("กู้ภาพค้างไม่สำเร็จ", false);
+          }
+        }, 4500);
       }
     }, 3000);
 
@@ -1068,12 +1206,20 @@ function useHLS_STABLE(url){
   }
 }
 
-function restartCurrent(){
-  if(activeOriginalChannel){
-    loadChannel(activeOriginalChannel, activeElement);
-  }else if(activeChannel){
-    loadChannel(activeChannel, activeElement);
-  }
+async function restartCurrent(){
+  if(!activeOriginalChannel && !activeChannel) return;
+  addPlaybackLog("RELOAD", "ผู้ใช้กดรีโหลด " + currentServerName);
+  const resolved = activeOriginalChannel
+    ? resolveChannel(activeOriginalChannel, activeServerIndex)
+    : activeChannel;
+  if(!resolved || !resolved.file) return;
+
+  activeChannel = lab14ApplyExistingMatch(resolved);
+  activeUrl = proxyUrl(activeChannel.file);
+  await stopAllPlayers();
+
+  if(activeUrl.includes(".mpd")) playMPDNotice(activeChannel, activeUrl);
+  else useHLS_STABLE(activeUrl);
 }
 
 
@@ -1130,6 +1276,8 @@ async function closePlayer(){
   box.classList.remove("controls-hidden");
   box.classList.remove("force-hide-controls");
   box.style.display = "none";
+  const logBox=document.getElementById("playback-log"); if(logBox) logBox.style.display="none";
+  const diagBox=document.getElementById("lab14-diag"); if(diagBox) diagBox.style.display="none";
   setTimeout(()=>{if(activeElement && document.body.contains(activeElement)) activeElement.focus();},120);
 }
 
