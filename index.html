@@ -447,8 +447,6 @@ function shouldWorkerFirst(url){
   const u=String(url||'').toLowerCase();
   return (
     u.includes('ok-hd.com') ||
-    u.includes('24playerhd') ||
-    u.includes('main.24playerhd.com') ||
 
     // MySeries new hosts: must go through Worker first
     u.includes('showhd9.com') ||
