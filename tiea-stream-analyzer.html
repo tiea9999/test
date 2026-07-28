@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>TIEA Developer Center V4.3 FINAL ภาษาไทย</title>
+<title>TIEA Developer Center V4.4 FINAL ARCHIVE ภาษาไทย</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#05080d;color:#fff;font-family:Tahoma,Arial,sans-serif}
-button,input,textarea{font:inherit;color:#fff;background:#172130;border:1px solid #29405a;border-radius:10px;padding:11px}
+button,input,textarea,select{font:inherit;color:#fff;background:#172130;border:1px solid #29405a;border-radius:10px;padding:11px}
 button{cursor:pointer}button:focus,input:focus,textarea:focus{outline:3px solid #25d8ff}
 header{position:sticky;top:0;z-index:20;background:#09111bee;border-bottom:1px solid #29405a;padding:12px}
 h1{margin:0;font-size:22px}.muted{color:#9bb0c2}.actions,.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -28,12 +28,13 @@ pre{white-space:pre-wrap;word-break:break-word;background:#05080d;border:1px sol
 </head>
 <body>
 <header>
-<h1>TIEA Developer Center V4.3 FINAL ภาษาไทย</h1>
-<div class="muted">ศูนย์วิเคราะห์สตรีม • V4.3 FINAL Build 4301</div>
+<h1>TIEA Developer Center V4.4 FINAL ARCHIVE ภาษาไทย</h1>
+<div class="muted">ศูนย์วิเคราะห์สตรีม • V4.4 FINAL ARCHIVE Build 4401</div>
 <div class="actions">
 <button class="primary" onclick="compareTwo()">▶ เปรียบเทียบ Warner ↔ Cinemax</button>
 <button class="good" onclick="diagnose()">🤖 วิเคราะห์อัตโนมัติ</button>
 <button onclick="exportTxt()">💾 รายงาน TXT</button>
+<button onclick="exportHtmlReport()">🌐 รายงาน HTML</button>
 <button class="danger" onclick="stopAll()">■ หยุดทั้งหมด</button>
 </div>
 </header>
@@ -47,6 +48,7 @@ pre{white-space:pre-wrap;word-break:break-word;background:#05080d;border:1px sol
 <button class="nav" data-view="performance">📊 ประสิทธิภาพระบบ</button>
 <button class="nav" data-view="blackbox">⬛ กล่องดำจับอาการหมุน</button>
 <button class="nav" data-view="lab">🧪 ห้องทดสอบ</button>
+<button class="nav" data-view="historyCompare">🕘 ประวัติและเปรียบเทียบ</button>
 <button class="nav" data-view="console">⌨ บันทึกการทำงาน</button>
 <div class="status"><b>สถานะระบบ</b>
 <div class="row"><span><i id="dothls" class="dot"></i>ระบบ HLS</span><span id="sthls">-</span></div>
@@ -154,6 +156,45 @@ pre{white-space:pre-wrap;word-break:break-word;background:#05080d;border:1px sol
 <div id="history"></div>
 </section>
 
+
+<section id="historyCompare" class="view">
+<div class="panel">
+<h2>ประวัติและเปรียบเทียบผล</h2>
+<div class="muted">บันทึกผลแต่ละครั้ง แล้วเลือก 2 รายการเพื่อดูความเปลี่ยนแปลงก่อน–หลัง</div>
+<div class="actions">
+<button class="good" onclick="saveSnapshot()">💾 บันทึกผลครั้งนี้</button>
+<button onclick="renderSnapshots()">↻ โหลดประวัติ</button>
+<button class="danger" onclick="clearSnapshots()">ล้างประวัติทั้งหมด</button>
+</div>
+</div>
+
+<div class="dashboard">
+<div class="kpi"><b>จำนวนประวัติ</b><span id="snapCount">0</span></div>
+<div class="kpi"><b>ผลล่าสุด</b><span id="snapLatest">-</span></div>
+<div class="kpi"><b>คะแนนล่าสุด</b><span id="snapLatestHealth">-</span></div>
+<div class="kpi"><b>แนวโน้ม</b><span id="snapTrend">-</span></div>
+</div>
+
+<div class="panel">
+<h3>เลือกผลก่อนและหลัง</h3>
+<div class="custom">
+<select id="compareBefore"></select>
+<select id="compareAfter"></select>
+<button class="primary" onclick="compareSnapshots()">เปรียบเทียบ</button>
+</div>
+</div>
+
+<div class="panel result">
+<h3>ผลเปรียบเทียบก่อน–หลัง</h3>
+<div id="snapshotCompareResult">ยังไม่ได้เลือกข้อมูล</div>
+</div>
+
+<div class="panel">
+<h3>ประวัติทั้งหมด</h3>
+<div id="snapshotList">ยังไม่มีประวัติ</div>
+</div>
+</section>
+
 <section id="console" class="view">
 <div class="panel"><h2>บันทึกการทำงาน</h2><pre id="consoleBox"></pre></div>
 </section>
@@ -227,10 +268,10 @@ function renderBlackBox(){
  $("bbDiagnosis").textContent=msg;
 }
 function exportBlackBox(){
- const head=`TIEA BLACK BOX V4.3 FINAL Build 4301\nสร้างเมื่อ: ${new Date().toLocaleString("th-TH")}\nอุปกรณ์: ${navigator.userAgent}\nอาการหมุน: ${blackBox.stalls}\nชิ้นส่วนโหลดช้า: ${blackBox.slowSegments}\nเวลาหมุนนานสุด: ${blackBox.longestStall.toFixed(1)} วินาที\nBuffer ต่ำสุด: ${blackBox.minBuffer===null?"-":blackBox.minBuffer.toFixed(1)+" วินาที"}\n\n`;
+ const head=`TIEA BLACK BOX V4.4 FINAL ARCHIVE Build 4401\nสร้างเมื่อ: ${new Date().toLocaleString("th-TH")}\nอุปกรณ์: ${navigator.userAgent}\nอาการหมุน: ${blackBox.stalls}\nชิ้นส่วนโหลดช้า: ${blackBox.slowSegments}\nเวลาหมุนนานสุด: ${blackBox.longestStall.toFixed(1)} วินาที\nBuffer ต่ำสุด: ${blackBox.minBuffer===null?"-":blackBox.minBuffer.toFixed(1)+" วินาที"}\n\n`;
  const body=blackBox.events.map(e=>JSON.stringify(e)).join("\n");
  const b=new Blob([head+body],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");
- a.href=URL.createObjectURL(b);a.download="tiea-black-box-v4.3-final-build4301.txt";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+ a.href=URL.createObjectURL(b);a.download="tiea-black-box-v4.4-final-archive-build4401.txt";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 const $=id=>document.getElementById(id), safe=s=>String(s).replace(/[^a-z0-9_-]/gi,"_"), now=()=>new Date().toLocaleTimeString("th-TH");
 function dot(id,state,text){$(id).className="dot "+state;$(id.replace("dot","st")).textContent=text}
@@ -432,9 +473,172 @@ function updatePerf(){let d=0,x=0;Object.values(reports).forEach(r=>{d+=r.metric
 function runLab(){const name=$("labName").value.trim()||"การทดสอบ",value=$("labValue").value.trim();if(!value)return alert("กรุณาใส่ลิงก์หรือรหัสช่อง");const id="lab_"+Date.now();runStream(id,value.startsWith("http")?value:BASE+encodeURIComponent(value),name);setTimeout(()=>{const r=reports[id],m=r.metrics||{},rec={date:new Date().toISOString(),name,value,result:m.decoded>0?"ผ่าน":"ต้องตรวจเพิ่ม"};const h=JSON.parse(localStorage.getItem("tieaV4History")||"[]");h.unshift(rec);localStorage.setItem("tieaV4History",JSON.stringify(h.slice(0,50)));renderHistory()},12000)}
 function renderHistory(){const h=JSON.parse(localStorage.getItem("tieaV4History")||"[]");$("history").innerHTML=h.length?h.map(x=>`<div class="panel"><b>${x.result==="ผ่าน"?"✅":"⚠️"} ${x.name}</b><br>${new Date(x.date).toLocaleString("th-TH")}<br>${x.value}<br>ผล: ${x.result}</div>`).join(""):"<div class='panel'>ยังไม่มีประวัติ</div>"}
 function clearHistory(){if(confirm("ล้างประวัติทั้งหมดหรือไม่")){localStorage.removeItem("tieaV4History");renderHistory()}}
+
+const SNAPSHOT_KEY="tieaV44Snapshots";
+
+function getSnapshots(){
+ try{return JSON.parse(localStorage.getItem(SNAPSHOT_KEY)||"[]")}catch(e){return []}
+}
+function saveSnapshots(arr){
+ localStorage.setItem(SNAPSHOT_KEY,JSON.stringify(arr.slice(0,100)));
+ renderSnapshots();
+}
+function currentSnapshot(){
+ const s=updateSummary();
+ const problemChannels=Object.values(reports).filter(r=>resultState(r).failed).map(r=>{
+  const ex=explainFailure(r);
+  return {
+   name:r.label,
+   url:r.url,
+   causes:ex.causes,
+   actions:ex.actions,
+   errors:r.errors,
+   fatal:!!r.fatalError,
+   metrics:r.metrics||{}
+  };
+ });
+ return {
+  id:"snap_"+Date.now(),
+  date:new Date().toISOString(),
+  tested:s.tested,
+  passed:s.passed,
+  failed:s.failed,
+  pending:s.pending,
+  playing:s.playing,
+  health:s.health,
+  status:s.status,
+  stars:starText(s.health),
+  problemChannels,
+  channels:Object.values(reports).map(r=>({
+   name:r.label,
+   url:r.url,
+   state:resultState(r).passed?"ผ่าน":resultState(r).failed?"เล่นไม่ได้":"กำลังตรวจ",
+   errors:r.errors,
+   fatal:!!r.fatalError,
+   metrics:r.metrics||{}
+  }))
+ };
+}
+function saveSnapshot(){
+ const s=currentSnapshot();
+ if(!s.tested){alert("ยังไม่มีผลการทดสอบให้บันทึก");return}
+ const arr=getSnapshots();
+ arr.unshift(s);
+ saveSnapshots(arr);
+ alert("บันทึกผลครั้งนี้แล้ว");
+}
+function clearSnapshots(){
+ if(confirm("ล้างประวัติผลทดสอบทั้งหมดหรือไม่")){
+  localStorage.removeItem(SNAPSHOT_KEY);
+  renderSnapshots();
+ }
+}
+function renderSnapshots(){
+ const arr=getSnapshots();
+ if(!$("snapCount"))return;
+ $("snapCount").textContent=arr.length;
+ $("snapLatest").textContent=arr.length?arr[0].status:"-";
+ $("snapLatestHealth").textContent=arr.length?arr[0].health+"%":"-";
+ let trend="-";
+ if(arr.length>=2){
+  const diff=arr[0].health-arr[1].health;
+  trend=diff>0?`ดีขึ้น +${diff}%`:diff<0?`ลดลง ${diff}%`:"คงเดิม";
+ }
+ $("snapTrend").textContent=trend;
+ const options=arr.map((x,i)=>`<option value="${x.id}">${new Date(x.date).toLocaleString("th-TH")} — ${x.status} — ${x.health}%</option>`).join("");
+ $("compareBefore").innerHTML=options;
+ $("compareAfter").innerHTML=options;
+ if(arr.length>=2){
+  $("compareBefore").value=arr[1].id;
+  $("compareAfter").value=arr[0].id;
+ }
+ $("snapshotList").innerHTML=arr.length?arr.map((x,i)=>`
+  <div class="panel">
+   <b>${new Date(x.date).toLocaleString("th-TH")}</b><br>
+   ${x.status} • สุขภาพ ${x.health}% ${x.stars}<br>
+   ทดสอบ ${x.tested} • ผ่าน ${x.passed} • เล่นไม่ได้ ${x.failed} • กำลังตรวจ ${x.pending}
+   ${x.problemChannels.length?`<br><b>มีปัญหา:</b> ${x.problemChannels.map(p=>p.name).join(", ")}`:"<br>✅ ไม่มีช่องที่มีปัญหา"}
+  </div>`).join(""):"ยังไม่มีประวัติ";
+}
+function compareSnapshots(){
+ const arr=getSnapshots();
+ const before=arr.find(x=>x.id===$("compareBefore").value);
+ const after=arr.find(x=>x.id===$("compareAfter").value);
+ if(!before||!after){$("snapshotCompareResult").textContent="กรุณาเลือกข้อมูลก่อนและหลัง";return}
+ const healthDiff=after.health-before.health;
+ const passDiff=after.passed-before.passed;
+ const failDiff=after.failed-before.failed;
+ let result=`<b>ก่อน:</b> ${new Date(before.date).toLocaleString("th-TH")} — ${before.status} — ${before.health}% ${before.stars}<br>`;
+ result+=`<b>หลัง:</b> ${new Date(after.date).toLocaleString("th-TH")} — ${after.status} — ${after.health}% ${after.stars}<br><br>`;
+ result+=`<b>สุขภาพระบบ:</b> ${healthDiff>0?"ดีขึ้น +":healthDiff<0?"ลดลง ":"คงเดิม "}${healthDiff}%<br>`;
+ result+=`<b>ช่องที่ผ่าน:</b> ${passDiff>0?"+":""}${passDiff}<br>`;
+ result+=`<b>ช่องที่เล่นไม่ได้:</b> ${failDiff>0?"+":""}${failDiff}<br>`;
+ if(after.problemChannels.length){
+  result+=`<br><b>ปัญหาหลังการแก้:</b><br>`;
+  after.problemChannels.forEach(p=>{
+   result+=`❌ ${p.name}<br>สาเหตุ: ${(p.causes||[]).join(", ")||"ยังระบุไม่ได้"}<br>`;
+  });
+ }else result+="<br>✅ หลังการแก้ไม่พบช่องที่มีปัญหา";
+ $("snapshotCompareResult").innerHTML=result;
+}
+function exportHtmlReport(){
+ const s=updateSummary();
+ const snap=currentSnapshot();
+ const rows=Object.values(reports).map(r=>{
+  const rs=resultState(r),ex=explainFailure(r),m=r.metrics||{};
+  return `<tr>
+   <td>${r.label}</td>
+   <td>${rs.passed?"ผ่าน":rs.failed?"เล่นไม่ได้":"กำลังตรวจ"}</td>
+   <td>${m.width||0}x${m.height||0}</td>
+   <td>${m.decoded||0}</td>
+   <td>${m.fps||0}</td>
+   <td>${m.buffer||0}s</td>
+   <td>${r.errors||0}</td>
+   <td>${(ex.causes||[]).join(", ")||"-"}</td>
+  </tr>`;
+ }).join("");
+ const problem=snap.problemChannels.map(p=>`
+  <div class="problem">
+   <h3>❌ ${p.name}</h3>
+   <p><b>สาเหตุ:</b> ${(p.causes||[]).join(", ")||"ยังระบุไม่ได้"}</p>
+   <p><b>คำแนะนำ:</b> ${(p.actions||[]).join(", ")||"ตรวจบันทึกการทำงาน"}</p>
+  </div>`).join("")||"<p>✅ ไม่พบช่องที่มีปัญหา</p>";
+ const doc=`<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+ <title>รายงาน TIEA V4.4</title>
+ <style>
+ body{background:#071019;color:#fff;font-family:Tahoma,Arial;padding:20px;line-height:1.55}
+ .box{background:#0f1b27;border:1px solid #29405a;border-radius:14px;padding:16px;margin-bottom:14px}
+ .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+ .k{background:#0a141e;border:1px solid #29405a;border-radius:12px;padding:12px}
+ table{width:100%;border-collapse:collapse;background:#0a141e}
+ th,td{border:1px solid #29405a;padding:8px;text-align:left}
+ th{background:#132337}.problem{border-left:4px solid #ff6666;padding-left:12px;margin:10px 0}
+ </style></head><body>
+ <h1>TIEA Developer Center V4.4 FINAL ARCHIVE</h1>
+ <p>สร้างเมื่อ ${new Date().toLocaleString("th-TH")}</p>
+ <div class="box grid">
+  <div class="k"><b>ทดสอบ</b><br>${s.tested}</div>
+  <div class="k"><b>เล่นได้จริง</b><br>${s.passed}</div>
+  <div class="k"><b>เล่นไม่ได้</b><br>${s.failed}</div>
+  <div class="k"><b>สุขภาพระบบ</b><br>${s.health}% ${starText(s.health)}</div>
+  <div class="k"><b>ผลรวม</b><br>${s.status}</div>
+ </div>
+ <div class="box"><h2>รายการที่มีปัญหา</h2>${problem}</div>
+ <div class="box"><h2>รายละเอียดทุกช่อง</h2>
+ <table><thead><tr><th>ช่อง</th><th>สถานะ</th><th>ความละเอียด</th><th>Decoded</th><th>FPS</th><th>Buffer</th><th>Error</th><th>สาเหตุ</th></tr></thead>
+ <tbody>${rows}</tbody></table></div>
+ <div class="box"><h2>ข้อมูลอุปกรณ์</h2><p>${navigator.userAgent}</p></div>
+ </body></html>`;
+ const b=new Blob([doc],{type:"text/html;charset=utf-8"}),a=document.createElement("a");
+ a.href=URL.createObjectURL(b);
+ a.download="tiea-developer-report-v4.4-final-archive.html";
+ a.click();
+ setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
 function exportTxt(){
  const s=updateSummary();
- let out="TIEA Developer Center V4.3 FINAL ภาษาไทย\nV4.3 FINAL Build 4301\n";
+ let out="TIEA Developer Center V4.4 FINAL ARCHIVE ภาษาไทย\nV4.4 FINAL ARCHIVE Build 4401\n";
  out+="สร้างเมื่อ: "+new Date().toLocaleString("th-TH")+"\n";
  out+="อุปกรณ์: "+navigator.userAgent+"\n\n";
  out+="สรุปผล\n";
@@ -474,11 +678,11 @@ function exportTxt(){
  });
  const b=new Blob([out],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");
  a.href=URL.createObjectURL(b);
- a.download="tiea-developer-report-v4.3-final-thai.txt";
+ a.download="tiea-developer-report-v4.4-final-archive-thai.txt";
  a.click();
  setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
-renderHistory();updatePerf();updateSummary();log("ระบบ","TIEA Developer Center V4.3 FINAL ภาษาไทย พร้อมใช้งาน");
+renderHistory();updatePerf();updateSummary();log("ระบบ","TIEA Developer Center V4.4 FINAL ARCHIVE ภาษาไทย พร้อมใช้งาน");
 </script>
 </body>
 </html>
