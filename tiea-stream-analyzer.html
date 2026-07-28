@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>TIEA Developer Center V4 ภาษาไทย</title>
+<title>TIEA Developer Center V4.1 ภาษาไทย</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <style>
 *{box-sizing:border-box}body{margin:0;background:#05080d;color:#fff;font-family:Tahoma,Arial,sans-serif}
@@ -28,8 +28,8 @@ pre{white-space:pre-wrap;word-break:break-word;background:#05080d;border:1px sol
 </head>
 <body>
 <header>
-<h1>TIEA Developer Center V4 ภาษาไทย</h1>
-<div class="muted">ศูนย์วิเคราะห์สตรีม • V4.0 Build 4001</div>
+<h1>TIEA Developer Center V4.1 ภาษาไทย</h1>
+<div class="muted">ศูนย์วิเคราะห์สตรีม • V4.1 Build 4101</div>
 <div class="actions">
 <button class="primary" onclick="compareTwo()">▶ เปรียบเทียบ Warner ↔ Cinemax</button>
 <button class="good" onclick="diagnose()">🤖 วิเคราะห์อัตโนมัติ</button>
@@ -45,6 +45,7 @@ pre{white-space:pre-wrap;word-break:break-word;background:#05080d;border:1px sol
 <button class="nav" data-view="provider">🧠 ข้อมูลผู้ให้บริการ</button>
 <button class="nav" data-view="worker">🌐 ตรวจสอบ Worker</button>
 <button class="nav" data-view="performance">📊 ประสิทธิภาพระบบ</button>
+<button class="nav" data-view="blackbox">⬛ กล่องดำจับอาการหมุน</button>
 <button class="nav" data-view="lab">🧪 ห้องทดสอบ</button>
 <button class="nav" data-view="console">⌨ บันทึกการทำงาน</button>
 <div class="status"><b>สถานะระบบ</b>
@@ -109,6 +110,36 @@ pre{white-space:pre-wrap;word-break:break-word;background:#05080d;border:1px sol
 <pre id="perfLog"></pre>
 </section>
 
+
+<section id="blackbox" class="view">
+<div class="panel">
+<h2>กล่องดำจับอาการหมุน</h2>
+<div class="muted">บันทึกอัตโนมัติเมื่อวิดีโอหยุดรอ ภาพหยุดเพิ่ม วิดีโอสำรองต่ำ หรือชิ้นส่วนวิดีโอโหลดช้า</div>
+<div class="actions">
+<button class="good" onclick="toggleBlackBox(true)">● เริ่มบันทึก</button>
+<button class="danger" onclick="toggleBlackBox(false)">■ หยุดบันทึก</button>
+<button onclick="exportBlackBox()">💾 ดาวน์โหลดกล่องดำ</button>
+<button onclick="clearBlackBox()">ล้างข้อมูล</button>
+</div>
+</div>
+<div class="dashboard">
+<div class="kpi"><b>สถานะกล่องดำ</b><span id="bbStatus">กำลังบันทึก</span></div>
+<div class="kpi"><b>พบอาการหมุน</b><span id="bbStalls">0</span></div>
+<div class="kpi"><b>ชิ้นส่วนโหลดช้า</b><span id="bbSlow">0</span></div>
+<div class="kpi"><b>เวลาหมุนนานสุด</b><span id="bbLongest">0.0s</span></div>
+<div class="kpi"><b>วิดีโอสำรองต่ำสุด</b><span id="bbMinBuffer">-</span></div>
+<div class="kpi"><b>เหตุการณ์ทั้งหมด</b><span id="bbEvents">0</span></div>
+</div>
+<div class="panel result">
+<h3>ผลวิเคราะห์ล่าสุด</h3>
+<div id="bbDiagnosis">ยังไม่พบอาการหมุน</div>
+</div>
+<div class="panel">
+<h3>บันทึกกล่องดำ</h3>
+<pre id="blackBoxLog">กำลังรอเหตุการณ์...</pre>
+</div>
+</section>
+
 <section id="lab" class="view">
 <div class="panel"><h2>ห้องทดสอบ</h2><div class="muted">บันทึกประวัติไว้ในเครื่องนี้</div>
 <div class="custom"><input id="labName" placeholder="ชื่อการทดสอบ"><input id="labValue" placeholder="ลิงก์หรือรหัสช่อง"><button class="good" onclick="runLab()">เริ่มทดสอบ</button></div></div>
@@ -131,6 +162,69 @@ const PROVIDERS=[
 {name:"LiveDooMovies",type:"HLS",player:"Hls.js",worker:"แนะนำให้ใช้",android:"ขึ้นอยู่กับช่อง",projector:"ขึ้นอยู่กับช่อง"},
 {name:"3BB",type:"DASH",player:"Shaka Player",worker:"ปกติไม่ต้องใช้",android:"ใช้ ClearKey",projector:"ใช้ ClearKey"}];
 const players={},reports={},logs=[];
+const BLACKBOX_KEY="tieaBlackBoxV41";
+const blackBox={
+ enabled:true, events:[], stalls:0, slowSegments:0, longestStall:0,
+ minBuffer:null, activeStalls:{}, segmentStarts:{}
+};
+function saveBlackBox(){
+ try{localStorage.setItem(BLACKBOX_KEY,JSON.stringify({...blackBox,activeStalls:{},segmentStarts:{}}))}catch(e){}
+ renderBlackBox();
+}
+function loadBlackBox(){
+ try{
+  const old=JSON.parse(localStorage.getItem(BLACKBOX_KEY)||"null");
+  if(old){blackBox.events=old.events||[];blackBox.stalls=old.stalls||0;blackBox.slowSegments=old.slowSegments||0;blackBox.longestStall=old.longestStall||0;blackBox.minBuffer=old.minBuffer??null}
+ }catch(e){}
+ renderBlackBox();
+}
+function bbEvent(id,type,data={}){
+ if(!blackBox.enabled)return;
+ const e={time:new Date().toISOString(),clock:now(),channel:id,type,...data};
+ blackBox.events.push(e);
+ if(blackBox.events.length>1000)blackBox.events.shift();
+ saveBlackBox();
+}
+function toggleBlackBox(on){blackBox.enabled=on;renderBlackBox();bbEvent("ระบบ",on?"เริ่มบันทึก":"หยุดบันทึก")}
+function clearBlackBox(){
+ if(!confirm("ล้างข้อมูลกล่องดำทั้งหมดหรือไม่"))return;
+ blackBox.events=[];blackBox.stalls=0;blackBox.slowSegments=0;blackBox.longestStall=0;blackBox.minBuffer=null;blackBox.activeStalls={};blackBox.segmentStarts={};
+ localStorage.removeItem(BLACKBOX_KEY);renderBlackBox();
+}
+function renderBlackBox(){
+ if(!$("bbStatus"))return;
+ $("bbStatus").textContent=blackBox.enabled?"กำลังบันทึก":"หยุดบันทึก";
+ $("bbStalls").textContent=blackBox.stalls;
+ $("bbSlow").textContent=blackBox.slowSegments;
+ $("bbLongest").textContent=blackBox.longestStall.toFixed(1)+"s";
+ $("bbMinBuffer").textContent=blackBox.minBuffer===null?"-":blackBox.minBuffer.toFixed(1)+"s";
+ $("bbEvents").textContent=blackBox.events.length;
+ const lines=blackBox.events.slice(-250).map(e=>{
+  let extra=[];
+  if(e.buffer!=null)extra.push("Buffer="+e.buffer+"s");
+  if(e.duration!=null)extra.push("ระยะเวลา="+e.duration+"s");
+  if(e.loadMs!=null)extra.push("โหลด="+e.loadMs+"ms");
+  if(e.decoded!=null)extra.push("Decoded="+e.decoded);
+  if(e.reason)extra.push(e.reason);
+  return `[${e.clock}] [${e.channel}] ${e.type}${extra.length?" | "+extra.join(" | "):""}`;
+ });
+ $("blackBoxLog").textContent=lines.length?lines.join("\n"):"กำลังรอเหตุการณ์...";
+ let msg="ยังไม่พบอาการหมุน";
+ const last=[...blackBox.events].reverse().find(e=>["เริ่มหมุน","กลับมาเล่น","ชิ้นส่วนโหลดช้า","ภาพหยุดเพิ่ม"].includes(e.type));
+ if(last){
+  if(last.type==="ชิ้นส่วนโหลดช้า")msg=`พบชิ้นส่วนวิดีโอโหลดช้า ${last.loadMs} ms มีแนวโน้มมาจากต้นทางหรือเครือข่าย`;
+  else if(last.type==="เริ่มหมุน" && (last.buffer??99)<1)msg="เริ่มหมุนขณะวิดีโอสำรองต่ำ มีแนวโน้มว่าโหลดข้อมูลมาไม่ทัน";
+  else if(last.type==="ภาพหยุดเพิ่ม" && (last.buffer??0)>3)msg="ภาพหยุดเพิ่มทั้งที่ยังมีวิดีโอสำรอง อาจเกี่ยวกับตัวถอดรหัสหรืออุปกรณ์";
+  else if(last.type==="กลับมาเล่น")msg=`กลับมาเล่นได้หลังหยุด ${last.duration||0} วินาที`;
+ }
+ $("bbDiagnosis").textContent=msg;
+}
+function exportBlackBox(){
+ const head=`TIEA BLACK BOX V4.1 Build 4101\nสร้างเมื่อ: ${new Date().toLocaleString("th-TH")}\nอุปกรณ์: ${navigator.userAgent}\nอาการหมุน: ${blackBox.stalls}\nชิ้นส่วนโหลดช้า: ${blackBox.slowSegments}\nเวลาหมุนนานสุด: ${blackBox.longestStall.toFixed(1)} วินาที\nBuffer ต่ำสุด: ${blackBox.minBuffer===null?"-":blackBox.minBuffer.toFixed(1)+" วินาที"}\n\n`;
+ const body=blackBox.events.map(e=>JSON.stringify(e)).join("\n");
+ const b=new Blob([head+body],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");
+ a.href=URL.createObjectURL(b);a.download="tiea-black-box-v4.1-build4101.txt";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
 const $=id=>document.getElementById(id), safe=s=>String(s).replace(/[^a-z0-9_-]/gi,"_"), now=()=>new Date().toLocaleTimeString("th-TH");
 function dot(id,state,text){$(id).className="dot "+state;$(id.replace("dot","st")).textContent=text}
 function log(type,msg,id="ระบบ"){logs.push(`[${now()}] [${type}] [${id}] ${msg}`);$("consoleBox").textContent=logs.slice(-250).join("\n")}
@@ -146,18 +240,62 @@ function compareTwo(){stopAll();$("cards").innerHTML="";runOne("warner");setTime
 function stopOne(id){const p=players[id];if(!p)return;clearInterval(p.timer);try{p.hls?.destroy()}catch(e){}try{p.video.pause();p.video.removeAttribute("src");p.video.load()}catch(e){}delete players[id];updatePerf()}
 function stopAll(){Object.keys(players).forEach(stopOne)}
 function runStream(id,url,label){stopOne(id);makeCard(id,label);const k=safe(id),v=$("video-"+k);reports[id]={id,label,url,manifest:false,errors:0,metrics:{},timeline:[]};let hls,lastD=0,lastT=performance.now();const add=m=>{reports[id].timeline.push(`[${now()}] ${m}`);$("log-"+k).textContent=reports[id].timeline.slice(-80).join("\n");log("ทดสอบ",m,label)};
-["playing","waiting","stalled","error"].forEach(ev=>v.addEventListener(ev,()=>add("วิดีโอ: "+ev)));
-if(window.Hls&&Hls.isSupported()){hls=new Hls(CFG);hls.attachMedia(v);hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(url));hls.on(Hls.Events.MANIFEST_PARSED,()=>{reports[id].manifest=true;$("badge-"+k).textContent="พบรายการสตรีม";add("อ่านรายการสตรีมสำเร็จ");v.play().catch(()=>{})});hls.on(Hls.Events.ERROR,(_,d)=>{reports[id].errors++;$("badge-"+k).textContent=d.fatal?"ผิดพลาดร้ายแรง":"คำเตือน";add(`HLS ${d.type}/${d.details}`);if(d.fatal&&d.type===Hls.ErrorTypes.NETWORK_ERROR)try{hls.startLoad()}catch(e){}else if(d.fatal&&d.type===Hls.ErrorTypes.MEDIA_ERROR)try{hls.recoverMediaError()}catch(e){}})}
+["playing","waiting","stalled","error"].forEach(ev=>v.addEventListener(ev,()=>{
+ const names={playing:"กลับมาเล่น",waiting:"กำลังรอข้อมูล",stalled:"ข้อมูลหยุดส่ง",error:"วิดีโอผิดพลาด"};
+ add("วิดีโอ: "+names[ev]);
+ const b=+buffer(v).toFixed(1),q=quality(v);
+ if(ev==="waiting"||ev==="stalled"){
+  if(!blackBox.activeStalls[id]){
+   blackBox.activeStalls[id]={start:performance.now(),buffer:b};
+   blackBox.stalls++;
+   bbEvent(label,"เริ่มหมุน",{buffer:b,decoded:q.decoded,reason:ev});
+  }
+ }
+ if(ev==="playing"&&blackBox.activeStalls[id]){
+  const d=+((performance.now()-blackBox.activeStalls[id].start)/1000).toFixed(1);
+  blackBox.longestStall=Math.max(blackBox.longestStall,d);
+  bbEvent(label,"กลับมาเล่น",{duration:d,buffer:b,decoded:q.decoded});
+  delete blackBox.activeStalls[id];
+ }
+ if(ev==="error")bbEvent(label,"วิดีโอผิดพลาด",{buffer:b,decoded:q.decoded});
+}));
+if(window.Hls&&Hls.isSupported()){hls=new Hls(CFG);hls.attachMedia(v);hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(url));hls.on(Hls.Events.MANIFEST_PARSED,()=>{reports[id].manifest=true;$("badge-"+k).textContent="พบรายการสตรีม";add("อ่านรายการสตรีมสำเร็จ");v.play().catch(()=>{})});hls.on(Hls.Events.FRAG_LOADING,(_,d)=>{
+ const key=(d.frag?.sn??"x")+"_"+(d.frag?.level??0);
+ blackBox.segmentStarts[id+"_"+key]=performance.now();
+});
+hls.on(Hls.Events.FRAG_LOADED,(_,d)=>{
+ const key=(d.frag?.sn??"x")+"_"+(d.frag?.level??0),start=blackBox.segmentStarts[id+"_"+key];
+ if(start){
+  const ms=Math.round(performance.now()-start);
+  delete blackBox.segmentStarts[id+"_"+key];
+  if(ms>=2500){blackBox.slowSegments++;bbEvent(label,"ชิ้นส่วนโหลดช้า",{loadMs:ms,buffer:+buffer(v).toFixed(1)});}
+ }
+});
+hls.on(Hls.Events.ERROR,(_,d)=>{
+ reports[id].errors++;$("badge-"+k).textContent=d.fatal?"ผิดพลาดร้ายแรง":"คำเตือน";
+ const thai=d.details==="bufferStalledError"?"วิดีโอสำรองไม่พอ":d.details;
+ add(`HLS ${d.type}/${thai}`);
+ bbEvent(label,"ข้อผิดพลาด HLS",{reason:`${d.type}/${d.details}`,buffer:+buffer(v).toFixed(1),fatal:!!d.fatal});
+ if(d.fatal&&d.type===Hls.ErrorTypes.NETWORK_ERROR)try{hls.startLoad()}catch(e){}
+ else if(d.fatal&&d.type===Hls.ErrorTypes.MEDIA_ERROR)try{hls.recoverMediaError()}catch(e){}
+})}
 else{v.src=url;v.play().catch(()=>{})}
-const timer=setInterval(()=>{const q=quality(v),t=performance.now(),dt=(t-lastT)/1000,fps=(q.decoded-lastD)/Math.max(.001,dt),buf=buffer(v),bit=hls?.bandwidthEstimate?Math.round(hls.bandwidthEstimate/1000):0;reports[id].metrics={decoded:q.decoded,dropped:q.dropped,fps:+fps.toFixed(1),buffer:+buf.toFixed(1),width:v.videoWidth,height:v.videoHeight,bitrateKbps:bit,paused:v.paused};$("res-"+k).textContent=`${v.videoWidth||0}x${v.videoHeight||0}`;$("dec-"+k).textContent=q.decoded;$("drop-"+k).textContent=q.dropped;$("fps-"+k).textContent=fps.toFixed(1);$("buf-"+k).textContent=buf.toFixed(1)+"s";$("bit-"+k).textContent=bit+" kbps";if(q.decoded>0){$("badge-"+k).textContent="ภาพทำงาน";dot("dotdec","ok","ทำงาน")}lastD=q.decoded;lastT=t;updatePerf()},2000);players[id]={hls,video:v,timer};updatePerf()}
+const timer=setInterval(()=>{const q=quality(v),t=performance.now(),dt=(t-lastT)/1000,fps=(q.decoded-lastD)/Math.max(.001,dt),buf=buffer(v),bit=hls?.bandwidthEstimate?Math.round(hls.bandwidthEstimate/1000):0;reports[id].metrics={decoded:q.decoded,dropped:q.dropped,fps:+fps.toFixed(1),buffer:+buf.toFixed(1),width:v.videoWidth,height:v.videoHeight,bitrateKbps:bit,paused:v.paused};$("res-"+k).textContent=`${v.videoWidth||0}x${v.videoHeight||0}`;$("dec-"+k).textContent=q.decoded;$("drop-"+k).textContent=q.dropped;$("fps-"+k).textContent=fps.toFixed(1);$("buf-"+k).textContent=buf.toFixed(1)+"s";$("bit-"+k).textContent=bit+" kbps";if(q.decoded>0){$("badge-"+k).textContent="ภาพทำงาน";dot("dotdec","ok","ทำงาน")}
+ if(blackBox.minBuffer===null||buf<blackBox.minBuffer)blackBox.minBuffer=buf;
+ if(!v.paused && v.readyState>=2 && q.decoded===lastD){
+  reports[id]._frozen=(reports[id]._frozen||0)+1;
+  if(reports[id]._frozen===2)bbEvent(label,"ภาพหยุดเพิ่ม",{buffer:+buf.toFixed(1),decoded:q.decoded,reason:"Decoded Frames ไม่เพิ่มประมาณ 4 วินาที"});
+ }else reports[id]._frozen=0;
+ if(buf<0.8&&!v.paused)bbEvent(label,"วิดีโอสำรองต่ำ",{buffer:+buf.toFixed(1),decoded:q.decoded});
+ lastD=q.decoded;lastT=t;updatePerf();renderBlackBox()},2000);players[id]={hls,video:v,timer};updatePerf()}
 function diagnose(){const rows=Object.values(reports);if(!rows.length){$("diagBox").textContent="ยังไม่มีข้อมูล กรุณาทดสอบอย่างน้อย 1 ช่องก่อน";return}let pass=0,fail=0,html="<h3>ผลวิเคราะห์</h3>";rows.forEach(r=>{const m=r.metrics||{},ok=r.manifest&&(m.decoded||0)>0&&r.errors===0;if(ok)pass++;else fail++;let advice=[];if(!r.manifest)advice.push("ตรวจลิงก์หรือ Worker");if(!(m.decoded>0))advice.push("ตรวจ Codec หรือรอเพิ่มอีกเล็กน้อย");if(r.errors)advice.push("ตรวจ Referer, CORS หรือสถานะต้นทาง");if((m.buffer||0)<1&&m.decoded>0)advice.push("วิดีโอสำรองต่ำ อาจเกิดอาการหมุน");html+=`<div class="panel"><b>${ok?"✅":"⚠️"} ${r.label}</b><br>รายการสตรีม: ${r.manifest?"ปกติ":"ยังไม่พบ"}<br>ถอดรหัสภาพ: ${m.decoded>0?"ทำงาน":"ยังไม่ทำงาน"}<br>ความละเอียด: ${m.width||0}x${m.height||0}<br>ภาพต่อวินาที: ${m.fps||0}<br>วิดีโอสำรอง: ${m.buffer||0} วินาที<br>ข้อผิดพลาด: ${r.errors}${advice.length?"<br><b>คำแนะนำ:</b> "+advice.join(", "):""}</div>`});$("diagBox").className="panel result "+(fail?"fail":"pass");$("diagBox").innerHTML=html+`<h3>สรุป: ผ่าน ${pass} ช่อง / ควรตรวจเพิ่ม ${fail} ช่อง</h3>`;$("dbResult").textContent=fail?"ควรตรวจเพิ่ม":"ผ่าน";document.querySelector('[data-view="diagnosis"]').click()}
 async function inspectWorker(){const url=$("workerUrl").value.trim(),t=performance.now();$("workerResult").textContent="กำลังตรวจสอบ...";try{const r=await fetch(url,{cache:"no-store"}),text=await r.text(),ms=Math.round(performance.now()-t),type=r.headers.get("content-type")||"-",manifest=text.includes("#EXTM3U");$("wiStatus").textContent=r.status;$("wiLatency").textContent=ms+" ms";$("wiType").textContent=type;$("wiManifest").textContent=manifest?"พบ":"ไม่พบ";$("workerResult").textContent=JSON.stringify({url,status:r.status,ok:r.ok,latencyMs:ms,contentType:type,isManifest:manifest,preview:text.slice(0,2500)},null,2);dot("dotworker",r.ok?"ok":"bad",String(r.status))}catch(e){$("workerResult").textContent="ผิดพลาด: "+e.message;dot("dotworker","bad","ผิดพลาด")}}
 function updatePerf(){let d=0,x=0;Object.values(reports).forEach(r=>{d+=r.metrics.decoded||0;x+=r.metrics.dropped||0});$("pfPlayers").textContent=Object.keys(players).length;$("pfDecoded").textContent=d;$("pfDropped").textContent=x;$("pfMemory").textContent=performance.memory?Math.round(performance.memory.usedJSHeapSize/1048576)+" MB":"ไม่รองรับ";$("dbPlayers").textContent=Object.keys(players).length;$("perfLog").textContent=JSON.stringify({activePlayers:Object.keys(players),decoded:d,dropped:x,online:navigator.onLine},null,2)}
 function runLab(){const name=$("labName").value.trim()||"การทดสอบ",value=$("labValue").value.trim();if(!value)return alert("กรุณาใส่ลิงก์หรือรหัสช่อง");const id="lab_"+Date.now();runStream(id,value.startsWith("http")?value:BASE+encodeURIComponent(value),name);setTimeout(()=>{const r=reports[id],m=r.metrics||{},rec={date:new Date().toISOString(),name,value,result:m.decoded>0?"ผ่าน":"ต้องตรวจเพิ่ม"};const h=JSON.parse(localStorage.getItem("tieaV4History")||"[]");h.unshift(rec);localStorage.setItem("tieaV4History",JSON.stringify(h.slice(0,50)));renderHistory()},12000)}
 function renderHistory(){const h=JSON.parse(localStorage.getItem("tieaV4History")||"[]");$("history").innerHTML=h.length?h.map(x=>`<div class="panel"><b>${x.result==="ผ่าน"?"✅":"⚠️"} ${x.name}</b><br>${new Date(x.date).toLocaleString("th-TH")}<br>${x.value}<br>ผล: ${x.result}</div>`).join(""):"<div class='panel'>ยังไม่มีประวัติ</div>"}
 function clearHistory(){if(confirm("ล้างประวัติทั้งหมดหรือไม่")){localStorage.removeItem("tieaV4History");renderHistory()}}
-function exportTxt(){let out="TIEA Developer Center V4 ภาษาไทย\nV4.0 Build 4001\nสร้างเมื่อ: "+new Date().toISOString()+"\n\n";Object.values(reports).forEach(r=>out+=`ช่อง: ${r.label}\nลิงก์: ${r.url}\nรายการสตรีม: ${r.manifest}\nข้อผิดพลาด: ${r.errors}\nค่าการเล่น: ${JSON.stringify(r.metrics,null,2)}\n\n`);const b=new Blob([out],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="tiea-developer-report-v4-thai.txt";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-renderHistory();updatePerf();log("ระบบ","TIEA Developer Center V4 ภาษาไทย พร้อมใช้งาน");
+function exportTxt(){let out="TIEA Developer Center V4.1 ภาษาไทย\nV4.1 Build 4101\nสร้างเมื่อ: "+new Date().toISOString()+"\n\n";Object.values(reports).forEach(r=>out+=`ช่อง: ${r.label}\nลิงก์: ${r.url}\nรายการสตรีม: ${r.manifest}\nข้อผิดพลาด: ${r.errors}\nค่าการเล่น: ${JSON.stringify(r.metrics,null,2)}\n\n`);const b=new Blob([out],{type:"text/plain;charset=utf-8"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="tiea-developer-report-v4.1-thai.txt";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+loadBlackBox();renderHistory();updatePerf();log("ระบบ","TIEA Developer Center V4.1 ภาษาไทย พร้อมใช้งาน");
 </script>
 </body>
 </html>
