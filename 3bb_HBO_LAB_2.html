@@ -92,7 +92,6 @@
 
     <script>
 const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
-
 const channels = [
 {
   name:"test",
@@ -101,7 +100,7 @@ const channels = [
   servers:[
     {
       name:"Main",
-      file:"https://movieproxy.tawatchai250958.workers.dev/debug8990?id=warner01",
+      file:"https://iptv.tawatchai250958.workers.dev/?url=http%3A%2F%2Fmacete.xyz%3A2095%2Fplay%2Flive.php%3Fmac%3D00%3A1A%3A79%3AAB%3AED%3A5A%26stream%3D115833%26extension%3Dm3u8&referer=https%3A%2F%2Fwww.madoball.com%2F",
       drm:false
     },
     {
@@ -118,23 +117,26 @@ logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQ
   group:"หนัง",
   servers:[
     {
-      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=warner01&utm_source=chatgpt.com",
+      name:"Main",
+      file:"http://6395online.ddns.net:8990/stream/inwtvsite/warner/stream.m3u8?uid=3624968277&u=admin2025a5brt&p=048d3a220cb399309e101459f5bcc27e34393433ff31d3105e66fff6a66e878e",
       drm:false
     }
   ]
-},
+}, 
+
 {
-  name:"test",
-logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQHDGbqHV94T6Ed74fTkKcXYhA&s=10",
-  group:"หนัง",
+  name:"tennis",
+  logo:"https://6395online.com:8443/logotv/sport/hd-tennis.png",
+   group:"กีฬา",
   servers:[
     {
-      file:"http://6395online.ddns.net:8990/stream/inwtvsite/warner/stream.m3u8?uid=3624968277&u=admin2025a5brt&p=048d3a220cb399309e101459f5bcc27e34393433ff31d3105e66fff6a66e878e
-",
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truetennis",
       drm:false
+
     }
   ]
-},
+}, 
 {
   name:"Bein 1",
   logo:"https://6395online.com:8443/logotv/sport/bein1.png",
@@ -159,13 +161,9 @@ logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQ
   servers:[
     {
       name:"Main",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/7423/playlist.m3u8",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=bein2",
       drm:false
-    },
-    {
-      name:"Backup",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://cdn1.googlecdnforstreaming.live/live/bein2/chunks.m3u8&referer=https://warpdooball.net/",
-      drm:false
+
     }
   ]
 }, 
@@ -278,7 +276,7 @@ logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQ
   servers:[
     {
       name:"Main",
-      file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/2888/playlist.m3u8",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truesport5",
       drm:false
     },
     {
@@ -321,7 +319,7 @@ logo:"https://6395online.com:8443/logotv/movie/Mono29p.jpg",
 },            
 {
   name:"asia-hits",
-  logo:"https://cdn4.madoball.com/upload/2821.jpg",
+  logo:"https://kicksball.com/img/proxy?u=https%3A%2F%2Fliveplayback.net%2Fuploads%2F1703829940.png&s=402fe16ffd3a",
   group:"หนัง",
   servers:[
     {
@@ -335,18 +333,14 @@ logo:"https://6395online.com:8443/logotv/movie/Mono29p.jpg",
 },
 
     
-{
+    {
   name:"HBO",
   logo:"https://6395online.com:8443/logotv/movie/hd-hbo-thai.png",
   group:"หนัง",
   servers:[
-    {
-      name:"Main",
-      file:"https://cnt1-streamer9.cdn.3bbtv.com:8443/3bb/live/103/103.mpd",
-      drm:true,
-      keyId:"9c5735afb4fd402580360aed8364469c",
-      key:"128d55d9ac2b47ad85f86b5d08320179"
-    }
+    {name:"Main",file:"https://iptv.tawatchai250958.workers.dev/?url=http://tiea1.3bbddns.com:28470/0.m3u8",drm:false},
+    {name:"Backup1",file:"https://6395online.com:8443/live/Iptv6988/0905692638/133.m3u8",drm:false},
+    {name:"Backup2",file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/2820/playlist.m3u8",drm:false},
   ]
 },
 {
@@ -354,13 +348,9 @@ logo:"https://6395online.com:8443/logotv/movie/Mono29p.jpg",
   logo:"https://6395online.com:8443/logotv/movie/hd-hbo-hit.png",
   group:"หนัง",
   servers:[
-    {
-      name:"Main",
-      file:"https://cco-streamer3.cdn.3bbtv.com:8443/3bb/live/105/105.mpd",
-      drm:true,
-      keyId:"7c04b8e7aa524afea879b2ed1aef8242",
-      key:"91e72b75fcb94c3bb36cceb741afd621"
-    }
+    {name:"Main",file:"https://iptv.tawatchai250958.workers.dev/?url=http://tiea1.3bbddns.com:28470/4.m3u8",drm:false},
+    {name:"Backup1",file:"https://6395online.com:8443/live/Iptv6988/0905692638/134.m3u8",drm:false},
+    {name:"Backup2",file:"https://iptv.tawatchai250958.workers.dev/?url=https://live.livedoomovies.com:4433/api/hls/live/2819/playlist.m3u8",drm:false},
   ]
 },
 {
@@ -403,6 +393,163 @@ logo:"https://6395online.com:8443/logotv/movie/Mono29p.jpg",
       drm:true,
       keyId:"f48caba466394e93b50780f21798787a",
       key:"9a074a10db4342e7937076b3e52f6029"
+    }
+  ]
+},
+
+{
+  name:"TRUE SERIES",
+  logo:"https://6395online.com:8443/logotv/movie/sd-series.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=trueseries",
+      drm:false
+
+    }
+  ]
+}, 
+{
+  name:"True Film Asia",
+  logo:"https://6395online.com:8443/logotv/movie/filmasia.jpg",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truefilmasia",
+      drm:false
+
+    }
+  ]
+}, 
+{
+  name:"Asian More",
+  logo:"https://6395online.com:8443/logotv/movie/hd-asianmore.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=asianmore",
+      drm:false
+
+    }
+  ]
+}, 
+{
+  name:"TRUE Thai Film ",
+  logo:"https://6395online.com:8443/logotv/movie/sd-thaifilm.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truethaifilm",
+      drm:false
+
+    }
+  ]
+}, 
+{
+  name:"True Film HD",
+  logo:"https://6395online.com:8443/logotv/sport/hd-tennis.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truetennis",
+      drm:false
+
+    }
+  ]
+}, 
+{
+  name:"AXN",
+  logo:"https://6395online.com:8443/logotv/movie/hd-axn.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=axn",
+      drm:false
+
+    }
+  ]
+}, 
+{
+  name:"True Movie Hits",
+  logo:"https://6395online.com:8443/logotv/movie/moviehits.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truemoviehits",
+      drm:false
+
+    }
+  ]
+},
+{
+  name:"truefilmhd",
+  logo:"https://6395online.com:8443/logotv/movie/hd-tfilm.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truefilmhd",
+      drm:false
+
+    }
+  ]
+},     
+{
+  name:"CCM",
+  logo:"https://6395online.com:8443/logotv/movie/ccm.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=ccm",
+      drm:false
+
+    }
+  ]
+},     
+{
+  name:"warner",
+  logo:"https://6395online.com:8443/logotv/movie/hd-warnertv.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=warner",
+      drm:false
+
+    }
+  ]
+},     
+{
+  name:"dreamworks",
+  logo:"https://6395online.com:8443/logotv/movie/hd-dreamworks.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=dreamworks",
+      drm:false
+
+    }
+  ]
+},     
+{
+  name:"discovery-asia",
+  logo:"https://6395online.com:8443/logotv/discovery/hd-discovery.png",
+   group:"หนัง",
+  servers:[
+    {
+      name:"Main",
+      file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=discoveryasia",
+      drm:false
+
     }
   ]
 },
