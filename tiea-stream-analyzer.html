@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+  <title>TIEA Stream Analyzer V1</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: #05070a;
+      color: #fff;
+      font-family: Arial, sans-serif;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #10151c;
+      padding: 14px;
+      border-bottom: 1px solid #333;
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: bold;
+    }
+
+    .subtitle {
+      color: #9fb0c0;
+      font-size: 13px;
+      margin-top: 4px;
+    }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: auto;
+      padding: 12px;
+    }
+
+    .card {
+      background: #10151c;
+      border: 1px solid #27313d;
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 14px;
+    }
+
+    .channel-name {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    video {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      border-radius: 10px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 12px;
+      min-height: 250px;
+      background: #070a0e;
+      border-radius: 10px;
+      color: #8fe7ff;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 14px;
+    }
+
+    @media (max-width: 750px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      button {
+        flex: 1 1 45%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="topbar">
+
+    <div class="title">
+      TIEA Stream Analyzer V1
+    </div>
+
+    <div class="subtitle">
+      Decoder Test — Warner vs Cinemax
+    </div>
+
+    <div class="buttons">
+
+      <button onclick="runOne('warner')">
+        ▶ Warner
+      </button>
+
+      <button onclick="runOne('cinemax')">
+        ▶ Cinemax
+      </button>
+
+      <button onclick="runCompare()">
+        ▶ Compare
+      </button>
+
+      <button onclick="stopAll()">
+        ■ Stop
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <main id="cards"></main>
+
+
+<script>
+
+const WORKER =
+  "https://movieproxy.tawatchai250958.workers.dev/watch?id=";
+
+const activePlayers = {};
+
+
+// =====================================================
+// CREATE CHANNEL CARD
+// =====================================================
+
+function createCard(id) {
+
+  let card =
+    document.getElementById(
+      "card-" + id
+    );
+
+  if (card) {
+    return card;
+  }
+
+  card =
+    document.createElement(
+      "div"
+    );
+
+  card.className =
+    "card";
+
+  card.id =
+    "card-" + id;
+
+
+  card.innerHTML = `
+
+    <div class="channel-name">
+      ${id.toUpperCase()}
+    </div>
+
+    <div class="grid">
+
+      <video
+        id="video-${id}"
+        controls
+        autoplay
+        muted
+        playsinline>
+      </video>
+
+      <pre id="report-${id}">
+WAITING...
+      </pre>
+
+    </div>
+  `;
+
+
+  document
+    .getElementById("cards")
+    .appendChild(card);
+
+
+  return card;
+}
+
+
+
+// =====================================================
+// VIDEO QUALITY
+// =====================================================
+
+function getVideoInfo(video) {
+
+  let quality = {};
+
+  try {
+
+    if (
+      typeof video.getVideoPlaybackQuality ===
+      "function"
+    ) {
+
+      quality =
+        video.getVideoPlaybackQuality();
+    }
+
+  } catch (e) {}
+
+
+  const decoded =
+    quality.totalVideoFrames ??
+    video.webkitDecodedFrameCount ??
+    "N/A";
+
+
+  const dropped =
+    quality.droppedVideoFrames ??
+    video.webkitDroppedFrameCount ??
+    "N/A";
+
+
+  return {
+
+    time:
+      Number(
+        video.currentTime || 0
+      ).toFixed(1),
+
+    duration:
+      video.duration,
+
+    readyState:
+      video.readyState,
+
+    networkState:
+      video.networkState,
+
+    width:
+      video.videoWidth || 0,
+
+    height:
+      video.videoHeight || 0,
+
+    decodedFrames:
+      decoded,
+
+    droppedFrames:
+      dropped,
+
+    paused:
+      video.paused,
+
+    ended:
+      video.ended,
+
+    error:
+      video.error
+        ? {
+            code:
+              video.error.code,
+
+            message:
+              video.error.message || ""
+          }
+        : null
+  };
+}
+
+
+
+// =====================================================
+// REPORT
+// =====================================================
+
+function showReport(
+  id,
+  stage,
+  extra = {}
+) {
+
+  const video =
+    document.getElementById(
+      "video-" + id
+    );
+
+
+  if (!video) {
+    return;
+  }
+
+
+  const info =
+    getVideoInfo(video);
+
+
+  let decodeStatus =
+    "UNKNOWN";
+
+
+  if (
+    typeof info.decodedFrames ===
+    "number"
+  ) {
+
+    decodeStatus =
+      info.decodedFrames > 0
+        ? "YES ✅"
+        : "NO ❌";
+  }
+
+
+  const lines = [
+
+    "CHANNEL: " +
+      id.toUpperCase(),
+
+    "",
+
+    "Stage: " +
+      stage,
+
+    "HLS State: " +
+      (
+        extra.hls ||
+        "-"
+      ),
+
+    "",
+
+    "Time: " +
+      info.time +
+      " sec",
+
+    "ReadyState: " +
+      info.readyState +
+      " / 4",
+
+    "NetworkState: " +
+      info.networkState,
+
+    "",
+
+    "Video Size: " +
+      info.width +
+      "x" +
+      info.height,
+
+    "Decoded Frames: " +
+      info.decodedFrames,
+
+    "Dropped Frames: " +
+      info.droppedFrames,
+
+    "",
+
+    "VIDEO DECODE: " +
+      decodeStatus,
+
+    "",
+
+    "Paused: " +
+      info.paused,
+
+    "Ended: " +
+      info.ended,
+
+    "",
+
+    "Video Error: " +
+      (
+        info.error
+          ? JSON.stringify(
+              info.error
+            )
+          : "NONE"
+      )
+  ];
+
+
+  if (
+    extra.fatal !==
+    undefined
+  ) {
+
+    lines.push(
+      ""
+    );
+
+    lines.push(
+      "HLS Fatal: " +
+      extra.fatal
+    );
+  }
+
+
+  document
+    .getElementById(
+      "report-" + id
+    )
+    .textContent =
+      lines.join("\n");
+}
+
+
+
+// =====================================================
+// STOP ONE
+// =====================================================
+
+function stopOne(id) {
+
+  const item =
+    activePlayers[id];
+
+
+  if (!item) {
+    return;
+  }
+
+
+  try {
+
+    clearInterval(
+      item.timer
+    );
+
+  } catch (e) {}
+
+
+  try {
+
+    if (item.hls) {
+      item.hls.destroy();
+    }
+
+  } catch (e) {}
+
+
+  try {
+
+    item.video.pause();
+
+    item.video.removeAttribute(
+      "src"
+    );
+
+    item.video.load();
+
+  } catch (e) {}
+
+
+  delete activePlayers[id];
+}
+
+
+
+// =====================================================
+// STOP ALL
+// =====================================================
+
+function stopAll() {
+
+  Object
+    .keys(activePlayers)
+    .forEach(
+      stopOne
+    );
+}
+
+
+
+// =====================================================
+// RUN CHANNEL
+// =====================================================
+
+function runOne(id) {
+
+  stopOne(id);
+
+  createCard(id);
+
+
+  const video =
+    document.getElementById(
+      "video-" + id
+    );
+
+
+  const streamUrl =
+    WORKER +
+    encodeURIComponent(id);
+
+
+  let hls = null;
+
+  let hlsState =
+    "STARTING";
+
+
+  function update(stage) {
+
+    showReport(
+      id,
+      stage,
+      {
+        hls:
+          hlsState
+      }
+    );
+  }
+
+
+  // ===================================================
+  // HLS.JS
+  // ===================================================
+
+  if (
+    window.Hls &&
+    Hls.isSupported()
+  ) {
+
+    hlsState =
+      "HLS.JS MODE";
+
+
+    hls =
+      new Hls({
+
+        enableWorker:
+          true,
+
+        lowLatencyMode:
+          false,
+
+        backBufferLength:
+          30,
+
+        maxBufferLength:
+          20,
+
+        maxMaxBufferLength:
+          40,
+
+        startFragPrefetch:
+          true
+      });
+
+
+    hls.attachMedia(
+      video
+    );
+
+
+    hls.on(
+      Hls.Events.MEDIA_ATTACHED,
+
+      function () {
+
+        hlsState =
+          "MEDIA_ATTACHED";
+
+        update(
+          "MEDIA ATTACHED"
+        );
+
+
+        hls.loadSource(
+          streamUrl
+        );
+      }
+    );
+
+
+    hls.on(
+      Hls.Events.MANIFEST_PARSED,
+
+      function () {
+
+        hlsState =
+          "MANIFEST_PARSED";
+
+
+        update(
+          "MANIFEST OK"
+        );
+
+
+        video
+          .play()
+          .catch(
+            function () {}
+          );
+      }
+    );
+
+
+    hls.on(
+      Hls.Events.FRAG_LOADED,
+
+      function () {
+
+        hlsState =
+          "FRAG_LOADED";
+
+        update(
+          "FRAGMENT LOADED"
+        );
+      }
+    );
+
+
+    hls.on(
+      Hls.Events.FRAG_PARSED,
+
+      function () {
+
+        hlsState =
+          "FRAG_PARSED";
+
+        update(
+          "FRAGMENT PARSED"
+        );
+      }
+    );
+
+
+    hls.on(
+      Hls.Events.ERROR,
+
+      function (
+        event,
+        data
+      ) {
+
+        hlsState =
+          data.type +
+          " / " +
+          data.details;
+
+
+        showReport(
+          id,
+          "HLS ERROR",
+          {
+            hls:
+              hlsState,
+
+            fatal:
+              data.fatal
+          }
+        );
+
+
+        if (
+          data.fatal &&
+          data.type ===
+          Hls.ErrorTypes.NETWORK_ERROR
+        ) {
+
+          try {
+
+            hls.startLoad();
+
+          } catch (e) {}
+        }
+
+
+        else if (
+          data.fatal &&
+          data.type ===
+          Hls.ErrorTypes.MEDIA_ERROR
+        ) {
+
+          try {
+
+            hls.recoverMediaError();
+
+          } catch (e) {}
+        }
+      }
+    );
+  }
+
+
+  // ===================================================
+  // NATIVE HLS
+  // ===================================================
+
+  else if (
+    video.canPlayType(
+      "application/vnd.apple.mpegurl"
+    )
+  ) {
+
+    hlsState =
+      "NATIVE HLS";
+
+
+    video.src =
+      streamUrl;
+
+
+    video
+      .play()
+      .catch(
+        function () {}
+      );
+  }
+
+
+  // ===================================================
+  // UNSUPPORTED
+  // ===================================================
+
+  else {
+
+    hlsState =
+      "NO HLS / MSE SUPPORT";
+
+
+    update(
+      "UNSUPPORTED"
+    );
+  }
+
+
+
+  // ===================================================
+  // VIDEO EVENTS
+  // ===================================================
+
+  const events = [
+
+    "loadstart",
+
+    "loadedmetadata",
+
+    "loadeddata",
+
+    "canplay",
+
+    "playing",
+
+    "waiting",
+
+    "stalled",
+
+    "suspend",
+
+    "error"
+  ];
+
+
+  events.forEach(
+
+    function (eventName) {
+
+      video.addEventListener(
+
+        eventName,
+
+        function () {
+
+          update(
+            eventName.toUpperCase()
+          );
+        }
+      );
+    }
+  );
+
+
+  const timer =
+    setInterval(
+
+      function () {
+
+        update(
+          "RUNNING"
+        );
+
+      },
+
+      2000
+    );
+
+
+  activePlayers[id] = {
+
+    hls,
+
+    video,
+
+    timer
+  };
+}
+
+
+
+// =====================================================
+// COMPARE
+// =====================================================
+
+function runCompare() {
+
+  stopAll();
+
+
+  document
+    .getElementById(
+      "cards"
+    )
+    .innerHTML = "";
+
+
+  runOne(
+    "warner"
+  );
+
+
+  runOne(
+    "cinemax"
+  );
+}
+
+</script>
+
+</body>
+</html>
