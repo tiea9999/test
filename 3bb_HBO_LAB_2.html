@@ -2,12 +2,12 @@
 <html lang="th">
 
 <head>
-<!-- TIEA 3BB V2.4 ANALYZER ENGINE LAB Build 2401: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
+<!-- TIEA 3BB V2.4 STABLE Build 2402: ANALYZER HLS ENGINE + PROJECTOR PICTURE FIX. SAFE/DIAG/LOG BUTTONS REMOVED. -->
 <!-- LAB14: REQUIRED/MISSING KID HAS PRIORITY OVER CONFIGURED KID. USES ONLY EXISTING LOCAL CLEARKEY PAIRS. ONE RELOAD MAX. LAB10/STABLE BASE UNCHANGED. -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB</title>
+    <title>TIEA 3BB V2.4 STABLE</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -60,16 +60,13 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.4 ANALYZER ENGINE LAB • Build 2401</h2>
+    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.4 STABLE • Build 2402</h2>
 
     <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
                 <button class="player-btn" id="closeBtn" onclick="closePlayer()">X</button>
                 <button class="player-btn" onclick="restartCurrent()">↻ รีโหลด</button>
-                <button class="player-btn" onclick="toggleLab10Diag()">📊 DIAG</button>
-                <button class="player-btn" onclick="togglePlaybackLog()">🧾 LOG</button>
-                <button class="player-btn" id="safeModeBtn" onclick="toggleProjectorSafe()">📽 SAFE</button>
             </div>
             <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
@@ -80,8 +77,6 @@
         <div id="jw-player"></div>
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
-        <div id="lab14-diag" style="display:none;position:absolute;right:14px;bottom:14px;z-index:100005;width:min(520px,calc(100vw - 28px));max-height:62vh;overflow:auto;background:rgba(3,14,24,.97);border:1px solid #00e5ff;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.45 Consolas,monospace;"></div>
-        <div id="playback-log" style="display:none;position:absolute;left:14px;bottom:14px;z-index:100006;width:min(600px,calc(100vw - 28px));max-height:58vh;overflow:auto;background:rgba(12,8,3,.97);border:1px solid orange;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.5 Consolas,monospace;"></div>
     </div>
 
     <div id="category-menu">
