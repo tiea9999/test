@@ -93,8 +93,9 @@
 </style>
 </head>
 <body>
+<!-- FIX1: MOVIE2 NEWPLAYLIST + 6395 SAFE RECOVERY / NO AUTO INTENT -->
 <!-- TIEA MOVIE2 AUTO: 24PLAYERHD -> movie2 / OTHER PROVIDERS -> iptv worker -->
-<div class="app"><aside class="sidebar"><div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 2 MOVIE2 AUTO</div></div><div class="group-title">เมนูหลัก</div><button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><div class="group-title">ทีวีออนไลน์</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 ทีวีออนไลน์</button><div class="group-title">หนัง</div><button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><div class="group-title">ซีรีส์</div><button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button><div class="group-title">ระบบ</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button></aside><main class="main"><div class="topbar"><button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep return</div></div><div class="content" id="content"></div></main></div>
+<div class="app"><aside class="sidebar"><div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 2 MOVIE2 FIX1 6395 SAFE</div></div><div class="group-title">เมนูหลัก</div><button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><div class="group-title">ทีวีออนไลน์</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 ทีวีออนไลน์</button><div class="group-title">หนัง</div><button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><div class="group-title">ซีรีส์</div><button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button><div class="group-title">ระบบ</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button></aside><main class="main"><div class="topbar"><button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep return</div></div><div class="content" id="content"></div></main></div>
 <div class="player-panel" id="playerPanel"><div class="player-top"><button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn home" id="playerHomeBtn">🏠 หน้าโฮม</button><div class="player-title" id="playerTitle">กำลังเล่น</div><button class="player-btn mx" id="mxBtn">▶ MX</button><button class="player-btn" id="extBtn">▶ PLAYER</button></div><div class="player-wrap"><div class="video-shell"><video id="video" controls playsinline webkit-playsinline autoplay></video></div><div class="player-hint"></div></div></div>
 <div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><div class="modal-title" id="modalTitle">ดูทั้งหมด</div><button class="player-btn close" id="closeModalBtn">✕ ปิด</button></div><div class="modal-body" id="modalBody"></div><div class="modal-foot"><div class="badge" id="modalCount">ทั้งหมด 0 รายการ</div><div class="pages"><button class="page-btn" id="prevPageBtn">◀ ก่อนหน้า</button><div class="badge" id="pageInfo">หน้า 1 / 1</div><button class="page-btn" id="nextPageBtn">ถัดไป ▶</button></div></div></div></div>
 <script>
@@ -360,10 +361,9 @@ function closeModal(){$('modal').classList.remove('show');$('prevPageBtn').style
 
 function isAutoFallbackUrl(url){
   const u=String(url||'').toLowerCase();
+  // 6395 ถูกถอดออก: ห้ามเด้ง PLAYER/MX อัตโนมัติระหว่างดู
   return (
     u.includes('54.37.19.157') ||
-    u.includes('6395online.com') ||
-    u.includes('gold.6395online.com') ||
     u.includes('animegood')
   );
 }
@@ -440,13 +440,36 @@ function is24PlayerHdUrl(url){
   );
 }
 
+function is6395Url(url){
+  const u=String(url||'').toLowerCase();
+  return u.includes('6395online.com') || u.includes('gold.6395online.com');
+}
+
+function normalize24PlayerUrl(url){
+  try{
+    const u=new URL(String(url||'').trim());
+    if(
+      u.hostname.toLowerCase()==='main.24playerhd.com' &&
+      /^\/m3u8\/[^/]+\.m3u8$/i.test(u.pathname)
+    ){
+      const file=u.pathname.split('/').pop()||'';
+      const id=file.replace(/\.m3u8$/i,'');
+      u.pathname='/newplaylist/'+id+'/'+id+'.m3u8';
+    }
+    return u.toString();
+  }catch(e){
+    return String(url||'').trim();
+  }
+}
+
 function workerUrlFor(url){
   url=String(url||'').trim();
   if(!url)return '';
 
-  // 24PlayerHD ใช้ Movie2 Worker โดยเฉพาะ
+  // 24PlayerHD ใช้ Movie2 Worker และแปลงเส้นทางเก่าอัตโนมัติ
   if(is24PlayerHdUrl(url)){
-    return MOVIE2_PROXY+encodeURIComponent(url);
+    const fixed24=normalize24PlayerUrl(url);
+    return MOVIE2_PROXY+encodeURIComponent(fixed24);
   }
 
   // Provider อื่นยังใช้ IPTV Worker เดิม
@@ -811,14 +834,14 @@ function startWatchdog(){
       return;
     }
 
-    if(unstable && stalledMs>6500 && Date.now()-state.lastRecoverAt>8000){
+    if(unstable && !is6395Url(direct) && stalledMs>6500 && Date.now()-state.lastRecoverAt>8000){
       state.lastRecoverAt=Date.now();
       state.recoverCount++;
       refreshCurrentHlsStream('หมุนเกิน 6 วิ • รีเฟรชสตรีม '+state.recoverCount);
       return;
     }
 
-    if(unstable && stalledMs>15000 && Date.now()-(state._hardRecoverAt||0)>18000){
+    if(unstable && !is6395Url(direct) && stalledMs>15000 && Date.now()-(state._hardRecoverAt||0)>18000){
       state._hardRecoverAt=Date.now();
       reloadSameHlsSource();
       return;
@@ -832,144 +855,273 @@ function startWatchdog(){
     }
   },3000);
 }
-function cleanupPlayer(){stopWatchdog();if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}if(state.hls){try{state.hls.destroy()}catch(e){}state.hls=null}if(state.dash){try{state.dash.destroy()}catch(e){}state.dash=null}try{video.pause()}catch(e){}video.removeAttribute('src');video.src='';video.load()}
+function cleanupPlayer(fullReset=true){
+  if(state._cleanupBusy)return;
+  state._cleanupBusy=true;
+  try{
+    stopWatchdog();
+    if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
+    if(state.hls){
+      const oldHls=state.hls;
+      state.hls=null;
+      try{oldHls.stopLoad()}catch(e){}
+      try{oldHls.detachMedia()}catch(e){}
+      try{oldHls.destroy()}catch(e){}
+    }
+    if(state.dash){
+      const oldDash=state.dash;
+      state.dash=null;
+      try{oldDash.destroy()}catch(e){}
+    }
+    try{video.pause()}catch(e){}
+    if(fullReset){
+      try{video.removeAttribute('src')}catch(e){}
+      try{video.src=''}catch(e){}
+      // ไม่เรียก video.load() ซ้ำ เพื่อลด Android WebView crash/เด้งออกจากแอป
+    }
+  }finally{
+    setTimeout(()=>{state._cleanupBusy=false},80);
+  }
+}
 async function playItem(item,serverIndex=0,displayTitle=''){if(!displayTitle)state.returnEpisodeItem=null;let original=getUrl(item,serverIndex),page=dynamicPageFromItem(item,serverIndex);if(!original&&!page){setStatus('ไม่พบลิงก์เล่นหรือหน้าต้นทาง');return}cleanupPlayer();state.currentTitle=displayTitle||item.title||'กำลังเล่น';$('playerTitle').textContent=state.currentTitle;playerPanel.classList.add('show');showPlayerUI();state._sourcePage=page||'';const resolved=await resolveDynamicProviderUrl(item,serverIndex,original);if(!resolved.url){state.originalUrl=original||'';state.currentUrl='';setStatus((resolved.provider?resolved.provider+' • ':'')+(resolved.reason||'ไม่สามารถดึงลิงก์สดได้'));$('playerHint').textContent=resolved.page?'หน้าต้นทาง: '+resolved.page+' • ต้องเชื่อม Dynamic Resolver ก่อน':'รายการเก่ายังไม่มี page URL';return}original=resolved.url;state.originalUrl=original;state.currentUrl=original;setStatus(resolved.dynamic?(resolved.provider+' • ใช้ลิงก์ล่าสุด'):'กำลังเล่น • Projector Stable V3');let lower=original.toLowerCase(),isMpd=lower.includes('.mpd'),noProxy=isMpd||lower.includes('thaicdn')||lower.includes('mux.dev')||lower.includes('byteark'),candidates=noProxy?[original]:(shouldWorkerFirst(original)?[workerUrlFor(original),original]:[original,workerUrlFor(original)]);playCandidate(candidates,item,serverIndex,0)}
 function playCandidate(candidates,item,serverIndex,idx){
-let url=candidates[idx]||candidates[0];
-state.currentUrl=url;
-let direct=getUrl(item,serverIndex);
-let next=()=>{
-  if(idx+1<candidates.length){playCandidate(candidates,item,serverIndex,idx+1);return}
-  if(item.servers?.length>serverIndex+1){playItem(item,serverIndex+1);return}
-  openMx(direct)
-};
-cleanupPlayer();
-playerPanel.classList.add('show');
-showPlayerUI();
-forceFullSound();
-startWatchdog();
+  let url=candidates[idx]||candidates[0];
+  const direct=getUrl(item,serverIndex);
+  const sourceIs6395=is6395Url(direct);
+  const sourceIs24=is24PlayerHdUrl(direct);
 
-// Auto PLAYER แยกสำหรับ 54.37 / 6395 / Animegood: ไม่ให้ loadeddata/canplay มายกเลิกก่อนภาพเดินจริง
-state.playTimer=setTimeout(()=>{
-  if(isAutoFallbackUrl(direct) && !hasRealPlayback()){
-    forceOpenPlayerNow(direct);
-    return;
-  }
-  if(video.readyState<2||video.currentTime===0)openExternal(direct);
-},isAutoFallbackUrl(direct)?5000:18000);
+  const next=()=>{
+    if(state._switchingCandidate)return;
+    state._switchingCandidate=true;
 
-['playing','loadeddata','canplay','timeupdate'].forEach(ev=>video.addEventListener(ev,()=>{
-  if(hasRealPlayback()){
-    if(state.playTimer)clearTimeout(state.playTimer);
-    state.stuckCount=0;
-    forceFullSound();
-  }
-},{once:false}));
+    setTimeout(()=>{
+      state._switchingCandidate=false;
 
-let lower=url.toLowerCase();
-if(lower.includes('.mpd')){
-  try{
-    state.dash=dashjs.MediaPlayer().create();
-    state.dash.initialize(video,url,true);
-    setTimeout(forceFullSound,500)
-  }catch(e){next()}
-  return
-}
-if(Hls.isSupported()&&(lower.includes('.m3u8')||lower.includes('master.txt')||lower.includes('.txt')||lower.includes('type=m3u8')||lower.includes('extension=m3u8')||decodeURIComponent(lower).includes('.m3u8'))){
-const mySeriesVod=isMySeriesVodUrl(state.originalUrl||url);
-state.hls=new Hls({
-enableWorker:false,
-lowLatencyMode:false,
+      if(idx+1<candidates.length){
+        setStatus('กำลังทดลองเส้นทางสำรอง');
+        playCandidate(candidates,item,serverIndex,idx+1);
+        return;
+      }
 
-// โปรเจคเตอร์/Android TV: เพิ่ม buffer ให้ยาวขึ้น ลดหยุดเป็นระยะ
-maxBufferLength:mySeriesVod?60:((isProjectorWeakMode()||isProjectorMode())?38:(isUnstableLiveUrl(state.originalUrl)?28:35)),
-maxMaxBufferLength:mySeriesVod?120:((isProjectorWeakMode()||isProjectorMode())?65:(isUnstableLiveUrl(state.originalUrl)?50:60)),
-backBufferLength:mySeriesVod?30:((isProjectorWeakMode()||isProjectorMode())?6:12),
-maxBufferHole:mySeriesVod?0.8:2.2,
-highBufferWatchdogPeriod:mySeriesVod?12:8,
-nudgeOffset:0.18,
-nudgeMaxRetry:10,
+      if(item.servers?.length>serverIndex+1){
+        setStatus('กำลังทดลอง Server ถัดไป');
+        playItem(item,serverIndex+1,state.currentTitle);
+        return;
+      }
 
-// โหลดช้าหรือเน็ตแกว่งให้รอนานขึ้น
-fragLoadingTimeOut:mySeriesVod?60000:45000,
-manifestLoadingTimeOut:mySeriesVod?45000:30000,
-levelLoadingTimeOut:mySeriesVod?45000:30000,
-fragLoadingMaxRetry:10,
-manifestLoadingMaxRetry:6,
-levelLoadingMaxRetry:6,
-fragLoadingRetryDelay:1200,
-manifestLoadingRetryDelay:1200,
-levelLoadingRetryDelay:1200,
+      // ไม่เด้งออกจากแอปอัตโนมัติ
+      setStatus('เล่นภายในยังไม่สำเร็จ • กด PLAYER หรือ MX ได้');
+    },300);
+  };
 
-startFragPrefetch:true,
-capLevelToPlayerSize:true,
-testBandwidth:false,
+  cleanupPlayer(false);
+  state.currentUrl=url;
+  state._hlsFatalCount=0;
+  state._networkRecoverAt=0;
+  state._mediaRecoverAt=0;
 
-// เริ่มที่ bitrate กลาง ๆ ไม่กระโดดสูงเกินจนโปรเจคเตอร์สะดุด
-abrEwmaDefaultEstimate:mySeriesVod?650000:((isProjectorWeakMode()||isProjectorMode())?420000:1000000),
-abrBandWidthFactor:mySeriesVod?0.75:0.58,
-abrBandWidthUpFactor:mySeriesVod?0.45:0.25,
-
-liveSyncDurationCount:(isProjectorWeakMode()||isProjectorMode())?5:(isUnstableLiveUrl(state.originalUrl)?3:7),
-liveMaxLatencyDurationCount:(isProjectorWeakMode()||isProjectorMode())?12:(isUnstableLiveUrl(state.originalUrl)?7:14),
-progressive:true,
-maxStarvationDelay:mySeriesVod?14:8,
-maxLoadingDelay:mySeriesVod?14:8,
-liveDurationInfinity:false
-});
-state.hls.loadSource(url);
-state.hls.attachMedia(video);
-state.hls.on(Hls.Events.MANIFEST_PARSED,()=>{projectorPreferLowLevel();chooseProjectorSafeLevel();forceFullSound();startWatchdog();video.play().catch(()=>{})});
-// V7.2 MySeries VOD Stable: ใช้ recovery เพียงชุดเดียว
-state.hls.on(Hls.Events.BUFFER_STALLED,()=>{
-  if(mySeriesVod){
-    setStatus('MySeries กำลังเติมบัฟเฟอร์ • ไม่รีโหลดถี่');
-    setTimeout(softRecoverPlayback,1200);
-    return;
-  }
-  if((isProjectorWeakMode()||isProjectorMode())&&isUnstableLiveUrl(state.originalUrl)){
-    projectorGentleStartLoad('โปรเจคเตอร์ V3 • เติมบัฟเฟอร์');
-  }else if(isUnstableLiveUrl(state.originalUrl)){
-    refreshCurrentHlsStream('กำลังหมุน • รีเฟรช live edge');
-  }else{
-    softRecoverPlayback();
-  }
-});
-state.hls.on(Hls.Events.LEVEL_LOADED,()=>{forceFullSound();});
-state.hls.on(Hls.Events.FRAG_BUFFERED,()=>{
+  playerPanel.classList.add('show');
+  showPlayerUI();
   forceFullSound();
-});
-state.hls.on(Hls.Events.ERROR,(e,d)=>{
-  if(!d)return;
-  if(!d.fatal){
-    if(d.type===Hls.ErrorTypes.NETWORK_ERROR){
-      if((isProjectorWeakMode()||isProjectorMode())&&isUnstableLiveUrl(state.originalUrl)){projectorGentleStartLoad('โปรเจคเตอร์ V3 • network สะดุด')}else if(isUnstableLiveUrl(state.originalUrl)){refreshCurrentHlsStream('network สะดุด • รีเฟรชสตรีม')}else{try{state.hls.startLoad(Math.max(0,(video.currentTime||0)-0.5))}catch(err){}}
-      setTimeout(()=>video.play().catch(()=>{}),500);
-    }
-    return
-  }
-  if(isAutoFallbackUrl(direct)){forceOpenPlayerNow(direct);return}
-  if(isOkHdUrl(direct)){next();return}
-  if(d.type===Hls.ErrorTypes.NETWORK_ERROR){
-    setStatus('network ค้าง • ต่อสัญญาณใหม่');
-    try{state.hls.startLoad(Math.max(0,video.currentTime-1));video.play().catch(()=>{})}catch(err){next()}
-    return
-  }
-  if(d.type===Hls.ErrorTypes.MEDIA_ERROR){
-    setStatus('media ค้าง • ซ่อม player');
-    try{state.hls.recoverMediaError();video.play().catch(()=>{})}catch(err){next()}
-    return
-  }
-  next()
-});
-return
-}
-video.src=url;
-forceFullSound();
-startWatchdog();
-video.play().catch(()=>next())
-}
 
+  // ให้เวลาต้นทาง/Worker ทำงาน แต่ไม่เปิด intent:// อัตโนมัติ
+  state.playTimer=setTimeout(()=>{
+    if(hasRealPlayback())return;
+
+    if(sourceIs6395){
+      setStatus('6395 ยังต่อสัญญาณอยู่ • ไม่เด้งออกจากแอป');
+      try{
+        if(state.hls){
+          state.hls.startLoad(Math.max(0,(video.currentTime||0)-0.5));
+          video.play().catch(()=>{});
+        }
+      }catch(e){}
+      return;
+    }
+
+    if(sourceIs24){
+      setStatus('Movie2 ยังโหลด Playlist • กำลังรอต่อ');
+      try{
+        if(state.hls){
+          state.hls.startLoad(-1);
+          video.play().catch(()=>{});
+        }
+      }catch(e){}
+      return;
+    }
+
+    setStatus('กำลังต่อสัญญาณ • กด PLAYER/MX ได้หากต้องการ');
+  },sourceIs24?30000:(sourceIs6395?20000:18000));
+
+  ['playing','loadeddata','canplay','timeupdate'].forEach(ev=>video.addEventListener(ev,()=>{
+    if(hasRealPlayback()){
+      if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
+      state.stuckCount=0;
+      state._hlsFatalCount=0;
+      forceFullSound();
+    }
+  },{once:false}));
+
+  const lower=url.toLowerCase();
+
+  if(lower.includes('.mpd')){
+    try{
+      state.dash=dashjs.MediaPlayer().create();
+      state.dash.initialize(video,url,true);
+      setTimeout(forceFullSound,500);
+    }catch(e){
+      next();
+    }
+    return;
+  }
+
+  const looksHls=
+    lower.includes('.m3u8') ||
+    lower.includes('master.txt') ||
+    lower.includes('.txt') ||
+    lower.includes('type=m3u8') ||
+    lower.includes('extension=m3u8') ||
+    decodeURIComponent(lower).includes('.m3u8');
+
+  if(Hls.isSupported() && looksHls){
+    const mySeriesVod=isMySeriesVodUrl(state.originalUrl||url);
+
+    state.hls=new Hls({
+      enableWorker:false,
+      lowLatencyMode:false,
+
+      maxBufferLength:sourceIs6395?24:(mySeriesVod?60:((isProjectorWeakMode()||isProjectorMode())?38:(isUnstableLiveUrl(state.originalUrl)?28:35))),
+      maxMaxBufferLength:sourceIs6395?40:(mySeriesVod?120:((isProjectorWeakMode()||isProjectorMode())?65:(isUnstableLiveUrl(state.originalUrl)?50:60))),
+      backBufferLength:sourceIs6395?5:(mySeriesVod?30:((isProjectorWeakMode()||isProjectorMode())?6:12)),
+      maxBufferHole:sourceIs6395?1.2:(mySeriesVod?0.8:2.2),
+      highBufferWatchdogPeriod:sourceIs6395?12:(mySeriesVod?12:8),
+      nudgeOffset:0.18,
+      nudgeMaxRetry:sourceIs6395?6:10,
+
+      fragLoadingTimeOut:sourceIs24?60000:(mySeriesVod?60000:45000),
+      manifestLoadingTimeOut:sourceIs24?60000:(mySeriesVod?45000:30000),
+      levelLoadingTimeOut:sourceIs24?60000:(mySeriesVod?45000:30000),
+      fragLoadingMaxRetry:sourceIs6395?6:10,
+      manifestLoadingMaxRetry:sourceIs6395?4:6,
+      levelLoadingMaxRetry:sourceIs6395?4:6,
+      fragLoadingRetryDelay:1500,
+      manifestLoadingRetryDelay:1500,
+      levelLoadingRetryDelay:1500,
+
+      startFragPrefetch:true,
+      capLevelToPlayerSize:true,
+      testBandwidth:false,
+      abrEwmaDefaultEstimate:mySeriesVod?650000:((isProjectorWeakMode()||isProjectorMode())?420000:1000000),
+      abrBandWidthFactor:mySeriesVod?0.75:0.58,
+      abrBandWidthUpFactor:mySeriesVod?0.45:0.25,
+      liveSyncDurationCount:sourceIs6395?5:((isProjectorWeakMode()||isProjectorMode())?5:(isUnstableLiveUrl(state.originalUrl)?3:7)),
+      liveMaxLatencyDurationCount:sourceIs6395?12:((isProjectorWeakMode()||isProjectorMode())?12:(isUnstableLiveUrl(state.originalUrl)?7:14)),
+      progressive:true,
+      maxStarvationDelay:mySeriesVod?14:8,
+      maxLoadingDelay:mySeriesVod?14:8,
+      liveDurationInfinity:false
+    });
+
+    const activeHls=state.hls;
+    activeHls.loadSource(url);
+    activeHls.attachMedia(video);
+
+    activeHls.on(Hls.Events.MANIFEST_PARSED,()=>{
+      if(state.hls!==activeHls)return;
+      projectorPreferLowLevel();
+      chooseProjectorSafeLevel();
+      forceFullSound();
+      startWatchdog();
+      video.play().catch(()=>{});
+    });
+
+    activeHls.on(Hls.Events.BUFFER_STALLED,()=>{
+      if(state.hls!==activeHls)return;
+
+      if(sourceIs6395){
+        // 6395: recovery เบาเท่านั้น ห้าม reload/destroy ซ้อน
+        const now=Date.now();
+        if(now-(state._networkRecoverAt||0)<10000)return;
+        state._networkRecoverAt=now;
+        setStatus('6395 บัฟเฟอร์ • กำลังต่อแบบปลอดภัย');
+        try{activeHls.startLoad(Math.max(0,(video.currentTime||0)-0.5))}catch(e){}
+        setTimeout(()=>video.play().catch(()=>{}),700);
+        return;
+      }
+
+      if(mySeriesVod){
+        setStatus('MySeries กำลังเติมบัฟเฟอร์ • ไม่รีโหลดถี่');
+        setTimeout(softRecoverPlayback,1200);
+        return;
+      }
+
+      softRecoverPlayback();
+    });
+
+    activeHls.on(Hls.Events.LEVEL_LOADED,()=>{if(state.hls===activeHls)forceFullSound()});
+    activeHls.on(Hls.Events.FRAG_BUFFERED,()=>{if(state.hls===activeHls)forceFullSound()});
+
+    activeHls.on(Hls.Events.ERROR,(e,d)=>{
+      if(!d || state.hls!==activeHls)return;
+
+      const now=Date.now();
+
+      if(!d.fatal){
+        if(d.type===Hls.ErrorTypes.NETWORK_ERROR && now-(state._networkRecoverAt||0)>10000){
+          state._networkRecoverAt=now;
+          try{activeHls.startLoad(Math.max(0,(video.currentTime||0)-0.5))}catch(err){}
+          setTimeout(()=>video.play().catch(()=>{}),600);
+        }
+        return;
+      }
+
+      state._hlsFatalCount=(state._hlsFatalCount||0)+1;
+
+      if(d.type===Hls.ErrorTypes.MEDIA_ERROR){
+        if(now-(state._mediaRecoverAt||0)>12000){
+          state._mediaRecoverAt=now;
+          setStatus(sourceIs6395?'6395 media สะดุด • ซ่อมโดยไม่ปิดแอป':'media สะดุด • กำลังซ่อม');
+          try{
+            activeHls.recoverMediaError();
+            setTimeout(()=>video.play().catch(()=>{}),700);
+            return;
+          }catch(err){}
+        }
+      }
+
+      if(d.type===Hls.ErrorTypes.NETWORK_ERROR){
+        setStatus(sourceIs6395?'6395 network สะดุด • ต่อใหม่โดยไม่เด้ง':'network สะดุด • กำลังต่อใหม่');
+        try{
+          activeHls.startLoad(Math.max(0,(video.currentTime||0)-1));
+          setTimeout(()=>video.play().catch(()=>{}),700);
+        }catch(err){}
+
+        // 6395 ไม่เปลี่ยน source/destroy ใน error แรก ๆ
+        if(sourceIs6395 && state._hlsFatalCount<=5)return;
+        if(sourceIs24 && state._hlsFatalCount<=3)return;
+      }
+
+      // เปลี่ยน candidate เมื่อพยายามซ่อมหลายครั้งแล้วเท่านั้น
+      if(state._hlsFatalCount>=4 && !sourceIs6395){
+        next();
+      }else if(sourceIs6395){
+        setStatus('6395 ยังเชื่อมต่ออยู่ • กด PLAYER/MX เองได้');
+      }
+    });
+
+    startWatchdog();
+    return;
+  }
+
+  try{
+    video.src=url;
+    forceFullSound();
+    startWatchdog();
+    video.play().catch(()=>next());
+  }catch(e){
+    next();
+  }
+}
 
 
 
