@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>TIEA IPTV HOME V7.2 ALPHA 2 DYNAMIC PROVIDER ENGINE</title>
+<title>TIEA IPTV HOME V7.2 ALPHA 3 24PLAYERHD NATIVE EMBED</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 <style>
@@ -51,6 +51,17 @@
   object-fit:contain!important;
   background:#000!important;
 }
+#native24Frame{
+  display:none;
+  width:100vw;
+  height:100vh;
+  border:0;
+  background:#000;
+}
+.player-panel.native24-mode #video{display:none!important}
+.player-panel.native24-mode #native24Frame{display:block!important}
+.player-panel.native24-mode #hlsDebugPanel{display:none!important}
+
 .player-hint{
   position:absolute!important;
   left:12px!important;
@@ -141,11 +152,12 @@
 </style>
 </head>
 <body>
+<!-- BUILD: V7.2 ALPHA 3 24PLAYERHD NATIVE EMBED -->
 <!-- DEBUG BUILD: HLS EVENT TRACE -->
 <!-- FIX2: 24PLAYERHD FORCE MOVIE2 ONLY / NO DIRECT FALLBACK -->
 <!-- FIX1: MOVIE2 NEWPLAYLIST + 6395 SAFE RECOVERY / NO AUTO INTENT -->
 <!-- TIEA MOVIE2 AUTO: 24PLAYERHD -> movie2 / OTHER PROVIDERS -> iptv worker -->
-<div class="app"><aside class="sidebar"><div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 2 MOVIE2 DEBUG EVENTS</div></div><div class="group-title">เมนูหลัก</div><button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><div class="group-title">ทีวีออนไลน์</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 ทีวีออนไลน์</button><div class="group-title">หนัง</div><button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><div class="group-title">ซีรีส์</div><button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button><div class="group-title">ระบบ</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button></aside><main class="main"><div class="topbar"><button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep return</div></div><div class="content" id="content"></div></main></div>
+<div class="app"><aside class="sidebar"><div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 3 24HD NATIVE EMBED</div></div><div class="group-title">เมนูหลัก</div><button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><div class="group-title">ทีวีออนไลน์</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 ทีวีออนไลน์</button><div class="group-title">หนัง</div><button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><div class="group-title">ซีรีส์</div><button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button><div class="group-title">ระบบ</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button></aside><main class="main"><div class="topbar"><button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep return</div></div><div class="content" id="content"></div></main></div>
 <div id="hlsDebugPanel">
   <div id="hlsDebugHead">
     <div id="hlsDebugTitle">TIEA HLS DEBUG</div>
@@ -154,7 +166,7 @@
   </div>
   <pre id="hlsDebugLog"></pre>
 </div>
-<div class="player-panel" id="playerPanel"><div class="player-top"><button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn home" id="playerHomeBtn">🏠 หน้าโฮม</button><div class="player-title" id="playerTitle">กำลังเล่น</div><button class="player-btn mx" id="mxBtn">▶ MX</button><button class="player-btn" id="extBtn">▶ PLAYER</button></div><div class="player-wrap"><div class="video-shell"><video id="video" controls playsinline webkit-playsinline autoplay></video></div><div class="player-hint"></div></div></div>
+<div class="player-panel" id="playerPanel"><div class="player-top"><button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn home" id="playerHomeBtn">🏠 หน้าโฮม</button><div class="player-title" id="playerTitle">กำลังเล่น</div><button class="player-btn mx" id="mxBtn">▶ MX</button><button class="player-btn" id="extBtn">▶ PLAYER</button></div><div class="player-wrap"><div class="video-shell"><video id="video" controls playsinline webkit-playsinline autoplay></video><iframe id="native24Frame" title="24PlayerHD Player" allow="autoplay; fullscreen; picture-in-picture; encrypted-media" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div><div class="player-hint"></div></div></div>
 <div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><div class="modal-title" id="modalTitle">ดูทั้งหมด</div><button class="player-btn close" id="closeModalBtn">✕ ปิด</button></div><div class="modal-body" id="modalBody"></div><div class="modal-foot"><div class="badge" id="modalCount">ทั้งหมด 0 รายการ</div><div class="pages"><button class="page-btn" id="prevPageBtn">◀ ก่อนหน้า</button><div class="badge" id="pageInfo">หน้า 1 / 1</div><button class="page-btn" id="nextPageBtn">ถัดไป ▶</button></div></div></div></div>
 <script>
 const HOME_URL='https://tiea9999.github.io/tv/index.html',LIVE_URL='https://tiea9999.github.io/tv/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
@@ -178,7 +190,7 @@ const TV_LINKS=[
 const MYSERIES_FOLDERS=[{kind:'folder',title:'ดูซีรี่ย์จีน',image:FOLDER_LOGO,source:MY_CHINA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์เกาหลี',image:FOLDER_LOGO,source:MY_KOREA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์ไทย',image:FOLDER_LOGO,source:MY_THAI,group:'MySeries'},{kind:'folder',title:'ซีรี่ย์ญี่ปุ่น',image:FOLDER_LOGO,source:MY_JAPAN,group:'MySeries'},{kind:'folder',title:'ดูละครสั้น',image:FOLDER_LOGO,source:MY_SHORT,group:'MySeries'},{kind:'folder',title:'ดูหนังออนไลน์',image:FOLDER_LOGO,source:MY_MOVIE,group:'MySeries'}];
 const SOURCES={'tv-6395':[{title:'DooBall6395',source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u'}],'movie-main':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],'movie-24hd':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],'series-main':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA},{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ดูซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ดูละครสั้น',source:MY_SHORT},{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-update':[{title:'ซีรี่ย์จีน',source:MY_CHINA},{title:'ซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ซีรี่ย์สั้น',source:MY_SHORT}],'series-china':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA}],'series-korea':[{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA}],'series-thai':[{title:'ดูซีรี่ย์ไทย',source:MY_THAI}],'series-japan':[{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN}],'series-short':[{title:'ดูละครสั้น',source:MY_SHORT}],'series-movie':[{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]};
 const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null};
-const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel');
+const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel'),native24Frame=$('native24Frame');
 
 const hlsDebugPanel=$('hlsDebugPanel'),hlsDebugLog=$('hlsDebugLog'),hlsDebugTitle=$('hlsDebugTitle');
 let hlsDebugStart=0,hlsDebugLines=[];
@@ -579,6 +591,68 @@ function is24PlayerHdUrl(url){
     u.includes('main.24playerhd.com') ||
     u.includes('dell250369.com')
   );
+}
+
+
+function get24PlayerContentId(url){
+  try{
+    const u=new URL(String(url||'').trim());
+    if(u.hostname.toLowerCase()!=='main.24playerhd.com')return '';
+
+    let m=u.pathname.match(/^\/m3u8\/([^/]+)(?:\/|\.m3u8$)/i);
+    if(m&&m[1])return m[1];
+
+    m=u.pathname.match(/^\/newplaylist\/([^/]+)(?:\/|$)/i);
+    if(m&&m[1])return m[1];
+
+    if(u.pathname.toLowerCase().includes('new_player.php')){
+      return u.searchParams.get('id')||'';
+    }
+  }catch(e){}
+  return '';
+}
+
+function build24NativePlayerUrl(url){
+  const id=get24PlayerContentId(url);
+  if(!id)return '';
+  return 'https://main.24playerhd.com/new_player.php?id='+encodeURIComponent(id)+'&typew=T';
+}
+
+function stop24NativePlayer(){
+  try{
+    if(native24Frame){
+      native24Frame.src='about:blank';
+      native24Frame.style.display='none';
+    }
+    playerPanel.classList.remove('native24-mode');
+    state._native24Mode=false;
+  }catch(e){}
+}
+
+function open24NativePlayer(url,title){
+  const playerUrl=build24NativePlayerUrl(url);
+  if(!playerUrl)return false;
+
+  cleanupPlayer();
+  state.originalUrl=url;
+  state.currentUrl=playerUrl;
+  state.currentTitle=title||'24PlayerHD';
+  state._native24Mode=true;
+
+  $('playerTitle').textContent=state.currentTitle+' • 24HD Native';
+  playerPanel.classList.add('show','native24-mode');
+  playerPanel.classList.remove('hide-ui');
+
+  if(hlsDebugPanel)hlsDebugPanel.classList.remove('show');
+  if(native24Frame){
+    native24Frame.style.display='block';
+    native24Frame.src=playerUrl;
+    native24Frame.focus();
+  }
+
+  setStatus('24PlayerHD • เปิด Player ต้นฉบับภายใน TIEA');
+  showPlayerUI(false);
+  return true;
 }
 
 function is6395Url(url){
@@ -1001,6 +1075,14 @@ function cleanupPlayer(fullReset=true){
   state._cleanupBusy=true;
   try{
     stopWatchdog();
+    try{
+      if(native24Frame){
+        native24Frame.src='about:blank';
+        native24Frame.style.display='none';
+      }
+      playerPanel.classList.remove('native24-mode');
+      state._native24Mode=false;
+    }catch(e){}
     if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
     if(state.hls){
       const oldHls=state.hls;
@@ -1024,16 +1106,86 @@ function cleanupPlayer(fullReset=true){
     setTimeout(()=>{state._cleanupBusy=false},80);
   }
 }
-async function playItem(item,serverIndex=0,displayTitle=''){if(!displayTitle)state.returnEpisodeItem=null;let original=getUrl(item,serverIndex),page=dynamicPageFromItem(item,serverIndex);if(!original&&!page){setStatus('ไม่พบลิงก์เล่นหรือหน้าต้นทาง');return}cleanupPlayer();state.currentTitle=displayTitle||item.title||'กำลังเล่น';$('playerTitle').textContent=state.currentTitle;playerPanel.classList.add('show');showPlayerUI();state._sourcePage=page||'';const resolved=await resolveDynamicProviderUrl(item,serverIndex,original);if(!resolved.url){state.originalUrl=original||'';state.currentUrl='';setStatus((resolved.provider?resolved.provider+' • ':'')+(resolved.reason||'ไม่สามารถดึงลิงก์สดได้'));$('playerHint').textContent=resolved.page?'หน้าต้นทาง: '+resolved.page+' • ต้องเชื่อม Dynamic Resolver ก่อน':'รายการเก่ายังไม่มี page URL';return}original=resolved.url;state.originalUrl=original;state.currentUrl=original;setStatus(resolved.dynamic?(resolved.provider+' • ใช้ลิงก์ล่าสุด'):'กำลังเล่น • Projector Stable V3');let lower=original.toLowerCase(),isMpd=lower.includes('.mpd'),noProxy=isMpd||lower.includes('thaicdn')||lower.includes('mux.dev')||lower.includes('byteark'),candidates;
+async function playItem(item,serverIndex=0,displayTitle=''){
+  if(!displayTitle)state.returnEpisodeItem=null;
 
-// 24PlayerHD ห้าม fallback ไป URL ตรง เพราะ Variant ต้องผ่าน Movie2 ทุกชั้น
-if(is24PlayerHdUrl(original)){
-  candidates=[workerUrlFor(original)];
-}else{
-  candidates=noProxy?[original]:(shouldWorkerFirst(original)?[workerUrlFor(original),original]:[original,workerUrlFor(original)]);
+  let original=getUrl(item,serverIndex);
+  let page=dynamicPageFromItem(item,serverIndex);
+
+  if(!original&&!page){
+    setStatus('ไม่พบลิงก์เล่นหรือหน้าต้นทาง');
+    return;
+  }
+
+  const title=displayTitle||item.title||'กำลังเล่น';
+
+  // 24PlayerHD: ใช้ new_player.php ของต้นทางภายใน iframe
+  // ไม่ผ่าน Movie2 Worker และไม่เข้า Hls.js ของหน้าแม่
+  if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original)){
+    open24NativePlayer(original,title);
+    return;
+  }
+
+  cleanupPlayer();
+  state.currentTitle=title;
+  $('playerTitle').textContent=state.currentTitle;
+  playerPanel.classList.add('show');
+  showPlayerUI();
+  state._sourcePage=page||'';
+
+  const resolved=await resolveDynamicProviderUrl(item,serverIndex,original);
+  if(!resolved.url){
+    state.originalUrl=original||'';
+    state.currentUrl='';
+    setStatus(
+      (resolved.provider?resolved.provider+' • ':'')+
+      (resolved.reason||'ไม่สามารถดึงลิงก์สดได้')
+    );
+    const hint=$('playerHint');
+    if(hint){
+      hint.textContent=resolved.page
+        ?'หน้าต้นทาง: '+resolved.page+' • ต้องเชื่อม Dynamic Resolver ก่อน'
+        :'รายการเก่ายังไม่มี page URL';
+    }
+    return;
+  }
+
+  original=resolved.url;
+  state.originalUrl=original;
+  state.currentUrl=original;
+  setStatus(
+    resolved.dynamic
+      ?(resolved.provider+' • ใช้ลิงก์ล่าสุด')
+      :'กำลังเล่น • Projector Stable V3'
+  );
+
+  // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
+  if(is24PlayerHdUrl(original) && get24PlayerContentId(original)){
+    open24NativePlayer(original,title);
+    return;
+  }
+
+  let lower=original.toLowerCase();
+  let isMpd=lower.includes('.mpd');
+  let noProxy=
+    isMpd||
+    lower.includes('thaicdn')||
+    lower.includes('mux.dev')||
+    lower.includes('byteark');
+  let candidates;
+
+  if(is24PlayerHdUrl(original)){
+    candidates=[workerUrlFor(original)];
+  }else{
+    candidates=noProxy
+      ?[original]
+      :(shouldWorkerFirst(original)
+        ?[workerUrlFor(original),original]
+        :[original,workerUrlFor(original)]);
+  }
+
+  playCandidate(candidates,item,serverIndex,0);
 }
-
-playCandidate(candidates,item,serverIndex,0)}
 function playCandidate(candidates,item,serverIndex,idx){
   let url=candidates[idx]||candidates[0];
   const direct=getUrl(item,serverIndex);
