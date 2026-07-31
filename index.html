@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>TIEA IPTV HOME V7.2 ALPHA 3.3 DEVICE PLAYER</title>
+<title>TIEA IPTV HOME V7.2 ALPHA 3.4 EXTERNAL PLAYER</title>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 <style>
@@ -100,12 +100,41 @@
 }
 
 
+
+/* ===== TIEA EXTERNAL PLAYER ENGINE V1.0 ===== */
+.external-settings-modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.9);z-index:11050;padding:18px}
+.external-settings-modal.show{display:flex}
+.external-settings-box{width:min(620px,100%);background:linear-gradient(180deg,#171717,#090909);border:1px solid #2b2b2b;border-radius:22px;padding:18px;box-shadow:0 0 35px rgba(0,208,255,.25)}
+.external-settings-title{font-size:22px;font-weight:900;color:#9ff4ff;margin-bottom:6px}
+.external-settings-sub{font-size:13px;line-height:1.5;color:#b9dfe6;margin-bottom:14px}
+.external-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.external-mode-btn{border:1px solid #303030;background:#171717;color:#fff;border-radius:15px;padding:14px 12px;text-align:left;font-size:15px;font-weight:900;cursor:pointer;min-height:68px}
+.external-mode-btn small{display:block;color:#9fdce7;font-size:12px;font-weight:normal;margin-top:5px;line-height:1.35}
+.external-mode-btn.active{border-color:#00d0ff;background:linear-gradient(180deg,#10313d,#111);box-shadow:0 0 18px rgba(0,208,255,.35)}
+.external-mode-btn:focus{box-shadow:var(--focus);border-color:var(--accent)}
+.external-settings-foot{display:flex;gap:10px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap}
+@media(max-width:620px){.external-mode-grid{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
-<!-- BUILD: V7.2 ALPHA 3.3 DEVICE PLAYER -->
-<div class="app"><aside class="sidebar"><div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 3.3 DEVICE PLAYER</div></div><div class="group-title">เมนูหลัก</div><button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><div class="group-title">ทีวีออนไลน์</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 ทีวีออนไลน์</button><div class="group-title">หนัง</div><button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><div class="group-title">ซีรีส์</div><button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button><div class="group-title">ระบบ</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button></aside><main class="main"><div class="topbar"><button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep return</div></div><div class="content" id="content"></div></main></div>
+<!-- BUILD: V7.2 ALPHA 3.4 EXTERNAL PLAYER PRODUCTION -->
+<div class="app"><aside class="sidebar"><div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 3.4 EXTERNAL PLAYER</div></div><div class="group-title">เมนูหลัก</div><button class="menu-btn active" data-action="home">🏠 หน้าแรก</button><div class="group-title">ทีวีออนไลน์</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/3bb.html">📡 ทีวีออนไลน์</button><div class="group-title">หนัง</div><button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button><button class="menu-btn" data-source="movie-24hd">🎬 หนัง 24HD</button><div class="group-title">ซีรีส์</div><button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn" data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn" data-source="series-movie">🎬 หนัง MySeries</button><button class="menu-btn" data-source="series-24hd">📺 ซีรีส์ 24HD</button><button class="menu-btn" data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button><div class="group-title">ระบบ</div><button class="menu-btn" data-link="https://tiea9999.github.io/tv/index.html">🏠 HOME จริง</button></aside><main class="main"><div class="topbar"><button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><button class="top-btn live" id="externalSettingsBtn">⚙ PLAYER</button><div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep return</div></div><div class="content" id="content"></div></main></div>
 <div class="player-panel" id="playerPanel"><div class="player-top"><button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn home" id="playerHomeBtn">🏠 หน้าโฮม</button><div class="player-title" id="playerTitle">กำลังเล่น</div></div><div class="player-wrap"><div class="video-shell"><video id="video" controls playsinline webkit-playsinline autoplay></video><iframe id="native24Frame" title="24PlayerHD Player" allow="autoplay *; fullscreen *; picture-in-picture *; encrypted-media *" allowfullscreen webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div><div class="player-hint"></div></div></div>
+<div class="external-settings-modal" id="externalSettingsModal">
+  <div class="external-settings-box">
+    <div class="external-settings-title">⚙ External Player สำหรับ 24PlayerHD</div>
+    <div class="external-settings-sub">เลือกวิธีเปิดเฉพาะรายการ 24PlayerHD เท่านั้น ระบบอื่นยังทำงานเหมือนเดิม ค่าที่เลือกจะถูกจำไว้ในเครื่องนี้</div>
+    <div class="external-mode-grid" id="externalModeGrid">
+      <button class="external-mode-btn" data-player-mode="auto">🚀 AUTO<small>Android ให้ระบบเลือกแอป • คอมใช้เว็บ</small></button>
+      <button class="external-mode-btn" data-player-mode="web">🌐 WEB PLAYER<small>เปิดหน้า Player เดิมภายใน TIEA</small></button>
+      <button class="external-mode-btn" data-player-mode="wiseplay">▶ WISEPLAY<small>เรียกแอป Wiseplay โดยตรง</small></button>
+      <button class="external-mode-btn" data-player-mode="mx">▶ MX PLAYER<small>เรียก MX Player โดยตรง</small></button>
+      <button class="external-mode-btn" data-player-mode="ask">❓ ถามทุกครั้ง<small>เลือกรูปแบบก่อนเปิดแต่ละรายการ</small></button>
+    </div>
+    <div class="external-settings-foot"><button class="player-btn close" id="externalSettingsCloseBtn">✕ ปิด</button></div>
+  </div>
+</div>
 <div class="modal" id="modal"><div class="modal-box"><div class="modal-head"><div class="modal-title" id="modalTitle">ดูทั้งหมด</div><button class="player-btn close" id="closeModalBtn">✕ ปิด</button></div><div class="modal-body" id="modalBody"></div><div class="modal-foot"><div class="badge" id="modalCount">ทั้งหมด 0 รายการ</div><div class="pages"><button class="page-btn" id="prevPageBtn">◀ ก่อนหน้า</button><div class="badge" id="pageInfo">หน้า 1 / 1</div><button class="page-btn" id="nextPageBtn">ถัดไป ▶</button></div></div></div></div>
 <script>
 const HOME_URL='https://tiea9999.github.io/tv/index.html',LIVE_URL='https://tiea9999.github.io/tv/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
@@ -499,6 +528,97 @@ function stop24NativePlayer(){
   }catch(e){}
 }
 
+
+
+/* ===== TIEA EXTERNAL PLAYER ENGINE V1.0 ===== */
+const TIEA_24_PLAYER_KEY='TIEA_24_PLAYER_MODE';
+const TIEA_24_PLAYER_MODES=['auto','web','wiseplay','mx','ask'];
+
+function get24PlayerMode(){
+  try{
+    const mode=localStorage.getItem(TIEA_24_PLAYER_KEY)||'auto';
+    return TIEA_24_PLAYER_MODES.includes(mode)?mode:'auto';
+  }catch(e){return 'auto'}
+}
+function set24PlayerMode(mode){
+  if(!TIEA_24_PLAYER_MODES.includes(mode))mode='auto';
+  try{localStorage.setItem(TIEA_24_PLAYER_KEY,mode)}catch(e){}
+  update24PlayerModeUI();
+  setStatus('24PlayerHD • ตั้งค่า Player เป็น '+mode.toUpperCase());
+}
+function update24PlayerModeUI(){
+  const mode=get24PlayerMode();
+  document.querySelectorAll('[data-player-mode]').forEach(btn=>{
+    btn.classList.toggle('active',btn.dataset.playerMode===mode);
+  });
+}
+function openExternalSettings(){
+  update24PlayerModeUI();
+  const m=$('externalSettingsModal');
+  if(m){m.classList.add('show');setTimeout(()=>m.querySelector('.external-mode-btn.active,.external-mode-btn')?.focus(),80)}
+}
+function closeExternalSettings(){
+  const m=$('externalSettingsModal');
+  if(m)m.classList.remove('show');
+  setTimeout(()=>$('externalSettingsBtn')?.focus(),50);
+}
+function isAndroidDevice(){return /android/i.test(navigator.userAgent||'')}
+function buildAndroidViewIntent(url,packageName=''){
+  const u=new URL(url);
+  const scheme=u.protocol.replace(':','');
+  const hostPath=u.host+u.pathname+(u.search||'')+(u.hash||'');
+  return 'intent://'+hostPath+'#Intent;scheme='+scheme+';action=android.intent.action.VIEW;type=application/vnd.apple.mpegurl;'
+    +(packageName?'package='+packageName+';':'')
+    +'S.browser_fallback_url='+encodeURIComponent(url)+';end';
+}
+function launch24AndroidApp(url,mode,title){
+  const direct=normalize24PlayerUrl(url);
+  if(!direct)return false;
+  if(!isAndroidDevice())return open24NativePlayer(url,title);
+
+  let pkg='';
+  if(mode==='wiseplay')pkg='com.wiseplay';
+  if(mode==='mx')pkg='com.mxtech.videoplayer.ad';
+
+  state.originalUrl=direct;
+  state.currentUrl=direct;
+  state.currentTitle=title||'24PlayerHD';
+  try{
+    saveReturnState({player:mode,url:direct});
+    saveReturnBeforeExternal(mode,direct);
+  }catch(e){}
+  setStatus('24PlayerHD • กำลังเปิด '+(mode==='wiseplay'?'Wiseplay':mode==='mx'?'MX Player':'แอป Player'));
+
+  try{
+    const intent=buildAndroidViewIntent(direct,pkg);
+    window.location.href=intent;
+    return true;
+  }catch(e){
+    setStatus('เปิดแอปไม่สำเร็จ • กลับไปใช้ Web Player');
+    return open24NativePlayer(url,title);
+  }
+}
+function ask24PlayerMode(url,title){
+  const choice=window.prompt(
+    'เลือก Player สำหรับ 24PlayerHD\\n'+
+    '1 = Wiseplay\\n2 = MX Player\\n3 = Web Player\\n4 = Android เลือกแอป',
+    '1'
+  );
+  if(choice===null)return false;
+  if(String(choice).trim()==='2')return launch24AndroidApp(url,'mx',title);
+  if(String(choice).trim()==='3')return open24NativePlayer(url,title);
+  if(String(choice).trim()==='4')return launch24AndroidApp(url,'auto',title);
+  return launch24AndroidApp(url,'wiseplay',title);
+}
+function route24Player(url,title){
+  let mode=get24PlayerMode();
+  if(mode==='ask')return ask24PlayerMode(url,title);
+  if(mode==='web')return open24NativePlayer(url,title);
+  if(mode==='wiseplay'||mode==='mx')return launch24AndroidApp(url,mode,title);
+  // AUTO: Android เปิดตัวเลือกแอปของระบบ; Desktop ใช้เว็บ
+  if(isAndroidDevice())return launch24AndroidApp(url,'auto',title);
+  return open24NativePlayer(url,title);
+}
 
 function shouldUseDevicePlayer24(){
   const ua=(navigator.userAgent||'').toLowerCase();
@@ -1074,11 +1194,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   // 24PlayerHD: มือถือ/โปรเจคเตอร์ใช้ Player ของเครื่อง
   // คอมพิวเตอร์ยังใช้ new_player.php ภายใน iframe
   if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original)){
-    if(shouldUseDevicePlayer24()){
-      open24DevicePlayer(original,title);
-    }else{
-      open24NativePlayer(original,title);
-    }
+    route24Player(original,title);
     return;
   }
 
@@ -1117,11 +1233,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
 
   // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
   if(is24PlayerHdUrl(original) && get24PlayerContentId(original)){
-    if(shouldUseDevicePlayer24()){
-      open24DevicePlayer(original,title);
-    }else{
-      open24NativePlayer(original,title);
-    }
+    route24Player(original,title);
     return;
   }
 
@@ -1611,10 +1723,15 @@ function safeIntent(url,mode){
 }function openMx(url){safeIntent(url||state.originalUrl||state.currentUrl,'mx')}function openExternal(url){safeIntent(url||state.originalUrl||state.currentUrl,'external')}
 async function loadMenuSource(key){state.activeSource=key;let label=document.querySelector(`[data-source="${key}"]`)?.textContent?.trim()||'รายการ';setStatus('กำลังโหลด '+label+' ...');content.innerHTML='<div class="hero"><div class="hero-title">กำลังโหลด...</div><div class="hero-sub">'+label+'</div></div>';try{if(key==='series-update'){let items=await loadSeriesUpdateDirect();renderUpdatePage(items,label);return}if(key==='series-main'){renderRows([{title:'MySeries แยกหมวด',items:MYSERIES_FOLDERS}],label);setStatus('พร้อมใช้งาน • MySeries แยกหมวด');return}let items=await loadSourcePack(key);renderRows(makeRows(items),label);setStatus(items.length?'พร้อมใช้งาน':'ไม่พบรายการ')}catch(e){content.innerHTML='<div class="hero"><div class="hero-title">โหลดไม่สำเร็จ</div><div class="hero-sub">'+e.message+'</div></div>';setStatus('โหลดไม่สำเร็จ')}}function openVip(url){let pass=prompt('กรุณาใส่รหัสผ่าน VIP');if(pass===VIP_PASSWORD)location.href=url;else if(pass!==null)alert('รหัสผ่านไม่ถูกต้อง')}
 document.querySelectorAll('.menu-btn').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(btn.dataset.vipLink){openVip(btn.dataset.vipLink);return}if(btn.dataset.link){location.href=btn.dataset.link;return}if(btn.dataset.action==='home'){renderHome();return}if(btn.dataset.source){loadMenuSource(btn.dataset.source);return}}});
-$('homeBtn').onclick=()=>location.href=HOME_URL;$('reloadBtn').onclick=()=>{state.cache={};if(state.activeSource&&state.activeSource!=='home')loadMenuSource(state.activeSource);else renderHome()};$('closePlayerBtn').onclick=closePlayer;$('playerHomeBtn').onclick=()=>location.href=HOME_URL;$('closeModalBtn').onclick=closeModal;$('prevPageBtn').onclick=()=>{state.page--;renderModalPage()};$('nextPageBtn').onclick=()=>{state.page++;renderModalPage()};
+$('homeBtn').onclick=()=>location.href=HOME_URL;$('reloadBtn').onclick=()=>{state.cache={};if(state.activeSource&&state.activeSource!=='home')loadMenuSource(state.activeSource);else renderHome()};$('externalSettingsBtn').onclick=openExternalSettings;$('externalSettingsCloseBtn').onclick=closeExternalSettings;document.querySelectorAll('[data-player-mode]').forEach(btn=>{btn.onclick=()=>{set24PlayerMode(btn.dataset.playerMode);closeExternalSettings()}});$('closePlayerBtn').onclick=closePlayer;$('playerHomeBtn').onclick=()=>location.href=HOME_URL;$('closeModalBtn').onclick=closeModal;$('prevPageBtn').onclick=()=>{state.page--;renderModalPage()};$('nextPageBtn').onclick=()=>{state.page++;renderModalPage()};
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'||e.key==='Backspace'||e.keyCode===10009){
     e.preventDefault();
+
+    if($('externalSettingsModal')?.classList.contains('show')){
+      closeExternalSettings();
+      return;
+    }
 
     if(playerPanel.classList.contains('show')){
       try{
