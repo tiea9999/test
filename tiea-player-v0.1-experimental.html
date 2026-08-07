@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TIEA Player V0.1 Experimental</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.10.9/shaka-player.compiled.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#06101b;color:#fff;font-family:Arial,Tahoma,sans-serif}
+.app{display:grid;grid-template-columns:340px 1fr;min-height:100vh}
+.side{background:#091624;border-right:1px solid #29445f;padding:16px;overflow:auto}
+.main{padding:18px}
+h1{font-size:24px;margin:0 0 4px}.ver{color:#71d0ff;margin-bottom:16px}
+textarea,input{width:100%;background:#081523;color:#fff;border:1px solid #355676;border-radius:8px;padding:10px}
+textarea{height:210px;font-family:Consolas,monospace;font-size:12px}
+button{border:0;border-radius:8px;background:#1e3b5d;color:#fff;font-weight:800;padding:10px 12px;cursor:pointer}
+button.green{background:#08b86e}button.red{background:#a83939}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.card{border:1px solid #2c5575;background:#0c1e31;border-radius:10px;padding:10px;margin:8px 0;cursor:pointer}
+.card:hover{border-color:#41c8ff}.card .title{font-weight:900}
+.card .meta{color:#9fc9e8;font-size:12px;margin-top:4px;word-break:break-all}
+video{width:100%;max-height:70vh;background:#000;border-radius:10px}
+.status{margin-top:12px;padding:12px;border:1px solid #355676;border-radius:8px;background:#071422;white-space:pre-wrap}
+.bad{color:#ff8080}.good{color:#6cffb0}.warn{color:#ffd166}
+label{display:block;margin:10px 0 5px;color:#a9d9ff;font-weight:800}
+@media(max-width:900px){.app{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid #29445f}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="side">
+    <h1>TIEA Player</h1>
+    <div class="ver">V0.1 Experimental • HLS + DASH/ClearKey</div>
+    <label>นำเข้า TIEA Playlist JSON</label>
+    <input id="file" type="file" accept=".json,.txt,application/json">
+    <div class="row">
+      <button class="green" onclick="loadText()">โหลดจากช่อง JSON</button>
+      <button onclick="fillExample()">ตัวอย่าง</button>
+      <button class="red" onclick="clearAll()">ล้าง</button>
+    </div>
+    <textarea id="jsonInput" placeholder="วาง TIEA Playlist JSON ที่นี่"></textarea>
+    <div id="list"></div>
+  </aside>
+  <main class="main">
+    <video id="video" controls playsinline autoplay></video>
+    <div class="row">
+      <button onclick="stopPlayer()">หยุด</button>
+      <button onclick="reloadCurrent()">Reload</button>
+    </div>
+    <div id="status" class="status">พร้อมใช้งาน</div>
+  </main>
+</div>
+<script>
+let items=[], currentItem=null, hls=null, shakaPlayer=null;
+const $=id=>document.getElementById(id);
+const status=(msg,cls="")=>{ $("status").className="status "+cls; $("status").textContent=msg; };
+
+if(window.shaka && shaka.polyfill) shaka.polyfill.installAll();
+
+$("file").addEventListener("change", async e=>{
+  const f=e.target.files && e.target.files[0];
+  if(!f)return;
+  $("jsonInput").value=await f.text();
+  loadText();
+});
+
+function normalizeRoot(root){
+  if(Array.isArray(root)) return root;
+  if(Array.isArray(root.items)) return root.items;
+  if(Array.isArray(root.channels)) return root.channels;
+  if(Array.isArray(root.playlist)) return root.playlist;
+  return [];
+}
+function loadText(){
+  try{
+    const root=JSON.parse($("jsonInput").value.trim());
+    items=normalizeRoot(root);
+    if(!items.length) throw new Error("ไม่พบรายการใน JSON");
+    renderList();
+    status("โหลด Playlist สำเร็จ "+items.length+" รายการ","good");
+  }catch(e){ status("JSON ERROR: "+e.message,"bad"); }
+}
+function renderList(){
+  $("list").innerHTML="";
+  items.forEach((it,i)=>{
+    const d=document.createElement("div");
+    d.className="card";
+    const drm=(it.drm&&typeof it.drm==="object")?(it.drm.type||"none"):(it.drm||"none");
+    d.innerHTML='<div class="title">'+escapeHtml(it.title||it.name||("รายการ "+(i+1)))+'</div>'+
+      '<div class="meta">'+escapeHtml((it.type||autoType(it.url||""))+" • DRM: "+drm)+'</div>';
+    d.onclick=()=>playItem(it);
+    $("list").appendChild(d);
+  });
+}
+function escapeHtml(s){
+  return String(s==null?"":s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+function autoType(url){
+  const s=String(url||"").toLowerCase();
+  if(s.includes(".mpd")) return "DASH";
+  if(s.includes(".m3u8")) return "HLS";
+  return "AUTO";
+}
+function resolvePlayUrl(it){ return it.playUrl || it.workerUrl || it.url || ""; }
+function drmInfo(it){
+  const d=(it.drm&&typeof it.drm==="object")?it.drm:{type:it.drm||"none"};
+  return {type:String(d.type||"none").toLowerCase(),kid:d.kid||d.keyId||it.kid||it.keyId||"",key:d.key||d.clearKey||it.key||it.clearKey||""};
+}
+async function stopPlayer(){
+  try{ if(hls){hls.destroy();hls=null;} }catch(e){}
+  try{ if(shakaPlayer){await shakaPlayer.destroy();shakaPlayer=null;} }catch(e){}
+  const v=$("video"); try{v.pause();v.removeAttribute("src");v.load();}catch(e){}
+}
+async function playItem(it){
+  currentItem=it; await stopPlayer();
+  const v=$("video"), url=resolvePlayUrl(it), type=String(it.type||autoType(url)).toUpperCase(), drm=drmInfo(it);
+  if(!url){status("ไม่มี URL สำหรับเล่น","bad");return;}
+  status("กำลังเปิด: "+(it.title||it.name||"ไม่ระบุชื่อ")+"\nType: "+type+"\nDRM: "+drm.type+"\nURL: "+url);
+  try{
+    if(type==="DASH" || url.toLowerCase().includes(".mpd")) await playDash(v,url,drm);
+    else await playHls(v,url);
+  }catch(e){ status("PLAY ERROR: "+(e&&e.message?e.message:e),"bad"); }
+}
+async function playDash(video,url,drm){
+  if(!window.shaka) throw new Error("Shaka Player ไม่พร้อม");
+  shakaPlayer=new shaka.Player();
+  await shakaPlayer.attach(video);
+  shakaPlayer.addEventListener("error",ev=>{
+    const d=ev.detail||{}; status("SHAKA ERROR\nCode: "+(d.code||"")+"\n"+(d.message||""),"bad");
+  });
+  if(drm.type==="clearkey" && drm.kid && drm.key){
+    const clearKeys={}; clearKeys[drm.kid]=drm.key;
+    shakaPlayer.configure({drm:{clearKeys:clearKeys}});
+  }
+  await shakaPlayer.load(url);
+  await video.play().catch(()=>{});
+  status("เล่น DASH สำเร็จ"+(drm.type==="clearkey"?" • ClearKey":"")+"" ,"good");
+}
+async function playHls(video,url){
+  if(video.canPlayType("application/vnd.apple.mpegurl")){
+    video.src=url; await video.play().catch(()=>{}); status("เล่น HLS แบบ Native","good"); return;
+  }
+  if(window.Hls && Hls.isSupported()){
+    hls=new Hls({enableWorker:true,lowLatencyMode:false,backBufferLength:90});
+    hls.on(Hls.Events.ERROR,(ev,data)=>{ if(data&&data.fatal) status("HLS ERROR\n"+(data.type||"")+" / "+(data.details||""),"bad"); });
+    hls.loadSource(url); hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED,()=>video.play().catch(()=>{}));
+    status("กำลังเปิด HLS.js ...","warn"); return;
+  }
+  throw new Error("อุปกรณ์นี้ไม่รองรับ HLS");
+}
+async function reloadCurrent(){ if(currentItem) await playItem(currentItem); }
+function clearAll(){ stopPlayer(); items=[]; currentItem=null; $("list").innerHTML=""; $("jsonInput").value=""; status("ล้างข้อมูลแล้ว"); }
+function fillExample(){
+  $("jsonInput").value=JSON.stringify({
+    format:"TIEA-PLAYLIST",version:"0.1",
+    items:[
+      {title:"ตัวอย่าง HLS",type:"HLS",url:"https://example.com/live/index.m3u8",playUrl:"",workerUrl:"",referer:""},
+      {title:"ตัวอย่าง DASH ClearKey",type:"DASH",url:"https://example.com/live/manifest.mpd",
+       drm:{type:"clearkey",kid:"PUT_KID_HERE",key:"PUT_KEY_HERE"},referer:""}
+    ]
+  },null,2);
+}
+</script>
+</body>
+</html>
