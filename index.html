@@ -1145,7 +1145,71 @@ function renderUpdatePage(items,label){
   setStatus('พร้อมใช้งาน');
   setTimeout(()=>document.querySelector('.card,.menu-btn.active')?.focus(),120);
 }
-function makeRows(items){let order=['ดูซีรี่ย์ออนไลน์','ดูซีรี่ย์จีน','ดูซีรี่ย์เกาหลี','ดูซีรี่ย์ไทย','ซีรี่ย์ญี่ปุ่น','ดูหนังออนไลน์','ดูละครสั้น','ทีวีออนไลน์','ทีวี','กีฬา','อื่นๆ'],map={};items.forEach(item=>{let cats=item.groups&&item.groups.length?item.groups:[item.group||'อื่นๆ'];cats.forEach(c=>{c=groupName(c);if(!map[c])map[c]=[];if(!map[c].some(x=>x.title===item.title))map[c].push(item)})});return Object.keys(map).sort((a,b)=>{let ia=order.indexOf(a)<0?99:order.indexOf(a),ib=order.indexOf(b)<0?99:order.indexOf(b);return ia-ib||a.localeCompare(b,'th')}).map(title=>({title,items:map[title]}))}
+function makeRows(items){let order=['ดูซีรี่ย์จีน','ดูซีรี่ย์เกาหลี','ดูซีรี่ย์ไทย','ซีรี่ย์ญี่ปุ่น','ดูหนังออนไลน์','ดูละครสั้น','ทีวีออนไลน์','ทีวี','กีฬา','อื่นๆ'],map={};items.forEach(item=>{let cats=item.groups&&item.groups.length?item.groups:[item.group||'อื่นๆ'];cats.forEach(c=>{c=groupName(c);if(c==='ดูซีรี่ย์ออนไลน์')return;if(!map[c])map[c]=[];if(!map[c].some(x=>x.title===item.title))map[c].push(item)})});return Object.keys(map).sort((a,b)=>{let ia=order.indexOf(a)<0?99:order.indexOf(a),ib=order.indexOf(b)<0?99:order.indexOf(b);return ia-ib||a.localeCompare(b,'th')}).map(title=>({title,items:map[title]}))}
+
+function movieYearOf(item){
+  let candidates=[
+    item&&item.year,
+    item&&item.group,
+    ...(item&&Array.isArray(item.groups)?item.groups:[]),
+    item&&item.title
+  ].filter(Boolean).map(String);
+  for(const s of candidates){
+    let m=s.match(/\b(19|20)\d{2}\b/);
+    if(m)return m[0];
+  }
+  return 'ไม่ระบุปี';
+}
+
+function renderMoviePage(items,label='หนังทั้งหมด'){
+  items=(items||[]).filter(Boolean);
+  state.rows=[];
+  content.innerHTML='';
+
+  let hero=document.createElement('div');
+  hero.className='hero';
+  hero.innerHTML='<div class="hero-title">🎬 หนังทั้งหมด</div><div class="hero-sub">รวมหนังทุกหมวดทุกปี • เลื่อนลงเพื่อดูแยกตามปี</div>';
+  content.appendChild(hero);
+
+  // แถวรวมทุกเรื่องก่อน
+  let allSec=document.createElement('div');
+  allSec.className='section';
+  allSec.innerHTML=`<div class="section-head"><div class="section-title">หนังทั้งหมด</div><div class="section-tools"><div class="badge">${items.length} รายการ</div><button class="see-all-btn">ดูทั้งหมด</button></div></div><div class="row"></div>`;
+  let allRow=allSec.querySelector('.row');
+  items.slice(0,18).forEach(item=>allRow.appendChild(createCard(item)));
+  allSec.querySelector('.see-all-btn').onclick=()=>openModal('หนังทั้งหมด',items);
+  content.appendChild(allSec);
+
+  // แยกตามปี โดยปีใหม่อยู่บน
+  let yearMap={};
+  items.forEach(item=>{
+    let y=movieYearOf(item);
+    if(!yearMap[y])yearMap[y]=[];
+    if(!yearMap[y].some(x=>x.title===item.title))yearMap[y].push(item);
+  });
+
+  let years=Object.keys(yearMap).sort((a,b)=>{
+    if(a==='ไม่ระบุปี')return 1;
+    if(b==='ไม่ระบุปี')return -1;
+    return Number(b)-Number(a);
+  });
+
+  years.forEach(y=>{
+    let sec=document.createElement('div');
+    sec.className='section';
+    let title=y==='ไม่ระบุปี'?'หนังไม่ระบุปี':'หนังปี '+y;
+    sec.innerHTML=`<div class="section-head"><div class="section-title">${title}</div><div class="section-tools"><div class="badge">${yearMap[y].length} รายการ</div><button class="see-all-btn">ดูทั้งหมด</button></div></div><div class="row"></div>`;
+    let row=sec.querySelector('.row');
+    yearMap[y].slice(0,18).forEach(item=>row.appendChild(createCard(item)));
+    sec.querySelector('.see-all-btn').onclick=()=>openModal(title,yearMap[y]);
+    content.appendChild(sec);
+  });
+
+  state.rows=[{title:'หนังทั้งหมด',items},...years.map(y=>({title:y==='ไม่ระบุปี'?'หนังไม่ระบุปี':'หนังปี '+y,items:yearMap[y]}))];
+  setStatus(items.length?'พร้อมใช้งาน • หนังทั้งหมด '+items.length+' รายการ':'ไม่พบรายการหนัง');
+  setTimeout(()=>document.querySelector('.card,.menu-btn.active')?.focus(),100);
+}
+
 function renderHome(){
 state.activeSource='home';
 setStatus('กำลังโหลดหน้าแรก V7.1...');
@@ -2514,7 +2578,7 @@ function safeIntent(url,mode){
     window.location.href=url;
   }
 }function openMx(url){safeIntent(url||state.originalUrl||state.currentUrl,'mx')}function openExternal(url){safeIntent(url||state.originalUrl||state.currentUrl,'external')}
-async function loadMenuSource(key){state.activeSource=key;let label=document.querySelector(`[data-source="${key}"]`)?.textContent?.trim()||'รายการ';setStatus('กำลังโหลด '+label+' ...');content.innerHTML='<div class="hero"><div class="hero-title">กำลังโหลด...</div><div class="hero-sub">'+label+'</div></div>';try{if(key==='series-update'){let items=await loadSeriesUpdateDirect();renderUpdatePage(items,label);return}if(key==='series-main'){renderRows([{title:'MySeries แยกหมวด',items:MYSERIES_FOLDERS}],label);setStatus('พร้อมใช้งาน • MySeries แยกหมวด');return}let items=await loadSourcePack(key);renderRows(makeRows(items),label);setStatus(items.length?'พร้อมใช้งาน':'ไม่พบรายการ')}catch(e){content.innerHTML='<div class="hero"><div class="hero-title">โหลดไม่สำเร็จ</div><div class="hero-sub">'+e.message+'</div></div>';setStatus('โหลดไม่สำเร็จ')}}function openVip(url){let pass=prompt('กรุณาใส่รหัสผ่าน VIP');if(pass===VIP_PASSWORD)location.href=url;else if(pass!==null)alert('รหัสผ่านไม่ถูกต้อง')}
+async function loadMenuSource(key){state.activeSource=key;let label=document.querySelector(`[data-source="${key}"]`)?.textContent?.trim()||'รายการ';setStatus('กำลังโหลด '+label+' ...');content.innerHTML='<div class="hero"><div class="hero-title">กำลังโหลด...</div><div class="hero-sub">'+label+'</div></div>';try{if(key==='series-update'){let items=await loadSeriesUpdateDirect();renderUpdatePage(items,label);return}if(key==='series-main'){renderRows([{title:'MySeries แยกหมวด',items:MYSERIES_FOLDERS}],label);setStatus('พร้อมใช้งาน • MySeries แยกหมวด');return}let items=await loadSourcePack(key);if(key==='movie-main'){renderMoviePage(items,label);return}renderRows(makeRows(items),label);setStatus(items.length?'พร้อมใช้งาน':'ไม่พบรายการ')}catch(e){content.innerHTML='<div class="hero"><div class="hero-title">โหลดไม่สำเร็จ</div><div class="hero-sub">'+e.message+'</div></div>';setStatus('โหลดไม่สำเร็จ')}}function openVip(url){let pass=prompt('กรุณาใส่รหัสผ่าน VIP');if(pass===VIP_PASSWORD)location.href=url;else if(pass!==null)alert('รหัสผ่านไม่ถูกต้อง')}
 document.querySelectorAll('.menu-btn').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.menu-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(btn.dataset.vipLink){openVip(btn.dataset.vipLink);return}if(btn.dataset.link){location.href=btn.dataset.link;return}if(btn.dataset.action==='home'){renderHome();return}if(btn.dataset.source){loadMenuSource(btn.dataset.source);return}}});
 $('homeBtn').onclick=()=>location.href=HOME_URL;$('reloadBtn').onclick=()=>{state.cache={};if(state.activeSource&&state.activeSource!=='home')loadMenuSource(state.activeSource);else renderHome()};$('externalSettingsBtn').onclick=openExternalSettings;$('externalSettingsCloseBtn').onclick=closeExternalSettings;document.querySelectorAll('[data-player-mode]').forEach(btn=>{btn.onclick=()=>{set24PlayerMode(btn.dataset.playerMode);closeExternalSettings()}});$('closePlayerBtn').onclick=closePlayer;$('playerHomeBtn').onclick=()=>location.href=HOME_URL;$('closeModalBtn').onclick=closeModal;$('prevPageBtn').onclick=()=>{state.page--;renderModalPage()};$('nextPageBtn').onclick=()=>{state.page++;renderModalPage()};
 document.addEventListener('keydown',e=>{
