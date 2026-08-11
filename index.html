@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 3.6 24HD REF77</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 3.8 TORBO SOURCE FALLBACK</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,7 +856,7 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 3.7 TORBO WORKER ONLY -->
+    <!-- BUILD: V7.2 ALPHA 3.8 TORBO SOURCE PAGE FALLBACK -->
     <div class="app">
         <aside class="sidebar">
             <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 3.4 EXTERNAL PLAYER</div>
@@ -2043,6 +2043,74 @@ function cleanupPlayer(fullReset=true){
     setTimeout(()=>{state._cleanupBusy=false},80);
   }
 }
+
+/* ===== TORBO007 SUPPORTED SOURCE FALLBACK V3.8 =====
+   เหตุผล: Torbo signed HLS ผูกกับ browser/session fingerprint
+   ดังนั้นเมื่อรายการมีหน้าต้นทาง ให้เปิดหน้าต้นทางโดยตรงแทนการยิง HLS ผ่าน Worker
+   Provider อื่นไม่เปลี่ยนพฤติกรรม
+*/
+function isTorboUrl(url){
+  return String(url||'').toLowerCase().includes('torbo007.com');
+}
+function isTorboDirectStreamUrl(url){
+  const u=String(url||'').toLowerCase();
+  return isTorboUrl(u) && (
+    u.includes('/api/stream/') ||
+    u.includes('/api/v2/stream/') ||
+    u.includes('/api/tokenplay') ||
+    u.includes('.m3u8')
+  );
+}
+function torboSourcePageOf(item,serverIndex=0,original=''){
+  const candidates=[
+    dynamicPageFromItem(item,serverIndex),
+    pageUrlOf(item?.servers?.[serverIndex]),
+    pageUrlOf(item?.servers?.[0]),
+    pageUrlOf(item)
+  ].map(cleanUrl).filter(Boolean);
+
+  // ถ้า JSON เก็บ Torbo embed URL มาเป็น URL หลัก สามารถใช้เป็นหน้าต้นทางได้
+  const raw=cleanUrl(original);
+  if(raw && isTorboUrl(raw) && raw.toLowerCase().includes('/embed/')){
+    candidates.unshift(raw);
+  }
+
+  for(const page of candidates){
+    try{
+      const u=new URL(page);
+      if(!/^https?:$/i.test(u.protocol))continue;
+      if(isTorboDirectStreamUrl(page))continue;
+      return u.toString();
+    }catch(e){}
+  }
+  return '';
+}
+function routeTorboSupportedPage(item,serverIndex,original,title){
+  if(!isTorboUrl(original))return false;
+
+  const sourcePage=torboSourcePageOf(item,serverIndex,original);
+  if(!sourcePage){
+    // หยุดก่อน Worker เพื่อไม่วน 502/Invalid Client Fingerprint
+    cleanupPlayer();
+    state.originalUrl=original||'';
+    state.currentUrl='';
+    state.currentTitle=title||item?.title||'Torbo007';
+    setStatus('Torbo007 • ต้องใช้หน้าต้นทางของตอนนี้ • ไม่ส่งเข้า Worker');
+    alert('Torbo007 เปลี่ยนเป็นระบบ Session/Fingerprint แล้ว\nรายการนี้ยังไม่มี page URL ใน JSON จึงไม่ส่งเข้า Worker เพื่อป้องกัน 502\nให้เพิ่ม page ของตอน/เรื่องนี้ แล้วเปิดใหม่ครับ');
+    return true;
+  }
+
+  try{
+    sessionStorage.setItem('TIEA_TORBO_RETURN_URL', location.href);
+    sessionStorage.setItem('TIEA_TORBO_SOURCE_PAGE', sourcePage);
+  }catch(e){}
+
+  setStatus('Torbo007 • เปิดหน้าต้นทางที่สร้าง Session ได้');
+  // ใช้ same-tab เพื่อไม่ติด popup blocker บน Android TV/Projector และกด Back กลับ TIEA ได้
+  window.location.href=sourcePage;
+  return true;
+}
+
 async function playItem(item,serverIndex=0,displayTitle=''){
   if(!displayTitle)state.returnEpisodeItem=null;
 
@@ -2055,6 +2123,12 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   }
 
   const title=displayTitle||item.title||'กำลังเล่น';
+
+  // Torbo007: ใช้หน้าต้นทางที่ถูกเก็บใน JSON เพื่อให้ต้นทางสร้าง session/fingerprint เอง
+  // ต้องทำก่อน Dynamic Resolver / Worker
+  if(original && isTorboUrl(original)){
+    if(routeTorboSupportedPage(item,serverIndex,original,title))return;
+  }
 
   // 24PlayerHD: มือถือ/โปรเจคเตอร์ใช้ Player ของเครื่อง
   // คอมพิวเตอร์ยังใช้ new_player.php ภายใน iframe
@@ -2095,6 +2169,11 @@ async function playItem(item,serverIndex=0,displayTitle=''){
       ?(resolved.provider+' • ใช้ลิงก์ล่าสุด')
       :'กำลังเล่น • Projector Stable V3'
   );
+
+  // เผื่อ Resolver คืน URL Torbo กลับมา: ยังต้องใช้หน้าต้นทาง ไม่ยิง signed HLS ผ่าน Worker
+  if(isTorboUrl(original)){
+    if(routeTorboSupportedPage(item,serverIndex,original,title))return;
+  }
 
   // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
   if(is24PlayerHdUrl(original) && get24PlayerContentId(original)){
