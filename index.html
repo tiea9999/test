@@ -856,7 +856,7 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 3.6 24HD REF77 -->
+    <!-- BUILD: V7.2 ALPHA 3.7 TORBO WORKER ONLY -->
     <div class="app">
         <aside class="sidebar">
             <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 3.4 EXTERNAL PLAYER</div>
@@ -2111,7 +2111,12 @@ async function playItem(item,serverIndex=0,displayTitle=''){
     lower.includes('byteark');
   let candidates;
 
-  if(is24PlayerHdUrl(original)){
+  const sourceIsTorbo=String(original||'').toLowerCase().includes('torbo007.com');
+  if(sourceIsTorbo){
+    // Torbo007 MUST stay inside Worker. Never fall back to direct URL because
+    // torbo007 blocks browser-origin requests with 403/CORS.
+    candidates=[workerUrlFor(original)];
+  }else if(is24PlayerHdUrl(original)){
     candidates=[workerUrlFor(original)];
   }else{
     candidates=noProxy
