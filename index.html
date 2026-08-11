@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 3.8 TORBO SOURCE FALLBACK</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 3.9 TORBO BROWSER SESSION</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 3.8 TORBO SOURCE PAGE FALLBACK -->
+    <!-- BUILD: V7.2 ALPHA 3.9 TORBO BROWSER SESSION -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 3.4 EXTERNAL PLAYER</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 3.9 TORBO BROWSER SESSION</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -2019,6 +2019,7 @@ function cleanupPlayer(fullReset=true){
       }
       playerPanel.classList.remove('native24-mode');
       state._native24Mode=false;
+      state._torboBrowserMode=false;
     }catch(e){}
     if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
     if(state.hls){
@@ -2085,29 +2086,82 @@ function torboSourcePageOf(item,serverIndex=0,original=''){
   }
   return '';
 }
-function routeTorboSupportedPage(item,serverIndex,original,title){
+function torboEmbedUrlLocal(original){
+  try{
+    const id=extractStreamId(original);
+    if(!id)return '';
+    return 'https://torbo007.com/embed/'+encodeURIComponent(id);
+  }catch(e){return ''}
+}
+
+async function resolveTorboEmbedUrl(original){
+  const local=torboEmbedUrlLocal(original);
+  // Worker V9 only calculates/returns the embed address. The actual Torbo page
+  // is still loaded by the client browser, so fingerprint/session belongs to this device.
+  try{
+    const api=PROXY+'__dummy__'; // keep PROXY constant untouched for other providers
+    const workerBase=PROXY.split('?')[0];
+    const r=await fetch(workerBase+'?mode=torbo-embed&url='+encodeURIComponent(original),{cache:'no-store'});
+    if(r.ok){
+      const data=await r.json();
+      const embed=cleanUrl(data.embed||data.url||'');
+      if(embed && isTorboUrl(embed) && embed.toLowerCase().includes('/embed/'))return embed;
+    }
+  }catch(e){console.log('Torbo bridge fallback local',e)}
+  return local;
+}
+
+function showTorboIframe(embedUrl,sourcePage,title){
+  cleanupPlayer();
+  state.originalUrl=embedUrl||sourcePage||'';
+  state.currentUrl=embedUrl||sourcePage||'';
+  state.currentTitle=title||'Torbo007';
+  state._native24Mode=true;       // reuse the proven fullscreen iframe shell
+  state._torboBrowserMode=true;
+  state._sourcePage=sourcePage||'';
+
+  $('playerTitle').textContent=state.currentTitle+' • Torbo Browser Session';
+  playerPanel.classList.add('show','native24-mode');
+  playerPanel.classList.remove('hide-ui');
+
+  if(native24Frame){
+    native24Frame.style.display='block';
+    native24Frame.setAttribute('allow','autoplay *; fullscreen *; picture-in-picture *; encrypted-media *');
+    native24Frame.setAttribute('referrerpolicy','no-referrer-when-downgrade');
+    native24Frame.src=embedUrl||sourcePage;
+    try{native24Frame.focus({preventScroll:true});}
+    catch(e){try{native24Frame.focus();}catch(err){}}
+  }
+
+  setStatus('Torbo007 • เล่นใน TIEA ผ่าน Browser Session • ไม่ส่ง HLS เข้า Worker');
+  showPlayerUI(false);
+  return true;
+}
+
+async function routeTorboSupportedPage(item,serverIndex,original,title){
   if(!isTorboUrl(original))return false;
 
   const sourcePage=torboSourcePageOf(item,serverIndex,original);
-  if(!sourcePage){
-    // หยุดก่อน Worker เพื่อไม่วน 502/Invalid Client Fingerprint
-    cleanupPlayer();
-    state.originalUrl=original||'';
-    state.currentUrl='';
-    state.currentTitle=title||item?.title||'Torbo007';
-    setStatus('Torbo007 • ต้องใช้หน้าต้นทางของตอนนี้ • ไม่ส่งเข้า Worker');
-    alert('Torbo007 เปลี่ยนเป็นระบบ Session/Fingerprint แล้ว\nรายการนี้ยังไม่มี page URL ใน JSON จึงไม่ส่งเข้า Worker เพื่อป้องกัน 502\nให้เพิ่ม page ของตอน/เรื่องนี้ แล้วเปิดใหม่ครับ');
-    return true;
+  const embedUrl=await resolveTorboEmbedUrl(original);
+
+  // Preferred path: Torbo embed runs INSIDE TIEA. This lets the client browser/WebView
+  // create the fingerprint/session itself and avoids Worker 502 / Invalid Client Fingerprint.
+  if(embedUrl){
+    return showTorboIframe(embedUrl,sourcePage,title);
   }
 
-  try{
-    sessionStorage.setItem('TIEA_TORBO_RETURN_URL', location.href);
-    sessionStorage.setItem('TIEA_TORBO_SOURCE_PAGE', sourcePage);
-  }catch(e){}
+  // Last fallback: keep the source page inside the TIEA player iframe rather than
+  // navigating away from TIEA. Some sites may block framing, but we never auto-jump out.
+  if(sourcePage){
+    return showTorboIframe('',sourcePage,title);
+  }
 
-  setStatus('Torbo007 • เปิดหน้าต้นทางที่สร้าง Session ได้');
-  // ใช้ same-tab เพื่อไม่ติด popup blocker บน Android TV/Projector และกด Back กลับ TIEA ได้
-  window.location.href=sourcePage;
+  cleanupPlayer();
+  state.originalUrl=original||'';
+  state.currentUrl='';
+  state.currentTitle=title||item?.title||'Torbo007';
+  setStatus('Torbo007 • ไม่พบ embed/page • ไม่ส่งเข้า Worker');
+  alert('Torbo007: รายการนี้ยังไม่มีข้อมูลที่ใช้เปิด Browser Session\nระบบจะไม่ส่ง HLS เข้า Worker เพื่อป้องกัน 502');
   return true;
 }
 
@@ -2127,7 +2181,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   // Torbo007: ใช้หน้าต้นทางที่ถูกเก็บใน JSON เพื่อให้ต้นทางสร้าง session/fingerprint เอง
   // ต้องทำก่อน Dynamic Resolver / Worker
   if(original && isTorboUrl(original)){
-    if(routeTorboSupportedPage(item,serverIndex,original,title))return;
+    if(await routeTorboSupportedPage(item,serverIndex,original,title))return;
   }
 
   // 24PlayerHD: มือถือ/โปรเจคเตอร์ใช้ Player ของเครื่อง
