@@ -4,7 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 4.7.1 24HD AUTOPLAY FIX</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 4.7.3 24HD NATIVE FAST START</title>
+    <link rel="preconnect" href="https://main.24playerhd.com" crossorigin>
+    <link rel="dns-prefetch" href="//main.24playerhd.com">
+    <link rel="preconnect" href="https://master17.dell250369.com" crossorigin>
+    <link rel="dns-prefetch" href="//master17.dell250369.com">
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +860,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 4.7.1 24HD AUTOPLAY FIX -->
+    <!-- BUILD: V7.2 ALPHA 4.7.3 24HD NATIVE FAST START -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.7.1 24HD AUTOPLAY FIX</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.7.3 24HD NATIVE FAST START</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -891,7 +895,7 @@ data-vip-link="https://tiea9999.github.io/tv/VIP.html">💎 VIP</button>
         </div>
         <div class="player-wrap">
             <div class="video-shell"><video id="video" controls playsinline webkit-playsinline autoplay></video><iframe
-                    id="native24Frame" title="24PlayerHD Player"
+                    id="native24Frame" title="24PlayerHD Player" loading="eager" fetchpriority="high"
                     allow="autoplay *; fullscreen *; picture-in-picture *; encrypted-media *" allowfullscreen
                     webkitallowfullscreen mozallowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe></div>
             <div class="player-hint"></div>
@@ -1360,19 +1364,23 @@ function build24NativePlayerUrl(url){
   const id=get24PlayerContentId(url);
   if(!id)return '';
 
-  // ส่งพารามิเตอร์ Autoplay หลายชื่อเพื่อรองรับ Player ต้นทางหลายแบบ
-  // ถ้าต้นทางไม่อ่านค่าเหล่านี้ จะยังเปิด Player ได้เหมือน V3.0
+  // ALPHA 4.7.3: ยังใช้หน้า Native เดิมของ 4.7
+  // เพิ่มเฉพาะพารามิเตอร์ auto-start ที่มักใช้กับ player หลายแบบ
   return 'https://main.24playerhd.com/new_player.php'
     +'?id='+encodeURIComponent(id)
     +'&typew=T'
     +'&autoplay=1'
     +'&autoPlay=1'
+    +'&autostart=1'
+    +'&auto_start=1'
     +'&play=1'
+    +'&start=1'
     +'&muted=1'
     +'&mute=1'
     +'&playsinline=1'
     +'&controls=1'
-    +'&tiea_autostart=1';
+    +'&tiea_autostart=1'
+    +'&t='+Date.now();
 }
 
 function stop24NativePlayer(){
@@ -1543,44 +1551,67 @@ function open24NativePlayer(url,title){
   const playerUrl=build24NativePlayerUrl(url);
   if(!playerUrl)return false;
 
+  // รักษา route เดิมของ 4.7 แต่ลดงานก่อนเปิด iframe
   cleanupPlayer();
   state.originalUrl=url;
   state.currentUrl=playerUrl;
   state.currentTitle=title||'24PlayerHD';
   state._native24Mode=true;
 
-  $('playerTitle').textContent=state.currentTitle+' • 24HD Native';
+  $('playerTitle').textContent=state.currentTitle+' • 24HD Native Fast';
   playerPanel.classList.add('show','native24-mode');
   playerPanel.classList.remove('hide-ui');
 
   if(native24Frame){
     native24Frame.style.display='block';
-
-    // ตั้ง permission ก่อนใส่ src และใส่ src ภายในจังหวะคลิกของผู้ใช้
     native24Frame.setAttribute(
       'allow',
       'autoplay *; fullscreen *; picture-in-picture *; encrypted-media *'
     );
+
+    // ตั้ง src ทันทีใน user gesture จากปุ่ม EP
     native24Frame.src=playerUrl;
 
     try{native24Frame.focus({preventScroll:true});}
     catch(e){try{native24Frame.focus();}catch(err){}}
 
-    // โหลดซ้ำหนึ่งครั้งเฉพาะเมื่อ iframe ยังเป็น about:blank
-    setTimeout(()=>{
+    // ถ้าหน้า player รองรับ postMessage คำสั่งเหล่านี้จะช่วยเริ่มเล่น
+    // ถ้าไม่รองรับจะถูกเพิกเฉยและไม่กระทบการเล่นแบบเดิมของ 4.7
+    const kickNative=()=>{
       try{
-        if(
-          state._native24Mode &&
-          native24Frame.src &&
-          native24Frame.src==='about:blank'
-        ){
-          native24Frame.src=playerUrl;
-        }
+        const w=native24Frame.contentWindow;
+        if(!w)return;
+        [
+          'play',
+          'PLAY',
+          {action:'play'},
+          {command:'play'},
+          {type:'play'},
+          {event:'play'},
+          {method:'play'},
+          {autoplay:true},
+          {action:'autoplay',value:true}
+        ].forEach(msg=>{
+          try{w.postMessage(msg,'*')}catch(e){}
+        });
       }catch(e){}
-    },350);
+    };
+
+    native24Frame.onload=()=>{
+      setStatus('24PlayerHD • Native พร้อม • กำลังสั่งเริ่มเล่น');
+      kickNative();
+      setTimeout(kickNative,120);
+      setTimeout(kickNative,350);
+      setTimeout(kickNative,800);
+      setTimeout(kickNative,1500);
+    };
+
+    // kick เพิ่มตั้งแต่ต้น เผื่อหน้า player ลง listener เร็ว
+    setTimeout(kickNative,250);
+    setTimeout(kickNative,700);
   }
 
-  setStatus('24PlayerHD • AUTO START TEST • ถ้าเบราว์เซอร์อนุญาตจะเริ่มเล่นเอง');
+  setStatus('24PlayerHD • Native Fast Start');
   showPlayerUI(false);
   return true;
 }
@@ -2180,16 +2211,9 @@ async function playItem(item,serverIndex=0,displayTitle=''){
     if(routeTorboSupportedPage(item,serverIndex,original,title))return;
   }
 
-  // ALPHA 4.7.2
-  // Android/Projector/Touch device ยังใช้ Player ของเครื่องตามเดิม
-  // Desktop ห้ามเข้า cross-origin iframe เพราะเราไม่สามารถสั่งปุ่ม Play ภายใน iframe ได้
-  // Desktop ให้ไหลลง HLS.js + Movie2 Worker + 24HD Child Direct Loader
-  if(
-    original &&
-    is24PlayerHdUrl(original) &&
-    get24PlayerContentId(original) &&
-    shouldUseDevicePlayer24()
-  ){
+  // 24PlayerHD: มือถือ/โปรเจคเตอร์ใช้ Player ของเครื่อง
+  // คอมพิวเตอร์ยังใช้ new_player.php ภายใน iframe
+  if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original)){
     route24Player(original,title);
     return;
   }
@@ -2233,12 +2257,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   }
 
   // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
-  // Desktop ยังคง HLS.js path; route ออกเฉพาะอุปกรณ์ที่ควรใช้ Device Player
-  if(
-    is24PlayerHdUrl(original) &&
-    get24PlayerContentId(original) &&
-    shouldUseDevicePlayer24()
-  ){
+  if(is24PlayerHdUrl(original) && get24PlayerContentId(original)){
     route24Player(original,title);
     return;
   }
@@ -2271,66 +2290,29 @@ async function playItem(item,serverIndex=0,displayTitle=''){
 }
 function start24PcAutoplay(){
   try{
-    video.autoplay=true;
-    video.playsInline=true;
-    video.setAttribute('autoplay','');
-    video.setAttribute('playsinline','');
+    // Desktop Chromium/Brave: muted autoplay is always allowed.
+    // Start muted first, then restore sound once playback has actually begun.
     video.muted=true;
     video.defaultMuted=true;
     video.volume=0;
 
-    let started=false;
-    let lastTime=video.currentTime||0;
-
-    const kick=()=>{
+    const restore=()=>{
       try{
-        if(started)return;
-        const p=video.play();
-        if(p&&typeof p.catch==='function')p.catch(()=>{});
+        video.muted=false;
+        video.defaultMuted=false;
+        video.volume=1;
       }catch(e){}
     };
 
-    const confirmStarted=()=>{
-      try{
-        const now=video.currentTime||0;
-        if(!video.paused && now>lastTime+0.05){
-          started=true;
-          video.removeEventListener('timeupdate',confirmStarted);
-          video.removeEventListener('playing',confirmStarted);
-
-          // playback เริ่มจริงแล้วค่อยคืนเสียง
-          setTimeout(()=>{
-            try{
-              video.muted=false;
-              video.defaultMuted=false;
-              video.volume=1;
-              setStatus('24PlayerHD • PC AUTO PLAY');
-            }catch(e){}
-          },700);
-          return;
-        }
-        lastTime=now;
-      }catch(e){}
-    };
-
-    video.addEventListener('timeupdate',confirmStarted);
-    video.addEventListener('playing',confirmStarted);
-
-    // Chromium บางครั้ง manifest พร้อมก่อน decoder พร้อม จึง kick หลายจังหวะ
-    kick();
-    [120,300,600,1000,1600,2400,3500,5000].forEach(ms=>setTimeout(kick,ms));
-
-    // เมื่อ ready เพิ่มขึ้น ให้ลอง play ซ้ำโดยไม่เปลี่ยนหน้า
-    const onCanPlay=()=>kick();
-    video.addEventListener('loadedmetadata',onCanPlay,{once:true});
-    video.addEventListener('loadeddata',onCanPlay,{once:true});
-    video.addEventListener('canplay',onCanPlay,{once:true});
-
-    setTimeout(()=>{
-      if(!started && video.paused){
-        setStatus('24PlayerHD • Browser ยังบล็อก Auto Play • กด Play 1 ครั้ง');
-      }
-    },6500);
+    const pr=video.play();
+    if(pr&&typeof pr.then==='function'){
+      pr.then(()=>{
+        setTimeout(restore,120);
+        setTimeout(()=>{try{video.play().catch(()=>{})}catch(e){}},180);
+      }).catch(()=>{});
+    }else{
+      setTimeout(restore,120);
+    }
   }catch(e){}
 }
 
@@ -2416,7 +2398,7 @@ function playCandidate(candidates,item,serverIndex,idx){
       state.stuckCount=0;
       state._hlsFatalCount=0;
       if(sourceIs24 && !isAndroidDevice()){
-        // 4.7.1: start24PcAutoplay restores sound after autoplay is stable.
+        try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
       }else{
         forceFullSound();
       }
@@ -2525,8 +2507,8 @@ function playCandidate(candidates,item,serverIndex,idx){
       softRecoverPlayback();
     });
 
-    activeHls.on(Hls.Events.LEVEL_LOADED,()=>{if(state.hls===activeHls && !(sourceIs24&&!isAndroidDevice()))forceFullSound()});
-    activeHls.on(Hls.Events.FRAG_BUFFERED,()=>{if(state.hls===activeHls && !(sourceIs24&&!isAndroidDevice()))forceFullSound()});
+    activeHls.on(Hls.Events.LEVEL_LOADED,()=>{if(state.hls===activeHls)forceFullSound()});
+    activeHls.on(Hls.Events.FRAG_BUFFERED,()=>{if(state.hls===activeHls)forceFullSound()});
 
     activeHls.on(Hls.Events.ERROR,(e,d)=>{
       if(!d || state.hls!==activeHls)return;
