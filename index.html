@@ -2,6 +2,7 @@
 <html lang="th">
 
 <head>
+<!-- BUILD: TIEA PC 24PLAYERHD AUTOPLAY TEST V1 • 2026-08-12 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <title>TIEA IPTV HOME V7.2 ALPHA 4.5 TORBO INSTANT SOURCE</title>
@@ -1468,14 +1469,46 @@ function ask24PlayerMode(url,title){
   if(String(choice).trim()==='4')return launch24AndroidApp(url,'auto',title);
   return launch24AndroidApp(url,'wiseplay',title);
 }
+
+/* ===== TIEA 24PLAYERHD PC AUTOPLAY TEST V1 =====
+   Desktop only: ใช้ HLS Player ของ TIEA โดยตรงแทน iframe new_player.php
+   Android / Android TV / Projector ไม่เปลี่ยน
+*/
+function open24PcAutoPlay(url,title){
+  const direct=normalize24PlayerUrl(url);
+  if(!direct)return false;
+
+  state.currentTitle=title||'24PlayerHD';
+  state.originalUrl=direct;
+  state.currentUrl=direct;
+  $('playerTitle').textContent=state.currentTitle+' • 24HD PC AUTO';
+
+  // 24PlayerHD ใช้ Movie2 Worker ตามกฎเดิม
+  const candidate=workerUrlFor(direct);
+
+  // เริ่มจาก muted เพื่อให้ Chrome อนุญาต autoplay ได้ง่ายขึ้น
+  // แล้วคืนเสียงเมื่อเริ่มเล่นจริง
+  try{
+    video.muted=true;
+    video.defaultMuted=true;
+    video.volume=1;
+  }catch(e){}
+
+  playCandidate([candidate], {title:state.currentTitle, url:direct, servers:[{name:'Main',url:direct}]}, 0, 0);
+
+  // เรียก play() ซ้ำในจังหวะคลิกของผู้ใช้
+  try{video.play().catch(()=>{});}catch(e){}
+  return true;
+}
+
 function route24Player(url,title){
   let mode=get24PlayerMode();
   if(mode==='ask')return ask24PlayerMode(url,title);
   if(mode==='web')return open24NativePlayer(url,title);
   if(mode==='wiseplay'||mode==='mx')return launch24AndroidApp(url,mode,title);
-  // AUTO: Android เปิดตัวเลือกแอปของระบบ; Desktop ใช้เว็บ
-  if(isAndroidDevice())return launch24AndroidApp(url,'auto',title);
-  return open24NativePlayer(url,title);
+  // AUTO: Android/Projector ใช้วิธีเดิมทั้งหมด; Desktop ใช้ TIEA HLS เพื่อ Auto Play
+  if(isAndroidDevice() || isProjectorMode())return launch24AndroidApp(url,'auto',title);
+  return open24PcAutoPlay(url,title);
 }
 
 function shouldUseDevicePlayer24(){
@@ -2261,7 +2294,17 @@ function playCandidate(candidates,item,serverIndex,idx){
 
   playerPanel.classList.add('show');
   showPlayerUI();
-  forceFullSound();
+
+  const pc24Auto = sourceIs24 && !isAndroidDevice() && !isProjectorMode();
+  if(pc24Auto){
+    try{
+      video.muted=true;
+      video.defaultMuted=true;
+      video.volume=1;
+    }catch(e){}
+  }else{
+    forceFullSound();
+  }
 
   // ให้เวลาต้นทาง/Worker ทำงาน แต่ไม่เปิด intent:// อัตโนมัติ
   state.playTimer=setTimeout(()=>{
@@ -2298,7 +2341,15 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
       state.stuckCount=0;
       state._hlsFatalCount=0;
-      forceFullSound();
+      if(pc24Auto){
+        try{
+          video.muted=false;
+          video.defaultMuted=false;
+          video.volume=1;
+        }catch(e){}
+      }else{
+        forceFullSound();
+      }
     }
   },{once:false}));
 
@@ -2370,7 +2421,7 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(state.hls!==activeHls)return;
       projectorPreferLowLevel();
       chooseProjectorSafeLevel();
-      forceFullSound();
+      if(!pc24Auto)forceFullSound();
       startWatchdog();
       video.play().catch(()=>{});
     });
