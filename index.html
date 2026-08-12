@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 4.8 24HD PC AUTOPLAY SAFE</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 4.7.1 24HD AUTOPLAY FIX</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 4.8 24HD PC AUTOPLAY SAFE -->
+    <!-- BUILD: V7.2 ALPHA 4.7.1 24HD AUTOPLAY FIX -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.8 24HD PC AUTOPLAY SAFE</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.7.1 24HD AUTOPLAY FIX</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -2180,16 +2180,9 @@ async function playItem(item,serverIndex=0,displayTitle=''){
     if(routeTorboSupportedPage(item,serverIndex,original,title))return;
   }
 
-  // ALPHA 4.8:
-  // Android/Projector ยังใช้ route24Player ตามเดิม
-  // PC ห้ามออกไป new_player.php iframe เพราะ ALPHA 4.6 เล่นได้แล้วผ่าน Worker/Hls
-  // ให้ PC ไหลลง playCandidate() เพื่อใช้ Movie2 Worker + 24HD child-direct loader
-  if(
-    original &&
-    is24PlayerHdUrl(original) &&
-    get24PlayerContentId(original) &&
-    (isAndroidDevice() || isProjectorMode())
-  ){
+  // 24PlayerHD: มือถือ/โปรเจคเตอร์ใช้ Player ของเครื่อง
+  // คอมพิวเตอร์ยังใช้ new_player.php ภายใน iframe
+  if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original)){
     route24Player(original,title);
     return;
   }
@@ -2233,12 +2226,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   }
 
   // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
-  // PC ต้องอยู่ใน Web/Hls path; route ออกเฉพาะ Android/Projector
-  if(
-    is24PlayerHdUrl(original) &&
-    get24PlayerContentId(original) &&
-    (isAndroidDevice() || isProjectorMode())
-  ){
+  if(is24PlayerHdUrl(original) && get24PlayerContentId(original)){
     route24Player(original,title);
     return;
   }
@@ -2271,37 +2259,44 @@ async function playItem(item,serverIndex=0,displayTitle=''){
 }
 function start24PcAutoplay(){
   try{
-    // PC: เริ่ม muted เพื่อให้ Brave/Chrome ยอม autoplay
-    // ห้ามเปลี่ยนหน้า/เปิด iframe/intent จากฟังก์ชันนี้
+    // 4.7.1: keep muted until the stream has really started.
+    // Unmuting after 120ms could make Chromium pause/block autoplay again.
+    video.autoplay=true;
+    video.playsInline=true;
     video.muted=true;
     video.defaultMuted=true;
     video.volume=0;
 
     const restoreSound=()=>{
       try{
-        if(!video.paused && (video.currentTime||0)>0){
-          video.muted=false;
-          video.defaultMuted=false;
-          video.volume=1;
-          setStatus('24PlayerHD • เล่นอัตโนมัติแล้ว');
-        }
+        if(video.paused || video.readyState<2)return;
+        video.muted=false;
+        video.defaultMuted=false;
+        video.volume=1;
       }catch(e){}
     };
 
-    const p=video.play();
-    if(p&&typeof p.then==='function'){
-      p.then(()=>{
-        // รอให้เฟรมแรกเดินจริงก่อนคืนเสียง เพื่อลด autoplay policy rejection
-        setTimeout(restoreSound,1500);
-        setTimeout(restoreSound,3000);
-      }).catch(()=>{
-        // ถ้า browser บล็อกจริง ให้คง player ไว้ ไม่เด้งออกหน้าอื่น
-        setStatus('24PlayerHD • พร้อมเล่น • กด Play 1 ครั้ง');
-      });
-    }
-  }catch(e){
-    setStatus('24PlayerHD • พร้อมเล่น');
-  }
+    const kick=()=>{
+      try{
+        const p=video.play();
+        if(p&&p.catch)p.catch(()=>{});
+      }catch(e){}
+    };
+
+    kick();
+    setTimeout(kick,250);
+    setTimeout(kick,700);
+    setTimeout(kick,1400);
+
+    const onStarted=()=>{
+      if(video.paused)return;
+      video.removeEventListener('playing',onStarted);
+      video.removeEventListener('timeupdate',onStarted);
+      setTimeout(restoreSound,900);
+    };
+    video.addEventListener('playing',onStarted);
+    video.addEventListener('timeupdate',onStarted);
+  }catch(e){}
 }
 
 function playCandidate(candidates,item,serverIndex,idx){
@@ -2386,7 +2381,7 @@ function playCandidate(candidates,item,serverIndex,idx){
       state.stuckCount=0;
       state._hlsFatalCount=0;
       if(sourceIs24 && !isAndroidDevice()){
-        try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
+        // 4.7.1: start24PcAutoplay restores sound after autoplay is stable.
       }else{
         forceFullSound();
       }
@@ -2495,8 +2490,8 @@ function playCandidate(candidates,item,serverIndex,idx){
       softRecoverPlayback();
     });
 
-    activeHls.on(Hls.Events.LEVEL_LOADED,()=>{if(state.hls===activeHls)forceFullSound()});
-    activeHls.on(Hls.Events.FRAG_BUFFERED,()=>{if(state.hls===activeHls)forceFullSound()});
+    activeHls.on(Hls.Events.LEVEL_LOADED,()=>{if(state.hls===activeHls && !(sourceIs24&&!isAndroidDevice()))forceFullSound()});
+    activeHls.on(Hls.Events.FRAG_BUFFERED,()=>{if(state.hls===activeHls && !(sourceIs24&&!isAndroidDevice()))forceFullSound()});
 
     activeHls.on(Hls.Events.ERROR,(e,d)=>{
       if(!d || state.hls!==activeHls)return;
