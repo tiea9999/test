@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 4.3 TORBO TITLE FALLBACK</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 4.4 TORBO ANDROID DETECT FIX</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 4.3 TORBO TITLE FALLBACK -->
+    <!-- BUILD: V7.2 ALPHA 4.4 TORBO ANDROID DETECT FIX -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.3 TORBO TITLE FALLBACK</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.4 TORBO ANDROID DETECT FIX</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -2121,7 +2121,7 @@ function routeTorboSupportedPage(item,serverIndex,original,title){
 
   // PC/Desktop: เปิดแท็บใหม่เพื่อให้หน้า TIEA ยังอยู่เดิม
   // Android/Android TV/Projector: ใช้แท็บเดิม เพื่อไม่ติด popup blocker และกด Back กลับ TIEA ง่าย
-  const androidLike = isAndroidLike();
+  const androidLike = isAndroidDevice() || isProjectorMode();
   if(androidLike){
     setStatus('Torbo007 • เปิด GOSERIES • กด Back เพื่อกลับ TIEA');
     window.location.assign(sourcePage);
