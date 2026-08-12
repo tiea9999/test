@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 4.6 24HD CHILD DIRECT FIX</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 4.7 24HD PC AUTOPLAY</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 4.6 24HD CHILD DIRECT FIX -->
+    <!-- BUILD: V7.2 ALPHA 4.7 24HD PC AUTOPLAY -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.6 24HD CHILD DIRECT FIX</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.7 24HD PC AUTOPLAY</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -2257,6 +2257,34 @@ async function playItem(item,serverIndex=0,displayTitle=''){
 
   playCandidate(candidates,item,serverIndex,0);
 }
+function start24PcAutoplay(){
+  try{
+    // Desktop Chromium/Brave: muted autoplay is always allowed.
+    // Start muted first, then restore sound once playback has actually begun.
+    video.muted=true;
+    video.defaultMuted=true;
+    video.volume=0;
+
+    const restore=()=>{
+      try{
+        video.muted=false;
+        video.defaultMuted=false;
+        video.volume=1;
+      }catch(e){}
+    };
+
+    const pr=video.play();
+    if(pr&&typeof pr.then==='function'){
+      pr.then(()=>{
+        setTimeout(restore,120);
+        setTimeout(()=>{try{video.play().catch(()=>{})}catch(e){}},180);
+      }).catch(()=>{});
+    }else{
+      setTimeout(restore,120);
+    }
+  }catch(e){}
+}
+
 function playCandidate(candidates,item,serverIndex,idx){
   let url=candidates[idx]||candidates[0];
   const direct=getUrl(item,serverIndex);
@@ -2295,7 +2323,13 @@ function playCandidate(candidates,item,serverIndex,idx){
 
   playerPanel.classList.add('show');
   showPlayerUI();
-  forceFullSound();
+  if(sourceIs24 && !isAndroidDevice()){
+    // 24HD PC: do not force audible state before the first play() call.
+    // Audible autoplay can be blocked by Brave/Chrome.
+    try{video.muted=true;video.defaultMuted=true;video.volume=0}catch(e){}
+  }else{
+    forceFullSound();
+  }
 
   // ให้เวลาต้นทาง/Worker ทำงาน แต่ไม่เปิด intent:// อัตโนมัติ
   state.playTimer=setTimeout(()=>{
@@ -2332,7 +2366,11 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
       state.stuckCount=0;
       state._hlsFatalCount=0;
-      forceFullSound();
+      if(sourceIs24 && !isAndroidDevice()){
+        try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
+      }else{
+        forceFullSound();
+      }
     }
   },{once:false}));
 
@@ -2405,9 +2443,14 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(state.hls!==activeHls)return;
       projectorPreferLowLevel();
       chooseProjectorSafeLevel();
-      forceFullSound();
       startWatchdog();
-      video.play().catch(()=>{});
+      if(sourceIs24 && !isAndroidDevice()){
+        setStatus('24PlayerHD • PC AUTO START');
+        start24PcAutoplay();
+      }else{
+        forceFullSound();
+        video.play().catch(()=>{});
+      }
     });
 
     activeHls.on(Hls.Events.BUFFER_STALLED,()=>{
