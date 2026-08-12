@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 3.9 TORBO BROWSER SESSION</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 4.3 TORBO TITLE FALLBACK</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 3.9 TORBO BROWSER SESSION -->
+    <!-- BUILD: V7.2 ALPHA 4.3 TORBO TITLE FALLBACK -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 3.9 TORBO BROWSER SESSION</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.3 TORBO TITLE FALLBACK</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -1250,7 +1250,7 @@ function renderRows(rows,title='รายการ',target=content){state.rows=r
 function epText(item){if(item.latest_ep&&item.total_ep)return'EP.'+item.latest_ep+'/'+item.total_ep;if(item.total_ep)return'EP.1-'+item.total_ep;if(item.episodes?.length)return'EP.'+item.episodes.length;return''}
 function createCard(item){let btn=document.createElement('button'),isFolder=item.kind==='folder'||item.kind==='link';btn.className='card'+(isFolder?' folder-card':'');btn.type='button';let image=isFolder?(item.image||FOLDER_LOGO):imgOf(item),lang=item.language||'',ep=epText(item),st=item.status||'';if(!st&&!isFolder&&item.kind==='series'){let le=Number(item.latest_ep||0),te=Number(item.total_ep||0);st=(te&&le&&le>=te)?'จบแล้ว':'ยังไม่จบ'}let done=String(st).includes('จบ')&&!String(st).includes('ยัง');btn.innerHTML=`<div class="card-glow"></div><div class="poster-wrap">${image?`<img class="thumb ${item.type==='tv'?'tv':''} ${isFolder?'folder-logo':''}" src="${image}" loading="lazy" onerror="this.onerror=null;this.outerHTML='<div class=&quot;thumb fallback&quot;>${item.kind==='link'?'🔗':(isFolder?'📁':'🎬')}</div>'">`:`<div class="thumb fallback">${item.kind==='link'?'🔗':(isFolder?'📁':'🎬')}</div>`}${(!isFolder&&lang)?`<div class="lang-ribbon">${lang}</div>`:''}${(!isFolder&&st)?`<div class="status-pill ${done?'done':''}">${st}</div>`:''}${(!isFolder&&ep)?`<div class="ep-pill">${ep}</div>`:''}</div><div class="card-body"><div class="card-title">${item.kind==='link'?'🔗 ':isFolder?'📁 ':''}${item.title||'ไม่มีชื่อ'}</div><div class="card-meta">${item.group?`<span class="tag">${item.group}</span>`:''}</div></div>`;btn.onclick=()=>openItem(item);btn.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openItem(item)}};return btn}
 function openItem(item){if(item.kind==='link'){location.href=item.url;return}if(item.kind==='folder'){loadFolder(item);return}if(item.kind==='series'&&item.episodes?.length){openDetail(item);return}playItem(item,0)}
-function openDetail(item){let modal=$('modal');$('modalTitle').textContent=item.title;$('modalBody').innerHTML=`<div class="detail-box"><div class="detail-title">${item.title}</div><div class="detail-sub">${item.language?item.language+' • ':''}${item.status?item.status+' • ':''}${item.group||''}${item.total_ep?' • ทั้งหมด '+item.total_ep+' ตอน':''}</div></div><div class="episode-list"></div>`;let list=$('modalBody').querySelector('.episode-list');item.episodes.forEach((ep,i)=>{let b=document.createElement('button');b.className='episode-btn';b.textContent=ep.title||`EP${i+1}`;b.onclick=()=>{state.returnEpisodeItem=item;closeModal();playItem(ep,0,item.title+' '+b.textContent)};list.appendChild(b)});$('modalCount').textContent='ทั้งหมด '+item.episodes.length+' ตอน';$('pageInfo').textContent='เลือกตอน';$('prevPageBtn').style.display='none';$('nextPageBtn').style.display='none';modal.classList.add('show');setTimeout(()=>list.querySelector('.episode-btn')?.focus(),80)}
+function openDetail(item){let modal=$('modal');$('modalTitle').textContent=item.title;$('modalBody').innerHTML=`<div class="detail-box"><div class="detail-title">${item.title}</div><div class="detail-sub">${item.language?item.language+' • ':''}${item.status?item.status+' • ':''}${item.group||''}${item.total_ep?' • ทั้งหมด '+item.total_ep+' ตอน':''}</div></div><div class="episode-list"></div>`;let list=$('modalBody').querySelector('.episode-list');item.episodes.forEach((ep,i)=>{let b=document.createElement('button');b.className='episode-btn';b.textContent=ep.title||`EP${i+1}`;b.onclick=()=>{state.returnEpisodeItem=item;closeModal();const inheritedPage=pageUrlOf(ep)||pageUrlOf(item)||torboKnownPageByTitle(item.title);const playEp={...ep,page:inheritedPage,servers:(ep.servers||[]).map(s=>({...s,page:pageUrlOf(s)||inheritedPage}))};playItem(playEp,0,item.title+' '+b.textContent)};list.appendChild(b)});$('modalCount').textContent='ทั้งหมด '+item.episodes.length+' ตอน';$('pageInfo').textContent='เลือกตอน';$('prevPageBtn').style.display='none';$('nextPageBtn').style.display='none';modal.classList.add('show');setTimeout(()=>list.querySelector('.episode-btn')?.focus(),80)}
 function openModal(title,items){state.modalItems=items;state.page=1;$('modalTitle').textContent=title;$('prevPageBtn').style.display='';$('nextPageBtn').style.display='';renderModalPage();$('modal').classList.add('show')}
 function renderModalPage(){let total=state.modalItems.length,pages=Math.max(1,Math.ceil(total/state.perPage));state.page=Math.max(1,Math.min(state.page,pages));let start=(state.page-1)*state.perPage,items=state.modalItems.slice(start,start+state.perPage);$('modalBody').innerHTML='<div class="grid"></div>';let g=$('modalBody').querySelector('.grid');items.forEach(item=>g.appendChild(createCard(item)));$('modalCount').textContent='ทั้งหมด '+total+' รายการ';$('pageInfo').textContent='หน้า '+state.page+' / '+pages;$('prevPageBtn').disabled=state.page<=1;$('nextPageBtn').disabled=state.page>=pages;setTimeout(()=>g.querySelector('.card')?.focus(),80)}
 function closeModal(){$('modal').classList.remove('show');$('prevPageBtn').style.display='';$('nextPageBtn').style.display=''}function getUrl(item,serverIndex=0){return cleanUrl(item.servers?.[serverIndex]?.url||item.servers?.[0]?.url||item.url||item.link||item.stream||'')}
@@ -2045,13 +2045,20 @@ function cleanupPlayer(fullReset=true){
   }
 }
 
-/* ===== TORBO007 SUPPORTED SOURCE FALLBACK V3.8 =====
-   เหตุผล: Torbo signed HLS ผูกกับ browser/session fingerprint
-   ดังนั้นเมื่อรายการมีหน้าต้นทาง ให้เปิดหน้าต้นทางโดยตรงแทนการยิง HLS ผ่าน Worker
+/* ===== TORBO007 SOURCE PAGE FALLBACK V4.0 =====
+   Torbo ปฏิเสธ parent/domain ที่ไม่อนุญาตเมื่อฝังใน TIEA
+   ดังนั้น Torbo จะเปิดหน้าต้นทาง GOSERIES ที่เก็บใน JSON โดยตรง
    Provider อื่นไม่เปลี่ยนพฤติกรรม
 */
 function isTorboUrl(url){
   return String(url||'').toLowerCase().includes('torbo007.com');
+}
+
+// Known source pages used only when older JSON has no page/pageUrl field.
+function torboKnownPageByTitle(title){
+  const t=String(title||'').trim().toLowerCase();
+  if(t.includes('the husband')) return 'https://goseries4k.com/the-husband/';
+  return '';
 }
 function isTorboDirectStreamUrl(url){
   const u=String(url||'').toLowerCase();
@@ -2062,19 +2069,16 @@ function isTorboDirectStreamUrl(url){
     u.includes('.m3u8')
   );
 }
-function torboSourcePageOf(item,serverIndex=0,original=''){
+function torboSourcePageOf(item,serverIndex=0,original='',displayTitle=''){
   const candidates=[
     dynamicPageFromItem(item,serverIndex),
     pageUrlOf(item?.servers?.[serverIndex]),
     pageUrlOf(item?.servers?.[0]),
-    pageUrlOf(item)
+    pageUrlOf(item),
+    torboKnownPageByTitle(displayTitle),
+    torboKnownPageByTitle(item?.title),
+    torboKnownPageByTitle(state.returnEpisodeItem?.title)
   ].map(cleanUrl).filter(Boolean);
-
-  // ถ้า JSON เก็บ Torbo embed URL มาเป็น URL หลัก สามารถใช้เป็นหน้าต้นทางได้
-  const raw=cleanUrl(original);
-  if(raw && isTorboUrl(raw) && raw.toLowerCase().includes('/embed/')){
-    candidates.unshift(raw);
-  }
 
   for(const page of candidates){
     try{
@@ -2086,82 +2090,51 @@ function torboSourcePageOf(item,serverIndex=0,original=''){
   }
   return '';
 }
-function torboEmbedUrlLocal(original){
-  try{
-    const id=extractStreamId(original);
-    if(!id)return '';
-    return 'https://torbo007.com/embed/'+encodeURIComponent(id);
-  }catch(e){return ''}
-}
 
-async function resolveTorboEmbedUrl(original){
-  const local=torboEmbedUrlLocal(original);
-  // Worker V9 only calculates/returns the embed address. The actual Torbo page
-  // is still loaded by the client browser, so fingerprint/session belongs to this device.
-  try{
-    const api=PROXY+'__dummy__'; // keep PROXY constant untouched for other providers
-    const workerBase=PROXY.split('?')[0];
-    const r=await fetch(workerBase+'?mode=torbo-embed&url='+encodeURIComponent(original),{cache:'no-store'});
-    if(r.ok){
-      const data=await r.json();
-      const embed=cleanUrl(data.embed||data.url||'');
-      if(embed && isTorboUrl(embed) && embed.toLowerCase().includes('/embed/'))return embed;
-    }
-  }catch(e){console.log('Torbo bridge fallback local',e)}
-  return local;
-}
-
-function showTorboIframe(embedUrl,sourcePage,title){
-  cleanupPlayer();
-  state.originalUrl=embedUrl||sourcePage||'';
-  state.currentUrl=embedUrl||sourcePage||'';
-  state.currentTitle=title||'Torbo007';
-  state._native24Mode=true;       // reuse the proven fullscreen iframe shell
-  state._torboBrowserMode=true;
-  state._sourcePage=sourcePage||'';
-
-  $('playerTitle').textContent=state.currentTitle+' • Torbo Browser Session';
-  playerPanel.classList.add('show','native24-mode');
-  playerPanel.classList.remove('hide-ui');
-
-  if(native24Frame){
-    native24Frame.style.display='block';
-    native24Frame.setAttribute('allow','autoplay *; fullscreen *; picture-in-picture *; encrypted-media *');
-    native24Frame.setAttribute('referrerpolicy','no-referrer-when-downgrade');
-    native24Frame.src=embedUrl||sourcePage;
-    try{native24Frame.focus({preventScroll:true});}
-    catch(e){try{native24Frame.focus();}catch(err){}}
-  }
-
-  setStatus('Torbo007 • เล่นใน TIEA ผ่าน Browser Session • ไม่ส่ง HLS เข้า Worker');
-  showPlayerUI(false);
-  return true;
-}
-
-async function routeTorboSupportedPage(item,serverIndex,original,title){
+function routeTorboSupportedPage(item,serverIndex,original,title){
   if(!isTorboUrl(original))return false;
 
-  const sourcePage=torboSourcePageOf(item,serverIndex,original);
-  const embedUrl=await resolveTorboEmbedUrl(original);
-
-  // Preferred path: Torbo embed runs INSIDE TIEA. This lets the client browser/WebView
-  // create the fingerprint/session itself and avoids Worker 502 / Invalid Client Fingerprint.
-  if(embedUrl){
-    return showTorboIframe(embedUrl,sourcePage,title);
-  }
-
-  // Last fallback: keep the source page inside the TIEA player iframe rather than
-  // navigating away from TIEA. Some sites may block framing, but we never auto-jump out.
-  if(sourcePage){
-    return showTorboIframe('',sourcePage,title);
-  }
+  const sourcePage=torboSourcePageOf(item,serverIndex,original,title);
 
   cleanupPlayer();
   state.originalUrl=original||'';
   state.currentUrl='';
   state.currentTitle=title||item?.title||'Torbo007';
-  setStatus('Torbo007 • ไม่พบ embed/page • ไม่ส่งเข้า Worker');
-  alert('Torbo007: รายการนี้ยังไม่มีข้อมูลที่ใช้เปิด Browser Session\nระบบจะไม่ส่ง HLS เข้า Worker เพื่อป้องกัน 502');
+
+  if(!sourcePage){
+    console.warn('TIEA TORBO PAGE MISS', {
+      itemTitle:item?.title||'',
+      displayTitle:title||'',
+      parentTitle:state.returnEpisodeItem?.title||'',
+      itemPage:pageUrlOf(item),
+      serverPage:pageUrlOf(item?.servers?.[serverIndex])
+    });
+    setStatus('Torbo007 • ไม่มี page URL • ไม่ส่งเข้า Worker');
+    alert('Torbo007 รายการนี้ยังไม่มี page URL ใน JSON\nจึงไม่ส่ง HLS เข้า Worker เพื่อป้องกัน 502/403');
+    return true;
+  }
+
+  try{
+    sessionStorage.setItem('TIEA_TORBO_RETURN_URL', location.href);
+    sessionStorage.setItem('TIEA_TORBO_SOURCE_PAGE', sourcePage);
+  }catch(e){}
+
+  // PC/Desktop: เปิดแท็บใหม่เพื่อให้หน้า TIEA ยังอยู่เดิม
+  // Android/Android TV/Projector: ใช้แท็บเดิม เพื่อไม่ติด popup blocker และกด Back กลับ TIEA ง่าย
+  const androidLike = isAndroidLike();
+  if(androidLike){
+    setStatus('Torbo007 • เปิด GOSERIES • กด Back เพื่อกลับ TIEA');
+    window.location.assign(sourcePage);
+    return true;
+  }
+
+  setStatus('Torbo007 • เปิด GOSERIES ในแท็บใหม่ • TIEA ยังอยู่แท็บเดิม');
+  const w = window.open(sourcePage, '_blank', 'noopener,noreferrer');
+  if(!w){
+    // ถ้า browser บล็อก popup ให้ fallback เป็นแท็บเดิม
+    setStatus('Torbo007 • Popup ถูกบล็อก • เปิดในแท็บเดิม');
+    window.location.assign(sourcePage);
+  }
   return true;
 }
 
@@ -2181,7 +2154,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   // Torbo007: ใช้หน้าต้นทางที่ถูกเก็บใน JSON เพื่อให้ต้นทางสร้าง session/fingerprint เอง
   // ต้องทำก่อน Dynamic Resolver / Worker
   if(original && isTorboUrl(original)){
-    if(await routeTorboSupportedPage(item,serverIndex,original,title))return;
+    if(routeTorboSupportedPage(item,serverIndex,original,title))return;
   }
 
   // 24PlayerHD: มือถือ/โปรเจคเตอร์ใช้ Player ของเครื่อง
