@@ -2,7 +2,7 @@
 <html lang="th">
 
 <head>
-<!-- TIEA 3BB V2.4 STABLE Build 2402: ANALYZER HLS ENGINE + PROJECTOR PICTURE FIX. SAFE/DIAG/LOG BUTTONS REMOVED. -->
+<!-- TIEA 3BB V2.4 STABLE Build 2403: ANALYZER HLS ENGINE + PROJECTOR PICTURE FIX. SAFE/DIAG/LOG BUTTONS REMOVED. -->
 <!-- LAB14: REQUIRED/MISSING KID HAS PRIORITY OVER CONFIGURED KID. USES ONLY EXISTING LOCAL CLEARKEY PAIRS. ONE RELOAD MAX. LAB10/STABLE BASE UNCHANGED. -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
@@ -60,7 +60,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.4 STABLE • Build 2402</h2>
+    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.4 STABLE • Build 2403</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -796,7 +796,31 @@ function useHLS_STABLE(url){
     setStatus("กำลังโหลดด้วย Analyzer Engine...");
     addPlaybackLog("ENGINE", "เริ่ม HLS แบบเดียวกับ TIEA Stream Analyzer");
 
+    // Build 2403: googlecdnforstreaming Worker HLS fix.
+    // The Worker playlist can contain child/segment URLs that must continue
+    // through the same Worker + referer. Rewrite every HLS request here.
+    const workerBase = "https://iptv.tawatchai250958.workers.dev/?url=";
+    let inheritedReferer = "";
+    try{ inheritedReferer = new URL(url).searchParams.get("referer") || ""; }catch(e){}
+    const isTieaWorkerHls = url.startsWith(workerBase) && /googlecdnforstreaming\.live/i.test(url);
+
+    function tieaRewriteHlsRequest(requestUrl){
+      if(!isTieaWorkerHls || !requestUrl) return requestUrl;
+      if(requestUrl.startsWith(workerBase)) return requestUrl;
+      if(!/^https?:\/\//i.test(requestUrl)) return requestUrl;
+      return workerBase + encodeURIComponent(requestUrl) +
+        (inheritedReferer ? "&referer=" + encodeURIComponent(inheritedReferer) : "");
+    }
+
+    class TieaWorkerLoader extends Hls.DefaultConfig.loader {
+      load(context, config, callbacks){
+        context.url = tieaRewriteHlsRequest(context.url);
+        super.load(context, config, callbacks);
+      }
+    }
+
     currentHls = new Hls({
+      loader: TieaWorkerLoader,
       enableWorker: true,
       lowLatencyMode: false,
       autoStartLoad: true,
