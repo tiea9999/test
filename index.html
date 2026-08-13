@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 4.7.6 24HD NATIVE INJECT</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 4.7 24HD PC AUTOPLAY</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 4.7.6 24HD NATIVE INJECT -->
+    <!-- BUILD: V7.2 ALPHA 4.7 24HD PC AUTOPLAY -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.7.6 24HD NATIVE INJECT</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.7 24HD PC AUTOPLAY</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -1359,14 +1359,20 @@ function get24PlayerContentId(url){
 function build24NativePlayerUrl(url){
   const id=get24PlayerContentId(url);
   if(!id)return '';
-  const native='https://main.24playerhd.com/new_player.php'
+
+  // ส่งพารามิเตอร์ Autoplay หลายชื่อเพื่อรองรับ Player ต้นทางหลายแบบ
+  // ถ้าต้นทางไม่อ่านค่าเหล่านี้ จะยังเปิด Player ได้เหมือน V3.0
+  return 'https://main.24playerhd.com/new_player.php'
     +'?id='+encodeURIComponent(id)
     +'&typew=T'
     +'&autoplay=1'
+    +'&autoPlay=1'
+    +'&play=1'
     +'&muted=1'
+    +'&mute=1'
     +'&playsinline=1'
-    +'&t='+Date.now();
-  return MOVIE2_PROXY+encodeURIComponent(native)+'&nativeinject=1';
+    +'&controls=1'
+    +'&tiea_autostart=1';
 }
 
 function stop24NativePlayer(){
@@ -1543,7 +1549,7 @@ function open24NativePlayer(url,title){
   state.currentTitle=title||'24PlayerHD';
   state._native24Mode=true;
 
-  $('playerTitle').textContent=state.currentTitle+' • 24HD Native Inject';
+  $('playerTitle').textContent=state.currentTitle+' • 24HD Native';
   playerPanel.classList.add('show','native24-mode');
   playerPanel.classList.remove('hide-ui');
 
@@ -1574,7 +1580,7 @@ function open24NativePlayer(url,title){
     },350);
   }
 
-  setStatus('24PlayerHD • Native Inject • กำลังเริ่มอัตโนมัติ');
+  setStatus('24PlayerHD • AUTO START TEST • ถ้าเบราว์เซอร์อนุญาตจะเริ่มเล่นเอง');
   showPlayerUI(false);
   return true;
 }
