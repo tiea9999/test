@@ -2,12 +2,12 @@
 <html lang="th">
 
 <head>
-<!-- TIEA 3BB V2.4 STABLE Build 2403: ANALYZER HLS ENGINE + PROJECTOR PICTURE FIX. SAFE/DIAG/LOG BUTTONS REMOVED. -->
+<!-- TIEA 3BB V2.4 ANALYZER ENGINE LAB Build 2401: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
 <!-- LAB14: REQUIRED/MISSING KID HAS PRIORITY OVER CONFIGURED KID. USES ONLY EXISTING LOCAL CLEARKEY PAIRS. ONE RELOAD MAX. LAB10/STABLE BASE UNCHANGED. -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA 3BB V2.4 STABLE</title>
+    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -60,13 +60,16 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.4 STABLE • Build 2403</h2>
+    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.4 ANALYZER ENGINE LAB • Build 2401</h2>
 
     <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
                 <button class="player-btn" id="closeBtn" onclick="closePlayer()">X</button>
                 <button class="player-btn" onclick="restartCurrent()">↻ รีโหลด</button>
+                <button class="player-btn" onclick="toggleLab10Diag()">📊 DIAG</button>
+                <button class="player-btn" onclick="togglePlaybackLog()">🧾 LOG</button>
+                <button class="player-btn" id="safeModeBtn" onclick="toggleProjectorSafe()">📽 SAFE</button>
             </div>
             <div class="right-buttons">
                 <button class="player-btn" onclick="openExternal()">▶ PLAYER</button>
@@ -77,6 +80,8 @@
         <div id="jw-player"></div>
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
         <div id="status" class="status"></div>
+        <div id="lab14-diag" style="display:none;position:absolute;right:14px;bottom:14px;z-index:100005;width:min(520px,calc(100vw - 28px));max-height:62vh;overflow:auto;background:rgba(3,14,24,.97);border:1px solid #00e5ff;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.45 Consolas,monospace;"></div>
+        <div id="playback-log" style="display:none;position:absolute;left:14px;bottom:14px;z-index:100006;width:min(600px,calc(100vw - 28px));max-height:58vh;overflow:auto;background:rgba(12,8,3,.97);border:1px solid orange;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.5 Consolas,monospace;"></div>
     </div>
 
     <div id="category-menu">
@@ -92,7 +97,6 @@
     <script>
 const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 const channels = [
- 
 {name:"Monomax 2",logo:"https://ball67.com/assets/channels-logo/monomax-2.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.googlecdnforstreaming.live%2Flive%2Fmonomax-2%2Fchunks.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F",drm:false,group:"กีฬา"},        
 {name:"golf channel",logo:"https://www.dropbox.com/scl/fi/3ekiv5abo840gh1i5vj30/xqfFe4EzPS5iJ9ee89bkEpqkxC6RrzMUntitled-2.jpg?rlkey=buxrafcak6qeb4ouru42lvgu1&dl=1",file:"https://d11k1mnrgfposz.cloudfront.net/playlist_1920x1080.m3u8",drm:false,group:"กีฬา"},    
 {name:"Golf 2 HD",logo:"https://6395online.com:8443/logotv/sport/golf2.jpg",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.googlecdnforstreaming.live%2Flive%2Fgolfchannel%2Fplaylist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F",drm:false,group:"กีฬา"},
@@ -211,10 +215,10 @@ let audioOnlyTimer = null;
 let audioOnlyRetryDone = false;
 let selectedSafeLevel = -1;
 const VOLUME_PROFILE = {
-    mpd: 0.70,
-    movieproxy: 1.00,
-    iptvworker: 1.00,
-    otherHls: 1.00
+  mpd: 1.00,
+  movieproxy: 0.38,
+  iptvworker: 0.40,
+  otherHls: 0.55
 };
 
 function sourceVolume(url){
@@ -796,31 +800,7 @@ function useHLS_STABLE(url){
     setStatus("กำลังโหลดด้วย Analyzer Engine...");
     addPlaybackLog("ENGINE", "เริ่ม HLS แบบเดียวกับ TIEA Stream Analyzer");
 
-    // Build 2403: googlecdnforstreaming Worker HLS fix.
-    // The Worker playlist can contain child/segment URLs that must continue
-    // through the same Worker + referer. Rewrite every HLS request here.
-    const workerBase = "https://iptv.tawatchai250958.workers.dev/?url=";
-    let inheritedReferer = "";
-    try{ inheritedReferer = new URL(url).searchParams.get("referer") || ""; }catch(e){}
-    const isTieaWorkerHls = url.startsWith(workerBase) && /googlecdnforstreaming\.live/i.test(url);
-
-    function tieaRewriteHlsRequest(requestUrl){
-      if(!isTieaWorkerHls || !requestUrl) return requestUrl;
-      if(requestUrl.startsWith(workerBase)) return requestUrl;
-      if(!/^https?:\/\//i.test(requestUrl)) return requestUrl;
-      return workerBase + encodeURIComponent(requestUrl) +
-        (inheritedReferer ? "&referer=" + encodeURIComponent(inheritedReferer) : "");
-    }
-
-    class TieaWorkerLoader extends Hls.DefaultConfig.loader {
-      load(context, config, callbacks){
-        context.url = tieaRewriteHlsRequest(context.url);
-        super.load(context, config, callbacks);
-      }
-    }
-
     currentHls = new Hls({
-      loader: TieaWorkerLoader,
       enableWorker: true,
       lowLatencyMode: false,
       autoStartLoad: true,
