@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.1 — V2.8.6 AUTO123 TEST</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.2 — V2.8.7 AUTO123 DISCOVER</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -1332,6 +1332,7 @@ function is24PlayerHdUrl(url){
   return (
     u.includes('24playerhd') ||
     u.includes('main.24playerhd.com') ||
+    u.includes('main.123hd-serie.com') ||
     u.includes('dell250369.com') ||
     u.includes('vdohls.com')
   );
@@ -3058,6 +3059,17 @@ window.addEventListener('message',function(e){
   }
 });
 
+async function v286DiscoverDirect(source){
+  try{
+    const page=v285PlayerUrl(source);
+    const u=V285_WORKER+'/discover?source='+encodeURIComponent(source)+'&page='+encodeURIComponent(page);
+    const r=await fetch(u,{cache:'no-store'});
+    const j=await r.json();
+    if(j && j.ok && j.seed) return {ok:true,seed:j.seed,page:page,method:'worker-discover'};
+  }catch(e){ console.log('V2.8.7 direct discover fail',e); }
+  return null;
+}
+
 function v285WaitLearn(source,timeout){
   timeout=timeout||25000;
   return new Promise(function(resolve){
@@ -3122,7 +3134,13 @@ window.playItem=async function(item,serverIndex,displayTitle){
       if(typeof setStatus==='function') setStatus('V2.8.6 • Auto Play 123HD • รอ Capture/Learn...');
     }catch(e){}
 
-    const cap=await v285WaitLearn(original,25000);
+    // V2.8.7: ask Worker to discover/learn first. Customers do not need the browser extension
+    // when the Worker can discover the .aaa from the derived 123HD/24HD player page.
+    let cap=await v286DiscoverDirect(original);
+    if(!cap){
+      if(typeof setStatus==='function') setStatus('V2.8.7 • Worker Discover ไม่พบ • ลอง Capture สำรอง...');
+      cap=await v285WaitLearn(original,25000);
+    }
     if(cap){
       const play=V285_WORKER+'/play.m3u8?source='+encodeURIComponent(original);
       try{
@@ -3149,11 +3167,11 @@ window.playItem=async function(item,serverIndex,displayTitle){
 };
 
 window.TIEA_V286_MOTHER={
-  version:'V7.2 ALPHA 5.1 V2.8.6 AUTO123 TEST',
+  version:'V7.2 ALPHA 5.2 V2.8.7 AUTO123 DISCOVER',
   extensionReady:function(){return V285_EXT_READY},
   lastCapture:function(){return V285_LAST_CAPTURE}
 };
-console.log('TIEA IPTV HOME V7.2 ALPHA 5.1 — V2.8.6 AUTO123 TEST loaded');
+console.log('TIEA IPTV HOME V7.2 ALPHA 5.2 — V2.8.7 AUTO123 DISCOVER loaded');
 })();
 </script>
 
