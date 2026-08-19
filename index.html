@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.5 — V2.9.0 CLEAN DIRECT 3 ROUTES</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.8 — V2.9.3 EP2 CODEC DIAG</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -3171,6 +3171,238 @@ window.TIEA_V290={
 };
 
 console.log('TIEA V2.9.0 CLEAN DIRECT 3 ROUTES loaded');
+})();
+</script>
+
+
+<style>
+#tieaEp2Diag{
+  position:fixed; right:12px; bottom:12px; z-index:2147483600;
+  width:min(560px,46vw); max-height:46vh; overflow:auto;
+  background:#031722; color:#d7f5ff; border:1px solid #20a4d8;
+  border-radius:8px; padding:10px; font:12px/1.35 Consolas,monospace;
+  box-shadow:0 6px 24px rgba(0,0,0,.45); display:none;
+}
+#tieaEp2Diag b{color:#64ffb0}
+#tieaEp2Diag .bad{color:#ff7a7a}
+#tieaEp2Diag .warn{color:#ffd166}
+#tieaEp2DiagBtns{position:sticky;top:0;background:#031722;padding-bottom:6px}
+#tieaEp2Diag button{margin-right:6px;padding:4px 8px}
+</style>
+<div id="tieaEp2Diag">
+  <div id="tieaEp2DiagBtns">
+    <b>EP2 V2.9.3 CODEC / BUFFER DIAG</b>
+    <button id="tieaEp2Copy">Copy Log</button>
+    <button id="tieaEp2Hide">Hide</button>
+  </div>
+  <pre id="tieaEp2DiagLog" style="white-space:pre-wrap;margin:0"></pre>
+</div>
+
+<script>
+/* ================================================================
+ TIEA V2.9.3 — EP2 CODEC / BUFFER DIAG
+ BASE: V2.9.0 CLEAN DIRECT 3 ROUTES
+
+ สำคัญ:
+ - ไม่แก้เส้นเล่น EP1 / EP2 / EP3
+ - ไม่เปลี่ยน Worker
+ - ไม่เพิ่ม retry / fallback
+ - เพิ่มเฉพาะ diagnostics สำหรับ main.24playerhd.com/newplaylist
+ เพื่อดูว่า EP2 ค้างเพราะ codec / MSE append / audio-video / buffer stage ใด
+ ================================================================ */
+(function(){
+'use strict';
+
+const box=document.getElementById('tieaEp2Diag');
+const pre=document.getElementById('tieaEp2DiagLog');
+const lines=[];
+
+function is24New(raw){
+  try{
+    const u=new URL(String(raw||'').trim());
+    return u.hostname.toLowerCase()==='main.24playerhd.com' &&
+           /^\/newplaylist\/[^/]+\/[^/]+\.m3u8$/i.test(u.pathname);
+  }catch(e){ return false; }
+}
+function ts(){ return (performance.now()/1000).toFixed(2)+'s'; }
+function ranges(){
+  try{
+    const a=[];
+    for(let i=0;i<video.buffered.length;i++){
+      a.push(video.buffered.start(i).toFixed(2)+'-'+video.buffered.end(i).toFixed(2));
+    }
+    return a.join(',')||'-';
+  }catch(e){ return '-'; }
+}
+function add(msg,cls){
+  const s='['+ts()+'] '+msg;
+  lines.push(s);
+  if(lines.length>220) lines.shift();
+  pre.textContent=lines.join('\n');
+  box.style.display='block';
+  box.scrollTop=box.scrollHeight;
+  console.log('[TIEA V2.9.3]',msg);
+}
+function stat(tag){
+  try{
+    add(tag+
+      ' | t='+Number(video.currentTime||0).toFixed(2)+
+      ' ready='+video.readyState+
+      ' net='+video.networkState+
+      ' paused='+video.paused+
+      ' muted='+video.muted+
+      ' buffer='+ranges()+
+      ' vw='+video.videoWidth+'x'+video.videoHeight);
+  }catch(e){}
+}
+document.getElementById('tieaEp2Copy').onclick=async()=>{
+  try{ await navigator.clipboard.writeText(lines.join('\n')); add('LOG COPIED'); }catch(e){ add('COPY FAIL '+e); }
+};
+document.getElementById('tieaEp2Hide').onclick=()=>box.style.display='none';
+
+const PREV=window.playItem;
+if(typeof PREV!=='function'){
+  add('ERROR: playItem not found');
+  return;
+}
+
+window.playItem=function(item,serverIndex,displayTitle){
+  let original='';
+  try{ original=typeof getUrl==='function'?getUrl(item,serverIndex||0):''; }catch(e){}
+
+  if(!is24New(original)){
+    return PREV.apply(this,arguments);
+  }
+
+  lines.length=0;
+  add('EP2 START');
+  add('SOURCE '+original);
+  add('UA '+navigator.userAgent);
+
+  // เรียก V2.9.0 เดิมแบบเดิมทุกอย่าง
+  const ret=PREV.apply(this,arguments);
+
+  setTimeout(()=>{
+    const h=state && state.hls;
+    if(!h){
+      add('HLS INSTANCE = NONE');
+      return;
+    }
+
+    add('HLS INSTANCE ATTACHED');
+
+    function on(name,fn){
+      try{
+        const ev=Hls.Events[name];
+        if(ev) h.on(ev,function(_e,d){
+          try{ fn(d||{}); }catch(err){ add(name+' handler err '+err); }
+        });
+      }catch(e){}
+    }
+
+    on('MEDIA_ATTACHED',()=>stat('MEDIA_ATTACHED'));
+
+    on('MANIFEST_PARSED',d=>{
+      const levels=(d.levels||h.levels||[]).map((x,i)=>({
+        i,
+        w:x.width,h:x.height,
+        br:x.bitrate,
+        v:x.videoCodec||x.codecSet||'',
+        a:x.audioCodec||''
+      }));
+      add('MANIFEST_PARSED levels='+JSON.stringify(levels));
+      stat('AFTER MANIFEST');
+    });
+
+    on('LEVEL_LOADED',d=>{
+      const x=d.details||{};
+      add('LEVEL_LOADED live='+!!x.live+
+          ' total='+Number(x.totalduration||0).toFixed(2)+
+          ' startSN='+x.startSN+' endSN='+x.endSN+
+          ' frags='+(x.fragments?x.fragments.length:0));
+      try{
+        if(x.fragments&&x.fragments[0]){
+          const f=x.fragments[0];
+          add('FIRST_FRAG start='+f.start+' dur='+f.duration+
+              ' cc='+f.cc+' sn='+f.sn+' url='+(f.url||'').slice(-90));
+        }
+      }catch(e){}
+      stat('AFTER LEVEL');
+    });
+
+    on('AUDIO_TRACKS_UPDATED',d=>{
+      add('AUDIO_TRACKS '+JSON.stringify((d.audioTracks||[]).map((x,i)=>({
+        i,name:x.name,lang:x.lang,codec:x.audioCodec||'',group:x.groupId||''
+      }))));
+    });
+
+    on('AUDIO_TRACK_SWITCHED',d=>add('AUDIO_TRACK_SWITCHED id='+d.id));
+
+    on('BUFFER_CODECS',d=>{
+      const tracks=d.tracks||{};
+      const slim={};
+      Object.keys(tracks).forEach(k=>{
+        const t=tracks[k]||{};
+        slim[k]={container:t.container,codec:t.codec,levelCodec:t.levelCodec};
+      });
+      add('BUFFER_CODECS '+JSON.stringify(slim));
+    });
+
+    on('FRAG_LOADED',d=>{
+      const f=d.frag||{};
+      add('FRAG_LOADED type='+f.type+' sn='+f.sn+' start='+f.start+' dur='+f.duration);
+    });
+
+    on('FRAG_BUFFERED',d=>{
+      const f=d.frag||{};
+      add('FRAG_BUFFERED type='+f.type+' sn='+f.sn);
+      stat('BUFFERED');
+    });
+
+    on('BUFFER_APPENDED',d=>{
+      add('BUFFER_APPENDED type='+(d.type||'')+' parent='+(d.parent||''));
+      stat('APPENDED');
+    });
+
+    h.on(Hls.Events.ERROR,function(_e,d){
+      add('HLS_ERROR type='+d.type+
+          ' details='+d.details+
+          ' fatal='+d.fatal+
+          ' reason='+(d.reason||'')+
+          ' code='+(d.response&&d.response.code||'')+
+          ' err='+(d.error&&d.error.message||''));
+      stat('AT ERROR');
+    });
+
+    ['loadstart','loadedmetadata','loadeddata','canplay','canplaythrough',
+     'play','playing','waiting','stalled','suspend','emptied','ended','error',
+     'seeking','seeked','timeupdate'].forEach(ev=>{
+      video.addEventListener(ev,function(){
+        if(ev==='timeupdate' && video.currentTime>0.5) return;
+        let extra='';
+        if(ev==='error' && video.error){
+          extra=' code='+video.error.code+' msg='+(video.error.message||'');
+        }
+        stat('VIDEO '+ev+extra);
+      });
+    });
+
+    // snapshot 0-12 sec เพื่อเห็นว่ามี buffer แต่ currentTime ไม่เดินหรือไม่
+    [0,1000,2500,5000,8000,12000].forEach(ms=>{
+      setTimeout(()=>stat('SNAPSHOT '+ms+'ms'),ms);
+    });
+
+  },0);
+
+  return ret;
+};
+
+window.TIEA_V293_DIAG={
+  version:'V2.9.3 EP2 CODEC DIAG',
+  log:()=>lines.slice()
+};
+
+console.log('TIEA V2.9.3 EP2 CODEC DIAG loaded');
 })();
 </script>
 
