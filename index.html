@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.9 — V2.9.4 EP2 MANIFEST RETRY</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.0 — V2.8.5 MOTHER TEST</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -2996,390 +2996,164 @@ if(!restoreAfterExternal()&&!restoreReturnState()){
 
 <script>
 /* ================================================================
- TIEA V2.9.0 CLEAN DIRECT 3 ROUTES
- BASE: V7.2 ALPHA 4.9 24HD STABLE ADAPTIVE V4
-
- ใช้ V2.6 playback core เฉพาะ 3 รูปแบบที่ทดสอบจริง:
- 1) main.24playerhd.com/m3u8/.../...438.m3u8
- 2) main.24playerhd.com/newplaylist/.../...m3u8
- 3) main.123hd-serie.com/newplaylist/.../...m3u8
-
- สำคัญ:
- - ไม่ต่อยอดจาก V2.8.7/8.8/8.9 เพื่อตัด side effect
- - ไม่ Discover
- - ไม่ Extension
- - ไม่ All Player
- - ไม่ movie2 สำหรับ 3 route นี้
- - Provider อื่นกลับไปใช้ BASE 4.9 เดิม
- ================================================================ */
+   TIEA IPTV HOME V7.2 ALPHA 5.0 — V2.8.5 MOTHER TEST
+   - Series primary: main.123hd-serie.com/newplaylist/...
+   - Also supports the other 2 proven 24playerhd forms
+   - Desktop: V2.8.5 Capture/Learn -> TEST Worker
+   - Android: keep existing route
+   - If Capture/Learn fails: fallback to original playItem
+   ================================================================ */
 (function(){
 'use strict';
 
-const DIRECT_WORKER='https://tiea-googlecdn-test.tawatchai250958.workers.dev';
+const V285_WORKER='https://tiea-googlecdn-test.tawatchai250958.workers.dev';
+let V285_EXT_READY=false;
+let V285_LAST_CAPTURE=null;
+let V285_WAITERS=[];
 
-function routeKind(raw){
+function v285Supported(raw){
   try{
     const u=new URL(String(raw||'').trim());
     const h=u.hostname.toLowerCase();
-    const p=u.pathname;
-
-    if(h==='main.123hd-serie.com' &&
-       /^\/newplaylist\/[^/]+\/[^/]+\.m3u8$/i.test(p)){
-      return '123HD';
-    }
-
-    if(h==='main.24playerhd.com' &&
-       /^\/newplaylist\/[^/]+\/[^/]+\.m3u8$/i.test(p)){
-      return '24NEW';
-    }
-
-    if(h==='main.24playerhd.com' &&
-       /^\/m3u8\/[^/]+\/[^/]+\.m3u8$/i.test(p)){
-      return '24M3U8';
-    }
-  }catch(e){}
-  return '';
-}
-
-function cleanOnlyForDirect(){
-  try{ if(typeof stopWatchdog==='function') stopWatchdog(); }catch(e){}
-  try{
-    if(state && state.playTimer){clearTimeout(state.playTimer);state.playTimer=null;}
-  }catch(e){}
-  try{
-    if(state && state.hls){
-      const h=state.hls; state.hls=null;
-      try{h.stopLoad()}catch(e){}
-      try{h.detachMedia()}catch(e){}
-      try{h.destroy()}catch(e){}
-    }
-  }catch(e){}
-  try{
-    if(state && state.dash){
-      const d=state.dash; state.dash=null;
-      try{d.destroy()}catch(e){}
-    }
-  }catch(e){}
-  try{ video.pause(); }catch(e){}
-  try{ video.removeAttribute('src'); }catch(e){}
-  try{
-    if(native24Frame){
-      native24Frame.src='about:blank';
-      native24Frame.style.display='none';
-    }
-    playerPanel.classList.remove('native24-mode');
-  }catch(e){}
-}
-
-function playV26Core(source,title,kind){
-  cleanOnlyForDirect();
-
-  const playUrl=DIRECT_WORKER+'/play.m3u8?source='+encodeURIComponent(source);
-
-  try{
-    state.originalUrl=source;
-    state.currentUrl=playUrl;
-    state.currentTitle=title||'กำลังเล่น';
-    state._native24Mode=false;
-  }catch(e){}
-
-  try{
-    const pt=document.getElementById('playerTitle');
-    if(pt) pt.textContent=title||'กำลังเล่น';
-    playerPanel.classList.add('show');
-    playerPanel.classList.remove('hide-ui','native24-mode');
-    if(typeof showPlayerUI==='function') showPlayerUI();
-    if(typeof setStatus==='function') setStatus(kind+' • DIRECT V2.6 CORE');
-  }catch(e){}
-
-  try{
-    if(window.Hls && Hls.isSupported()){
-      const h=new Hls({
-        enableWorker:true,
-        lowLatencyMode:false
-      });
-      state.hls=h;
-
-      h.on(Hls.Events.MEDIA_ATTACHED,function(){
-        h.loadSource(playUrl);
-      });
-
-      h.on(Hls.Events.MANIFEST_PARSED,function(){
-        try{
-          if(typeof setStatus==='function') setStatus(kind+' • MANIFEST PASS');
-          const p=video.play();
-          if(p && p.catch) p.catch(()=>{});
-        }catch(e){}
-      });
-
-      h.on(Hls.Events.ERROR,function(_,d){
-        try{
-          console.log('[TIEA V2.9.0 '+kind+']',d.type,d.details,d.fatal,d.response&&d.response.code);
-          if(d.fatal && typeof setStatus==='function'){
-            setStatus(kind+' • ERROR • '+(d.details||''));
-          }
-        }catch(e){}
-      });
-
-      h.attachMedia(video);
-    }else{
-      video.src=playUrl;
-      video.autoplay=true;
-      video.play().catch(()=>{});
-    }
-
-    try{ if(typeof startWatchdog==='function') startWatchdog(); }catch(e){}
-    return true;
-  }catch(e){
-    console.error('[TIEA V2.9.0 DIRECT ERROR]',e);
-    return false;
-  }
-}
-
-const OLD_PLAYITEM=window.playItem;
-
-if(typeof OLD_PLAYITEM==='function'){
-  window.playItem=function(item,serverIndex,displayTitle){
-    serverIndex=serverIndex||0;
-    displayTitle=displayTitle||'';
-
-    let original='';
-    try{
-      original=typeof getUrl==='function' ? getUrl(item,serverIndex) : '';
-    }catch(e){}
-
-    const kind=routeKind(original);
-    if(kind){
-      if(!displayTitle) {
-        try{ state.returnEpisodeItem=null; }catch(e){}
-      }
-      const title=displayTitle || (item&&item.title) || 'กำลังเล่น';
-      console.log('[TIEA V2.9.0] DIRECT',kind,original);
-      return playV26Core(original,title,kind);
-    }
-
-    return OLD_PLAYITEM.apply(this,arguments);
-  };
-}else{
-  console.warn('TIEA V2.9.0: playItem not found');
-}
-
-window.TIEA_V290={
-  version:'V2.9.0 CLEAN DIRECT 3 ROUTES',
-  worker:DIRECT_WORKER,
-  routeKind:routeKind
-};
-
-console.log('TIEA V2.9.0 CLEAN DIRECT 3 ROUTES loaded');
-})();
-</script>
-
-
-<script>
-/* ================================================================
- TIEA V2.9.4 — EP2 MANIFEST RETRY ONLY
- BASE: V2.9.0 CLEAN DIRECT 3 ROUTES
-
- ผลวิเคราะห์จาก V2.9.3:
- - MEDIA_ATTACHED แล้ว
- - ไม่มี MANIFEST_PARSED / LEVEL_LOADED / FRAG_LOADED
- - buffer ว่าง, readyState=0
- => EP2 ค้างก่อนเข้า HLS pipeline เพราะ /play.m3u8 ยังไม่คืน manifest บางรอบ
-
- แก้เฉพาะ:
- main.24playerhd.com/newplaylist/.../...m3u8
-
- วิธี:
- 1) preflight fetch /play.m3u8 รอบแรก
- 2) timeout 4.5s
- 3) ถ้ารอบแรก fail/timeout -> retry 1 ครั้งพร้อม cache-bypass
- 4) เมื่อได้ text ที่ขึ้น #EXTM3U ค่อยให้ Hls.js โหลด URL ที่ผ่าน
- 5) EP1 / EP3 / provider อื่น = V2.9.0 เดิม
- ================================================================ */
-(function(){
-'use strict';
-
-const WORKER='https://tiea-googlecdn-test.tawatchai250958.workers.dev';
-
-function is24New(raw){
-  try{
-    const u=new URL(String(raw||'').trim());
-    return u.hostname.toLowerCase()==='main.24playerhd.com' &&
-           /^\/newplaylist\/[^/]+\/[^/]+\.m3u8$/i.test(u.pathname);
+    if(h!=='main.123hd-serie.com' && h!=='main.24playerhd.com') return false;
+    return /\/newplaylist\/[^/]+\/[^/]+\.m3u8$/i.test(u.pathname) ||
+           /\/m3u8\/[^/]+\/[^/]+\.m3u8$/i.test(u.pathname);
   }catch(e){ return false; }
 }
+function v285Id(raw){
+  const m=String(raw||'').match(/\/(?:newplaylist|m3u8)\/([^/?#]+)/i);
+  return m?m[1]:'';
+}
+function v285Same(p,source){
+  if(!p)return false;
+  const id=v285Id(source);
+  return (p.sourceId && p.sourceId===id) ||
+         String(p.source||'').trim()===String(source||'').trim();
+}
+function v285PlayerUrl(source){
+  const id=v285Id(source);
+  // For 123HD series use 123HD player page first; 24player/5G keeps 24player page.
+  try{
+    const h=new URL(source).hostname.toLowerCase();
+    if(h==='main.123hd-serie.com'){
+      return 'https://main.123hd-serie.com/index_th.php?id='+encodeURIComponent(id)+'&b=3196';
+    }
+  }catch(e){}
+  return 'https://main.24playerhd.com/new_player.php?id='+encodeURIComponent(id)+'&typew=T';
+}
+function v285RequestLast(){
+  window.postMessage({type:'TIEA_V285_REQUEST_LAST'},'*');
+}
+window.addEventListener('message',function(e){
+  if(e.source!==window)return;
+  const d=e.data||{};
+  if(d.type==='TIEA_V285_EXTENSION_READY'){
+    V285_EXT_READY=true;
+    return;
+  }
+  if(d.type==='TIEA_V285_CAPTURE_RESULT'){
+    const p=d.payload||null;
+    if(p && !p.waitingCapture && !p.cleared) V285_LAST_CAPTURE=p;
+    V285_WAITERS.slice().forEach(function(fn){ try{fn(p)}catch(_){} });
+  }
+});
 
-function clearEp2(){
-  try{ if(typeof stopWatchdog==='function') stopWatchdog(); }catch(e){}
-  try{
-    if(state && state.playTimer){ clearTimeout(state.playTimer); state.playTimer=null; }
-  }catch(e){}
-  try{
-    if(state && state.hls){
-      const h=state.hls; state.hls=null;
-      try{h.stopLoad()}catch(e){}
-      try{h.detachMedia()}catch(e){}
-      try{h.destroy()}catch(e){}
+function v285WaitLearn(source,timeout){
+  timeout=timeout||25000;
+  return new Promise(function(resolve){
+    if(V285_LAST_CAPTURE && v285Same(V285_LAST_CAPTURE,source) && V285_LAST_CAPTURE.learn && V285_LAST_CAPTURE.learn.ok){
+      resolve(V285_LAST_CAPTURE);
+      return;
     }
-  }catch(e){}
-  try{
-    if(state && state.dash){
-      const d=state.dash; state.dash=null;
-      try{d.destroy()}catch(e){}
+    let done=false,popup=null;
+    const fn=function(p){
+      if(done || !p || !v285Same(p,source) || !p.learn || !p.learn.ok) return;
+      done=true; cleanup(); resolve(p);
+    };
+    function cleanup(){
+      V285_WAITERS=V285_WAITERS.filter(function(x){return x!==fn});
+      try{ if(popup && !popup.closed) popup.close(); }catch(e){}
     }
-  }catch(e){}
-  try{ video.pause(); }catch(e){}
-  try{ video.removeAttribute('src'); }catch(e){}
-  try{
-    if(native24Frame){
-      native24Frame.src='about:blank';
-      native24Frame.style.display='none';
-    }
-    playerPanel.classList.remove('native24-mode');
-  }catch(e){}
+    V285_WAITERS.push(fn);
+    v285RequestLast();
+
+    // Let extension see the real player network automatically.
+    setTimeout(function(){
+      if(done)return;
+      try{ popup=window.open(v285PlayerUrl(source),'TIEA_V285_CAPTURE','width=1120,height=760'); }catch(e){}
+    },400);
+
+    setTimeout(function(){
+      if(done)return;
+      done=true; cleanup(); resolve(null);
+    },timeout);
+  });
 }
 
-async function fetchManifest(url, timeoutMs){
-  const ac=new AbortController();
-  const timer=setTimeout(()=>ac.abort(),timeoutMs);
-  try{
-    const r=await fetch(url,{
-      method:'GET',
-      cache:'no-store',
-      credentials:'omit',
-      signal:ac.signal,
-      headers:{
-        'Accept':'application/vnd.apple.mpegurl,application/x-mpegURL,text/plain,*/*'
+const V285_OLD_PLAYITEM=window.playItem;
+if(typeof V285_OLD_PLAYITEM!=='function'){
+  console.warn('TIEA V2.8.5 mother patch: playItem not found');
+  return;
+}
+
+window.playItem=async function(item,serverIndex,displayTitle){
+  serverIndex=serverIndex||0;
+  displayTitle=displayTitle||'';
+
+  let original='';
+  try{ original=typeof getUrl==='function' ? getUrl(item,serverIndex) : ''; }catch(e){}
+
+  // Only intercept the 3 proven 24HD/123HD URL shapes on desktop.
+  let android=false;
+  try{ android=typeof isAndroidDevice==='function' ? isAndroidDevice() : /android/i.test(navigator.userAgent||''); }catch(e){}
+
+  if(original && v285Supported(original) && !android){
+    const title=displayTitle || (item&&item.title) || 'กำลังเล่น';
+    try{
+      if(typeof cleanupPlayer==='function') cleanupPlayer();
+      if(window.state){
+        state.currentTitle=title;
+        state.originalUrl=original;
+        state.currentUrl=original;
       }
-    });
-    const text=await r.text();
-    const ok=r.ok && /^\s*#EXTM3U/i.test(text);
-    return {ok,status:r.status,text};
-  }catch(e){
-    return {ok:false,status:0,error:String(e&&e.name||e)};
-  }finally{
-    clearTimeout(timer);
-  }
-}
-
-async function resolvePlayableManifest(source){
-  const base=WORKER+'/play.m3u8?source='+encodeURIComponent(source);
-
-  try{ if(typeof setStatus==='function') setStatus('24NEW • MANIFEST TRY 1'); }catch(e){}
-  const r1=await fetchManifest(base,4500);
-  console.log('[TIEA V2.9.4] TRY1',r1.status,r1.ok,r1.error||'');
-
-  if(r1.ok) return base;
-
-  const retry=base+'&_cb='+Date.now();
-  try{ if(typeof setStatus==='function') setStatus('24NEW • MANIFEST RETRY'); }catch(e){}
-  const r2=await fetchManifest(retry,6500);
-  console.log('[TIEA V2.9.4] TRY2',r2.status,r2.ok,r2.error||'');
-
-  if(r2.ok) return retry;
-  return '';
-}
-
-async function playEp2(source,title){
-  clearEp2();
-
-  try{
-    state.originalUrl=source;
-    state.currentTitle=title||'กำลังเล่น';
-    state._native24Mode=false;
-  }catch(e){}
-
-  try{
-    const pt=document.getElementById('playerTitle');
-    if(pt) pt.textContent=title||'กำลังเล่น';
-    playerPanel.classList.add('show');
-    playerPanel.classList.remove('hide-ui','native24-mode');
-    if(typeof showPlayerUI==='function') showPlayerUI();
-  }catch(e){}
-
-  const playUrl=await resolvePlayableManifest(source);
-
-  if(!playUrl){
-    try{
-      if(typeof setStatus==='function') setStatus('24NEW • MANIFEST FAIL');
-    }catch(e){}
-    console.warn('[TIEA V2.9.4] EP2 manifest failed both attempts');
-    return false;
-  }
-
-  try{ state.currentUrl=playUrl; }catch(e){}
-
-  try{
-    if(window.Hls && Hls.isSupported()){
-      const h=new Hls({
-        enableWorker:true,
-        lowLatencyMode:false
-      });
-      state.hls=h;
-
-      h.on(Hls.Events.MANIFEST_PARSED,function(){
-        try{
-          if(typeof setStatus==='function') setStatus('24NEW • MANIFEST PASS • PLAYING');
-          video.play().catch(()=>{});
-        }catch(e){}
-      });
-
-      h.on(Hls.Events.ERROR,function(_,d){
-        try{
-          console.log('[TIEA V2.9.4 EP2]',d.type,d.details,d.fatal,d.response&&d.response.code);
-          if(d.fatal && typeof setStatus==='function'){
-            setStatus('24NEW • HLS ERROR • '+(d.details||''));
-          }
-        }catch(e){}
-      });
-
-      h.loadSource(playUrl);
-      h.attachMedia(video);
-      video.play().catch(()=>{});
-    }else{
-      video.src=playUrl;
-      video.autoplay=true;
-      video.play().catch(()=>{});
-    }
-
-    try{ if(typeof startWatchdog==='function') startWatchdog(); }catch(e){}
-    return true;
-  }catch(e){
-    console.error('[TIEA V2.9.4 PLAY ERROR]',e);
-    return false;
-  }
-}
-
-const PREV=window.playItem;
-if(typeof PREV==='function'){
-  window.playItem=function(item,serverIndex,displayTitle){
-    serverIndex=serverIndex||0;
-    displayTitle=displayTitle||'';
-
-    let original='';
-    try{
-      original=typeof getUrl==='function' ? getUrl(item,serverIndex) : '';
+      const pt=document.getElementById('playerTitle');
+      if(pt)pt.textContent=title;
+      if(typeof showPlayerUI==='function') showPlayerUI();
+      if(typeof setStatus==='function') setStatus('V2.8.5 • รอ Capture/Learn...');
     }catch(e){}
 
-    if(original && is24New(original)){
-      if(!displayTitle){
-        try{ state.returnEpisodeItem=null; }catch(e){}
-      }
-      const title=displayTitle || (item&&item.title) || 'กำลังเล่น';
-      console.log('[TIEA V2.9.4] EP2 manifest retry:',original);
-      return playEp2(original,title);
+    const cap=await v285WaitLearn(original,25000);
+    if(cap){
+      const play=V285_WORKER+'/play.m3u8?source='+encodeURIComponent(original);
+      try{
+        if(window.state){
+          state.originalUrl=original;
+          state.currentUrl=play;
+          state.v285Capture=cap;
+        }
+        if(typeof setStatus==='function'){
+          const provider=(new URL(original).hostname==='main.123hd-serie.com')?'123HD SERIES':'5G / 24PlayerHD';
+          setStatus(provider+' • V2.8.5 Learn PASS • กำลังเล่น');
+        }
+        if(typeof playCandidate==='function'){
+          return playCandidate([play],item,serverIndex,0);
+        }
+      }catch(e){}
     }
 
-    return PREV.apply(this,arguments);
-  };
-}
+    // Safety fallback: no capture -> old proven mother logic.
+    try{ if(typeof setStatus==='function')setStatus('V2.8.5 ยัง Learn ไม่สำเร็จ • ใช้เส้นทางเดิม'); }catch(e){}
+  }
 
-window.TIEA_V294={
-  version:'V2.9.4 EP2 MANIFEST RETRY',
-  worker:WORKER
+  return V285_OLD_PLAYITEM.apply(this,arguments);
 };
 
-console.log('TIEA V2.9.4 EP2 MANIFEST RETRY loaded');
+window.TIEA_V285_MOTHER={
+  version:'V7.2 ALPHA 5.0 V2.8.5 TEST',
+  extensionReady:function(){return V285_EXT_READY},
+  lastCapture:function(){return V285_LAST_CAPTURE}
+};
+console.log('TIEA IPTV HOME V7.2 ALPHA 5.0 — V2.8.5 MOTHER TEST loaded');
 })();
 </script>
 
