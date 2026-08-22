@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2B — ANDROID TV WEB FIX</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2C — ANDROID WEB FORCE FIX</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 5.9.2A ANDROID TV WEB FIX -->
+    <!-- BUILD: V7.2 ALPHA 5.9.2A ANDROID WEB FORCE FIX -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 5.9.2A ANDROID TV WEB FIX</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 5.9.2A ANDROID WEB FORCE FIX</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -1451,7 +1451,12 @@ function buildAndroidViewIntent(url,packageName=''){
 function launch24AndroidApp(url,mode,title){
   const direct=normalize24PlayerUrl(url);
   if(!direct)return false;
-  if(!isAndroidDevice())return open24NativePlayer(url,title);
+
+  // 5.9.2C hard safety: never fire intent:// on Android for 24PlayerHD.
+  if(isAndroidDevice()){
+    try{ setStatus('24PlayerHD • ANDROID WEB MODE'); }catch(e){}
+    return open24NativePlayer(url,title);
+  }
 
   let pkg='';
   if(mode==='wiseplay')pkg='com.wiseplay';
@@ -1488,10 +1493,10 @@ function ask24PlayerMode(url,title){
   return launch24AndroidApp(url,'wiseplay',title);
 }
 function route24Player(url,title){
-  // 5.9.2B: Android TV/Box browser must never use intent://.
-  // Force the web/native 24HD player inside TIEA instead.
-  if(isAndroidTvBrowser()){
-    try{ setStatus('24PlayerHD • Android TV WEB MODE'); }catch(e){}
+  // 5.9.2C: ALL Android browsers use WEB mode for 24PlayerHD.
+  // No intent://, no app chooser, no Wiseplay/MX auto launch.
+  if(isAndroidDevice()){
+    try{ setStatus('24PlayerHD • ANDROID WEB MODE'); }catch(e){}
     return open24NativePlayer(url,title);
   }
 
@@ -1499,8 +1504,6 @@ function route24Player(url,title){
   if(mode==='ask')return ask24PlayerMode(url,title);
   if(mode==='web')return open24NativePlayer(url,title);
   if(mode==='wiseplay'||mode==='mx')return launch24AndroidApp(url,mode,title);
-  // AUTO: Android phone/tablet may still use app chooser; Desktop uses web.
-  if(isAndroidDevice())return launch24AndroidApp(url,'auto',title);
   return open24NativePlayer(url,title);
 }
 
@@ -2217,7 +2220,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original)){
     // 5.9.2A: Android TV/Box browser บางรุ่นบล็อก intent:// (ขึ้น "Deep Link ของแอปถูกบล็อก")
     // จึงไม่บังคับเด้งออกไปแอปบน TV/Box; ให้ main.24playerhd เดินต่อเข้า HLS/Worker ภายในเว็บแทน
-    if(!isMain24PlayerHdUrl(original) || (isAndroidDevice() && !isAndroidTvBrowser())){
+    if(!isMain24PlayerHdUrl(original) || isAndroidDevice()){
       route24Player(original,title);
       return;
     }
@@ -2264,9 +2267,9 @@ async function playItem(item,serverIndex=0,displayTitle=''){
 
   // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
   if(is24PlayerHdUrl(original) && get24PlayerContentId(original)){
-    // 5.9.2B: Android TV/Box main.24playerhd.com must continue WEB path,
+    // 5.9.2C: Android TV/Box main.24playerhd.com must continue WEB path,
     // not jump back into intent:// after Resolver.
-    if(!isMain24PlayerHdUrl(original) || (isAndroidDevice() && !isAndroidTvBrowser())){
+    if(!isMain24PlayerHdUrl(original) || isAndroidDevice()){
       route24Player(original,title);
       return;
     }
@@ -3192,7 +3195,7 @@ window.TIEA_V286_MOTHER={
   extensionReady:function(){return V285_EXT_READY},
   lastCapture:function(){return V285_LAST_CAPTURE}
 };
-console.log('TIEA IPTV HOME V7.2 ALPHA 5.9.2B — ANDROID TV NO INTENT FIX loaded');
+console.log('TIEA IPTV HOME V7.2 ALPHA 5.9.2C — ANDROID WEB FORCE FIX loaded');
 })();
 </script>
 
