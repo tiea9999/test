@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2C — ANDROID WEB FORCE FIX</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2D — ANDROID DEVICE PLAYER FIX</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 5.9.2A ANDROID WEB FORCE FIX -->
+    <!-- BUILD: V7.2 ALPHA 5.9.2A ANDROID DEVICE PLAYER FIX -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 5.9.2A ANDROID WEB FORCE FIX</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 5.9.2A ANDROID DEVICE PLAYER FIX</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -1452,10 +1452,10 @@ function launch24AndroidApp(url,mode,title){
   const direct=normalize24PlayerUrl(url);
   if(!direct)return false;
 
-  // 5.9.2C hard safety: never fire intent:// on Android for 24PlayerHD.
+  // 5.9.2D hard safety: Android never fires intent:// for 24PlayerHD.
   if(isAndroidDevice()){
-    try{ setStatus('24PlayerHD • ANDROID WEB MODE'); }catch(e){}
-    return open24NativePlayer(url,title);
+    try{ setStatus('24PlayerHD • ANDROID DEVICE PLAYER'); }catch(e){}
+    return open24DevicePlayer(url,title);
   }
 
   let pkg='';
@@ -1493,11 +1493,11 @@ function ask24PlayerMode(url,title){
   return launch24AndroidApp(url,'wiseplay',title);
 }
 function route24Player(url,title){
-  // 5.9.2C: ALL Android browsers use WEB mode for 24PlayerHD.
-  // No intent://, no app chooser, no Wiseplay/MX auto launch.
+  // 5.9.2D: Android uses the device/native player with a plain HTTPS media URL.
+  // No iframe page, no intent://, no app deep-link.
   if(isAndroidDevice()){
-    try{ setStatus('24PlayerHD • ANDROID WEB MODE'); }catch(e){}
-    return open24NativePlayer(url,title);
+    try{ setStatus('24PlayerHD • ANDROID DEVICE PLAYER'); }catch(e){}
+    return open24DevicePlayer(url,title);
   }
 
   let mode=get24PlayerMode();
@@ -1542,25 +1542,20 @@ function open24DevicePlayer(url,title){
 
   const ua=(navigator.userAgent||'').toLowerCase();
 
-  // Android / Android TV / Projector: ส่งให้แอป Player ของเครื่อง
+  // 5.9.2D Android / Android TV / Projector:
+  // Open the media URL directly with plain HTTPS.
+  // This lets the browser/OS hand it to its native media player without intent://.
   if(ua.includes('android') || isProjectorMode()){
     try{
-      const u=new URL(direct);
-      const scheme=u.protocol.replace(':','');
-      const hostPath=u.host+u.pathname+(u.search||'');
-      const intent=
-        'intent://'+hostPath+
-        '#Intent;scheme='+scheme+
-        ';action=android.intent.action.VIEW'+
-        ';type=application/vnd.apple.mpegurl'+
-        ';S.browser_fallback_url='+encodeURIComponent(direct)+
-        ';end';
-      window.location.href=intent;
-      return true;
+      saveReturnState({player:'device',url:direct});
+      saveReturnBeforeExternal('device',direct);
+    }catch(e){}
+    try{
+      window.location.assign(direct);
     }catch(e){
       window.location.href=direct;
-      return true;
     }
+    return true;
   }
 
   // iPhone/iPad และอุปกรณ์สัมผัสอื่น: เปิด Native Player ของระบบ
@@ -2267,7 +2262,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
 
   // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
   if(is24PlayerHdUrl(original) && get24PlayerContentId(original)){
-    // 5.9.2C: Android TV/Box main.24playerhd.com must continue WEB path,
+    // 5.9.2D: Android TV/Box main.24playerhd.com must continue WEB path,
     // not jump back into intent:// after Resolver.
     if(!isMain24PlayerHdUrl(original) || isAndroidDevice()){
       route24Player(original,title);
@@ -3195,7 +3190,7 @@ window.TIEA_V286_MOTHER={
   extensionReady:function(){return V285_EXT_READY},
   lastCapture:function(){return V285_LAST_CAPTURE}
 };
-console.log('TIEA IPTV HOME V7.2 ALPHA 5.9.2C — ANDROID WEB FORCE FIX loaded');
+console.log('TIEA IPTV HOME V7.2 ALPHA 5.9.2D — ANDROID DEVICE PLAYER FIX loaded');
 })();
 </script>
 
