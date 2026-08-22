@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2A — ANDROID TV WEB FIX</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2B — ANDROID TV WEB FIX</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -1488,11 +1488,18 @@ function ask24PlayerMode(url,title){
   return launch24AndroidApp(url,'wiseplay',title);
 }
 function route24Player(url,title){
+  // 5.9.2B: Android TV/Box browser must never use intent://.
+  // Force the web/native 24HD player inside TIEA instead.
+  if(isAndroidTvBrowser()){
+    try{ setStatus('24PlayerHD • Android TV WEB MODE'); }catch(e){}
+    return open24NativePlayer(url,title);
+  }
+
   let mode=get24PlayerMode();
   if(mode==='ask')return ask24PlayerMode(url,title);
   if(mode==='web')return open24NativePlayer(url,title);
   if(mode==='wiseplay'||mode==='mx')return launch24AndroidApp(url,mode,title);
-  // AUTO: Android เปิดตัวเลือกแอปของระบบ; Desktop ใช้เว็บ
+  // AUTO: Android phone/tablet may still use app chooser; Desktop uses web.
   if(isAndroidDevice())return launch24AndroidApp(url,'auto',title);
   return open24NativePlayer(url,title);
 }
@@ -2257,11 +2264,13 @@ async function playItem(item,serverIndex=0,displayTitle=''){
 
   // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
   if(is24PlayerHdUrl(original) && get24PlayerContentId(original)){
-    if(!isMain24PlayerHdUrl(original) || isAndroidDevice()){
+    // 5.9.2B: Android TV/Box main.24playerhd.com must continue WEB path,
+    // not jump back into intent:// after Resolver.
+    if(!isMain24PlayerHdUrl(original) || (isAndroidDevice() && !isAndroidTvBrowser())){
       route24Player(original,title);
       return;
     }
-    // Resolver คืน main.24playerhd.com: Desktop ใช้ Stable Adaptive V4 ต่อ
+    // Desktop + Android TV/Box main.24playerhd.com continue internal HLS/WEB path.
   }
 
   let lower=original.toLowerCase();
@@ -3183,7 +3192,7 @@ window.TIEA_V286_MOTHER={
   extensionReady:function(){return V285_EXT_READY},
   lastCapture:function(){return V285_LAST_CAPTURE}
 };
-console.log('TIEA IPTV HOME V7.2 ALPHA 5.9.2 — UNIFIED ALL PLAYER loaded');
+console.log('TIEA IPTV HOME V7.2 ALPHA 5.9.2B — ANDROID TV NO INTENT FIX loaded');
 })();
 </script>
 
