@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 4.7 24HD PC AUTOPLAY</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.1 — ALL FIRST + FRESH AAA</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 4.7 24HD PC AUTOPLAY -->
+    <!-- BUILD: V7.2 ALPHA 4.9 24HD STABLE ADAPTIVE V4 -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.7 24HD PC AUTOPLAY</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.9 24HD STABLE ADAPTIVE V4</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -1332,9 +1332,18 @@ function is24PlayerHdUrl(url){
   return (
     u.includes('24playerhd') ||
     u.includes('main.24playerhd.com') ||
+    u.includes('main.123hd-serie.com') ||
     u.includes('dell250369.com') ||
     u.includes('vdohls.com')
   );
+}
+
+function isMain24PlayerHdUrl(url){
+  try{
+    return new URL(String(url||'').trim()).hostname.toLowerCase()==='main.24playerhd.com';
+  }catch(e){
+    return String(url||'').toLowerCase().includes('main.24playerhd.com');
+  }
 }
 
 
@@ -1617,7 +1626,13 @@ function workerUrlFor(url){
       +'&referer='+encodeURIComponent('https://player77hdfree.xyz/');
   }
 
-  // 24PlayerHD รุ่นเดิมยังใช้ Movie2 Worker เหมือนเดิม
+  // 24PlayerHD main: ใช้ IPTV Worker แบบ TEST PLAYER ที่ทดสอบแล้ว
+  if(isMain24PlayerHdUrl(url)){
+    const fixed24=normalize24PlayerUrl(url);
+    return PROXY+encodeURIComponent(fixed24);
+  }
+
+  // host 24HD อื่นยังคงเส้นทางเดิม
   if(is24PlayerHdUrl(url)){
     const fixed24=normalize24PlayerUrl(url);
     return MOVIE2_PROXY+encodeURIComponent(fixed24);
@@ -2183,8 +2198,11 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   // 24PlayerHD: มือถือ/โปรเจคเตอร์ใช้ Player ของเครื่อง
   // คอมพิวเตอร์ยังใช้ new_player.php ภายใน iframe
   if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original)){
-    route24Player(original,title);
-    return;
+    if(!isMain24PlayerHdUrl(original) || isAndroidDevice()){
+      route24Player(original,title);
+      return;
+    }
+    // Desktop main.24playerhd.com เดินต่อเข้า Hls.js Stable Adaptive V4
   }
 
   cleanupPlayer();
@@ -2227,8 +2245,11 @@ async function playItem(item,serverIndex=0,displayTitle=''){
 
   // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
   if(is24PlayerHdUrl(original) && get24PlayerContentId(original)){
-    route24Player(original,title);
-    return;
+    if(!isMain24PlayerHdUrl(original) || isAndroidDevice()){
+      route24Player(original,title);
+      return;
+    }
+    // Resolver คืน main.24playerhd.com: Desktop ใช้ Stable Adaptive V4 ต่อ
   }
 
   let lower=original.toLowerCase();
@@ -2290,6 +2311,7 @@ function playCandidate(candidates,item,serverIndex,idx){
   const direct=getUrl(item,serverIndex);
   const sourceIs6395=is6395Url(direct);
   const sourceIs24=is24PlayerHdUrl(direct);
+  const sourceIsMain24=isMain24PlayerHdUrl(direct);
 
   const next=()=>{
     if(state._switchingCandidate)return;
@@ -2320,6 +2342,11 @@ function playCandidate(candidates,item,serverIndex,idx){
   state._hlsFatalCount=0;
   state._networkRecoverAt=0;
   state._mediaRecoverAt=0;
+  if(state._24UnlockTimer){clearTimeout(state._24UnlockTimer);state._24UnlockTimer=null}
+  state._24LowLevel=-1;
+  state._24HighLevel=-1;
+  state._24HighErrorCount=0;
+  state._24HighBlacklisted=false;
 
   playerPanel.classList.add('show');
   showPlayerUI();
@@ -2347,7 +2374,7 @@ function playCandidate(candidates,item,serverIndex,idx){
     }
 
     if(sourceIs24){
-      setStatus('Movie2 ยังโหลด Playlist • กำลังรอต่อ');
+      setStatus(sourceIsMain24?'24PlayerHD กำลังโหลด Playlist ผ่าน IPTV Worker':'Movie2 ยังโหลด Playlist • กำลังรอต่อ');
       try{
         if(state.hls){
           state.hls.startLoad(-1);
@@ -2370,6 +2397,23 @@ function playCandidate(candidates,item,serverIndex,idx){
         try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
       }else{
         forceFullSound();
+      }
+
+      // Stable Adaptive V4: เริ่มต่ำก่อน แล้วค่อยเปิด 1080 หลังเล่นนิ่ง 18 วินาที
+      if(sourceIsMain24 && state.hls && state._24LowLevel>=0 && !state._24HighBlacklisted && !state._24UnlockTimer){
+        state._24UnlockTimer=setTimeout(()=>{
+          state._24UnlockTimer=null;
+          if(state.hls!==activeHls || state._24HighBlacklisted)return;
+          if(state._24HighLevel>=0 && state._24HighLevel!==state._24LowLevel){
+            try{
+              activeHls.autoLevelCapping=state._24HighLevel;
+              activeHls.nextLevel=-1;
+              activeHls.currentLevel=-1;
+              setStatus('24PlayerHD • เล่นนิ่งแล้ว • กำลังไต่คุณภาพ');
+              console.log('[TIEA V4] 24HD UNLOCK HIGH',state._24HighLevel);
+            }catch(e){}
+          }
+        },18000);
       }
     }
   },{once:false}));
@@ -2399,8 +2443,8 @@ function playCandidate(candidates,item,serverIndex,idx){
     const mySeriesVod=isMySeriesVodUrl(state.originalUrl||url);
 
     state.hls=new Hls({
-      loader: sourceIs24 ? Tiea24ChildDirectLoader : Hls.DefaultConfig.loader,
-      enableWorker:false,
+      loader: sourceIsMain24 ? Hls.DefaultConfig.loader : (sourceIs24 ? Tiea24ChildDirectLoader : Hls.DefaultConfig.loader),
+      enableWorker:sourceIsMain24 ? true : false,
       lowLatencyMode:false,
 
       maxBufferLength:sourceIs6395?24:(mySeriesVod?60:((isProjectorWeakMode()||isProjectorMode())?38:(isUnstableLiveUrl(state.originalUrl)?28:35))),
@@ -2423,10 +2467,10 @@ function playCandidate(candidates,item,serverIndex,idx){
 
       startFragPrefetch:true,
       capLevelToPlayerSize:true,
-      testBandwidth:false,
-      abrEwmaDefaultEstimate:mySeriesVod?650000:((isProjectorWeakMode()||isProjectorMode())?420000:1000000),
-      abrBandWidthFactor:mySeriesVod?0.75:0.58,
-      abrBandWidthUpFactor:mySeriesVod?0.45:0.25,
+      testBandwidth:sourceIsMain24 ? true : false,
+      abrEwmaDefaultEstimate:sourceIsMain24?300000:(mySeriesVod?650000:((isProjectorWeakMode()||isProjectorMode())?420000:1000000)),
+      abrBandWidthFactor:sourceIsMain24?0.72:(mySeriesVod?0.75:0.58),
+      abrBandWidthUpFactor:sourceIsMain24?0.48:(mySeriesVod?0.45:0.25),
       liveSyncDurationCount:sourceIs6395?5:((isProjectorWeakMode()||isProjectorMode())?5:(isUnstableLiveUrl(state.originalUrl)?3:7)),
       liveMaxLatencyDurationCount:sourceIs6395?12:((isProjectorWeakMode()||isProjectorMode())?12:(isUnstableLiveUrl(state.originalUrl)?7:14)),
       progressive:true,
@@ -2441,11 +2485,33 @@ function playCandidate(candidates,item,serverIndex,idx){
 
     activeHls.on(Hls.Events.MANIFEST_PARSED,()=>{
       if(state.hls!==activeHls)return;
-      projectorPreferLowLevel();
-      chooseProjectorSafeLevel();
+
+      if(sourceIsMain24 && Array.isArray(activeHls.levels) && activeHls.levels.length){
+        const indexed=activeHls.levels.map((lv,i)=>({i,h:Number(lv.height||0),b:Number(lv.bitrate||0)}))
+          .sort((a,b)=>{
+            const ah=a.h||99999,bh=b.h||99999;
+            return ah!==bh ? ah-bh : a.b-b.b;
+          });
+        state._24LowLevel=indexed[0].i;
+        state._24HighLevel=indexed[indexed.length-1].i;
+        try{
+          activeHls.autoLevelCapping=state._24LowLevel;
+          activeHls.startLevel=state._24LowLevel;
+          activeHls.currentLevel=state._24LowLevel;
+          activeHls.nextLevel=state._24LowLevel;
+          activeHls.loadLevel=state._24LowLevel;
+        }catch(e){}
+        const low=activeHls.levels[state._24LowLevel];
+        setStatus('24PlayerHD • เริ่ม '+(low?.height||'ต่ำ')+'p ก่อน');
+        console.log('[TIEA V4] 24HD START LOW',state._24LowLevel,'HIGH',state._24HighLevel);
+      }else{
+        projectorPreferLowLevel();
+        chooseProjectorSafeLevel();
+      }
+
       startWatchdog();
       if(sourceIs24 && !isAndroidDevice()){
-        setStatus('24PlayerHD • PC AUTO START');
+        if(!sourceIsMain24)setStatus('24PlayerHD • PC AUTO START');
         start24PcAutoplay();
       }else{
         forceFullSound();
@@ -2483,6 +2549,42 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(!d || state.hls!==activeHls)return;
 
       const now=Date.now();
+
+      // Stable Adaptive V4: ถ้า 1080/ระดับสูง timeout/403 ให้กลับระดับต่ำทันที
+      if(sourceIsMain24 && state._24LowLevel>=0 && state._24HighLevel>=0 && !state._24HighBlacklisted){
+        const highAttempt =
+          activeHls.currentLevel===state._24HighLevel ||
+          activeHls.nextLevel===state._24HighLevel ||
+          activeHls.loadLevel===state._24HighLevel ||
+          (activeHls.autoLevelCapping===state._24HighLevel && state._24HighLevel!==state._24LowLevel);
+
+        const highError =
+          d.details==='levelLoadTimeOut' ||
+          d.details==='levelLoadError' ||
+          d.details==='fragLoadTimeOut' ||
+          d.details==='fragLoadError' ||
+          (d.response && Number(d.response.code)===403);
+
+        if(highAttempt && highError){
+          state._24HighErrorCount=(state._24HighErrorCount||0)+1;
+          if(state._24HighErrorCount>=2 || d.fatal || (d.response && Number(d.response.code)===403)){
+            state._24HighBlacklisted=true;
+            if(state._24UnlockTimer){clearTimeout(state._24UnlockTimer);state._24UnlockTimer=null}
+            try{
+              activeHls.autoLevelCapping=state._24LowLevel;
+              activeHls.currentLevel=state._24LowLevel;
+              activeHls.nextLevel=state._24LowLevel;
+              activeHls.loadLevel=state._24LowLevel;
+              activeHls.startLoad(Math.max(0,(video.currentTime||0)-0.5));
+              setTimeout(()=>video.play().catch(()=>{}),500);
+            }catch(err){}
+            const low=activeHls.levels?.[state._24LowLevel];
+            setStatus('24PlayerHD • 1080 มีปัญหา • เล่นต่อ '+(low?.height||'ต่ำ')+'p');
+            console.log('[TIEA V4] BLACKLIST HIGH → LOW',state._24LowLevel,d.details);
+            return;
+          }
+        }
+      }
 
       if(!d.fatal){
         if(d.type===Hls.ErrorTypes.NETWORK_ERROR && now-(state._networkRecoverAt||0)>10000){
@@ -2892,6 +2994,857 @@ if(!restoreAfterExternal()&&!restoreReturnState()){
   __didInitialRestore=true;
 }
     </script>
+
+<script>
+/* ================================================================
+   TIEA IPTV HOME V7.2 ALPHA 5.1 — V2.8.6 AUTO123 TEST
+   - Series primary: main.123hd-serie.com/newplaylist/...
+   - Also supports the other 2 proven 24playerhd forms
+   - Desktop: V2.8.5 Capture/Learn -> TEST Worker
+   - Android: keep existing route
+   - If Capture/Learn fails: fallback to original playItem
+   ================================================================ */
+(function(){
+'use strict';
+
+const V285_WORKER='https://tiea-googlecdn-test.tawatchai250958.workers.dev';
+let V285_EXT_READY=false;
+let V285_LAST_CAPTURE=null;
+let V285_WAITERS=[];
+
+function v285Supported(raw){
+  try{
+    const u=new URL(String(raw||'').trim());
+    const h=u.hostname.toLowerCase();
+    if(h!=='main.123hd-serie.com' && h!=='main.24playerhd.com') return false;
+    return /\/newplaylist\/[^/]+\/[^/]+\.m3u8$/i.test(u.pathname) ||
+           /\/m3u8\/[^/]+\/[^/]+\.m3u8$/i.test(u.pathname);
+  }catch(e){ return false; }
+}
+function v285Id(raw){
+  const m=String(raw||'').match(/\/(?:newplaylist|m3u8)\/([^/?#]+)/i);
+  return m?m[1]:'';
+}
+function v285Same(p,source){
+  if(!p)return false;
+  const id=v285Id(source);
+  return (p.sourceId && p.sourceId===id) ||
+         String(p.source||'').trim()===String(source||'').trim();
+}
+function v285PlayerUrl(source){
+  const id=v285Id(source);
+  // For 123HD series use 123HD player page first; 24player/5G keeps 24player page.
+  try{
+    const h=new URL(source).hostname.toLowerCase();
+    if(h==='main.123hd-serie.com'){
+      return 'https://main.123hd-serie.com/index_th.php?id='+encodeURIComponent(id)+'&b=3196';
+    }
+  }catch(e){}
+  return 'https://main.24playerhd.com/new_player.php?id='+encodeURIComponent(id)+'&typew=T';
+}
+function v285RequestLast(){
+  window.postMessage({type:'TIEA_V285_REQUEST_LAST'},'*');
+}
+window.addEventListener('message',function(e){
+  if(e.source!==window)return;
+  const d=e.data||{};
+  if(d.type==='TIEA_V285_EXTENSION_READY'){
+    V285_EXT_READY=true;
+    return;
+  }
+  if(d.type==='TIEA_V285_CAPTURE_RESULT'){
+    const p=d.payload||null;
+    if(p && !p.waitingCapture && !p.cleared) V285_LAST_CAPTURE=p;
+    V285_WAITERS.slice().forEach(function(fn){ try{fn(p)}catch(_){} });
+  }
+});
+
+async function v286DiscoverDirect(source){
+  try{
+    const page=v285PlayerUrl(source);
+    const u=V285_WORKER+'/discover?source='+encodeURIComponent(source)+'&page='+encodeURIComponent(page);
+    const r=await fetch(u,{cache:'no-store'});
+    const j=await r.json();
+    if(j && j.ok && j.seed) return {ok:true,seed:j.seed,page:page,method:'worker-discover'};
+  }catch(e){ console.log('V2.8.7 direct discover fail',e); }
+  return null;
+}
+
+function v285WaitLearn(source,timeout){
+  timeout=timeout||25000;
+  return new Promise(function(resolve){
+    if(V285_LAST_CAPTURE && v285Same(V285_LAST_CAPTURE,source) && V285_LAST_CAPTURE.learn && V285_LAST_CAPTURE.learn.ok){
+      resolve(V285_LAST_CAPTURE);
+      return;
+    }
+    let done=false,popup=null;
+    const fn=function(p){
+      if(done || !p || !v285Same(p,source) || !p.learn || !p.learn.ok) return;
+      done=true; cleanup(); resolve(p);
+    };
+    function cleanup(){
+      V285_WAITERS=V285_WAITERS.filter(function(x){return x!==fn});
+      try{ if(popup && !popup.closed) popup.close(); }catch(e){}
+    }
+    V285_WAITERS.push(fn);
+    v285RequestLast();
+
+    // Let extension see the real player network automatically.
+    setTimeout(function(){
+      if(done)return;
+      try{ popup=window.open(v285PlayerUrl(source),'TIEA_V285_CAPTURE','width=1120,height=760'); }catch(e){}
+    },400);
+
+    setTimeout(function(){
+      if(done)return;
+      done=true; cleanup(); resolve(null);
+    },timeout);
+  });
+}
+
+const V285_OLD_PLAYITEM=window.playItem;
+if(typeof V285_OLD_PLAYITEM!=='function'){
+  console.warn('TIEA V2.8.6 mother patch: playItem not found');
+  return;
+}
+
+window.playItem=async function(item,serverIndex,displayTitle){
+  serverIndex=serverIndex||0;
+  displayTitle=displayTitle||'';
+
+  let original='';
+  try{ original=typeof getUrl==='function' ? getUrl(item,serverIndex) : ''; }catch(e){}
+
+  // Only intercept the 3 proven 24HD/123HD URL shapes on desktop.
+  let android=false;
+  try{ android=typeof isAndroidDevice==='function' ? isAndroidDevice() : /android/i.test(navigator.userAgent||''); }catch(e){}
+
+  if(original && v285Supported(original) && !android){
+    const title=displayTitle || (item&&item.title) || 'กำลังเล่น';
+    try{
+      if(typeof cleanupPlayer==='function') cleanupPlayer();
+      if(window.state){
+        state.currentTitle=title;
+        state.originalUrl=original;
+        state.currentUrl=original;
+      }
+      const pt=document.getElementById('playerTitle');
+      if(pt)pt.textContent=title;
+      if(typeof showPlayerUI==='function') showPlayerUI();
+      if(typeof setStatus==='function') setStatus('V2.8.6 • Auto Play 123HD • รอ Capture/Learn...');
+    }catch(e){}
+
+    // V2.8.7: ask Worker to discover/learn first. Customers do not need the browser extension
+    // when the Worker can discover the .aaa from the derived 123HD/24HD player page.
+    let cap=await v286DiscoverDirect(original);
+    if(!cap){
+      if(typeof setStatus==='function') setStatus('V2.8.7 • Worker Discover ไม่พบ • ลอง Capture สำรอง...');
+      cap=await v285WaitLearn(original,25000);
+    }
+    if(cap){
+      const play=V285_WORKER+'/play.m3u8?source='+encodeURIComponent(original);
+      try{
+        if(window.state){
+          state.originalUrl=original;
+          state.currentUrl=play;
+          state.v285Capture=cap;
+        }
+        if(typeof setStatus==='function'){
+          const provider=(new URL(original).hostname==='main.123hd-serie.com')?'123HD SERIES':'5G / 24PlayerHD';
+          setStatus(provider+' • V2.8.6 Learn PASS • กำลังเล่น');
+        }
+        if(typeof playCandidate==='function'){
+          return playCandidate([play],item,serverIndex,0);
+        }
+      }catch(e){}
+    }
+
+    // Safety fallback: no capture -> old proven mother logic.
+    try{ if(typeof setStatus==='function')setStatus('V2.8.5 ยัง Learn ไม่สำเร็จ • ใช้เส้นทางเดิม'); }catch(e){}
+  }
+
+  return V285_OLD_PLAYITEM.apply(this,arguments);
+};
+
+window.TIEA_V286_MOTHER={
+  version:'V7.2 ALPHA 5.2 V2.8.7 AUTO123 DISCOVER',
+  extensionReady:function(){return V285_EXT_READY},
+  lastCapture:function(){return V285_LAST_CAPTURE}
+};
+console.log('TIEA IPTV HOME V7.2 ALPHA 5.9.2 — UNIFIED ALL PLAYER loaded');
+})();
+</script>
+
+
+<script>
+/* ================================================================
+   TIEA IPTV HOME V7.2 ALPHA 5.9.1 — ALL FIRST + FRESH AAA
+   FIX:
+   - main.123hd-serie.com/newplaylist -> use EXACT V2.6 playback pattern
+   - NO Discover wait
+   - NO Extension wait
+   - NO All Player popup
+   - NO old Movie2 fallback for 123HD
+   - Other providers keep existing mother logic
+   ================================================================ */
+(function(){
+'use strict';
+
+const TIEA123_WORKER='https://tiea-googlecdn-test.tawatchai250958.workers.dev';
+
+function isTiea123Direct(raw){
+  try{
+    const u=new URL(String(raw||'').trim());
+    return u.hostname.toLowerCase()==='main.123hd-serie.com'
+      && /^\/newplaylist\/[^/]+\/[^/]+\.m3u8$/i.test(u.pathname);
+  }catch(e){ return false; }
+}
+
+function tiea123StopOnly(){
+  try{ if(typeof stopWatchdog==='function') stopWatchdog(); }catch(e){}
+  try{
+    if(state && state.playTimer){ clearTimeout(state.playTimer); state.playTimer=null; }
+  }catch(e){}
+  try{
+    if(state && state.hls){
+      const h=state.hls;
+      state.hls=null;
+      try{h.stopLoad()}catch(e){}
+      try{h.detachMedia()}catch(e){}
+      try{h.destroy()}catch(e){}
+    }
+  }catch(e){}
+  try{
+    if(state && state.dash){
+      const d=state.dash;
+      state.dash=null;
+      try{d.destroy()}catch(e){}
+    }
+  }catch(e){}
+  try{ video.pause(); }catch(e){}
+  try{ video.removeAttribute('src'); }catch(e){}
+}
+
+function tiea123PlayV26(source,title){
+  tiea123StopOnly();
+
+  const playUrl=TIEA123_WORKER+'/play.m3u8?source='+encodeURIComponent(source);
+
+  try{
+    state.originalUrl=source;
+    state.currentUrl=playUrl;
+    state.currentTitle=title||'123HD SERIES';
+    state._native24Mode=false;
+  }catch(e){}
+
+  try{
+    if(native24Frame){
+      native24Frame.src='about:blank';
+      native24Frame.style.display='none';
+    }
+    playerPanel.classList.remove('native24-mode');
+    playerPanel.classList.add('show');
+    playerPanel.classList.remove('hide-ui');
+    $('playerTitle').textContent=(title||'123HD SERIES');
+    if(typeof showPlayerUI==='function') showPlayerUI();
+  }catch(e){}
+
+  try{
+    // Same core pattern as the V2.6 test page that already PLAYED.
+    if(Hls.isSupported()){
+      const h=new Hls({
+        enableWorker:true,
+        lowLatencyMode:false
+      });
+      state.hls=h;
+
+      h.on(Hls.Events.MANIFEST_PARSED,()=>{
+        try{
+          setStatus('123HD SERIES • V2.6 DIRECT • MANIFEST PASS');
+          video.play().catch(()=>{});
+        }catch(e){}
+      });
+
+      h.on(Hls.Events.LEVEL_LOADED,()=>{
+        try{ setStatus('123HD SERIES • V2.6 DIRECT • LEVEL PASS'); }catch(e){}
+      });
+
+      h.on(Hls.Events.ERROR,(_,d)=>{
+        try{
+          console.log('[TIEA V2.8.8 123 DIRECT]',d.type,d.details,d.fatal,d.response?.code||'');
+          if(d.fatal){
+            setStatus('123HD SERIES • V2.6 DIRECT ERROR • '+(d.details||''));
+          }
+        }catch(e){}
+      });
+
+      h.loadSource(playUrl);
+      h.attachMedia(video);
+      video.play().catch(()=>{});
+    }else{
+      video.src=playUrl;
+      video.play().catch(()=>{});
+    }
+
+    setStatus('123HD SERIES • V2.6 DIRECT • กำลังเล่น');
+    try{ if(typeof startWatchdog==='function') startWatchdog(); }catch(e){}
+    return true;
+  }catch(e){
+    console.error('TIEA V2.8.8 DIRECT123 ERROR',e);
+    try{ setStatus('123HD SERIES • DIRECT ERROR'); }catch(_){}
+    return false;
+  }
+}
+
+const PREV_PLAYITEM=window.playItem;
+window.playItem=function(item,serverIndex,displayTitle){
+  serverIndex=serverIndex||0;
+  displayTitle=displayTitle||'';
+
+  let original='';
+  try{
+    original=typeof getUrl==='function' ? getUrl(item,serverIndex) : '';
+  }catch(e){}
+
+  // Important: short-circuit BEFORE V2.8.7/old Movie2 logic.
+  if(original && isTiea123Direct(original)){
+    const title=displayTitle || (item&&item.title) || '123HD SERIES';
+    return tiea123PlayV26(original,title);
+  }
+
+  return PREV_PLAYITEM.apply(this,arguments);
+};
+
+window.TIEA_DIRECT123_V288={
+  version:'V2.8.9 123 CLICK INTERCEPT',
+  worker:TIEA123_WORKER
+};
+
+console.log('TIEA V2.8.9 123 CLICK INTERCEPT loaded');
+})();
+</script>
+
+
+<script>
+/* ================================================================
+   TIEA V2.8.9 — 123HD CLICK INTERCEPT — DISABLED IN 5.9.2
+   Reason: unified ALL Player routing below must handle BOTH
+   main.24playerhd.com and main.123hd-serie.com identically.
+   ================================================================ */
+console.log('TIEA V2.8.9 legacy 123 direct-click intercept DISABLED by 5.9.2');
+</script>
+
+
+<script>
+/* ================================================================
+   TIEA IPTV HOME V7.2 ALPHA 5.9.1 — ALL FIRST + FRESH AAA
+   BASE: V7.2 ALPHA 5.4
+
+   PC rule only:
+   - Any episode URL on main.24playerhd.com (/m3u8 or /newplaylist)
+     -> same-tab All Player
+   - Covers short drama AND normal series that moved to 24playerhd
+   - Other providers (torbo007/getplay/showhd9/etc.) keep base logic
+   - Android/mobile/projector keep base logic
+   ================================================================ */
+(function(){
+'use strict';
+
+function v584Desktop(){
+  try{
+    const ua=(navigator.userAgent||'').toLowerCase();
+    const touch=('ontouchstart' in window)||(navigator.maxTouchPoints||0)>0;
+    if(touch) return false;
+    if(/android|iphone|ipad|ipod|projector|xgimi|android tv|smart-tv|smarttv|mibox|bravia|aft|tizen|webos/.test(ua)) return false;
+    if(typeof isAndroidDevice==='function' && isAndroidDevice()) return false;
+    if(typeof isProjectorMode==='function' && isProjectorMode()) return false;
+    return true;
+  }catch(e){return false}
+}
+
+function v584Is24(raw){
+  try{
+    const u=new URL(String(raw||'').trim());
+    return u.hostname.toLowerCase()==='main.24playerhd.com'
+      && (/^\/m3u8\//i.test(u.pathname)||/^\/newplaylist\//i.test(u.pathname));
+  }catch(e){return false}
+}
+
+function v584Id(raw){
+  try{
+    const u=new URL(String(raw||''));
+    const p=u.pathname.split('/').filter(Boolean);
+    if((p[0]==='m3u8'||p[0]==='newplaylist') && p[1]) return p[1];
+  }catch(e){}
+  return '';
+}
+
+function v584ReturnUrl(){
+  let scroll=0;
+  try{scroll=Math.max(0,Math.round(content.scrollTop||0))}catch(e){}
+  const source=String(state?.activeSource||'home');
+  const base=location.href.split('#')[0];
+  return base+'#tiea-v584='+encodeURIComponent(source)+'&scroll='+encodeURIComponent(scroll);
+}
+
+function v584GoAllPlayer(raw,title){
+  const id=v584Id(raw);
+  if(!id) return false;
+
+  const ret=v584ReturnUrl();
+  try{
+    sessionStorage.setItem('tiea_v584_return',JSON.stringify({
+      source:String(state?.activeSource||'home'),
+      scroll:(content&&content.scrollTop)||0,
+      title:title||'',
+      at:Date.now()
+    }));
+  }catch(e){}
+
+  location.href='https://main.24playerhd.com/index_th.php?id='
+    +encodeURIComponent(id)
+    +'&b=3196'
+    +'&tiea_return='+encodeURIComponent(ret)
+    +'&tiea_source='+encodeURIComponent(String(state?.activeSource||''));
+  return true;
+}
+
+/* Final narrow wrapper:
+   intercept ONLY main.24playerhd on desktop.
+   Everything else returns to the complete 5.4 chain untouched. */
+const V584_OLD_PLAYITEM=window.playItem;
+if(typeof V584_OLD_PLAYITEM==='function'){
+  window.playItem=async function(item,serverIndex=0,displayTitle=''){
+    let original='';
+    try{original=getUrl(item,serverIndex)||''}catch(e){}
+    const title=displayTitle||(item&&item.title)||'กำลังเล่น';
+
+    if(v584Desktop() && original && v584Is24(original)){
+      try{
+        if(typeof cleanupPlayer==='function') cleanupPlayer();
+        if(typeof setStatus==='function') setStatus('24PlayerHD • เปิด All Player');
+      }catch(e){}
+      return v584GoAllPlayer(original,title);
+    }
+
+    return V584_OLD_PLAYITEM.apply(this,arguments);
+  };
+}
+
+async function v584Restore(){
+  try{
+    const h=location.hash||'';
+    const m=h.match(/tiea-v584=([^&]+)/);
+    if(!m) return;
+
+    const source=decodeURIComponent(m[1]||'');
+    const sm=h.match(/scroll=([^&]+)/);
+    const scroll=sm?Number(decodeURIComponent(sm[1]))||0:0;
+
+    try{history.replaceState(null,'',location.href.split('#')[0])}catch(e){}
+
+    if(source && source!=='home' && typeof loadMenuSource==='function'){
+      await loadMenuSource(source);
+      setTimeout(()=>{try{content.scrollTop=scroll}catch(e){}},700);
+    }else if(typeof loadHome==='function'){
+      await loadHome();
+    }
+  }catch(e){console.warn('V584 restore error',e)}
+}
+window.addEventListener('pageshow',()=>setTimeout(v584Restore,80));
+
+window.TIEA_V584={
+  version:'V7.2 ALPHA 5.9.2 UNIFIED ALL PLAYER',
+  scope:'desktop main.24playerhd only',
+  base:'V7.2 ALPHA 5.4'
+};
+console.log('TIEA V5.8.4 ALL FIRST + FRESH AAA loaded');
+})();
+</script>
+
+
+<script>
+/* ================================================================
+   TIEA IPTV HOME V7.2 ALPHA 5.9.1
+   24/123 UNIFIED ALL PLAYER + RETURN TO EP
+
+   Desktop only:
+   - main.24playerhd.com /m3u8 or /newplaylist
+       -> https://main.24playerhd.com/index_th.php?id=...
+   - main.123hd-serie.com /newplaylist
+       -> https://main.123hd-serie.com/index_th.php?id=...
+   - Save parent series item + category + scroll before leaving.
+   - On Back from All Player/Direct AAA, restore category AND reopen EP modal.
+   - Other providers keep the complete previous chain.
+   ================================================================ */
+(function(){
+'use strict';
+
+function v585Desktop(){
+  try{
+    const ua=(navigator.userAgent||'').toLowerCase();
+    const touch=('ontouchstart' in window)||(navigator.maxTouchPoints||0)>0;
+    if(touch) return false;
+    if(/android|iphone|ipad|ipod|projector|xgimi|android tv|smart-tv|smarttv|mibox|bravia|aft|tizen|webos/.test(ua)) return false;
+    if(typeof isAndroidDevice==='function' && isAndroidDevice()) return false;
+    if(typeof isProjectorMode==='function' && isProjectorMode()) return false;
+    return true;
+  }catch(e){return false}
+}
+
+function v585Info(raw){
+  try{
+    const u=new URL(String(raw||'').trim());
+    const host=u.hostname.toLowerCase();
+    const m=u.pathname.match(/^\/(?:newplaylist|m3u8)\/([^/?#]+)/i);
+    if(!m || !m[1]) return null;
+
+    if(host==='main.24playerhd.com'){
+      return {host,id:m[1],player:'https://main.24playerhd.com/index_th.php'};
+    }
+    if(host==='main.123hd-serie.com' && /^\/newplaylist\//i.test(u.pathname)){
+      return {host,id:m[1],player:'https://main.123hd-serie.com/index_th.php'};
+    }
+  }catch(e){}
+  return null;
+}
+
+function v585SaveReturn(title){
+  let scroll=0;
+  try{scroll=Math.max(0,Math.round(content.scrollTop||0))}catch(e){}
+  const source=String(state?.activeSource||'home');
+
+  let detail=null;
+  try{
+    if(state?.returnEpisodeItem){
+      // Deep-copy plain JSON only, avoiding accidental references.
+      detail=JSON.parse(JSON.stringify(state.returnEpisodeItem));
+    }
+  }catch(e){}
+
+  try{
+    sessionStorage.setItem('tiea_v585_return',JSON.stringify({
+      source,
+      scroll,
+      title:title||'',
+      detail,
+      at:Date.now()
+    }));
+  }catch(e){}
+
+  const base=location.href.split('#')[0];
+  return base+'#tiea-v585='+encodeURIComponent(source)
+    +'&scroll='+encodeURIComponent(scroll)
+    +'&detail='+(detail?'1':'0');
+}
+
+function v585Go(raw,title){
+  const x=v585Info(raw);
+  if(!x) return false;
+
+  const ret=v585SaveReturn(title);
+
+  location.href=x.player
+    +'?id='+encodeURIComponent(x.id)
+    +'&b=3196'
+    +'&tiea_return='+encodeURIComponent(ret)
+    +'&tiea_source='+encodeURIComponent(String(state?.activeSource||''));
+  return true;
+}
+
+/* Final override:
+   intercept 24playerhd + 123hd-serie BEFORE older 123 direct player logic.
+   All other providers go to the entire previous chain unchanged. */
+const V585_PREV_PLAYITEM=window.playItem;
+if(typeof V585_PREV_PLAYITEM==='function'){
+  window.playItem=async function(item,serverIndex=0,displayTitle=''){
+    let original='';
+    try{original=getUrl(item,serverIndex)||''}catch(e){}
+    const info=v585Info(original);
+
+    if(v585Desktop() && info){
+      const title=displayTitle||(item&&item.title)||'กำลังเล่น';
+      try{
+        if(typeof cleanupPlayer==='function') cleanupPlayer();
+        if(typeof setStatus==='function'){
+          setStatus((info.host==='main.123hd-serie.com'?'123HD':'24PlayerHD')+' • เปิด All Player');
+        }
+      }catch(e){}
+      return v585Go(original,title);
+    }
+
+    return V585_PREV_PLAYITEM.apply(this,arguments);
+  };
+}
+
+async function v585Restore(){
+  try{
+    const h=location.hash||'';
+    const m=h.match(/tiea-v585=([^&]+)/);
+    if(!m) return;
+
+    const source=decodeURIComponent(m[1]||'home');
+    const sm=h.match(/scroll=([^&]+)/);
+    const scroll=sm?Number(decodeURIComponent(sm[1]))||0:0;
+
+    let saved=null;
+    try{
+      const raw=sessionStorage.getItem('tiea_v585_return');
+      if(raw) saved=JSON.parse(raw);
+    }catch(e){}
+
+    try{history.replaceState(null,'',location.href.split('#')[0])}catch(e){}
+
+    // Reopen the exact source/category first.
+    if(source && source!=='home' && typeof loadMenuSource==='function'){
+      await loadMenuSource(source);
+    }else if(typeof renderHome==='function'){
+      renderHome();
+    }else if(typeof loadHome==='function'){
+      await loadHome();
+    }
+
+    setTimeout(()=>{
+      try{content.scrollTop=scroll}catch(e){}
+
+      // Then restore exact series EP modal.
+      try{
+        if(saved?.detail && typeof openDetail==='function'){
+          state.returnEpisodeItem=saved.detail;
+          openDetail(saved.detail);
+        }
+      }catch(e){console.warn('V585 reopen EP error',e)}
+
+      try{sessionStorage.removeItem('tiea_v585_return')}catch(e){}
+    },750);
+  }catch(e){console.warn('V585 restore error',e)}
+}
+
+window.addEventListener('pageshow',()=>setTimeout(v585Restore,80));
+
+window.TIEA_V585={
+  version:'V7.2 ALPHA 5.9.2 UNIFIED ALL PLAYER',
+  scope:'desktop main.24playerhd + main.123hd-serie',
+  returnEpisode:true
+};
+console.log('TIEA V5.8.5 ALL FIRST + FRESH AAA loaded');
+})();
+</script>
+
+
+<script>
+/* ================================================================
+   TIEA IPTV HOME V7.2 ALPHA 5.9.1 — ALL FIRST + FRESH AAA
+   FINAL PATCH OVER 5.8.5
+
+   Goal:
+   - Movie / normal series behavior remains 5.8.5
+   - Short drama MUST return to series-short page
+   - Detect short from item metadata, not only state.activeSource
+   ================================================================ */
+(function(){
+'use strict';
+
+function v586IsShortItem(item){
+  try{
+    const vals = [
+      item?.group,
+      item?.groupTitle,
+      item?.category,
+      item?.type,
+      item?.source_name,
+      ...(Array.isArray(item?.groups) ? item.groups : [])
+    ].filter(Boolean).map(x=>String(x).toLowerCase());
+
+    const joined = vals.join(' ');
+    if(/series-short|short[-_ ]?series|ละครสั้น|หนังสั้น/.test(joined)) return true;
+
+    const active=String(state?.activeSource||'').toLowerCase();
+    if(active==='series-short' || active.includes('ละครสั้น') || active.includes('หนังสั้น')) return true;
+  }catch(e){}
+  return false;
+}
+
+function v586Info(raw){
+  try{
+    const u=new URL(String(raw||'').trim());
+    const host=u.hostname.toLowerCase();
+    const m=u.pathname.match(/^\/(?:newplaylist|m3u8)\/([^/?#]+)/i);
+    if(!m || !m[1]) return null;
+
+    if(host==='main.24playerhd.com'){
+      return {host,id:m[1],player:'https://main.24playerhd.com/index_th.php'};
+    }
+    if(host==='main.123hd-serie.com' && /^\/newplaylist\//i.test(u.pathname)){
+      return {host,id:m[1],player:'https://main.123hd-serie.com/index_th.php'};
+    }
+  }catch(e){}
+  return null;
+}
+
+function v586SaveReturn(item,title,isShort){
+  let scroll=0;
+  try{scroll=Math.max(0,Math.round(content.scrollTop||0))}catch(e){}
+
+  // FINAL FIX: short items always return to series-short,
+  // independent of whatever activeSource currently says.
+  const source = isShort ? 'series-short' : String(state?.activeSource||'home');
+
+  let detail=null;
+  if(!isShort){
+    try{
+      if(state?.returnEpisodeItem){
+        detail=JSON.parse(JSON.stringify(state.returnEpisodeItem));
+      }
+    }catch(e){}
+  }
+
+  try{
+    sessionStorage.setItem('tiea_v586_return',JSON.stringify({
+      source,
+      scroll,
+      title:title||'',
+      detail,
+      isShort:!!isShort,
+      at:Date.now()
+    }));
+  }catch(e){}
+
+  const base=location.href.split('#')[0];
+  return base+'#tiea-v586='+encodeURIComponent(source)
+    +'&scroll='+encodeURIComponent(scroll)
+    +'&detail='+(detail?'1':'0')
+    +'&short='+(isShort?'1':'0');
+}
+
+function v586Go(item,raw,title){
+  const x=v586Info(raw);
+  if(!x) return false;
+
+  const isShort=v586IsShortItem(item);
+  const ret=v586SaveReturn(item,title,isShort);
+
+  location.href=x.player
+    +'?id='+encodeURIComponent(x.id)
+    +'&b=3196'
+    +'&tiea_return='+encodeURIComponent(ret)
+    +'&tiea_source='+encodeURIComponent(isShort?'series-short':String(state?.activeSource||''));
+  return true;
+}
+
+/* Final override on top of 5.8.5:
+   same 24/123 interception, but return-state is corrected for short items. */
+const V586_PREV_PLAYITEM=window.playItem;
+if(typeof V586_PREV_PLAYITEM==='function'){
+  window.playItem=async function(item,serverIndex=0,displayTitle=''){
+    let original='';
+    try{original=getUrl(item,serverIndex)||''}catch(e){}
+    const info=v586Info(original);
+
+    if(info){
+      // Let 5.8.5/older chain handle non-desktop environments.
+      let desktop=true;
+      try{
+        const ua=(navigator.userAgent||'').toLowerCase();
+        const touch=('ontouchstart' in window)||(navigator.maxTouchPoints||0)>0;
+        desktop=!touch && !/android|iphone|ipad|ipod|projector|xgimi|android tv|smart-tv|smarttv|mibox|bravia|aft|tizen|webos/.test(ua);
+      }catch(e){}
+
+      if(desktop){
+        const title=displayTitle||(item&&item.title)||'กำลังเล่น';
+        try{
+          if(typeof cleanupPlayer==='function') cleanupPlayer();
+          if(typeof setStatus==='function'){
+            setStatus((v586IsShortItem(item)?'ละครสั้น':'ซีรีส์')+' • เปิด All Player');
+          }
+        }catch(e){}
+        return v586Go(item,original,title);
+      }
+    }
+
+    return V586_PREV_PLAYITEM.apply(this,arguments);
+  };
+}
+
+async function v586Restore(){
+  try{
+    const h=location.hash||'';
+    const m=h.match(/tiea-v586=([^&]+)/);
+    if(!m) return;
+
+    const source=decodeURIComponent(m[1]||'home');
+    const sm=h.match(/scroll=([^&]+)/);
+    const scroll=sm?Number(decodeURIComponent(sm[1]))||0:0;
+    const isShort=/[?&#]short=1(?:&|$)/.test(h);
+
+    let saved=null;
+    try{
+      const raw=sessionStorage.getItem('tiea_v586_return');
+      if(raw) saved=JSON.parse(raw);
+    }catch(e){}
+
+    try{history.replaceState(null,'',location.href.split('#')[0])}catch(e){}
+
+    if(source && source!=='home' && typeof loadMenuSource==='function'){
+      await loadMenuSource(source);
+    }else if(typeof loadHome==='function'){
+      await loadHome();
+    }
+
+    setTimeout(()=>{
+      try{
+        // For short category, returning to the category itself matters more than
+        // reopening a detail modal.
+        if(!isShort) content.scrollTop=scroll;
+      }catch(e){}
+
+      // Normal series keeps 5.8.5 behavior: reopen exact EP modal.
+      if(!isShort){
+        try{
+          if(saved?.detail && typeof openDetail==='function'){
+            state.returnEpisodeItem=saved.detail;
+            openDetail(saved.detail);
+          }
+        }catch(e){}
+      }
+
+      try{sessionStorage.removeItem('tiea_v586_return')}catch(e){}
+    },750);
+  }catch(e){console.warn('V586 restore error',e)}
+}
+
+window.addEventListener('pageshow',()=>setTimeout(v586Restore,80));
+
+window.TIEA_V586={
+  version:'V7.2 ALPHA 5.9.2 UNIFIED ALL PLAYER',
+  shortReturn:'series-short',
+  normalSeriesReturn:'episode-modal'
+};
+console.log('TIEA V5.8.6 ALL FIRST + FRESH AAA loaded');
+})();
+</script>
+
+
+<script>
+/* ================================================================
+   TIEA IPTV HOME V7.2 ALPHA 5.9.1 — ALL FIRST + FRESH AAA
+   Keep 5.8.6 playback/return behavior.
+   Only addition: tell extension to clear stale AAA session when
+   TIEAIP becomes active again.
+   ================================================================ */
+(function(){
+'use strict';
+function v587ResetBridge(){
+  try{
+    window.postMessage({type:'TIEA_V587_RESET_SESSION'},'*');
+  }catch(e){}
+}
+window.addEventListener('pageshow',()=>setTimeout(v587ResetBridge,60));
+window.addEventListener('focus',()=>setTimeout(v587ResetBridge,60));
+setTimeout(v587ResetBridge,120);
+})();
+</script>
+
 </body>
 
 </html>
