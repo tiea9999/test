@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.1 — ALL FIRST + FRESH AAA</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2A — ANDROID TV WEB FIX</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -856,10 +856,10 @@
 </head>
 
 <body>
-    <!-- BUILD: V7.2 ALPHA 4.9 24HD STABLE ADAPTIVE V4 -->
+    <!-- BUILD: V7.2 ALPHA 5.9.2A ANDROID TV WEB FIX -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.9 24HD STABLE ADAPTIVE V4</div>
+            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 5.9.2A ANDROID TV WEB FIX</div>
             </div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
@@ -1430,6 +1430,16 @@ function closeExternalSettings(){
   setTimeout(()=>$('externalSettingsBtn')?.focus(),50);
 }
 function isAndroidDevice(){return /android/i.test(navigator.userAgent||'')}
+function isAndroidTvBrowser(){
+  const ua=(navigator.userAgent||'').toLowerCase();
+  return /android/i.test(ua) && (
+    ua.includes('android tv') || ua.includes('smart-tv') || ua.includes('smarttv') ||
+    ua.includes('projector') || ua.includes('xgimi') || ua.includes('mibox') ||
+    ua.includes('bravia') || ua.includes('chromecast') || ua.includes('aft') ||
+    // Android boxes often report only Android + TV-like large screen.
+    (Math.max(screen.width||0,screen.height||0)>=960 && !(('ontouchstart' in window)||(navigator.maxTouchPoints||0)>0))
+  );
+}
 function buildAndroidViewIntent(url,packageName=''){
   const u=new URL(url);
   const scheme=u.protocol.replace(':','');
@@ -2198,11 +2208,13 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   // 24PlayerHD: มือถือ/โปรเจคเตอร์ใช้ Player ของเครื่อง
   // คอมพิวเตอร์ยังใช้ new_player.php ภายใน iframe
   if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original)){
-    if(!isMain24PlayerHdUrl(original) || isAndroidDevice()){
+    // 5.9.2A: Android TV/Box browser บางรุ่นบล็อก intent:// (ขึ้น "Deep Link ของแอปถูกบล็อก")
+    // จึงไม่บังคับเด้งออกไปแอปบน TV/Box; ให้ main.24playerhd เดินต่อเข้า HLS/Worker ภายในเว็บแทน
+    if(!isMain24PlayerHdUrl(original) || (isAndroidDevice() && !isAndroidTvBrowser())){
       route24Player(original,title);
       return;
     }
-    // Desktop main.24playerhd.com เดินต่อเข้า Hls.js Stable Adaptive V4
+    // Desktop + Android TV/Box main.24playerhd.com เดินต่อเข้า Hls.js Stable Adaptive V4
   }
 
   cleanupPlayer();
