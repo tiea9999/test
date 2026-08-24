@@ -2,12 +2,12 @@
 <html lang="th">
 
 <head>
-<!-- TIEA 3BB V2.4 ANALYZER ENGINE LAB Build 2401: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
+<!-- TIEA 3BB V2.4 ANALYZER ENGINE LAB Build 2401-VOL80: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
 <!-- LAB14: REQUIRED/MISSING KID HAS PRIORITY OVER CONFIGURED KID. USES ONLY EXISTING LOCAL CLEARKEY PAIRS. ONE RELOAD MAX. LAB10/STABLE BASE UNCHANGED. -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB</title>
+    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB • VOL80</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -60,7 +60,7 @@
 <body>
 
     <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.4 ANALYZER ENGINE LAB • Build 2401</h2>
+    <h2 style="color:orange;text-align:center;">TIEA 3BB V2.4 ANALYZER ENGINE LAB • Build 2401-VOL80</h2>
 
     <div id="player-container">
         <div class="player-controls">
@@ -217,10 +217,11 @@ let audioOnlyTimer = null;
 let audioOnlyRetryDone = false;
 let selectedSafeLevel = -1;
 const VOLUME_PROFILE = {
-  mpd: 1.00,
-  movieproxy: 0.38,
-  iptvworker: 0.40,
-  otherHls: 0.55
+  // TIEA 3BB: default browser-player volume = 80%
+  mpd: 0.80,
+  movieproxy: 0.80,
+  iptvworker: 0.80,
+  otherHls: 0.80
 };
 
 function sourceVolume(url){
