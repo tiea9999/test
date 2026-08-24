@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TIEA All Player Full</title>
+<style>
+:root{--barH:58px}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:#000;color:#fff;font-family:Arial,Helvetica,sans-serif;overflow:hidden}
+#frame{position:fixed;inset:0;width:100vw;height:100vh;border:0;background:#000;z-index:1}
+#top{
+  position:fixed;left:0;right:0;top:0;height:var(--barH);
+  display:flex;align-items:center;gap:10px;padding:8px 10px;
+  background:linear-gradient(180deg,rgba(0,0,0,.92),rgba(0,0,0,.35));
+  z-index:30;transition:opacity .22s ease,visibility .22s ease,transform .22s ease;
+}
+body.hide-ui #top{opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-10px)}
+button{
+  border:1px solid rgba(255,255,255,.28);background:rgba(18,18,18,.88);color:#fff;
+  border-radius:11px;padding:10px 13px;font-weight:900;font-size:14px;cursor:pointer
+}
+button:focus{outline:2px solid #00d0ff}
+#back{background:rgba(0,112,145,.94)}
+#title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:900;text-align:center}
+#hint{
+  position:fixed;left:50%;bottom:16px;transform:translateX(-50%);
+  z-index:25;background:rgba(0,0,0,.68);border:1px solid rgba(255,255,255,.18);
+  border-radius:999px;padding:7px 12px;font-size:12px;color:#ddd;
+  transition:opacity .2s ease;
+}
+body.hide-ui #hint{opacity:0;pointer-events:none}
+#tapLayer{
+  position:fixed;inset:0;z-index:20;pointer-events:none;
+}
+@media(max-width:700px){
+  #title{font-size:13px}
+  button{padding:9px 11px;font-size:13px}
+}
+</style>
+</head>
+<body>
+<iframe id="frame"
+  allow="autoplay *; fullscreen *; picture-in-picture *; encrypted-media *"
+  allowfullscreen webkitallowfullscreen mozallowfullscreen
+  referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+<div id="top">
+  <button id="back">← กลับหน้า EP</button>
+  <div id="title">All Player</div>
+  <button id="reload">⟳</button>
+</div>
+
+<div id="hint">ขยับเมาส์ / แตะจอ / กดรีโมต เพื่อแสดงปุ่มย้อนกลับ • เดินหน้า/ถอยหลังใช้แถบเวลาของ All Player</div>
+<div id="tapLayer"></div>
+
+<script>
+(function(){
+  'use strict';
+  const q=new URLSearchParams(location.search);
+  const player=q.get('player')||'';
+  const ret=q.get('return')||'';
+  const title=q.get('title')||'All Player';
+  const frame=document.getElementById('frame');
+  const body=document.body;
+  const titleEl=document.getElementById('title');
+  titleEl.textContent=title;
+
+  let timer=null;
+  function showUI(){
+    body.classList.remove('hide-ui');
+    clearTimeout(timer);
+    timer=setTimeout(()=>body.classList.add('hide-ui'),3000);
+  }
+
+  ['mousemove','mousedown','touchstart','pointerdown','keydown'].forEach(ev=>{
+    window.addEventListener(ev,showUI,{passive:true});
+  });
+
+  document.getElementById('back').onclick=function(e){
+    e.preventDefault(); e.stopPropagation();
+    if(ret){ location.href=ret; return; }
+    if(history.length>1) history.back();
+    else location.href='https://tiea9999.github.io/tv/index.html';
+  };
+
+  document.getElementById('reload').onclick=function(e){
+    e.preventDefault(); e.stopPropagation();
+    try{ frame.src=frame.src; }catch(_){}
+    showUI();
+  };
+
+  // Common remote/keyboard behavior.
+  window.addEventListener('keydown',function(e){
+    if(e.key==='Escape' || e.key==='Backspace' || e.keyCode===10009){
+      e.preventDefault();
+      document.getElementById('back').click();
+      return;
+    }
+    showUI();
+  },true);
+
+  if(player){
+    frame.src=player;
+  }else{
+    titleEl.textContent='ไม่พบ URL All Player';
+  }
+
+  showUI();
+})();
+</script>
+</body>
+</html>
