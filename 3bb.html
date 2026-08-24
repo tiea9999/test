@@ -184,6 +184,7 @@ const channels = [
 ];
 
 
+
 let currentHls = null;
 let shakaPlayer = null;
 let hlsWatchdog = null;
@@ -531,6 +532,19 @@ function setStatus(text, autoHide=true){
     clearTimeout(setStatus._timer);
     setStatus._timer = setTimeout(()=>{ box.style.display = "none"; }, 5000);
   }
+}
+
+
+function tieaLogoUrl(url){
+  try{
+    const u=new URL(String(url||""));
+    if(u.hostname.toLowerCase()==="6395online.com" &&
+       (!u.port || u.port==="8443") &&
+       /^\/logotv\//i.test(u.pathname)){
+      return "https://iptv.tawatchai250958.workers.dev/logo?url="+encodeURIComponent(u.href);
+    }
+  }catch(e){}
+  return url||"";
 }
 
 function proxyUrl(url){
@@ -982,7 +996,7 @@ function renderCategory(group){
     const div=document.createElement("div");
     div.className="channel";
     div.tabIndex=0;
-    div.innerHTML=`<img src="${ch.logo}" loading="lazy"><span>${ch.name}</span>`;
+    div.innerHTML=`<img src="${tieaLogoUrl(ch.logo)}" loading="lazy" onerror="this.onerror=null;this.src='${ch.logo}'"><span>${ch.name}</span>`;
     div.onclick=()=>loadChannel(ch,div);
     div.onfocus=()=>warmStream(firstChannelUrl(ch));
     div.onmouseenter=()=>warmStream(firstChannelUrl(ch));
