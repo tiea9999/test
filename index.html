@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2I — FULL ALL PLAYER</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2J — WISEPLAY RETURN TO EP</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -3857,6 +3857,132 @@ setTimeout(v587ResetBridge,120);
 
 <script>
 console.log('TIEA 5.9.2F SAME-TAB HARD FIX active');
+</script>
+
+
+<script>
+/* ================================================================
+   TIEA IPTV HOME V7.2 ALPHA 5.9.2J — WISEPLAY RETURN TO EP
+   - Persist parent series detail in localStorage before leaving TIEAIP
+   - Survives Android/Projector browser activity reload
+   - On return from Wiseplay/MX: reopen same series EP modal
+   - Does not change web All Player / 3BB playback
+   ================================================================ */
+(function(){
+'use strict';
+
+const KEY='TIEA_EXTERNAL_EP_RETURN_V592J';
+let armedAt=0;
+let restoring=false;
+
+function clonePlain(x){
+  try{return JSON.parse(JSON.stringify(x))}catch(e){return null}
+}
+
+function saveExternalEP(mode,url){
+  try{
+    const detail=clonePlain(state && state.returnEpisodeItem ? state.returnEpisodeItem : null);
+    const payload={
+      activeSource:String((state&&state.activeSource)||'home'),
+      scroll:(window.content ? Number(content.scrollTop||0) : 0),
+      detail:detail,
+      seriesTitle:detail ? String(detail.title||'') : '',
+      playerMode:String(mode||'external'),
+      url:String(url||''),
+      time:Date.now()
+    };
+    localStorage.setItem(KEY,JSON.stringify(payload));
+    armedAt=payload.time;
+
+    // Keep old key too, so older code remains compatible.
+    try{sessionStorage.setItem('tiea_external_return',JSON.stringify({
+      activeSource:payload.activeSource,
+      scroll:payload.scroll,
+      modalOpen:!!detail,
+      hasEpisodeReturn:!!detail,
+      episodeTitle:payload.seriesTitle,
+      playerMode:payload.playerMode,
+      url:payload.url,
+      time:payload.time
+    }))}catch(e){}
+  }catch(e){}
+}
+
+/* Override only the save hook already used by Wiseplay/MX launchers. */
+window.saveReturnBeforeExternal=function(mode,url){
+  saveExternalEP(mode,url);
+};
+
+async function restoreExternalEP(){
+  if(restoring)return false;
+  let raw='';
+  try{raw=localStorage.getItem(KEY)||''}catch(e){}
+  if(!raw)return false;
+
+  let saved=null;
+  try{saved=JSON.parse(raw)}catch(e){return false}
+  if(!saved || !saved.time || Date.now()-saved.time>30*60*1000){
+    try{localStorage.removeItem(KEY)}catch(e){}
+    return false;
+  }
+
+  // Prevent an immediate focus event during intent launch from restoring too early.
+  if(Date.now()-saved.time<900)return false;
+
+  restoring=true;
+  try{
+    try{closePlayerOnlyAfterExternal()}catch(e){}
+
+    const source=String(saved.activeSource||'home');
+
+    // Restore the category/list first.
+    if(source && source!=='home' && !source.startsWith('folder:') && typeof loadMenuSource==='function'){
+      try{await loadMenuSource(source)}catch(e){
+        if(typeof renderHome==='function')renderHome();
+      }
+    }else if(typeof renderHome==='function'){
+      renderHome();
+    }
+
+    // Restore list scroll, then exact parent series EP modal.
+    setTimeout(()=>{
+      try{if(window.content)content.scrollTop=Number(saved.scroll||0)}catch(e){}
+      try{
+        if(saved.detail && typeof openDetail==='function'){
+          state.returnEpisodeItem=saved.detail;
+          openDetail(saved.detail);
+        }
+      }catch(e){console.warn('5.9.2J reopen EP failed',e)}
+
+      try{localStorage.removeItem(KEY)}catch(e){}
+      try{sessionStorage.removeItem('tiea_external_return')}catch(e){}
+      restoring=false;
+    },700);
+    return true;
+  }catch(e){
+    restoring=false;
+    return false;
+  }
+}
+
+/* Returning from an Android external app normally fires focus/visibility/pageshow. */
+window.addEventListener('pageshow',()=>setTimeout(restoreExternalEP,120));
+window.addEventListener('focus',()=>setTimeout(restoreExternalEP,180));
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden)setTimeout(restoreExternalEP,180);
+});
+
+/* Also catch Android WebView/browser restoration after script startup. */
+setTimeout(restoreExternalEP,500);
+
+window.TIEA_V592J={
+  version:'5.9.2J',
+  feature:'WISEPLAY RETURN TO SAME EP MODAL',
+  storage:'localStorage',
+  ttlMinutes:30
+};
+console.log('TIEA 5.9.2J WISEPLAY RETURN TO EP active');
+})();
 </script>
 
 </body>
