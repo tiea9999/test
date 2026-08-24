@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2 — NEW TAB SAFE TEST</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.2I — FULL ALL PLAYER</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
@@ -3730,13 +3730,14 @@ function v586Go(item,raw,title){
     +'&tiea_return='+encodeURIComponent(ret)
     +'&tiea_source='+encodeURIComponent(isShort?'series-short':String(state?.activeSource||''));
 
-  // 5.9.2 NEW TAB SAFE TEST:
-  // Keep TIEAIP exactly where it is and open All Player in a new tab.
-  const w=window.open(target,'_blank','noopener,noreferrer');
-  if(!w){
-    // Popup blocked fallback: preserve old same-tab behavior.
-    location.href=target;
-  }
+  // 5.9.2H WEB BACK WRAPPER:
+  // Open our own wrapper in the SAME tab. The wrapper keeps a visible
+  // back-to-EP button and embeds the real All Player underneath.
+  const wrapper='https://tiea9999.github.io/tv/all-player-full.html'
+    +'?player='+encodeURIComponent(target)
+    +'&return='+encodeURIComponent(ret)
+    +'&title='+encodeURIComponent(title||'All Player');
+  location.href=wrapper;
   return true;
 }
 
@@ -3855,7 +3856,7 @@ setTimeout(v587ResetBridge,120);
 
 
 <script>
-console.log('TIEA 5.9.2 NEW TAB SAFE TEST active: All Player opens in new tab');
+console.log('TIEA 5.9.2F SAME-TAB HARD FIX active');
 </script>
 
 </body>
