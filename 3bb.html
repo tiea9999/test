@@ -7,7 +7,7 @@
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB • VOL80</title>
+    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB • VOL80 • PLUS-SERVER DIRECT</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -94,7 +94,7 @@
     <script>
 const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 const channels = [
-{name:"Monomax 1",logo:"https://apk-x.org/pics/images/max1.jpg",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=monomax1",drm:false,group:"กีฬา"},        
+{name:"Monomax 1",logo:"https://apk-x.org/pics/images/max1.jpg",file:"http://api.plus-server.sbs/play.php?key=1234&ch=api_mono1",drm:false,group:"กีฬา"},        
 {name:"golf channel",logo:"https://www.dropbox.com/scl/fi/3ekiv5abo840gh1i5vj30/xqfFe4EzPS5iJ9ee89bkEpqkxC6RrzMUntitled-2.jpg?rlkey=buxrafcak6qeb4ouru42lvgu1&dl=1",file:"https://d11k1mnrgfposz.cloudfront.net/playlist_1920x1080.m3u8",drm:false,group:"กีฬา"},    
 {name:"Golf 2 HD",logo:"https://6395online.com:8443/logotv/sport/golf2.jpg",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=golf2",drm:false,group:"กีฬา"},
 {name:"tennis",logo:"https://6395online.com:8443/logotv/sport/hd-tennis.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truetennis",drm:false,group:"กีฬา"},  
@@ -672,6 +672,27 @@ function firstChannelUrl(channel){
   return resolved ? resolved.file : "";
 }
 
+function isPlusServerEntry(url){
+  try{
+    const u = new URL(String(url || ""));
+    return u.hostname.toLowerCase() === "api.plus-server.sbs" &&
+           /\/play\.php$/i.test(u.pathname);
+  }catch(e){
+    return false;
+  }
+}
+
+function openPlusServerDirect(url){
+  if(!url) return;
+  try{
+    const u = new URL(url);
+    u.searchParams.set("_", Date.now());
+    window.location.href = u.href;
+  }catch(e){
+    window.location.href = url;
+  }
+}
+
 async function loadChannel(channel, element){
   activeOriginalChannel = channel;
   activeServerIndex = 0;
@@ -703,6 +724,15 @@ async function loadChannel(channel, element){
   const url = proxyUrl(resolvedChannel.file);
   activeUrl = url;
   addPlaybackLog("OPEN", "เริ่มเปิด " + currentServerName + " • " + url);
+
+  // PLUS-SERVER SPECIAL:
+  // เปิด play.php เป็นหน้าหลักของ Browser เพื่อให้ต้นทางสร้าง session สด
+  // และแสดงปุ่ม ▶ ของต้นทางให้ผู้ใช้กดเอง (ไม่ส่งเข้า HLS.js / Worker)
+  if(isPlusServerEntry(url)){
+    setStatus("กำลังเปิด Monomax 1 แบบ Browser Direct...", true);
+    openPlusServerDirect(url);
+    return;
+  }
 
   if(url.includes(".mpd")){
     playMPDNotice(resolvedChannel, url);
