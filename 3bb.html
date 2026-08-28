@@ -7,7 +7,7 @@
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB • VOL80 • PLUS-SERVER DIRECT</title>
+    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB • VOL80 • PLUS-SERVER BACK TO 3BB</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -76,6 +76,22 @@
         </div>
         <div id="jw-player"></div>
         <video id="html5-player" controls autoplay playsinline webkit-playsinline style="display:none;"></video>
+
+        <div id="plus-player-wrap" style="display:none;position:absolute;inset:0;background:#000;z-index:99990;">
+            <button id="plusBackBtn"
+                    onclick="closePlusServerPlayer()"
+                    style="position:absolute;top:14px;left:14px;z-index:100010;
+                           padding:10px 16px;border:2px solid #fff;border-radius:12px;
+                           background:rgba(0,0,0,.78);color:#fff;font-size:18px;
+                           font-weight:bold;cursor:pointer;">
+                ⬅ กลับ 3BB
+            </button>
+            <iframe id="plus-player-frame"
+                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                    referrerpolicy="no-referrer-when-downgrade"
+                    style="width:100%;height:100%;border:0;background:#000;"></iframe>
+        </div>
+
         <div id="status" class="status"></div>
         <div id="lab14-diag" style="display:none;position:absolute;right:14px;bottom:14px;z-index:100005;width:min(520px,calc(100vw - 28px));max-height:62vh;overflow:auto;background:rgba(3,14,24,.97);border:1px solid #00e5ff;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.45 Consolas,monospace;"></div>
         <div id="playback-log" style="display:none;position:absolute;left:14px;bottom:14px;z-index:100006;width:min(600px,calc(100vw - 28px));max-height:58vh;overflow:auto;background:rgba(12,8,3,.97);border:1px solid orange;border-radius:12px;padding:12px;color:#fff;font:600 12px/1.5 Consolas,monospace;"></div>
@@ -684,13 +700,48 @@ function isPlusServerEntry(url){
 
 function openPlusServerDirect(url){
   if(!url) return;
+
+  const wrap = document.getElementById("plus-player-wrap");
+  const frame = document.getElementById("plus-player-frame");
+  if(!wrap || !frame) return;
+
   try{
     const u = new URL(url);
     u.searchParams.set("_", Date.now());
-    window.location.href = u.href;
+    frame.src = u.href;
   }catch(e){
-    window.location.href = url;
+    frame.src = url;
   }
+
+  wrap.style.display = "block";
+  document.getElementById("player-container").style.display = "block";
+  setStatus("PLUS-SERVER • กด ▶ เพื่อเล่น", true);
+
+  setTimeout(()=>{
+    const btn = document.getElementById("plusBackBtn");
+    if(btn) btn.focus();
+  },250);
+}
+
+function closePlusServerPlayer(){
+  const wrap = document.getElementById("plus-player-wrap");
+  const frame = document.getElementById("plus-player-frame");
+
+  if(frame){
+    try{ frame.src = "about:blank"; }catch(e){}
+  }
+  if(wrap) wrap.style.display = "none";
+
+  const container = document.getElementById("player-container");
+  if(container) container.style.display = "none";
+
+  activeChannel = null;
+  activeOriginalChannel = null;
+  activeElement = null;
+  activeUrl = "";
+  setStatus("");
+
+  document.querySelectorAll(".channel").forEach(ch=>ch.classList.remove("active"));
 }
 
 async function loadChannel(channel, element){
@@ -990,6 +1041,11 @@ function setupForceAutoHide(){
 }
 
 async function closePlayer(){
+  const plusWrap = document.getElementById("plus-player-wrap");
+  if(plusWrap && plusWrap.style.display === "block"){
+    closePlusServerPlayer();
+    return;
+  }
   await stopAllPlayers();
   const box = document.getElementById("player-container");
   box.classList.remove("controls-hidden");
