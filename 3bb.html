@@ -7,7 +7,7 @@
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TIEA 3BB V2.4 • MONOMAX FAST START + ANDROID TV STABLE</title>
+    <title>TIEA 3BB V2.4 ANALYZER ENGINE LAB • VOL80 • SPORT+MOVIE MAIN BACKUP ORDER</title>
 
     <script src="https://ssl.p.jwpcdn.com/player/v/8.26.0/jwplayer.js"></script>
     <script>
@@ -872,12 +872,6 @@ function playMPDNotice(channel, url){
 }
 
 /* ================= HLS ANALYZER ENGINE LAB ================= */
-function tieaIsMonoSports(){
-  const n = String(activeOriginalChannel?.name || activeChannel?.name || "").trim().toUpperCase();
-  const u = String(activeChannel?.file || activeUrl || "").toLowerCase();
-  return n === "MONOMAX" || n === "MAX" || /[?&]id=(monomax|max)\d+/i.test(u);
-}
-
 function useHLS_STABLE(url){
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
@@ -907,26 +901,17 @@ function useHLS_STABLE(url){
     setStatus("กำลังโหลดด้วย Analyzer Engine...");
     addPlaybackLog("ENGINE", "เริ่ม HLS แบบเดียวกับ TIEA Stream Analyzer");
 
-    const monoStable = tieaIsMonoSports();
-    if(monoStable) addPlaybackLog("MONOMAX", "FAST START + ANDROID TV STABLE เปิดใช้งาน");
-
     currentHls = new Hls({
       enableWorker: true,
       lowLatencyMode: false,
       autoStartLoad: true,
       startFragPrefetch: true,
-      // MONOMAX/MAX: เริ่มระดับต่ำเพื่อให้ภาพมาเร็ว แล้วล็อกไม่เกิน 720p
-      startLevel: monoStable ? 0 : -1,
-      testBandwidth: monoStable ? false : true,
-      backBufferLength: monoStable ? 45 : 30,
-      maxBufferLength: monoStable ? 45 : 20,
-      maxMaxBufferLength: monoStable ? 90 : 40,
-      maxBufferHole: monoStable ? 1.0 : 0.5,
-      fragLoadingMaxRetry: monoStable ? 6 : 4,
-      fragLoadingRetryDelay: monoStable ? 700 : 1000,
-      fragLoadingMaxRetryTimeout: monoStable ? 5000 : 64000,
-      manifestLoadingMaxRetry: monoStable ? 4 : 3,
-      levelLoadingMaxRetry: monoStable ? 4 : 3
+      backBufferLength: 30,
+      maxBufferLength: 20,
+      maxMaxBufferLength: 40,
+      fragLoadingMaxRetry: 4,
+      manifestLoadingMaxRetry: 3,
+      levelLoadingMaxRetry: 3
     });
 
     currentHls.attachMedia(video);
@@ -938,21 +923,6 @@ function useHLS_STABLE(url){
 
     currentHls.on(Hls.Events.MANIFEST_PARSED, function(event, data){
       addPlaybackLog("HLS", "MANIFEST_PARSED levels=" + ((data && data.levels) ? data.levels.length : 0));
-
-      if(monoStable && Array.isArray(currentHls.levels) && currentHls.levels.length){
-        // Android TV: จำกัดระดับสูงสุดไว้ที่ H.264/720p ถ้ามี
-        const safe = currentHls.levels
-          .map((level,index)=>({level,index}))
-          .filter(x=>codecLooksAvc(x.level))
-          .filter(x=>(x.level.height || 0) <= 720 || !(x.level.height));
-        if(safe.length){
-          safe.sort((a,b)=>(b.level.height||0)-(a.level.height||0) || (b.level.bitrate||0)-(a.level.bitrate||0));
-          const maxSafe = safe[0].index;
-          currentHls.autoLevelCapping = maxSafe;
-          addPlaybackLog("MONOMAX", "ล็อกคุณภาพสูงสุด " + (currentHls.levels[maxSafe]?.height || "AUTO") + "p");
-        }
-      }
-
       applyBalancedVolume(url);
       video.play().catch(function(){
         setStatus("กด PLAY หนึ่งครั้งเพื่อเริ่มเล่น", true);
