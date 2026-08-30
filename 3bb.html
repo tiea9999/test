@@ -2,7 +2,7 @@
 <html lang="th">
 
 <head>
-<!-- TIEA 3BB V2.4 ANALYZER ENGINE LAB Build 2401-VOL80: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
+<!-- TIEA 3BB V2.4 ANALYZER ENGINE LAB Build 2401-VOL80-MFIXER-LOGO-BACKFIX: SMART MAIN→BACKUP + THAI PLAYBACK LOG. BASE FILE PRESERVED AS SEPARATE COPY. -->
 <!-- LAB14: REQUIRED/MISSING KID HAS PRIORITY OVER CONFIGURED KID. USES ONLY EXISTING LOCAL CLEARKEY PAIRS. ONE RELOAD MAX. LAB10/STABLE BASE UNCHANGED. -->
 <!-- ROLLBACK STABLE: V2.1 BASE / NO DIAG / NO TIMELINE PATCH / NO FORCE SEEK -->
     <meta charset="UTF-8">
@@ -94,6 +94,32 @@
     <script>
 const WORKER_PROXY = "https://iptv.tawatchai250958.workers.dev/?url=";
 const channels = [
+{name:"HBO AIS",logo:"https://6395online.com:8443/logotv/movie/hd-hbo-thai.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=hbo",drm:false,group:"หนัง"},
+{name:"CINEMAX AIS",logo:"https://6395online.com:8443/logotv/movie/cinemax(2).png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=cinemax",drm:false,group:"หนัง"},
+{name:"HBO Signature AIS",logo:"https://6395online.com:8443/logotv/movie/hbosignature.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=hbosignature",drm:false,group:"หนัง"},
+{name:"HBO Hits AIS",logo:"https://6395online.com:8443/logotv/movie/hd-hbo-hit.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=hbohits",drm:false,group:"หนัง"},
+{name:"HBO Family AIS",logo:"https://6395online.com:8443/logotv/movie/hbofamily.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=hbofamily",drm:false,group:"หนัง"},
+{name:"Warner TV AIS",logo:"https://6395online.com:8443/logotv/movie/hd-warnertv.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=warner",drm:false,group:"หนัง"},
+{name:"Rock Action AIS",logo:"https://6395online.com:8443/logotv/movie/rocken.jpg",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=action",drm:false,group:"หนัง"},
+{name:"Discovery AIS",logo:"https://6395online.com:8443/logotv/discovery/sd-discovery.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=discovery",drm:false,group:"หนัง"},
+{name:"สำรวจโลก AIS",logo:"https://6395online.com:8443/logotv/discovery/hd-discovery.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=samrujlok",drm:false,group:"หนัง"},
+{name:"Thainess AIS",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=thainess",drm:false,group:"หนัง"},
+{name:"Animal Show AIS",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=animalshow",drm:false,group:"หนัง"},
+{name:"MySci AIS",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=mysci",drm:false,group:"หนัง"},
+{name:"Cartoon Network AIS",logo:"https://6395online.com:8443/logotv/cartoon/sd-cartoonnetwork.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=cartoonnetwork",drm:false,group:"การ์ตูน"},
+{name:"TLC AIS",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=tlc",drm:false,group:"หนัง"},
+{name:"MUTV AIS",logo:"https://dookeela.live/uploads/1665106261.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=mutv",drm:false,group:"กีฬา"},
+{name:"AIS PLAY 90",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=aisplay90",drm:false,group:"กีฬา"},
+{name:"AIS PLAY 91",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=aisplay91",drm:false,group:"กีฬา"},
+{name:"AIS PLAY 92",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=aisplay92",drm:false,group:"กีฬา"},
+{name:"AIS PLAY 93",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=aisplay93",drm:false,group:"กีฬา"},
+{name:"AIS PLAY 94",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=aisplay94",drm:false,group:"กีฬา"},
+{name:"AIS PLAY 95",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=aisplay95",drm:false,group:"กีฬา"},
+{name:"AIS PLAY 96",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=aisplay96",drm:false,group:"กีฬา"},
+{name:"Eurosport AIS",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=eurosport",drm:false,group:"กีฬา"},
+{name:"Real Madrid TV AIS",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=realmadridtv",drm:false,group:"กีฬา"},
+{name:"W-Sport AIS",logo:"",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=wsport",drm:false,group:"กีฬา"},
+
 {name:"",logo:"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJXwyJSphHY4jEYhXPyQHDGbqHV94T6Ed74fTkKcXYhA&s=10",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=hbosignature",drm:false,group:"หนัง"},
 
 {name:"MONOMAX",logo:"https://tse1.mm.bing.net/th/id/OIP.dYVIDHBYvTJLyZ71jgYpGwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=monomax1",drm:false,group:"กีฬา"},
@@ -642,6 +668,13 @@ function tieaLogoUrl(url){
   return url||"";
 }
 
+function tieaFallbackLogo(name){
+  const label=String(name||"TIEA").replace(/ AIS$/i,"").trim()||"TIEA";
+  const short=label.length>18?label.slice(0,18):label;
+  const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="220" viewBox="0 0 320 220"><rect width="320" height="220" rx="24" fill="#111"/><rect x="8" y="8" width="304" height="204" rx="20" fill="none" stroke="#fff" stroke-width="4"/><text x="160" y="106" text-anchor="middle" dominant-baseline="middle" fill="#fff" font-family="Arial,sans-serif" font-size="28" font-weight="700">${short.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}</text><text x="160" y="152" text-anchor="middle" fill="#00e5ff" font-family="Arial,sans-serif" font-size="20" font-weight="700">AIS PLAY</text></svg>`;
+  return "data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(svg);
+}
+
 function proxyUrl(url){
   // ลิงก์ workers.dev เล่นตรง ห้าม proxy ซ้อน
   return url;
@@ -1113,9 +1146,37 @@ async function closePlayer(){
   setTimeout(()=>{if(activeElement && document.body.contains(activeElement)) activeElement.focus();},120);
 }
 
-function goHome(){
-  window.location.href = "https://tiea9999.github.io/tv/index.html";
+const TIEA_HOME_URL = "https://tiea9999.github.io/tv/index.html";
+let tieaGoingHome = false;
+let tieaBackGuardReady = false;
+
+function armTieaBackGuard(){
+  if(tieaBackGuardReady) return;
+  tieaBackGuardReady = true;
+  try{
+    history.replaceState({tieaBase:true}, "", location.href);
+    history.pushState({tieaGuard:true}, "", location.href);
+  }catch(e){}
 }
+
+function goHome(){
+  tieaGoingHome = true;
+  window.location.assign(TIEA_HOME_URL);
+}
+
+window.addEventListener("popstate", function(){
+  if(tieaGoingHome) return;
+  const container = document.getElementById("player-container");
+  const playing = container && container.style.display === "block";
+  if(playing){
+    closePlayer();
+    try{ history.pushState({tieaGuard:true}, "", location.href); }catch(e){}
+    return;
+  }
+  // Android/Projector BACK ขณะอยู่หน้ารายการ: กลับ TIEA HOME แทนการหลุดออกหน้า Home ของเครื่อง
+  tieaGoingHome = true;
+  window.location.assign(TIEA_HOME_URL);
+});
 
 document.addEventListener("keydown",function(e){
   const container = document.getElementById("player-container");
@@ -1126,10 +1187,16 @@ document.addEventListener("keydown",function(e){
       document.getElementById("closeBtn")?.focus();
       return;
     }
-    if(e.key === "Escape" || e.key === "Backspace" || e.key === "BrowserBack"){
+    if(e.key === "Escape" || e.key === "Backspace" || e.key === "BrowserBack" || e.key === "GoBack"){
       e.preventDefault();
+      e.stopPropagation();
       closePlayer();
+      return;
     }
+  } else if(e.key === "BrowserBack" || e.key === "GoBack"){
+    e.preventDefault();
+    e.stopPropagation();
+    goHome();
   }
 });
 
@@ -1145,7 +1212,9 @@ function renderCategory(group){
     const div=document.createElement("div");
     div.className="channel";
     div.tabIndex=0;
-    div.innerHTML=`<img src="${tieaLogoUrl(ch.logo)}" loading="lazy" onerror="this.onerror=null;this.src='${ch.logo}'"><span>${ch.name}</span>`;
+    const logoSrc=tieaLogoUrl(ch.logo)||tieaFallbackLogo(ch.name);
+    const fallback=tieaFallbackLogo(ch.name);
+    div.innerHTML=`<img src="${logoSrc}" loading="lazy" alt="${String(ch.name||'ช่อง').replace(/"/g,'&quot;')}" onerror="this.onerror=null;this.src='${fallback}'"><span>${ch.name||'ช่อง'}</span>`;
     div.onclick=()=>loadChannel(ch,div);
     div.onfocus=()=>warmStream(firstChannelUrl(ch));
     div.onmouseenter=()=>warmStream(firstChannelUrl(ch));
@@ -1167,6 +1236,7 @@ function setupCategoryMenu(){
   });
 }
 document.addEventListener("DOMContentLoaded",function(){
+  armTieaBackGuard();
   setupForceAutoHide();
   const safeBtn=document.getElementById("safeModeBtn"); if(safeBtn) safeBtn.textContent="📽 SAFE ON";
   setupCategoryMenu();
