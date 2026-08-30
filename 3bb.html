@@ -997,17 +997,29 @@ function useHLS_STABLE(url){
     setStatus("กำลังโหลดด้วย Analyzer Engine...");
     addPlaybackLog("ENGINE", "เริ่ม HLS แบบเดียวกับ TIEA Stream Analyzer");
 
+    // SMART ABR: start around 480p, then release to AUTO.
+    // Goal: fast/stable start on Android TV while still allowing 720/1080p
+    // when measured bandwidth and decoder performance can sustain it.
+    let tiea480StartLevel = -1;
+    let tieaAbrReleased = false;
+    let tieaAbrReleaseTimer = null;
+
     currentHls = new Hls({
       enableWorker: true,
       lowLatencyMode: false,
       autoStartLoad: true,
       startFragPrefetch: true,
+      startLevel: -1,
       backBufferLength: 30,
       maxBufferLength: 20,
       maxMaxBufferLength: 40,
       fragLoadingMaxRetry: 4,
       manifestLoadingMaxRetry: 3,
-      levelLoadingMaxRetry: 3
+      levelLoadingMaxRetry: 3,
+      // Be conservative when stepping UP; stepping DOWN remains automatic.
+      abrEwmaDefaultEstimate: 1200000,
+      abrBandWidthFactor: 0.80,
+      abrBandWidthUpFactor: 0.65
     });
 
     currentHls.attachMedia(video);
@@ -1015,6 +1027,35 @@ function useHLS_STABLE(url){
     currentHls.on(Hls.Events.MEDIA_ATTACHED, function(){
       addPlaybackLog("HLS", "MEDIA_ATTACHED");
       currentHls.loadSource(url);
+    });
+
+    // Pick the highest rendition at or below 480p for the first few seconds.
+    // If 480p is not present, use the nearest lower level; otherwise the lowest.
+    currentHls.on(Hls.Events.MANIFEST_LOADED, function(event, data){
+      try{
+        const levels = (data && data.levels) ? data.levels : [];
+        if(!levels.length) return;
+        let best = -1;
+        let bestH = -1;
+        for(let i=0;i<levels.length;i++){
+          const h = Number(levels[i] && levels[i].height) || 0;
+          if(h > 0 && h <= 480 && h > bestH){ best = i; bestH = h; }
+        }
+        if(best < 0){
+          let minH = Infinity;
+          for(let i=0;i<levels.length;i++){
+            const h = Number(levels[i] && levels[i].height) || 0;
+            if(h > 0 && h < minH){ best = i; minH = h; }
+          }
+          bestH = (best >= 0 && levels[best]) ? (Number(levels[best].height)||0) : 0;
+        }
+        if(best >= 0){
+          tiea480StartLevel = best;
+          currentHls.startLevel = best;
+          currentHls.nextLevel = best;
+          addPlaybackLog("ABR", "เริ่มที่ " + (bestH || "LOW") + "p แล้วค่อย AUTO");
+        }
+      }catch(e){}
     });
 
     currentHls.on(Hls.Events.MANIFEST_PARSED, function(event, data){
@@ -1034,6 +1075,19 @@ function useHLS_STABLE(url){
 
     currentHls.on(Hls.Events.FRAG_PARSED, function(){
       addPlaybackLog("HLS", "FRAG_PARSED");
+      // Hold the safe startup quality briefly, then return control to Hls.js ABR.
+      if(!tieaAbrReleased && tiea480StartLevel >= 0 && !tieaAbrReleaseTimer){
+        tieaAbrReleaseTimer = setTimeout(function(){
+          if(!currentHls) return;
+          tieaAbrReleased = true;
+          try{
+            currentHls.currentLevel = -1;
+            currentHls.nextLevel = -1;
+            currentHls.loadLevel = -1;
+            addPlaybackLog("ABR", "AUTO เปิดแล้ว • เพิ่ม/ลดคุณภาพตามเครื่องและเน็ต");
+          }catch(e){}
+        }, 8000);
+      }
     });
 
     currentHls.on(Hls.Events.ERROR, function(event, data){
