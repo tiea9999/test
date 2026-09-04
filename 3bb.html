@@ -1258,74 +1258,95 @@ window.addEventListener("pageshow", function(){
 </script>
 
 
-<script id="tiea-long-watch-2406">
-/* TIEA 3BB V2.4 — 064927 BASE — LONG WATCH FIX 2406
-   Only long-watch memory/log guard. No URL/channel/DRM/M-FIXER/GoogleCDN changes. */
+<script id="tiea-projector-low-memory-2407">
 (function(){
 "use strict";
-window.TIEA_LONG_WATCH_BUILD="064927-2406";
+window.TIEA_PROJECTOR_LOW_MEMORY_BUILD="064927-2407";
 
-/* Keep hidden diagnostics from accumulating indefinitely. */
-function trimTieaLogs(){
+/* ลด log ที่สะสม */
+function trimLogs(){
   ["log","diagLog","debugLog","safeDiagLog","statusLog","diag-log","debug-log"].forEach(function(id){
     var e=document.getElementById(id);
     if(!e)return;
-    while(e.children && e.children.length>60)e.removeChild(e.firstChild);
+    while(e.children && e.children.length>24)e.removeChild(e.firstChild);
     var t=e.textContent||"";
-    if(t.length>12000)e.textContent=t.slice(-8000);
+    if(t.length>5000)e.textContent=t.slice(-3000);
   });
 }
-setInterval(trimTieaLogs,30000);
+setInterval(trimLogs,45000);
 
-/* Suppress only high-frequency HLS debug chatter. */
-var _cl=console.log.bind(console);
-console.log=function(){
-  try{
-    var s=Array.prototype.join.call(arguments," ");
-    if(/FRAG_(?:LOADED|PARSED|CHANGED)|BUFFER_(?:APPENDED|APPENDING)|LEVEL_(?:LOADED|UPDATED)/i.test(s))return;
-  }catch(e){}
-  return _cl.apply(console,arguments);
-};
+/* ลด console traffic จาก HLS */
+(function(){
+  var cl=console.log.bind(console);
+  console.log=function(){
+    try{
+      var s=Array.prototype.join.call(arguments," ");
+      if(/FRAG_|BUFFER_|LEVEL_|AUDIO_TRACK_|FPS_DROP|SUBTITLE_/i.test(s))return;
+    }catch(e){}
+    return cl.apply(console,arguments);
+  };
+})();
 
-/* Apply conservative memory limits to an existing Hls.js instance.
-   Does not recreate/destroy player and does not alter stream routing. */
-function tune(h){
-  if(!h || h.__tieaLW2406)return;
-  h.__tieaLW2406=true;
+/* ลด memory ของ HLS โดยไม่สร้าง player ใหม่ */
+function tuneHls(h){
+  if(!h || h.__tieaLM2407)return;
+  h.__tieaLM2407=1;
   try{
     var c=h.config||{};
-    if("maxBufferLength" in c)c.maxBufferLength=Math.min(Number(c.maxBufferLength)||30,20);
-    if("maxMaxBufferLength" in c)c.maxMaxBufferLength=Math.min(Number(c.maxMaxBufferLength)||60,30);
-    if("backBufferLength" in c)c.backBufferLength=Math.min(Number(c.backBufferLength)||30,10);
-    if("maxBufferSize" in c)c.maxBufferSize=Math.min(Number(c.maxBufferSize)||30000000,20000000);
+    if("maxBufferLength" in c)c.maxBufferLength=Math.min(Number(c.maxBufferLength)||20,12);
+    if("maxMaxBufferLength" in c)c.maxMaxBufferLength=Math.min(Number(c.maxMaxBufferLength)||30,18);
+    if("backBufferLength" in c)c.backBufferLength=0;
+    if("maxBufferSize" in c)c.maxBufferSize=Math.min(Number(c.maxBufferSize)||20000000,12000000);
+    if("maxBufferHole" in c)c.maxBufferHole=Math.min(Number(c.maxBufferHole)||0.5,0.3);
   }catch(e){}
 }
 setInterval(function(){
   try{
-    tune(window.hls);
-    tune(window.hlsPlayer);
-    tune(window.currentHls);
+    tuneHls(window.hls);
+    tuneHls(window.hlsPlayer);
+    tuneHls(window.currentHls);
   }catch(e){}
-},5000);
+},10000);
 
-/* Lightweight stall assist: play() only.
-   Never reload page, never switch channel, never trigger fallback. */
-var last=-1,stuck=0;
+/* ลดภาระรูปในรายการช่อง */
+setInterval(function(){
+  try{
+    document.querySelectorAll("#channel-list img").forEach(function(img){
+      img.loading="lazy";
+      img.decoding="async";
+    });
+  }catch(e){}
+},60000);
+
+/* stall assist แบบเบา: ไม่ reload ไม่เปลี่ยนช่อง */
+var last=-1, stuck=0;
 setInterval(function(){
   var v=document.getElementById("html5-player")||document.querySelector("video");
-  if(!v||v.paused||v.ended||v.seeking){
+  if(!v || v.paused || v.ended || v.seeking){
     stuck=0; last=v?Number(v.currentTime||0):-1; return;
   }
   var t=Number(v.currentTime||0);
   stuck=(last>=0 && Math.abs(t-last)<0.05)?stuck+1:0;
   last=t;
-  if(stuck>=3){
+  if(stuck>=4){
     stuck=0;
-    try{var p=v.play();if(p&&p.catch)p.catch(function(){});}catch(e){}
+    try{
+      var p=v.play();
+      if(p&&p.catch)p.catch(function(){});
+    }catch(e){}
   }
-},10000);
+},15000);
 
-console.log("TIEA 3BB 064927 LONG WATCH FIX 2406 loaded");
+/* จำกัด history/debug array ถ้ามี */
+setInterval(function(){
+  try{
+    ["lastDiagReport","diagHistory","traceHistory","safeDiagHistory"].forEach(function(k){
+      if(Array.isArray(window[k]) && window[k].length>20) window[k]=window[k].slice(-10);
+    });
+  }catch(e){}
+},60000);
+
+console.log("TIEA PROJECTOR LOW MEMORY 2407 loaded");
 })();
 </script>
 
