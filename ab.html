@@ -5526,7 +5526,7 @@ console.log('TIEA APP24 P6 ANDROID MOVIEPROXY FINAL GATE loaded');
 
 <script>
 /* ============================================================
-   TIEA APP24 A/B V0.10 — SAME PRODUCTION MOVIEPROXY / INTERNAL
+   TIEA APP24 A/B V0.11 TICKET DIAG — SAME PRODUCTION MOVIEPROXY / INTERNAL
    Test only: Golf Plus vs True Sport 2
    /ticket -> signed /watch -> INTERNAL Hls.js
    Does NOT enter P6 Android external-player gate.
@@ -5551,37 +5551,67 @@ console.log('TIEA APP24 P6 ANDROID MOVIEPROXY FINAL GATE loaded');
   }
 
   const abTicketCache=new Map();
+  function abDiagLine(text){
+    const msg=String(text||'');
+    abStatus(msg);
+    try{ console.log('[TIEA AB V0.11]',msg); }catch(e){}
+  }
+
   async function abTicket(id){
     id=String(id||'').trim();
     const now=Math.floor(Date.now()/1000);
     const cached=abTicketCache.get(id);
-    if(cached && cached.url && cached.exp>now+45) return cached.url;
+    if(cached && cached.url && cached.exp>now+45){
+      abDiagLine('TICKET CACHE OK • '+id);
+      return cached.url;
+    }
 
-    const r=await fetch(AB_BASE+'/ticket?id='+encodeURIComponent(id),{
-      method:'GET',
-      cache:'no-store'
-    });
-    if(!r.ok) throw new Error('TICKET HTTP '+r.status);
+    const ticketUrl=AB_BASE+'/ticket?id='+encodeURIComponent(id);
+    abDiagLine('TICKET REQUEST • '+id+
+      ' • page='+location.origin+
+      ' • ref='+(document.referrer||'(empty)'));
 
-    const raw=await r.text();
-    let signed='', exp=0;
+    let r, raw='';
     try{
-      const data=JSON.parse(raw);
+      r=await fetch(ticketUrl,{
+        method:'GET',
+        cache:'no-store',
+        credentials:'omit',
+        mode:'cors'
+      });
+      raw=await r.text();
+    }catch(e){
+      throw new Error('TICKET FETCH ERROR • '+(e&&e.message?e.message:e));
+    }
+
+    let data=null;
+    try{ data=JSON.parse(raw); }catch(e){}
+
+    if(!r.ok){
+      const detail=(data && (data.error||data.message)) || raw || '(empty body)';
+      throw new Error('TICKET HTTP '+r.status+' • '+detail);
+    }
+
+    let signed='', exp=0;
+    if(data){
       signed=data.url || data.watch || data.signedUrl || data.signed_url ||
              data.playUrl || data.play_url || '';
       exp=Number(data.expires || data.exp || 0) || 0;
-    }catch(e){
+    }else{
       signed=raw.trim();
     }
 
-    if(!signed || !/^https?:\/\//i.test(signed))
-      throw new Error('TICKET URL INVALID');
+    if(!signed || !/^https?:\/\//i.test(signed)){
+      throw new Error('TICKET URL INVALID • HTTP '+r.status+
+        ' • BODY '+raw.slice(0,220));
+    }
 
     if(!exp){
       try{ exp=Number(new URL(signed).searchParams.get('exp')||0)||0; }catch(e){}
     }
     if(!exp) exp=now+540;
     abTicketCache.set(id,{url:signed,exp});
+    abDiagLine('TICKET OK • HTTP '+r.status+' • '+id);
     return signed;
   }
 
@@ -5640,11 +5670,12 @@ console.log('TIEA APP24 P6 ANDROID MOVIEPROXY FINAL GATE loaded');
         await video.play();
       }
     }catch(e){
-      abStatus(title+' • '+(e && e.message ? e.message : String(e)));
+      const msg=title+' • '+(e && e.message ? e.message : String(e));
+      abDiagLine(msg);
     }
   }
 
-  window.TIEA_AB10={play:abPlay,stop:abStop};
+  window.TIEA_AB11={play:abPlay,stop:abStop};
 
   function bind(){
     const g=document.getElementById('abGolfBtn');
