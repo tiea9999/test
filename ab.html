@@ -5526,7 +5526,7 @@ console.log('TIEA APP24 P6 ANDROID MOVIEPROXY FINAL GATE loaded');
 
 <script>
 /* ============================================================
-   TIEA APP24 A/B V0.9 — SAME PRODUCTION MOVIEPROXY / INTERNAL
+   TIEA APP24 A/B V0.10 — SAME PRODUCTION MOVIEPROXY / INTERNAL
    Test only: Golf Plus vs True Sport 2
    /ticket -> signed /watch -> INTERNAL Hls.js
    Does NOT enter P6 Android external-player gate.
@@ -5550,18 +5550,39 @@ console.log('TIEA APP24 P6 ANDROID MOVIEPROXY FINAL GATE loaded');
     try{ video.pause(); video.removeAttribute('src'); video.load(); }catch(e){}
   }
 
+  const abTicketCache=new Map();
   async function abTicket(id){
+    id=String(id||'').trim();
+    const now=Math.floor(Date.now()/1000);
+    const cached=abTicketCache.get(id);
+    if(cached && cached.url && cached.exp>now+45) return cached.url;
+
     const r=await fetch(AB_BASE+'/ticket?id='+encodeURIComponent(id),{
-      cache:'no-store',
-      credentials:'omit'
+      method:'GET',
+      cache:'no-store'
     });
-    const raw=await r.text();
     if(!r.ok) throw new Error('TICKET HTTP '+r.status);
-    let d=null;
-    try{ d=JSON.parse(raw); }catch(e){}
-    const u=(d && (d.url||d.watch||d.stream)) || raw.trim();
-    if(!/^https?:\/\//i.test(u)) throw new Error('NO SIGNED URL');
-    return u;
+
+    const raw=await r.text();
+    let signed='', exp=0;
+    try{
+      const data=JSON.parse(raw);
+      signed=data.url || data.watch || data.signedUrl || data.signed_url ||
+             data.playUrl || data.play_url || '';
+      exp=Number(data.expires || data.exp || 0) || 0;
+    }catch(e){
+      signed=raw.trim();
+    }
+
+    if(!signed || !/^https?:\/\//i.test(signed))
+      throw new Error('TICKET URL INVALID');
+
+    if(!exp){
+      try{ exp=Number(new URL(signed).searchParams.get('exp')||0)||0; }catch(e){}
+    }
+    if(!exp) exp=now+540;
+    abTicketCache.set(id,{url:signed,exp});
+    return signed;
   }
 
   async function abPlay(id,title){
@@ -5623,7 +5644,7 @@ console.log('TIEA APP24 P6 ANDROID MOVIEPROXY FINAL GATE loaded');
     }
   }
 
-  window.TIEA_AB09={play:abPlay,stop:abStop};
+  window.TIEA_AB10={play:abPlay,stop:abStop};
 
   function bind(){
     const g=document.getElementById('abGolfBtn');
