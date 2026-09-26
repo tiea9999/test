@@ -901,6 +901,8 @@ data-vip-link="https://tiea9999.github.io/tv-1/VIP.html">💎 VIP</button>
         <main class="main">
             <div class="topbar">
                 <button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><button class="top-btn live" id="externalSettingsBtn">⚙ PLAYER</button>
+<button class="top-btn" id="abGolfBtn" style="background:#355c2d">⛳ GOLF TEST</button>
+<button class="top-btn" id="abTs2Btn" style="background:#6b3a22">⚽ TRUE SPORT 2 TEST</button>
                 <div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep
                     return</div>
             </div>
@@ -5518,6 +5520,119 @@ window.TIEA_APP24_P6={
   returnBehavior:'same category + scroll'
 };
 console.log('TIEA APP24 P6 ANDROID MOVIEPROXY FINAL GATE loaded');
+})();
+</script>
+
+
+<script>
+/* ============================================================
+   TIEA APP24 A/B V0.9 — SAME PRODUCTION MOVIEPROXY / INTERNAL
+   Test only: Golf Plus vs True Sport 2
+   /ticket -> signed /watch -> INTERNAL Hls.js
+   Does NOT enter P6 Android external-player gate.
+   ============================================================ */
+(function(){
+  const AB_BASE='https://movieproxy.tawatchai250958.workers.dev';
+  let abHls=null;
+
+  function abStatus(t){
+    try{ setStatus(t); }catch(e){
+      const el=document.getElementById('statusText'); if(el) el.textContent=t;
+    }
+  }
+
+  function abStop(){
+    try{ if(abHls){abHls.destroy();abHls=null;} }catch(e){}
+    try{
+      if(window.state && state.hls){state.hls.destroy();state.hls=null;}
+      if(window.state && state.dash){state.dash.reset();state.dash=null;}
+    }catch(e){}
+    try{ video.pause(); video.removeAttribute('src'); video.load(); }catch(e){}
+  }
+
+  async function abTicket(id){
+    const r=await fetch(AB_BASE+'/ticket?id='+encodeURIComponent(id),{
+      cache:'no-store',
+      credentials:'omit'
+    });
+    const raw=await r.text();
+    if(!r.ok) throw new Error('TICKET HTTP '+r.status);
+    let d=null;
+    try{ d=JSON.parse(raw); }catch(e){}
+    const u=(d && (d.url||d.watch||d.stream)) || raw.trim();
+    if(!/^https?:\/\//i.test(u)) throw new Error('NO SIGNED URL');
+    return u;
+  }
+
+  async function abPlay(id,title){
+    try{
+      abStop();
+
+      // Open the existing App24 fullscreen player, but stay internal.
+      try{
+        state.currentTitle=title;
+        state.originalUrl=AB_BASE+'/watch?id='+id;
+        state.currentUrl='';
+      }catch(e){}
+      const panel=document.getElementById('playerPanel');
+      const titleEl=document.getElementById('playerTitle');
+      if(titleEl) titleEl.textContent=title+' • A/B INTERNAL';
+      if(panel){
+        panel.classList.remove('native24-mode','hide-ui');
+        panel.classList.add('show');
+      }
+      const frame=document.getElementById('native24Frame');
+      if(frame){ try{frame.src='about:blank';}catch(e){} }
+      video.style.display='block';
+
+      abStatus(title+' • กำลังขอสิทธิ์จาก Worker...');
+      const signed=await abTicket(id);
+      try{state.currentUrl=signed;}catch(e){}
+      abStatus(title+' • TICKET OK • INTERNAL');
+
+      const HE=window.TIEA_HLS_1517 || window.Hls;
+      if(HE && HE.isSupported()){
+        abHls=new HE({
+          enableWorker:true,
+          lowLatencyMode:false,
+          maxBufferLength:45,
+          maxMaxBufferLength:60,
+          backBufferLength:20,
+          liveSyncDurationCount:4,
+          liveMaxLatencyDurationCount:8,
+          fragLoadingMaxRetry:10,
+          manifestLoadingMaxRetry:6,
+          levelLoadingMaxRetry:6
+        });
+        try{state.hls=abHls;}catch(e){}
+        abHls.on(HE.Events.MANIFEST_PARSED,function(){
+          abStatus(title+' • MANIFEST OK • กำลังเล่น');
+          video.play().catch(function(e){abStatus(title+' • PLAY '+e.message);});
+        });
+        abHls.on(HE.Events.ERROR,function(_,d){
+          if(d && d.fatal) abStatus(title+' • FATAL '+d.type+' / '+d.details);
+        });
+        abHls.attachMedia(video);
+        abHls.loadSource(signed);
+      }else{
+        video.src=signed;
+        await video.play();
+      }
+    }catch(e){
+      abStatus(title+' • '+(e && e.message ? e.message : String(e)));
+    }
+  }
+
+  window.TIEA_AB09={play:abPlay,stop:abStop};
+
+  function bind(){
+    const g=document.getElementById('abGolfBtn');
+    const t=document.getElementById('abTs2Btn');
+    if(g) g.onclick=function(){abPlay('golf','GOLF PLUS');};
+    if(t) t.onclick=function(){abPlay('truesporthd2','TRUE SPORT 2');};
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',bind);
+  else bind();
 })();
 </script>
 
