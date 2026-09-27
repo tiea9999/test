@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.6 — KEEP CURRENT LIST PAGE</title>
+    <title>TIEA IPTV HOME V7.2 ALPHA 5.9.6 — GOOGLECDN PROJECTOR STABLE G1</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
     <script>window.TIEA_HLS_1517=window.Hls;</script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
@@ -875,14 +875,6 @@
      - let Hls.js native retry handle nonfatal network/buffer events
      - keep P2 buffer profile and P1 stable projector profile
      Worker H4 unchanged.
--->
-<!-- TIEA TEST.HTML TRUESPORT STABLE RECIPE • 2026-09-27
-     M-Fixer TrueVisions + weak projector only:
-     - buffer 30/60, back buffer 20
-     - bandwidth test remains OFF
-     - ABR default estimate 1.2 Mbps
-     - live sync 5, max latency 12
-     - all lists / routes / workers / movie-series logic unchanged
 -->
 </head>
 
@@ -2072,6 +2064,20 @@ function isMfixerTruevisionsLive(url){
   return u.includes('m-fixer.net') && u.includes('/stream/truevisions/');
 }
 
+// TIEA GOOGLECDN PROJECTOR STABLE G1 • 2026-09-27
+// Target only googlecdnforstreaming.live. M-Fixer and all other providers unchanged.
+function isGoogleCdnStreamingLive(url){
+  let u=String(url||'').toLowerCase();
+  try{ u=decodeURIComponent(u); }catch(e){}
+  return u.includes('googlecdnforstreaming.live') || u.includes('cdn1.googlecdnforstreaming.live');
+}
+function isGoogleCdnProjectorLive(){
+  try{
+    return (isProjectorWeakMode()||isProjectorMode()) &&
+      (isGoogleCdnStreamingLive(state.originalUrl||'') || isGoogleCdnStreamingLive(state.currentUrl||'') || isGoogleCdnStreamingLive(video.currentSrc||video.src||''));
+  }catch(e){ return false; }
+}
+
 function isActiveMfixerProjectorLive(){
   try{
     return isProjectorWeakMode() &&
@@ -2942,6 +2948,8 @@ function playCandidate(candidates,item,serverIndex,idx){
       return;
     }
     const mySeriesVod=isMySeriesVodUrl(state.originalUrl||url);
+    const googleCdnProjector=(isProjectorWeakMode()||isProjectorMode()) &&
+      (isGoogleCdnStreamingLive(state.originalUrl||'') || isGoogleCdnStreamingLive(url));
 
     if(sourceIsBcdn){
       stopWatchdog();
@@ -2951,35 +2959,35 @@ function playCandidate(candidates,item,serverIndex,idx){
 
     state.hls=new HlsEngine({
       loader: sourceIsMain24 ? HlsEngine.DefaultConfig.loader : (sourceIs24 ? Tiea24ChildDirectLoader : HlsEngine.DefaultConfig.loader),
-      enableWorker:sourceIsBcdn ? true : (sourceIsMain24 ? true : false),
+      enableWorker:googleCdnProjector ? true : (sourceIsBcdn ? true : (sourceIsMain24 ? true : false)),
       lowLatencyMode:false,
 
-      maxBufferLength:sourceIsBcdn?30:(sourceIs6395?24:(mySeriesVod?60:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?30:(isProjectorWeakMode()?48:(isProjectorMode()?38:(isUnstableLiveUrl(state.originalUrl)?28:35)))))),
-      maxMaxBufferLength:sourceIsBcdn?60:(sourceIs6395?40:(mySeriesVod?120:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?60:(isProjectorWeakMode()?80:(isProjectorMode()?65:(isUnstableLiveUrl(state.originalUrl)?50:60)))))),
-      backBufferLength:sourceIsBcdn?15:(sourceIs6395?5:(mySeriesVod?30:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?20:((isProjectorWeakMode()||isProjectorMode())?6:12)))),
-      maxBufferHole:sourceIsBcdn?0.5:(sourceIs6395?1.2:(mySeriesVod?0.8:2.2)),
-      highBufferWatchdogPeriod:sourceIs6395?12:(mySeriesVod?12:8),
+      maxBufferLength:googleCdnProjector?30:(sourceIsBcdn?30:(sourceIs6395?24:(mySeriesVod?60:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?60:(isProjectorWeakMode()?48:(isProjectorMode()?38:(isUnstableLiveUrl(state.originalUrl)?28:35))))))),
+      maxMaxBufferLength:googleCdnProjector?60:(sourceIsBcdn?60:(sourceIs6395?40:(mySeriesVod?120:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?90:(isProjectorWeakMode()?80:(isProjectorMode()?65:(isUnstableLiveUrl(state.originalUrl)?50:60))))))),
+      backBufferLength:googleCdnProjector?20:(sourceIsBcdn?15:(sourceIs6395?5:(mySeriesVod?30:((isProjectorWeakMode()||isProjectorMode())?6:12)))),
+      maxBufferHole:googleCdnProjector?0.5:(sourceIsBcdn?0.5:(sourceIs6395?1.2:(mySeriesVod?0.8:2.2))),
+      highBufferWatchdogPeriod:googleCdnProjector?3:(sourceIs6395?12:(mySeriesVod?12:8)),
       nudgeOffset:0.18,
       nudgeMaxRetry:sourceIs6395?6:10,
 
       fragLoadingTimeOut:sourceIs24?60000:(mySeriesVod?60000:45000),
       manifestLoadingTimeOut:sourceIs24?60000:(mySeriesVod?45000:30000),
       levelLoadingTimeOut:sourceIs24?60000:(mySeriesVod?45000:30000),
-      fragLoadingMaxRetry:sourceIsBcdn?8:(sourceIs6395?6:10),
-      manifestLoadingMaxRetry:sourceIsBcdn?6:(sourceIs6395?4:6),
-      levelLoadingMaxRetry:sourceIsBcdn?6:(sourceIs6395?4:6),
-      fragLoadingRetryDelay:1500,
-      manifestLoadingRetryDelay:1500,
-      levelLoadingRetryDelay:1500,
+      fragLoadingMaxRetry:googleCdnProjector?6:(sourceIsBcdn?8:(sourceIs6395?6:10)),
+      manifestLoadingMaxRetry:googleCdnProjector?5:(sourceIsBcdn?6:(sourceIs6395?4:6)),
+      levelLoadingMaxRetry:googleCdnProjector?5:(sourceIsBcdn?6:(sourceIs6395?4:6)),
+      fragLoadingRetryDelay:googleCdnProjector?1000:1500,
+      manifestLoadingRetryDelay:googleCdnProjector?1000:1500,
+      levelLoadingRetryDelay:googleCdnProjector?1000:1500,
 
       startFragPrefetch:sourceIsBcdn?false:true,
       capLevelToPlayerSize:sourceIsBcdn?false:true,
       testBandwidth:sourceIsMain24 ? true : false,
-      abrEwmaDefaultEstimate:sourceIsMain24?300000:(mySeriesVod?650000:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?1200000:((isProjectorWeakMode()||isProjectorMode())?420000:1000000))),
-      abrBandWidthFactor:sourceIsMain24?0.72:(mySeriesVod?0.75:0.58),
-      abrBandWidthUpFactor:sourceIsMain24?0.48:(mySeriesVod?0.45:0.25),
-      liveSyncDurationCount:sourceIs6395?5:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?5:((isProjectorWeakMode()||isProjectorMode())?5:(isUnstableLiveUrl(state.originalUrl)?3:7))),
-      liveMaxLatencyDurationCount:sourceIs6395?12:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?12:((isProjectorWeakMode()||isProjectorMode())?12:(isUnstableLiveUrl(state.originalUrl)?7:14))),
+      abrEwmaDefaultEstimate:googleCdnProjector?1200000:(sourceIsMain24?300000:(mySeriesVod?650000:((isProjectorWeakMode()||isProjectorMode())?420000:1000000))),
+      abrBandWidthFactor:googleCdnProjector?0.95:(sourceIsMain24?0.72:(mySeriesVod?0.75:0.58)),
+      abrBandWidthUpFactor:googleCdnProjector?0.7:(sourceIsMain24?0.48:(mySeriesVod?0.45:0.25)),
+      liveSyncDurationCount:googleCdnProjector?3:(sourceIs6395?5:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?8:((isProjectorWeakMode()||isProjectorMode())?5:(isUnstableLiveUrl(state.originalUrl)?3:7)))),
+      liveMaxLatencyDurationCount:googleCdnProjector?10:(sourceIs6395?12:((isProjectorWeakMode()&&isMfixerTruevisionsLive(state.originalUrl))?20:((isProjectorWeakMode()||isProjectorMode())?12:(isUnstableLiveUrl(state.originalUrl)?7:14)))),
       progressive:sourceIsBcdn?false:true,
       maxStarvationDelay:sourceIsBcdn?60:(mySeriesVod?14:8),
       maxLoadingDelay:sourceIsBcdn?60:(mySeriesVod?14:8),
@@ -3011,9 +3019,17 @@ function playCandidate(candidates,item,serverIndex,idx){
         const low=activeHls.levels[state._24LowLevel];
         setStatus('24PlayerHD • เริ่ม '+(low?.height||'ต่ำ')+'p ก่อน');
         console.log('[TIEA V4] 24HD START LOW',state._24LowLevel,'HIGH',state._24HighLevel);
-      }else if(!sourceIsBcdn){
+      }else if(!sourceIsBcdn && !googleCdnProjector){
         projectorPreferLowLevel();
         chooseProjectorSafeLevel();
+      }else if(googleCdnProjector){
+        try{
+          activeHls.autoLevelCapping=-1;
+          activeHls.currentLevel=-1;
+          activeHls.nextLevel=-1;
+          activeHls.loadLevel=-1;
+        }catch(e){}
+        setStatus('GoogleCDN กีฬา • PROJECTOR STABLE G1 • AUTO ABR');
       }
 
       if(sourceIsBcdn){
