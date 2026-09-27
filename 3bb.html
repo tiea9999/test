@@ -1451,7 +1451,7 @@ window.addEventListener("pageshow", function(){
 <script id="tiea-projector-low-memory-2407">
 (function(){
 "use strict";
-window.TIEA_PROJECTOR_LOW_MEMORY_BUILD="064927-2407";
+window.TIEA_PROJECTOR_LOW_MEMORY_BUILD="092727-SPORT-BUFFER";
 
 /* ลด log ที่สะสม */
 function trimLogs(){
@@ -1483,11 +1483,11 @@ function tuneHls(h){
   h.__tieaLM2407=1;
   try{
     var c=h.config||{};
-    if("maxBufferLength" in c)c.maxBufferLength=Math.min(Number(c.maxBufferLength)||20,12);
-    if("maxMaxBufferLength" in c)c.maxMaxBufferLength=Math.min(Number(c.maxMaxBufferLength)||30,18);
-    if("backBufferLength" in c)c.backBufferLength=0;
-    if("maxBufferSize" in c)c.maxBufferSize=Math.min(Number(c.maxBufferSize)||20000000,12000000);
-    if("maxBufferHole" in c)c.maxBufferHole=Math.min(Number(c.maxBufferHole)||0.5,0.3);
+    if("maxBufferLength" in c)c.maxBufferLength=Math.min(Number(c.maxBufferLength)||45,30);
+    if("maxMaxBufferLength" in c)c.maxMaxBufferLength=Math.min(Number(c.maxMaxBufferLength)||90,60);
+    if("backBufferLength" in c)c.backBufferLength=Math.min(Number(c.backBufferLength)||30,10);
+    if("maxBufferSize" in c)c.maxBufferSize=Math.min(Number(c.maxBufferSize)||60000000,30000000);
+    if("maxBufferHole" in c)c.maxBufferHole=Math.min(Number(c.maxBufferHole)||0.5,0.5);
   }catch(e){}
 }
 setInterval(function(){
@@ -1536,7 +1536,7 @@ setInterval(function(){
   }catch(e){}
 },60000);
 
-console.log("TIEA PROJECTOR LOW MEMORY 2407 loaded");
+console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
 })();
 </script>
 
