@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>TIEA B-CDN Player V1.9</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Tahoma,sans-serif;overflow:hidden}
+#wrap{position:fixed;inset:0;background:#000}
+video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+#topbar{
+  position:absolute;left:0;right:0;top:0;z-index:20;
+  display:flex;gap:8px;align-items:center;padding:10px 12px;
+  background:linear-gradient(to bottom,rgba(0,0,0,.82),rgba(0,0,0,.18),transparent);
+  transition:opacity .25s ease;
+}
+#topbar.hidden{opacity:0;pointer-events:none}
+button{
+  border:0;border-radius:10px;padding:9px 13px;background:#171a1f;color:#fff;
+  font-weight:800;font-size:14px;cursor:pointer;box-shadow:0 0 0 1px rgba(255,255,255,.12) inset
+}
+button:focus{outline:3px solid #00d9ff;outline-offset:2px}
+#title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800}
+#status{
+  position:absolute;left:12px;bottom:12px;z-index:20;
+  background:rgba(0,0,0,.58);padding:7px 10px;border-radius:9px;font-size:12px
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+</head>
+<body>
+<div id="wrap">
+  <video id="v" controls autoplay playsinline webkit-playsinline></video>
+  <div id="topbar">
+    <button id="closeBtn">✕ ปิด</button>
+    <button id="backBtn">← ย้อนกลับ</button>
+    <div id="title">B-CDN</div>
+  </div>
+  <div id="status">พร้อมเล่น</div>
+</div>
+<script>
+const qs=new URLSearchParams(location.search);
+const source=qs.get('url')||'';
+const title=qs.get('title')||'B-CDN';
+const ret=qs.get('return')||'';
+const worker='https://movie2.tawatchai250958.workers.dev/?url=';
+const video=document.getElementById('v');
+const statusEl=document.getElementById('status');
+const topbar=document.getElementById('topbar');
+document.getElementById('title').textContent=title;
+
+let hls=null, hideTimer=null;
+
+function setStatus(t){statusEl.textContent=t}
+function showControls(){
+  topbar.classList.remove('hidden');
+  clearTimeout(hideTimer);
+  hideTimer=setTimeout(()=>{ if(!video.paused) topbar.classList.add('hidden'); },6000);
+}
+function clean(){
+  try{
+    if(hls){try{hls.stopLoad()}catch(e){};try{hls.detachMedia()}catch(e){};try{hls.destroy()}catch(e){};hls=null}
+    try{video.pause()}catch(e){}
+    try{video.removeAttribute('src')}catch(e){}
+    try{video.load()}catch(e){}
+  }catch(e){}
+}
+function goBack(){
+  clean();
+  // V2.1: return URL contains the exact TIEA category marker.
+  // Use it first so index can restore the correct category instead of HOME.
+  if(ret){
+    location.replace(ret);
+    return;
+  }
+  if(history.length>1){
+    history.back();
+    return;
+  }
+  location.replace('./index.html');
+}
+document.getElementById('backBtn').onclick=goBack;
+document.getElementById('closeBtn').onclick=goBack;
+
+['mousemove','pointermove','touchstart','click','keydown'].forEach(ev=>{
+  document.addEventListener(ev,showControls,{passive:true});
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'||e.key==='Backspace'){
+    e.preventDefault(); goBack();
+  }
+});
+
+if(!source){
+  setStatus('ไม่พบลิงก์ B-CDN');
+}else if(!window.Hls||!Hls.isSupported()){
+  setStatus('Hls.js 1.5.17 ไม่พร้อม');
+}else{
+  hls=new Hls({
+    enableWorker:true,
+    lowLatencyMode:false,
+    startFragPrefetch:false,
+    capLevelToPlayerSize:false,
+    progressive:false,
+    maxBufferLength:30,
+    maxMaxBufferLength:60,
+    backBufferLength:15,
+    maxBufferHole:0.5,
+    fragLoadingTimeOut:30000,
+    fragLoadingMaxRetry:8,
+    manifestLoadingMaxRetry:6,
+    levelLoadingMaxRetry:6,
+    maxStarvationDelay:60,
+    maxLoadingDelay:60
+  });
+  const proxied=worker+encodeURIComponent(source);
+  hls.attachMedia(video);
+  hls.on(Hls.Events.MEDIA_ATTACHED,()=>hls.loadSource(proxied));
+  hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+    const levels=hls.levels||[];
+    let pick=-1,bh=-1,bb=-1;
+    levels.forEach((lv,i)=>{
+      const hh=Number(lv.height||0), b=Number(lv.bitrate||0);
+      if(hh>0 && hh<=720 && (hh>bh || (hh===bh && b>bb))){
+        pick=i; bh=hh; bb=b;
+      }
+    });
+    if(pick<0 && levels.length){
+      pick=levels.map((lv,i)=>({i,h:Number(lv.height||0)||99999,b:Number(lv.bitrate||0)||0}))
+                 .sort((a,b)=>a.h-b.h || a.b-b.b)[0].i;
+    }
+    if(pick>=0){
+      hls.autoLevelCapping=pick;
+      hls.startLevel=pick;
+      hls.currentLevel=pick;
+      hls.nextLevel=pick;
+      hls.loadLevel=pick;
+      const lv=levels[pick]||{};
+      setStatus('Hls.js 1.5.17 • FIXED '+(lv.height?lv.height+'p':'LEVEL '+pick));
+    }else{
+      setStatus('Hls.js 1.5.17 • PLAYING');
+    }
+    video.play().catch(()=>{});
+  });
+  hls.on(Hls.Events.ERROR,(_,d)=>{
+    if(d) setStatus('Hls.js 1.5.17 • '+String(d.details||d.type||'error')+(d.fatal?' • fatal':''));
+  });
+}
+window.addEventListener('beforeunload',clean);
+showControls();
+</script>
+</body>
+</html>
+
+<!-- TIEA B-CDN PLAYER V2.0
+     Close and Back return to the exact previous TIEA category via history.back().
+     Top controls stay visible while paused and auto-hide after 6s only during playback.
+-->
+
+<!-- TIEA B-CDN PLAYER V2.1
+     Close/Back prioritizes encoded return URL so the main index restores exact category.
+-->
+
+<!-- TIEA B-CDN PLAYER V2.2
+     Pairs with index V2.2 exact short-drama return fix.
+-->
+
+<!-- TIEA B-CDN PLAYER V2.3 - paired with ALWAYS EXTERNAL ROUTE index -->
+
+<!-- TIEA B-CDN PLAYER V2.4 paired with DEEP DETECT index -->
