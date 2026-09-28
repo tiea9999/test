@@ -887,7 +887,7 @@
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
             <div class="group-title">ทีวีออนไลน์</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/tv-1/3bb.html">📡 ทีวีออนไลน์</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/test/3bb.html">📡 ทีวีออนไลน์</button>
             <div class="group-title">หนัง</div>
             <button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button>
             <div class="group-title">ซีรีส์</div>
@@ -896,7 +896,7 @@ data-source="series-24hd">📺 ซีรีส์ ฝรั่ง</button><butto
 data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn"  
 data-vip-link="https://tiea9999.github.io/tv-1/VIP.html">💎 VIP</button>
             <div class="group-title">ระบบ</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/tv-1/index.html">🏠 HOME จริง</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/test/index.html">🏠 HOME จริง</button>
         </aside>
         <main class="main">
             <div class="topbar">
@@ -953,7 +953,7 @@ data-vip-link="https://tiea9999.github.io/tv-1/VIP.html">💎 VIP</button>
         </div>
     </div>
     <script>
-        const HOME_URL='https://tiea9999.github.io/tv-1/index.html',LIVE_URL='https://tiea9999.github.io/tv-1/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
+        const HOME_URL='https://tiea9999.github.io/test/index.html',LIVE_URL='https://tiea9999.github.io/tv-1/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
 
 // Dynamic Provider Engine
 // Resolver ต้องเป็น API/Worker ที่ผู้ใช้ควบคุมและคืน JSON: {"url":"https://...m3u8"}
@@ -966,10 +966,9 @@ const DYNAMIC_PROVIDERS=[
 ];
 const MY_CHINA=RAW+'myseries-china.json',MY_KOREA=RAW+'myseries-korea.json',MY_THAI=RAW+'myseries-thai.json',MY_JAPAN=RAW+'myseries-japan.json',MY_SHORT=RAW+'myseries-short.json',MY_MOVIE=RAW+'myseries-movie.json';
 const TV_LINKS=[
-{kind:'link',title:'LiveDooMovies',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/livedoomovies.html',group:'ทีวีออนไลน์'},
-{kind:'link',title:'ตารางแข่งขัน',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/live.html',group:'ทีวีออนไลน์'},
-{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/3bb.html',group:'ทีวีออนไลน์'},
-{kind:'folder',title:'DOOBALL6395',image:FOLDER_LOGO,source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u',group:'ทีวีออนไลน์'}
+
+{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/test/3bb.html',group:'ทีวีออนไลน์'},
+
 ];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'ดูซีรี่ย์จีน',image:FOLDER_LOGO,source:MY_CHINA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์เกาหลี',image:FOLDER_LOGO,source:MY_KOREA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์ไทย',image:FOLDER_LOGO,source:MY_THAI,group:'MySeries'},{kind:'folder',title:'ซีรี่ย์ญี่ปุ่น',image:FOLDER_LOGO,source:MY_JAPAN,group:'MySeries'},{kind:'folder',title:'ดูละครสั้น',image:FOLDER_LOGO,source:MY_SHORT,group:'MySeries'},{kind:'folder',title:'ดูหนังออนไลน์',image:FOLDER_LOGO,source:MY_MOVIE,group:'MySeries'}];
 const SOURCES={
@@ -5423,7 +5422,7 @@ function tieaBack(){
     }
     location.href=(typeof HOME_URL!=='undefined'?HOME_URL:'https://tiea9999.github.io/tv-1/index.html');
   }catch(e){
-    location.href='https://tiea9999.github.io/tv-1/index.html';
+    location.href='https://tiea9999.github.io/test/index.html';
   }
 }
 window.tieaApp24Back=tieaBack;
