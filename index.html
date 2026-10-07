@@ -1,3 +1,7 @@
+<!-- TIEA PATCH 2026-10-07: RESTORE SHORT MOVIE B-CDN
+     *.b-cdn.net -> movie2 V1.1 only + Hls.js 1.5.17
+     no direct fallback; 037HD P2 and other providers preserved
+-->
 <!-- TIEA PATCH 2026-10-07: 037HD WORKER-FIRST ROUTE
      streamhls.com / steamhls88.com -> IPTV Worker + 037 referer
      NO direct fallback for these hosts; other providers unchanged
@@ -15,6 +19,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <title>TIEA IPTV HOME V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <script>window.TIEA_HLS_LATEST=window.Hls;</script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
+    <script>window.TIEA_HLS_1517=window.Hls; window.Hls=window.TIEA_HLS_LATEST;</script>
     <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
     <style>
         * {
@@ -880,7 +887,7 @@
             <button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn"         
 data-source="series-24hd">📺 ซีรีส์ ฝรั่ง</button><button class="menu-btn"            
 data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn"  
-data-vip-link="https://tiea9999.github.io/tv-1/VIP.html">💎 VIP</button>
+data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
             <div class="group-title">ระบบ</div>
             <button class="menu-btn" data-link="https://tiea9999.github.io/test/index.html">🏠 HOME จริง</button>
         </aside>
@@ -1631,6 +1638,13 @@ function normalize24PlayerUrl(url){
   }
 }
 
+function isBcdnUrl(url){
+  try{
+    const h=new URL(String(url||'').trim()).hostname.toLowerCase();
+    return h==='b-cdn.net'||h.endsWith('.b-cdn.net');
+  }catch(e){return false}
+}
+
 function is037HlsUrl(url){
   try{
     const h=new URL(String(url||'').trim()).hostname.toLowerCase();
@@ -1642,6 +1656,11 @@ function is037HlsUrl(url){
 function workerUrlFor(url){
   url=String(url||'').trim();
   if(!url)return '';
+
+  // Short movie B-CDN: proven isolated movie2 V1.1 route.
+  if(isBcdnUrl(url)){
+    return MOVIE2_PROXY+encodeURIComponent(url);
+  }
 
   // 037HD: never let browser request StreamHLS directly (direct = 403).
   // Worker P2 handles master, extensionless child playlists and segments.
@@ -2293,6 +2312,9 @@ async function playItem(item,serverIndex=0,displayTitle=''){
     // Torbo007 MUST stay inside Worker. Never fall back to direct URL because
     // torbo007 blocks browser-origin requests with 403/CORS.
     candidates=[workerUrlFor(original)];
+  }else if(isBcdnUrl(original)){
+    // B-CDN short movie: movie2 only, no direct fallback.
+    candidates=[workerUrlFor(original)];
   }else if(is037HlsUrl(original)){
     // 037HD StreamHLS direct browser request is 403: Worker only, no direct fallback.
     candidates=[workerUrlFor(original)];
@@ -2341,6 +2363,8 @@ function playCandidate(candidates,item,serverIndex,idx){
   const direct=getUrl(item,serverIndex);
   const sourceIs6395=is6395Url(direct);
   const sourceIs24=is24PlayerHdUrl(direct);
+  const sourceIsBcdn=isBcdnUrl(direct);
+  if(sourceIsBcdn) url=workerUrlFor(direct);
 
   const next=()=>{
     if(state._switchingCandidate)return;
@@ -2449,7 +2473,7 @@ function playCandidate(candidates,item,serverIndex,idx){
   if(Hls.isSupported() && looksHls){
     const mySeriesVod=isMySeriesVodUrl(state.originalUrl||url);
 
-    state.hls=new Hls({
+    state.hls=new (sourceIsBcdn && window.TIEA_HLS_1517 ? window.TIEA_HLS_1517 : Hls)({
       loader: Hls.DefaultConfig.loader, // 4.7.5: Movie2 V3.8 handles child + segment chain
       enableWorker:false,
       lowLatencyMode:false,
