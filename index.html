@@ -1,3 +1,11 @@
+<!-- TIEA PATCH 2026-10-07: 037HD WORKER-FIRST ROUTE
+     streamhls.com / steamhls88.com -> IPTV Worker + 037 referer
+     NO direct fallback for these hosts; other providers unchanged
+-->
+<!-- TIEA PATCH 2026-10-06: RESTORE ALL MOVIES IN FIRST FILE
+     movie-main = หนังใหม่ 2026 / 2025 / Netflix / ฝรั่ง / เอเชีย / ไทย / การ์ตูน / 18+
+     movie-24hd + player/provider logic เดิมคงไว้
+-->
 <!DOCTYPE html>
 <!-- TIEA CONFIRMED PLAY BASE 2026-10-04: 4.7.6 / 24HD-123HD 1.5.7 STABLE -->
 <html lang="th">
@@ -865,14 +873,14 @@
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
             <div class="group-title">ทีวีออนไลน์</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/test/3bb.html">📡 ทีวีออนไลน์</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/tv-1/3bb.html">📡 ทีวีออนไลน์</button>
             <div class="group-title">หนัง</div>
             <button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button>
             <div class="group-title">ซีรีส์</div>
             <button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn"         
 data-source="series-24hd">📺 ซีรีส์ ฝรั่ง</button><button class="menu-btn"            
 data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn"  
-data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
+data-vip-link="https://tiea9999.github.io/tv-1/VIP.html">💎 VIP</button>
             <div class="group-title">ระบบ</div>
             <button class="menu-btn" data-link="https://tiea9999.github.io/test/index.html">🏠 HOME จริง</button>
         </aside>
@@ -944,13 +952,25 @@ const DYNAMIC_PROVIDERS=[
 ];
 const MY_CHINA=RAW+'myseries-china.json',MY_KOREA=RAW+'myseries-korea.json',MY_THAI=RAW+'myseries-thai.json',MY_JAPAN=RAW+'myseries-japan.json',MY_SHORT=RAW+'myseries-short.json',MY_MOVIE=RAW+'myseries-movie.json';
 const TV_LINKS=[
-{kind:'link',title:'LiveDooMovies',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/livedoomovies.html',group:'ทีวีออนไลน์'},
-{kind:'link',title:'ตารางแข่งขัน',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv/live.html',group:'ทีวีออนไลน์'},
+{kind:'link',title:'LiveDooMovies',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/livedoomovies.html',group:'ทีวีออนไลน์'},
+{kind:'link',title:'ตารางแข่งขัน',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/live.html',group:'ทีวีออนไลน์'},
 {kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/test/3bb.html',group:'ทีวีออนไลน์'},
 {kind:'folder',title:'DOOBALL6395',image:FOLDER_LOGO,source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u',group:'ทีวีออนไลน์'}
 ];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'ดูซีรี่ย์จีน',image:FOLDER_LOGO,source:MY_CHINA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์เกาหลี',image:FOLDER_LOGO,source:MY_KOREA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์ไทย',image:FOLDER_LOGO,source:MY_THAI,group:'MySeries'},{kind:'folder',title:'ซีรี่ย์ญี่ปุ่น',image:FOLDER_LOGO,source:MY_JAPAN,group:'MySeries'},{kind:'folder',title:'ดูละครสั้น',image:FOLDER_LOGO,source:MY_SHORT,group:'MySeries'},{kind:'folder',title:'ดูหนังออนไลน์',image:FOLDER_LOGO,source:MY_MOVIE,group:'MySeries'}];
-const SOURCES={'tv-6395':[{title:'DooBall6395',source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u'}],'movie-main':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],'movie-24hd':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],'series-main':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA},{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ดูซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ดูละครสั้น',source:MY_SHORT},{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-update':[{title:'ซีรี่ย์จีน',source:MY_CHINA},{title:'ซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ซีรี่ย์สั้น',source:MY_SHORT}],'series-china':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA}],'series-korea':[{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA}],'series-thai':[{title:'ดูซีรี่ย์ไทย',source:MY_THAI}],'series-japan':[{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN}],'series-short':[{title:'ดูละครสั้น',source:MY_SHORT}],'series-movie':[{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]};
+const SOURCES={'tv-6395':[{title:'DooBall6395',source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u'}],'movie-main':[
+
+  {title:'หนังใหม่ 2026',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%202026.json'},
+  {title:'หนังใหม่ 2025',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%202025.json'},
+  {title:'Netflix',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/Netflix.json'},
+  {title:'หนังฝรั่ง',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B8%9D%E0%B8%A3%E0%B8%B1%E0%B9%88%E0%B8%87.json'},
+  {title:'หนังเอเชีย',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%80%E0%B8%AD%E0%B9%80%E0%B8%8A%E0%B8%B5%E0%B8%A2.json'},
+  {title:'หนังไทย',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%84%E0%B8%97%E0%B8%A2.json'},
+  {title:'หนังการ์ตูน',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%8C%E0%B8%95%E0%B8%B9%E0%B8%99.json'},
+  {title:'หนัง 18+',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%2018%2B.json'}
+
+],
+'movie-24hd':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],'series-main':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA},{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ดูซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ดูละครสั้น',source:MY_SHORT},{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-update':[{title:'ซีรี่ย์จีน',source:MY_CHINA},{title:'ซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ซีรี่ย์สั้น',source:MY_SHORT}],'series-china':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA}],'series-korea':[{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA}],'series-thai':[{title:'ดูซีรี่ย์ไทย',source:MY_THAI}],'series-japan':[{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN}],'series-short':[{title:'ดูละครสั้น',source:MY_SHORT}],'series-movie':[{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]};
 const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null};
 const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel'),native24Frame=$('native24Frame');
 
@@ -1611,9 +1631,24 @@ function normalize24PlayerUrl(url){
   }
 }
 
+function is037HlsUrl(url){
+  try{
+    const h=new URL(String(url||'').trim()).hostname.toLowerCase();
+    return h==='streamhls.com'||h.endsWith('.streamhls.com')||
+           h==='steamhls88.com'||h.endsWith('.steamhls88.com');
+  }catch(e){return false}
+}
+
 function workerUrlFor(url){
   url=String(url||'').trim();
   if(!url)return '';
+
+  // 037HD: never let browser request StreamHLS directly (direct = 403).
+  // Worker P2 handles master, extensionless child playlists and segments.
+  if(is037HlsUrl(url)){
+    return PROXY+encodeURIComponent(url)
+      +'&referer='+encodeURIComponent('https://www.037hddmovie.com/');
+  }
 
   // 24HD CDN ใหม่ vdohls.com ต้องผ่าน IPTV Worker ตัวหลัก
   if(String(url||'').toLowerCase().includes('vdohls.com')){
@@ -2257,6 +2292,9 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   if(sourceIsTorbo){
     // Torbo007 MUST stay inside Worker. Never fall back to direct URL because
     // torbo007 blocks browser-origin requests with 403/CORS.
+    candidates=[workerUrlFor(original)];
+  }else if(is037HlsUrl(original)){
+    // 037HD StreamHLS direct browser request is 403: Worker only, no direct fallback.
     candidates=[workerUrlFor(original)];
   }else if(is24PlayerHdUrl(original)){
     candidates=[workerUrlFor(original)];
