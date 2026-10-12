@@ -902,7 +902,7 @@ data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
     </div>
     <div class="player-panel" id="playerPanel">
         <div class="player-top">
-            <button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn" id="app24ReloadBtn" type="button">⟳ โหลดใหม่</button><button class="player-btn" id="app24FullscreenBtn" type="button">⛶ เต็มจอ</button><button class="player-btn home" id="playerHomeBtn">🏠 HOME</button>
+            <button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn" id="app24ReloadBtn">⟳ โหลดใหม่</button><button class="player-btn" id="app24FullscreenBtn">⛶ เต็มจอ</button><button class="player-btn home" id="playerHomeBtn">⌂ HOME</button>
             <div class="player-title" id="playerTitle">กำลังเล่น</div>
         </div>
         <div class="player-wrap">
@@ -946,7 +946,7 @@ data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
         </div>
     </div>
     <script>
-        const HOME_URL='https://tiea9999.github.io/test/index.html',LIVE_URL='https://tiea9999.github.io/test/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
+        const HOME_URL='https://tiea9999.github.io/test/app24/index.html',LIVE_URL='https://tiea9999.github.io/test/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
 
 // Dynamic Provider Engine
 // Resolver ต้องเป็น API/Worker ที่ผู้ใช้ควบคุมและคืน JSON: {"url":"https://...m3u8"}
@@ -1497,6 +1497,7 @@ function ask24PlayerMode(url,title){
   return launch24AndroidApp(url,'wiseplay',title);
 }
 function route24Player(url,title){
+  if(new URLSearchParams(location.search).has('url'))return open24NativePlayer(url,title);
   let mode=get24PlayerMode();
   if(mode==='ask')return ask24PlayerMode(url,title);
   if(mode==='web')return open24NativePlayer(url,title);
@@ -2248,7 +2249,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   // ALPHA 4.7.5:
   // Android / Projector ยังใช้ Player ของเครื่องเหมือนเดิม
   // Desktop PC ใช้ HLS.js + IPTV Worker 1.5.5 Dynamic AAA Host
-  if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original) && isAndroidDevice()){
+  if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original) && isAndroidDevice() && !new URLSearchParams(location.search).has('url')){
     route24Player(original,title);
     return;
   }
@@ -2657,7 +2658,7 @@ function showPlayerUI(focusClose){
         }catch(e){}
         playerPanel.classList.add('hide-ui');
       }
-    },6000);
+    },3000);
   }catch(e){}
 }
 
@@ -2976,30 +2977,6 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
 </script>
 
 <script>
-/* APP24 V1.0.9: controls only; playback provider routing untouched */
-(function(){
- const css=document.createElement('style');
- css.textContent=`.player-panel .player-top{display:flex!important;align-items:center!important;gap:7px!important;flex-wrap:nowrap!important;padding:calc(env(safe-area-inset-top,0px) + 8px) 8px 8px!important;overflow-x:auto!important;scrollbar-width:none!important;z-index:10080!important}.player-panel .player-top .player-btn{display:inline-flex!important;flex:0 0 auto!important;padding:10px 11px!important;font-size:13px!important;min-height:42px!important}.player-panel .player-top .player-title{display:none!important}.player-panel .player-top::-webkit-scrollbar{display:none}.player-panel.hide-ui .player-top{opacity:0!important;visibility:hidden!important;pointer-events:none!important}`;
- document.head.appendChild(css);
- window.addEventListener('DOMContentLoaded',()=>{
-   const reload=document.getElementById('app24ReloadBtn');
-   const full=document.getElementById('app24FullscreenBtn');
-   if(reload)reload.onclick=()=>{
-     try{showPlayerUI(false)}catch(e){}
-     const u=new URL(location.href);u.searchParams.set('_reload',String(Date.now()));
-     location.replace(u.href);
-   };
-   if(full)full.onclick=async()=>{
-     try{
-       const target=document.getElementById('playerPanel')||document.documentElement;
-       if(document.fullscreenElement){await document.exitFullscreen();}
-       else if(target.requestFullscreen){await target.requestFullscreen();}
-       else if(document.getElementById('video')?.webkitEnterFullscreen){document.getElementById('video').webkitEnterFullscreen();}
-     }catch(e){}
-     try{showPlayerUI(false)}catch(e){}
-   };
- });
-})();
 /* APP24 isolated bridge: source player engine unchanged */
 (function(){
  const params=new URLSearchParams(location.search);
@@ -3007,10 +2984,16 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
  const returnTo='https://tiea9999.github.io/test/app24/series-china.html';
  function leave(){try{cleanupPlayer()}catch(e){};if(window.parent!==window){window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}else location.href=returnTo;}
  window.addEventListener('DOMContentLoaded',()=>{
+  const panel=document.getElementById('playerPanel');
+  const reload=document.getElementById('app24ReloadBtn');
+  const full=document.getElementById('app24FullscreenBtn');
+  if(reload)reload.onclick=()=>{ if(url){try{cleanupPlayer()}catch(e){};playItem({title,servers:[{name:'Main',url,page}],page},0,title);} };
+  if(full)full.onclick=()=>{const target=panel||document.documentElement;if(!document.fullscreenElement){target.requestFullscreen?.().catch(()=>{});}else{document.exitFullscreen?.().catch(()=>{});}};
+  const home=document.getElementById('playerHomeBtn');
+  if(home)home.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();try{cleanupPlayer()}catch(err){};window.top.location.href='https://tiea9999.github.io/test/app24/index.html';},true);
   for(const id of ['closePlayerBtn']){
    const b=document.getElementById(id);if(b)b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();leave()},true);
   }
-  const home=document.getElementById('playerHomeBtn');if(home)home.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();try{cleanupPlayer()}catch(err){};top.location.href='https://tiea9999.github.io/test/app24/index.html';},true);
   if(!url){document.getElementById('statusText').textContent='ไม่พบ URL สำหรับเล่น';return;}
   document.querySelector('.sidebar')?.remove();document.querySelector('.topbar')?.remove();
   document.getElementById('content').style.display='none';
