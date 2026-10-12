@@ -28,7 +28,7 @@ function showDetails(item){
   document.getElementById('episodeInfo').textContent='เลือกตอนที่ต้องการ';
   window.scrollTo(0,0);
 }
-window.addEventListener('message',e=>{if(e.origin!==location.origin||e.data?.type!=='TIEA_APP24_PLAYER_CLOSE')return;document.getElementById('tieaPlayerOverlay').classList.remove('show');document.getElementById('tieaPlayerFrame').src='about:blank';});
+window.addEventListener('message',e=>{if(e.origin!==location.origin||e.data?.type!=='TIEA_APP24_PLAYER_CLOSE')return;closeApp24Player();});
 document.getElementById('backList').onclick=()=>{details.hidden=true;grid.hidden=false;window.scrollTo(0,0)};
 async function fetchJSON(url, timeoutMs=12000){
   const controller=new AbortController();
@@ -67,5 +67,18 @@ async function load(){
     b.append(im,label);b.onclick=()=>showDetails(item);grid.append(b);
   });
 }
+
+function closeApp24Player(){
+ const frame=document.getElementById('tieaPlayerFrame');
+ try{frame.contentWindow.postMessage({type:'TIEA_APP24_STOP'},location.origin)}catch(e){}
+ document.getElementById('tieaPlayerOverlay').classList.remove('show');
+ frame.src='about:blank';
+}
+window.addEventListener('pagehide',closeApp24Player);
+window.addEventListener('popstate',()=>{
+ if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closeApp24Player();
+ else if(!document.getElementById('details').hidden){document.getElementById('details').hidden=true;document.getElementById('posters').hidden=false;}
+});
+
 load();
 </script></body></html>
