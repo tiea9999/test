@@ -1,0 +1,1 @@
+V1.0.5: Fix AppCreator24 localhost relative links. All internal HTML links point to https://tiea9999.github.io/test/app24/ . HOME has no hero and V1.0 under brand. 3BB playback unchanged. Upload all HTML files into test/app24/ and commit. If App24 embeds HTML, ensure it can access HTTPS URLs.
