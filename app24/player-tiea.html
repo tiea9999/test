@@ -2993,12 +2993,42 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
  if(typeof originalSetStatus==='function'){window.setStatus=function(t){originalSetStatus(t);if(!d.classList.contains('ok'))log(t)}}
  setTimeout(()=>{if(!d.classList.contains('ok') && (!v||v.readyState<2))log('ยังไม่ได้ภาพ/เสียง • ตรวจ URL, HLS หรือข้อจำกัด Android WebView')},30000);
 })();
+/* APP24 V1.0.13: stop playback before leaving or hiding iframe */
+(function(){
+  let stopped=false;
+  function stopMedia(){
+    if(stopped)return;
+    stopped=true;
+    try{if(typeof cleanupPlayer==='function')cleanupPlayer()}catch(e){}
+    try{
+      const v=document.getElementById('video');
+      if(v){v.pause();v.muted=true;v.removeAttribute('src');v.src='';}
+    }catch(e){}
+    try{
+      const f=document.getElementById('native24Frame');
+      if(f){f.src='about:blank';f.removeAttribute('src');}
+    }catch(e){}
+    try{if(window.state?.playTimer)clearTimeout(window.state.playTimer)}catch(e){}
+  }
+  window.TIEA_APP24_STOP=stopMedia;
+  window.addEventListener('pagehide',stopMedia);
+  window.addEventListener('beforeunload',stopMedia);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden && window.parent!==window) {
+      // A hidden embedded player must not continue making sound.
+      try{document.getElementById('video')?.pause()}catch(e){}
+    }
+  });
+  window.addEventListener('message',e=>{
+    if(e.origin===location.origin && e.data?.type==='TIEA_APP24_STOP')stopMedia();
+  });
+})();
 /* APP24 isolated bridge: source player engine unchanged */
 (function(){
  const params=new URLSearchParams(location.search);
  const url=params.get('url'), title=params.get('title')||'กำลังเล่น', page=params.get('page')||'';
  const returnTo='https://tiea9999.github.io/test/app24/series-china.html';
- function leave(){try{cleanupPlayer()}catch(e){};if(window.parent!==window){window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}else location.href=returnTo;}
+ function leave(){try{window.TIEA_APP24_STOP?.()}catch(e){};if(window.parent!==window){window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}else location.href=returnTo;}
  window.addEventListener('DOMContentLoaded',()=>{
   const panel=document.getElementById('playerPanel');
   const reload=document.getElementById('app24ReloadBtn');
@@ -3006,7 +3036,7 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
   if(reload)reload.onclick=()=>{ if(url){try{cleanupPlayer()}catch(e){};playItem({title,servers:[{name:'Main',url,page}],page},0,title);} };
   if(full)full.onclick=()=>{const target=panel||document.documentElement;if(!document.fullscreenElement){target.requestFullscreen?.().catch(()=>{});}else{document.exitFullscreen?.().catch(()=>{});}};
   const home=document.getElementById('playerHomeBtn');
-  if(home)home.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();try{cleanupPlayer()}catch(err){};window.top.location.href='https://tiea9999.github.io/test/app24/index.html';},true);
+  if(home)home.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();try{window.TIEA_APP24_STOP?.()}catch(err){};window.top.location.href='https://tiea9999.github.io/test/app24/index.html';},true);
   for(const id of ['closePlayerBtn']){
    const b=document.getElementById(id);if(b)b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();leave()},true);
   }
