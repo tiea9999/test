@@ -22,7 +22,7 @@ function showDetails(item){
       document.getElementById('episodeInfo').textContent='กำลังเปิด '+b.textContent;
       const query=new URLSearchParams({url,title:title+' '+b.textContent,page:server?.page||ep.page||item.page||item.web||''});
       document.getElementById('tieaPlayerFrame').src='https://tiea9999.github.io/test/app24/player-tiea.html?'+query.toString();
-      document.getElementById('tieaPlayerOverlay').classList.add('show');if(!tieaPlayerState){history.pushState({tieaPlayer:true},'','#player');tieaPlayerState=true;}
+      document.getElementById('tieaPlayerOverlay').classList.add('show');
       document.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');
     });list.appendChild(b)
   });
@@ -30,10 +30,7 @@ function showDetails(item){
   window.scrollTo(0,0);
 }
 window.addEventListener('message',e=>{if(e.origin!==location.origin||e.data?.type!=='TIEA_APP24_PLAYER_CLOSE')return;closeApp24Player();});
-document.getElementById('backList').onclick=()=>{details.hidden=true;grid.hidden=false;window.scrollTo(0,0);if(history.state?.tieaDetails)history.back()};
-let tieaDetailsState=false,tieaPlayerState=false;
-const tieaOriginalShowDetails=showDetails;
-showDetails=function(item){if(!tieaDetailsState){history.pushState({tieaDetails:true},'','#details');tieaDetailsState=true}tieaOriginalShowDetails(item)};
+document.getElementById('backList').onclick=()=>{details.hidden=true;grid.hidden=false;window.scrollTo(0,0)};
 async function load(){try{
   message.textContent='กำลังโหลดรายการจาก JSON เดิม…';
   const r=await fetch(DATA_URL,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);
@@ -51,7 +48,7 @@ async function load(){try{
       const im=document.createElement('img');im.loading='lazy';im.decoding='async';im.alt='';im.src=item.poster||item.logo||item.image||item.thumb||'';
       im.onerror=()=>im.style.visibility='hidden';
       const label=document.createElement('span');label.textContent=item.title||item.name||'ไม่มีชื่อ';
-      b.append(im,label);b.onclick=()=>{const eps=Array.isArray(item.episodes)?item.episodes:[];const direct=!!(item.url||item.link||item.stream||item.file||item.play_url);showDetails(item);if(direct||eps.length===1){setTimeout(()=>{const first=document.querySelector('#episodes .ep');if(first)first.click()},0)}};frag.append(b);
+      b.append(im,label);b.onclick=()=>showDetails(item);frag.append(b);
     }
     cursor+=batch;grid.insertBefore(frag,sentinel);
     message.textContent='แสดง '+Math.min(cursor,data.length)+' จาก '+data.length+' รายการ';
@@ -65,18 +62,17 @@ async function load(){try{
 }catch(e){message.textContent='โหลดรายการไม่สำเร็จ: '+e.message+' (ตรวจ JSON และการเชื่อมต่อ)'}}
 function closeApp24Player(){
  const frame=document.getElementById('tieaPlayerFrame');
- try{frame.contentWindow.postMessage({type:'TIEA_APP24_STOP'},location.origin)}catch(e){}
- document.getElementById('tieaPlayerOverlay').classList.remove('show');
- tieaPlayerState=false;
- frame.src='about:blank';
+ // Stop media before hiding the overlay, then destroy the iframe document so
+ // audio cannot continue if a browser delays the postMessage handler.
+ try{if(frame&&frame.contentWindow){frame.contentWindow.postMessage({type:'TIEA_APP24_STOP'},location.origin);const v=frame.contentDocument&&frame.contentDocument.getElementById('video');if(v){v.pause();v.muted=true;v.removeAttribute('src');}}}catch(e){}
+ const overlay=document.getElementById('tieaPlayerOverlay');
+ if(overlay)overlay.classList.remove('show');
+ if(frame){frame.src='about:blank';}
 }
 window.addEventListener('pagehide',closeApp24Player);
 window.addEventListener('popstate',()=>{
- const overlay=document.getElementById('tieaPlayerOverlay');
- if(overlay.classList.contains('show')){closeApp24Player();tieaPlayerState=false;return;}
- if(!document.getElementById('details').hidden){document.getElementById('details').hidden=true;document.getElementById('posters').hidden=false;tieaDetailsState=false;window.scrollTo(0,0);return;}
- // On a top-level Back, go straight to APP24 instead of walking through stale movie pages.
- if(location.hash===''||location.hash==='#'){location.replace('https://tiea9999.github.io/test/app24/index.html');}
+ if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closeApp24Player();
+ else if(!document.getElementById('details').hidden){document.getElementById('details').hidden=true;document.getElementById('posters').hidden=false;}
 });
 
 load();

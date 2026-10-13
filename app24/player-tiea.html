@@ -1818,6 +1818,7 @@ function dropProjectorQuality(){
 }
 
 function softRecoverPlayback(){
+  if(window.__TIEA_APP24_STOPPED)return;
   try{
     forceFullSound();
     if(state.hls){
@@ -1830,6 +1831,7 @@ function softRecoverPlayback(){
 }
 
 function setupProjectorVideoRecovery(){
+  if(window.__TIEA_APP24_STOPPED)return;
   if(setupProjectorVideoRecovery._ready)return;
   setupProjectorVideoRecovery._ready=true;
 
@@ -2999,10 +3001,18 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
   function stopMedia(){
     if(stopped)return;
     stopped=true;
+    // Prevent delayed playback-recovery callbacks from restarting sound after close.
+    window.__TIEA_APP24_STOPPED=true;
+    try{if(typeof stopWatchdog==='function')stopWatchdog()}catch(e){}
     try{if(typeof cleanupPlayer==='function')cleanupPlayer()}catch(e){}
     try{
       const v=document.getElementById('video');
-      if(v){v.pause();v.muted=true;v.removeAttribute('src');v.src='';}
+      if(v){
+        try{v.pause()}catch(e){}
+        try{v.muted=true;v.defaultMuted=true;v.volume=0}catch(e){}
+        try{v.play=function(){return Promise.resolve()}}catch(e){}
+        try{v.removeAttribute('src');v.src=''}catch(e){}
+      }
     }catch(e){}
     try{
       const f=document.getElementById('native24Frame');
