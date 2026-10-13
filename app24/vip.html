@@ -3,5 +3,7 @@
 </style></head><body><header class="top"><a class="back" href="https://tiea9999.github.io/test/app24/index.html">❮ ย้อนกลับ</a><span class="brand">TIEA <b>APP24</b></span><a class="home" href="https://tiea9999.github.io/test/app24/index.html">⌂ HOME</a></header><main style="padding:0;max-width:none"><div id="vipStatus" style="padding:8px 14px;color:#ccc;font-size:13px">กำลังเปิด VIP…</div><iframe id="vipFrame" src="https://tiea9999.github.io/test/VIP.html" title="VIP" allow="autoplay;fullscreen;encrypted-media" allowfullscreen style="width:100%;height:calc(100dvh - 105px);min-height:450px;border:0;background:#080a10"></iframe></main><script>
 const appHome='https://tiea9999.github.io/test/app24/index.html';
 document.querySelectorAll('.top a').forEach(a=>a.href=appHome);
+history.replaceState({tieaApp24Vip:true},'','#vip');
+window.addEventListener('popstate',()=>location.replace(appHome));
 document.getElementById('vipFrame').addEventListener('load',()=>document.getElementById('vipStatus').textContent='VIP • กดย้อนกลับด้านบนเพื่อกลับ APP24');
 </script></body></html>
