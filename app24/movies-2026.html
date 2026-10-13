@@ -36,13 +36,29 @@ async function load(){try{
   const r=await fetch(DATA_URL,{cache:'no-store'});if(!r.ok)throw Error('HTTP '+r.status);
   const data=itemsFrom(await r.json());message.textContent='พบ '+data.length+' รายการ';
   if(!data.length){message.textContent+=' • ไม่พบรูปแบบรายการที่รองรับ';return}
-  data.forEach(item=>{
-    const b=document.createElement('button');b.className='poster';
-    const im=document.createElement('img');im.loading='lazy';im.alt='';im.src=item.poster||item.logo||item.image||item.thumb||'';
-    im.onerror=()=>im.style.visibility='hidden';
-    const label=document.createElement('span');label.textContent=item.title||item.name||'ไม่มีชื่อ';
-    b.append(im,label);b.onclick=()=>showDetails(item);grid.append(b)
-  });
+  // Render 12 posters per frame; load remaining posters only near viewport.
+  let cursor=0;const batch=12;
+  const sentinel=document.createElement('div');sentinel.style.cssText='height:1px;grid-column:1/-1';
+  grid.appendChild(sentinel);
+  function appendBatch(){
+    if(cursor>=data.length){sentinel.remove();observer?.disconnect();return;}
+    const frag=document.createDocumentFragment();
+    for(const item of data.slice(cursor,cursor+batch)){
+      const b=document.createElement('button');b.className='poster';
+      const im=document.createElement('img');im.loading='lazy';im.decoding='async';im.alt='';im.src=item.poster||item.logo||item.image||item.thumb||'';
+      im.onerror=()=>im.style.visibility='hidden';
+      const label=document.createElement('span');label.textContent=item.title||item.name||'ไม่มีชื่อ';
+      b.append(im,label);b.onclick=()=>showDetails(item);frag.append(b);
+    }
+    cursor+=batch;grid.insertBefore(frag,sentinel);
+    message.textContent='แสดง '+Math.min(cursor,data.length)+' จาก '+data.length+' รายการ';
+  }
+  let observer=null;
+  if('IntersectionObserver' in window){observer=new IntersectionObserver(entries=>{if(entries.some(e=>e.isIntersecting))appendBatch()},{rootMargin:'450px'});}
+  appendBatch();
+  if(observer)observer.observe(sentinel);
+  else {const more=document.createElement('button');more.textContent='โหลดรายการเพิ่ม';more.className='ep';sentinel.append(more);more.onclick=()=>{appendBatch();if(cursor>=data.length)more.remove()};}
+
 }catch(e){message.textContent='โหลดรายการไม่สำเร็จ: '+e.message+' (ตรวจ JSON และการเชื่อมต่อ)'}}
 function closeApp24Player(){
  const frame=document.getElementById('tieaPlayerFrame');
