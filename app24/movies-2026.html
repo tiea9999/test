@@ -9,7 +9,7 @@ function itemsFrom(data){if(Array.isArray(data))return data;for(const k of ['ite
 function showDetails(item){
   grid.hidden=true;details.hidden=false;
   const title=item.title||item.name||'ไม่มีชื่อ';
-  document.getElementById('detailTitle').textContent=title;
+  const titleNode=document.getElementById('detailTitle');titleNode.textContent=title;titleNode.style.cursor='pointer';titleNode.title='กดเพื่อเล่นทันที';titleNode.onclick=()=>{const first=document.querySelector('#episodes .ep');if(first)first.click()};
   const eps=Array.isArray(item.episodes)&&item.episodes.length?item.episodes:[item];
   const list=document.getElementById('episodes');list.replaceChildren();
   if(!eps.length){list.textContent='ไม่มีลิงก์ใน JSON';return}
@@ -51,7 +51,7 @@ async function load(){try{
       const im=document.createElement('img');im.loading='lazy';im.decoding='async';im.alt='';im.src=item.poster||item.logo||item.image||item.thumb||'';
       im.onerror=()=>im.style.visibility='hidden';
       const label=document.createElement('span');label.textContent=item.title||item.name||'ไม่มีชื่อ';
-      b.append(im,label);b.onclick=()=>{const eps=Array.isArray(item.episodes)?item.episodes:[];const direct=!!(item.url||item.link||item.stream||item.file||item.play_url);showDetails(item);if(direct||eps.length===1){setTimeout(()=>{const first=document.querySelector('#episodes .ep');if(first)first.click()},0)}};frag.append(b);
+      b.append(im,label);b.onclick=()=>{showDetails(item);setTimeout(()=>{const first=document.querySelector('#episodes .ep');if(first)first.click()},0)};frag.append(b);
     }
     cursor+=batch;grid.insertBefore(frag,sentinel);
     message.textContent='แสดง '+Math.min(cursor,data.length)+' จาก '+data.length+' รายการ';
