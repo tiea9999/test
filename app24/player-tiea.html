@@ -1856,7 +1856,7 @@ function setupProjectorVideoRecovery(){
   });
 }
 
-function forceFullSound(){try{video.muted=false;video.defaultMuted=false;video.volume=1;video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
+function forceFullSound(){try{if(hasRealPlayback()){video.muted=false;video.defaultMuted=false;video.volume=1}else{video.muted=true;video.defaultMuted=true;video.volume=0}video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
 
 
 function isProjectorWeakMode(){
@@ -2403,13 +2403,9 @@ function playCandidate(candidates,item,serverIndex,idx){
 
   playerPanel.classList.add('show');
   showPlayerUI();
-  if(sourceIs24){
-    // V1.0.17: allow browser autoplay policy to start Movie2 muted first,
-    // then restore sound only after actual playback is detected below.
-    try{video.muted=true;video.defaultMuted=true;video.volume=0}catch(e){}
-  }else{
-    forceFullSound();
-  }
+  // V1.0.18: all sources start muted so autoplay can be accepted by browsers;
+  // audio is restored by the playback-confirmation listener once video is moving.
+  try{video.muted=true;video.defaultMuted=true;video.volume=0}catch(e){}
 
   // ให้เวลาต้นทาง/Worker ทำงาน แต่ไม่เปิด intent:// อัตโนมัติ
   state.playTimer=setTimeout(()=>{
@@ -2446,12 +2442,8 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
       state.stuckCount=0;
       state._hlsFatalCount=0;
-      if(sourceIs24){
-        // Unmute only after media has genuinely started, avoiding audible-autoplay rejection.
-        try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
-      }else{
-        forceFullSound();
-      }
+      // Restore audio only after real playback is confirmed.
+      try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
     }
   },{once:false}));
 
