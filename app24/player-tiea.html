@@ -2403,9 +2403,9 @@ function playCandidate(candidates,item,serverIndex,idx){
 
   playerPanel.classList.add('show');
   showPlayerUI();
-  if(sourceIs24 && (!isAndroidDevice() || isApp24Internal())){
-    // 24HD PC: do not force audible state before the first play() call.
-    // Audible autoplay can be blocked by Brave/Chrome.
+  if(sourceIs24){
+    // V1.0.17: allow browser autoplay policy to start Movie2 muted first,
+    // then restore sound only after actual playback is detected below.
     try{video.muted=true;video.defaultMuted=true;video.volume=0}catch(e){}
   }else{
     forceFullSound();
@@ -2446,7 +2446,8 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
       state.stuckCount=0;
       state._hlsFatalCount=0;
-      if(sourceIs24 && (!isAndroidDevice() || isApp24Internal())){
+      if(sourceIs24){
+        // Unmute only after media has genuinely started, avoiding audible-autoplay rejection.
         try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
       }else{
         forceFullSound();
