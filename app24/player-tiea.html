@@ -1818,7 +1818,6 @@ function dropProjectorQuality(){
 }
 
 function softRecoverPlayback(){
-  if(window.__TIEA_APP24_STOPPED)return;
   try{
     forceFullSound();
     if(state.hls){
@@ -1831,7 +1830,6 @@ function softRecoverPlayback(){
 }
 
 function setupProjectorVideoRecovery(){
-  if(window.__TIEA_APP24_STOPPED)return;
   if(setupProjectorVideoRecovery._ready)return;
   setupProjectorVideoRecovery._ready=true;
 
@@ -2403,9 +2401,9 @@ function playCandidate(candidates,item,serverIndex,idx){
 
   playerPanel.classList.add('show');
   showPlayerUI();
-  if(sourceIs24){
-    // V1.0.17: allow browser autoplay policy to start Movie2 muted first,
-    // then restore sound only after actual playback is detected below.
+  if(sourceIs24 && (!isAndroidDevice() || isApp24Internal())){
+    // 24HD PC: do not force audible state before the first play() call.
+    // Audible autoplay can be blocked by Brave/Chrome.
     try{video.muted=true;video.defaultMuted=true;video.volume=0}catch(e){}
   }else{
     forceFullSound();
@@ -2446,8 +2444,7 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
       state.stuckCount=0;
       state._hlsFatalCount=0;
-      if(sourceIs24){
-        // Unmute only after media has genuinely started, avoiding audible-autoplay rejection.
+      if(sourceIs24 && (!isAndroidDevice() || isApp24Internal())){
         try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
       }else{
         forceFullSound();
@@ -3002,18 +2999,10 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
   function stopMedia(){
     if(stopped)return;
     stopped=true;
-    // Prevent delayed playback-recovery callbacks from restarting sound after close.
-    window.__TIEA_APP24_STOPPED=true;
-    try{if(typeof stopWatchdog==='function')stopWatchdog()}catch(e){}
     try{if(typeof cleanupPlayer==='function')cleanupPlayer()}catch(e){}
     try{
       const v=document.getElementById('video');
-      if(v){
-        try{v.pause()}catch(e){}
-        try{v.muted=true;v.defaultMuted=true;v.volume=0}catch(e){}
-        try{v.play=function(){return Promise.resolve()}}catch(e){}
-        try{v.removeAttribute('src');v.src=''}catch(e){}
-      }
+      if(v){v.pause();v.muted=true;v.removeAttribute('src');v.src='';}
     }catch(e){}
     try{
       const f=document.getElementById('native24Frame');
