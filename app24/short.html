@@ -41,8 +41,15 @@ function showDetails(item){
     });
     list.appendChild(b);
   });
-  info.textContent=eps.length?'เลือกตอนที่ต้องการ':'เลือกรายการ Server เพื่อเริ่มเล่น';
+  info.textContent=eps.length?'เลือกตอนที่ต้องการ':'กำลังเริ่มเล่น…';
   window.scrollTo(0,0);
+  // หนังสั้นที่มี Server อย่าง Main เพียงอย่างเดียว: เริ่มเล่นทันทีเมื่อเลือกโปสเตอร์
+  // ถ้ามีรายการตอน (EP) ให้คงพฤติกรรมเดิม ไม่เปิดเล่นเอง
+  if(!eps.length && servers.length){
+    const buttons=[...list.querySelectorAll('button.ep')];
+    const mainButton=buttons.find(b=>b.textContent.trim().toLowerCase()==='main');
+    (mainButton||buttons[0])?.click();
+  }
 }
 window.addEventListener('message',e=>{if(e.origin!==location.origin||e.data?.type!=='TIEA_APP24_PLAYER_CLOSE')return;closeApp24Player();});
 document.getElementById('backList').onclick=()=>{details.hidden=true;grid.hidden=false;window.scrollTo(0,0)};
