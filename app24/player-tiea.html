@@ -10,6 +10,7 @@
      movie-main = หนังใหม่ 2026 / 2025 / Netflix / ฝรั่ง / เอเชีย / ไทย / การ์ตูน / 18+
      movie-24hd + player/provider logic เดิมคงไว้
 -->
+<!-- TIEA APP24 PATCH: PROJECTOR STARTUP + ANDROID REMOTE KEYS 2026-10-14 -->
 <!DOCTYPE html>
 <!-- TIEA CONFIRMED PLAY BASE 2026-10-04: 4.7.6 / 24HD-123HD 1.5.7 STABLE -->
 <html lang="th">
@@ -2503,6 +2504,8 @@ function playCandidate(candidates,item,serverIndex,idx){
 
       startFragPrefetch:true,
       capLevelToPlayerSize:true,
+      // โปรเจคเตอร์เริ่มจากระดับต่ำสุดก่อน ลดเวลารอ segment แรก; อุปกรณ์อื่นคงค่าเดิม
+      startLevel:(isProjectorWeakMode()||isProjectorMode())?0:-1,
       testBandwidth:false,
       abrEwmaDefaultEstimate:mySeriesVod?650000:((isProjectorWeakMode()||isProjectorMode())?420000:1000000),
       abrBandWidthFactor:mySeriesVod?0.75:0.58,
@@ -2924,33 +2927,48 @@ function setupRemoteSeekControl(){
     const code=e.keyCode||e.which;
     const active=document.activeElement;
     const activeIsBtn=active&&active.classList&&active.classList.contains('player-btn');
+    // Android TV / โปรเจคเตอร์บางรุ่นส่ง Android keyCode แทน Arrow keys ของเว็บ
+    const isRight=key==='ArrowRight'||code===39||code===22;
+    const isLeft=key==='ArrowLeft'||code===37||code===21;
+    const isUp=key==='ArrowUp'||code===38||code===19;
+    const isDown=key==='ArrowDown'||code===40||code===20;
+    const isConfirm=key==='Enter'||key==='OK'||code===13||code===23||code===66;
+    const isPlayPause=code===85;
 
-    if(key==='ArrowRight'||code===39){
+    if(isRight){
       e.preventDefault();e.stopPropagation();
+      // ถ้าปุ่ม Player กำลังโฟกัส ให้ใช้ขวาเลื่อนปุ่ม ไม่ใช่กรอหนัง
+      if(activeIsBtn)return;
       try{v.currentTime=isFinite(v.duration)?Math.min(v.duration,(v.currentTime||0)+10):(v.currentTime||0)+10}catch(err){}
+      showPlayerUI(false);
       return;
     }
-    if(key==='ArrowLeft'||code===37){
+    if(isLeft){
       e.preventDefault();e.stopPropagation();
+      if(activeIsBtn)return;
       try{v.currentTime=Math.max(0,(v.currentTime||0)-10)}catch(err){}
+      showPlayerUI(false);
       return;
     }
-    if((key==='Enter'||key==='OK'||code===13||code===23)&&!activeIsBtn){
+    if((isConfirm||isPlayPause)&&!activeIsBtn){
       e.preventDefault();e.stopPropagation();
       try{if(v.paused)v.play().catch(()=>{});else v.pause()}catch(err){}
+      showPlayerUI(false);
       return;
     }
-    if(key==='ArrowUp'||code===38){
-      e.preventDefault();
-      e.stopPropagation();
+    if(isUp){
+      e.preventDefault();e.stopPropagation();
       // ขึ้นบน = แสดงปุ่มและโฟกัส PLAYER/MX
       showPlayerUI(false);
       focusPlayerButtons();
       return;
     }
-    if(key==='ArrowDown'||code===40){
+    if(isDown){
       e.preventDefault();e.stopPropagation();
+      // ลง = ลดเสียงเล็กน้อย; ถ้าโฟกัสปุ่มให้ปล่อยให้การนำทางทำงาน
+      if(activeIsBtn)return;
       try{v.volume=Math.max(0,(v.volume||0)-0.1)}catch(err){}
+      showPlayerUI(false);
       return;
     }
   },true);
