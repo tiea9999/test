@@ -8,132 +8,91 @@ function itemsFrom(data){if(Array.isArray(data))return data;for(const k of ['ite
 function showDetails(item){
   grid.hidden=true;
   details.hidden=false;
-
   const title=item.title||item.name||'ไม่มีชื่อ';
   document.getElementById('detailTitle').textContent=title;
-
   const list=document.getElementById('episodes');
   const info=document.getElementById('episodeInfo');
   list.replaceChildren();
-
   const eps=Array.isArray(item.episodes)?item.episodes:[];
   const servers=Array.isArray(item.servers)?item.servers:[];
-
-  // ถ้ามี episodes ให้ใช้ระบบเลือกตอนเดิม
-  // ถ้าไม่มี episodes แต่มี servers ให้แสดง Server เช่น Main
+  // มี episodes ใช้ระบบเลือกตอนเดิม; ถ้าไม่มี episodes แต่มี servers ให้แสดงปุ่ม เช่น Main
   const entries=eps.length
-    ? eps.map((ep,i)=>({ep,label:typeof ep==='string'?`EP ${i+1}`:(ep.title||ep.name||`EP ${i+1}`),index:i}))
-    : servers.map((server,i)=>({ep:server,label:server.name||`Server ${i+1}`,index:i}));
-
+    ? eps.map((ep,i)=>({ep,label:typeof ep==='string'?`EP ${i+1}`:(ep.title||ep.name||`EP ${i+1}`)}))
+    : servers.map((server,i)=>({ep:server,label:server.name||`Server ${i+1}`}));
   if(!entries.length){
     list.textContent='เรื่องนี้ไม่มีรายการตอนหรือ Server ใน JSON';
     info.textContent='ไม่พบลิงก์เล่นของรายการนี้';
     return;
   }
-
   entries.forEach(({ep,label})=>{
     const b=document.createElement('button');
-    b.className='ep';
-    b.type='button';
-    b.textContent=label;
-
+    b.className='ep';b.type='button';b.textContent=label;
     b.addEventListener('click',()=>{
       const isServer=servers.includes(ep);
-      const server=isServer
-        ? ep
-        : (typeof ep==='object'&&Array.isArray(ep.servers)
-            ? ep.servers.find(s=>s&&s.url)
-            : null);
-
-      const url=(isServer?ep.url:'')||
-        server?.url||
-        (typeof ep==='object'?(ep.url||ep.link||ep.stream||''):'');
-      
-      if(!url){
-        info.textContent=label+' ไม่มีลิงก์เล่นใน JSON';
-        return;
-      }
-
+      const server=isServer?ep:(typeof ep==='object'&&Array.isArray(ep.servers)?ep.servers.find(s=>s&&s.url):null);
+      const url=(isServer?ep.url:'')||server?.url||(typeof ep==='object'?(ep.url||ep.link||ep.stream||''):'');
+      if(!url){info.textContent=label+' ไม่มีลิงก์เล่นใน JSON';return;}
       info.textContent='กำลังเปิด '+label;
-
-      const query=new URLSearchParams({
-        url,
-        title:title+' '+label,
-        page:server?.page||ep?.page||item.page||''
-      });
-
+      const query=new URLSearchParams({url,title:title+' '+label,page:server?.page||ep?.page||item.page||''});
       const frame=document.getElementById('tieaPlayerFrame');
       frame.src='https://tiea9999.github.io/test/app24/player-tiea.html?'+query.toString();
       document.getElementById('tieaPlayerOverlay').classList.add('show');
-
-      document.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));
-      b.classList.add('selected');
+      document.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');
     });
-
     list.appendChild(b);
   });
-
-  info.textContent=eps.length
-    ? 'เลือกตอนที่ต้องการ'
-    : 'เลือกรายการ Server เพื่อเริ่มเล่น';
-
+  info.textContent=eps.length?'เลือกตอนที่ต้องการ':'เลือกรายการ Server เพื่อเริ่มเล่น';
   window.scrollTo(0,0);
-}
 }
 window.addEventListener('message',e=>{if(e.origin!==location.origin||e.data?.type!=='TIEA_APP24_PLAYER_CLOSE')return;closeApp24Player();});
 document.getElementById('backList').onclick=()=>{details.hidden=true;grid.hidden=false;window.scrollTo(0,0)};
-async function fetchJSON(url, timeoutMs=12000){
+async function fetchJSON(url, timeoutMs=6500){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),timeoutMs);
   try{
-    const r=await fetch(url,{cache:'no-store',signal:controller.signal});
+    const r=await fetch(url,{cache:'default',signal:controller.signal});
     if(!r.ok)throw new Error('HTTP '+r.status);
     return await r.json();
   }finally{clearTimeout(timer)}
 }
 async function load(){
   message.textContent='กำลังโหลดรายการซีรีส์ละครสั้น…';
+  // ลองแหล่งข้อมูลพร้อมกัน แทนการรอทีละแหล่ง ช่วยลดเวลารอเมื่อ GitHub ช้า
   const sources=[
     DATA_URL,
-    'https://cdn.jsdelivr.net/gh/tiea9999/tv-online@main/myseries-short.json',
-    'https://raw.githubusercontent.com/tiea9999/tv-online/main/myseries-short.json'
+    'https://raw.githubusercontent.com/tiea9999/tv-online/main/myseries-short.json',
+    'https://cdn.jsdelivr.net/gh/tiea9999/tv-online@main/myseries-short.json'
   ];
-  let data=null, errors=[];
-  for(const [i,url] of sources.entries()){
-    try{
-      if(i)message.textContent='กำลังลองแหล่งข้อมูลสำรอง '+i+'…';
-      const parsed=await fetchJSON(url);
+  try{
+    const data=await Promise.any(sources.map(async url=>{
+      const parsed=await fetchJSON(url,6500);
       const items=itemsFrom(parsed);
       if(!items.length)throw new Error('JSON ไม่มีรายการ');
-      data=items;break;
-    }catch(e){errors.push(e.message||String(e))}
+      return items;
+    }));
+    message.textContent='พบ '+data.length+' รายการ';
+    grid.replaceChildren();
+    const frag=document.createDocumentFragment();
+    data.forEach(item=>{
+      const b=document.createElement('button');b.className='poster';b.type='button';
+      const im=document.createElement('img');
+      im.loading='lazy';im.decoding='async';im.fetchPriority='low';im.alt='';
+      im.src=item.poster||item.logo||item.image||item.thumb||'';
+      im.onerror=()=>{im.style.visibility='hidden'};
+      const label=document.createElement('span');label.textContent=item.title||item.name||'ไม่มีชื่อ';
+      b.append(im,label);b.onclick=()=>showDetails(item);frag.append(b);
+    });
+    grid.append(frag);
+  }catch(e){
+    message.textContent='โหลดรายการไม่สำเร็จ กรุณาลองรีเฟรชอีกครั้ง ('+(e?.message||'เชื่อมต่อแหล่งข้อมูลไม่ได้')+')';
   }
-  if(!data){message.textContent='โหลดซีรีส์ละครสั้นไม่สำเร็จ ('+errors.join(' / ')+')';return}
-  message.textContent='พบ '+data.length+' รายการ';
-  grid.replaceChildren();
-  data.forEach(item=>{
-    const b=document.createElement('button');b.className='poster';b.type='button';
-    const im=document.createElement('img');im.loading='lazy';im.alt='';im.src=item.poster||item.logo||item.image||item.thumb||'';
-    im.onerror=()=>im.style.visibility='hidden';
-    const label=document.createElement('span');label.textContent=item.title||item.name||'ไม่มีชื่อ';
-    b.append(im,label);b.onclick=()=>showDetails(item);grid.append(b);
-  });
 }
-
 function closeApp24Player(){
  const frame=document.getElementById('tieaPlayerFrame');
- // Stop media before hiding the overlay, then destroy the iframe document so
- // audio cannot continue if a browser delays the postMessage handler.
  try{if(frame&&frame.contentWindow){frame.contentWindow.postMessage({type:'TIEA_APP24_STOP'},location.origin);const v=frame.contentDocument&&frame.contentDocument.getElementById('video');if(v){v.pause();v.muted=true;v.removeAttribute('src');}}}catch(e){}
- const overlay=document.getElementById('tieaPlayerOverlay');
- if(overlay)overlay.classList.remove('show');
- if(frame){frame.src='about:blank';}
+ const overlay=document.getElementById('tieaPlayerOverlay');if(overlay)overlay.classList.remove('show');if(frame)frame.src='about:blank';
 }
 window.addEventListener('pagehide',closeApp24Player);
-window.addEventListener('popstate',()=>{
- if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closeApp24Player();
- else if(!document.getElementById('details').hidden){document.getElementById('details').hidden=true;document.getElementById('posters').hidden=false;}
-});
-
+window.addEventListener('popstate',()=>{if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closeApp24Player();else if(!document.getElementById('details').hidden){document.getElementById('details').hidden=true;document.getElementById('posters').hidden=false;}});
 load();
 </script></body></html>
