@@ -10,7 +10,7 @@
      movie-main = หนังใหม่ 2026 / 2025 / Netflix / ฝรั่ง / เอเชีย / ไทย / การ์ตูน / 18+
      movie-24hd + player/provider logic เดิมคงไว้
 -->
-<!-- TIEA APP24 PATCH: PROJECTOR STARTUP + ANDROID REMOTE KEYS 2026-10-14 -->
+<!-- TIEA APP24 PATCH: PROJECTOR STARTUP + WINDOW-CAPTURE REMOTE KEYS 2026-10-14 R2 -->
 <!DOCTYPE html>
 <!-- TIEA CONFIRMED PLAY BASE 2026-10-04: 4.7.6 / 24HD-123HD 1.5.7 STABLE -->
 <html lang="th">
@@ -2918,62 +2918,73 @@ function setupPlayerButtonNav(){
 function setupRemoteSeekControl(){
   if(setupRemoteSeekControl._ready)return;
   setupRemoteSeekControl._ready=true;
-  document.addEventListener('keydown',function(e){
+  // ใช้ window capture เพื่อรับปุ่มรีโมทก่อน event จะถูก video/iframe กลืนไป
+  window.addEventListener('keydown',function(e){
     const panel=document.getElementById('playerPanel');
     const v=document.getElementById('video');
     if(!panel||!panel.classList.contains('show')||!v)return;
-
     const key=e.key||'';
-    const code=e.keyCode||e.which;
+    const code=e.keyCode||e.which||0;
     const active=document.activeElement;
-    const activeIsBtn=active&&active.classList&&active.classList.contains('player-btn');
-    // Android TV / โปรเจคเตอร์บางรุ่นส่ง Android keyCode แทน Arrow keys ของเว็บ
+    const btns=[...document.querySelectorAll('.player-top .player-btn')].filter(b=>b.offsetParent!==null);
+    const activeIsBtn=!!(active&&active.classList&&active.classList.contains('player-btn'));
     const isRight=key==='ArrowRight'||code===39||code===22;
     const isLeft=key==='ArrowLeft'||code===37||code===21;
     const isUp=key==='ArrowUp'||code===38||code===19;
     const isDown=key==='ArrowDown'||code===40||code===20;
-    const isConfirm=key==='Enter'||key==='OK'||code===13||code===23||code===66;
-    const isPlayPause=code===85;
+    const isConfirm=key==='Enter'||key==='OK'||key==='Select'||code===13||code===23||code===66;
+    const isPlayPause=key==='MediaPlayPause'||code===85;
+    const isBack=key==='Escape'||key==='Backspace'||code===4;
 
-    if(isRight){
-      e.preventDefault();e.stopPropagation();
-      // ถ้าปุ่ม Player กำลังโฟกัส ให้ใช้ขวาเลื่อนปุ่ม ไม่ใช่กรอหนัง
-      if(activeIsBtn)return;
-      try{v.currentTime=isFinite(v.duration)?Math.min(v.duration,(v.currentTime||0)+10):(v.currentTime||0)+10}catch(err){}
+    // ให้ปุ่ม Back ทำงานตามระบบเดิม
+    if(isBack)return;
+    // รีโมททุกปุ่มที่รู้จักต้องไม่ปล่อยให้ WebView เปลี่ยนโฟกัส/ออกจากหน้าเอง
+    if(isRight||isLeft||isUp||isDown||isConfirm||isPlayPause){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      showPlayerUI(false);
+    }else{
+      // บางรีโมทส่งรหัส key ที่ไม่มาตรฐาน อย่างน้อยแสดงแถบควบคุมให้ผู้ใช้เห็น
       showPlayerUI(false);
       return;
     }
-    if(isLeft){
-      e.preventDefault();e.stopPropagation();
-      if(activeIsBtn)return;
-      try{v.currentTime=Math.max(0,(v.currentTime||0)-10)}catch(err){}
-      showPlayerUI(false);
-      return;
-    }
-    if((isConfirm||isPlayPause)&&!activeIsBtn){
-      e.preventDefault();e.stopPropagation();
-      try{if(v.paused)v.play().catch(()=>{});else v.pause()}catch(err){}
-      showPlayerUI(false);
+
+    if(isRight||isLeft){
+      if(activeIsBtn){
+        const i=btns.indexOf(active);
+        const next=isRight?Math.min(btns.length-1,i+1):Math.max(0,i-1);
+        if(btns.length&&i>=0)btns[next].focus();
+        return;
+      }
+      try{
+        const t=v.currentTime||0;
+        v.currentTime=isRight?(Number.isFinite(v.duration)?Math.min(v.duration,t+10):t+10):Math.max(0,t-10);
+      }catch(err){}
       return;
     }
     if(isUp){
-      e.preventDefault();e.stopPropagation();
-      // ขึ้นบน = แสดงปุ่มและโฟกัส PLAYER/MX
-      showPlayerUI(false);
-      focusPlayerButtons();
+      if(activeIsBtn){
+        const i=btns.indexOf(active);
+        if(i>0)btns[i-1].focus();
+        else if(btns.length)btns[0].focus();
+      }else if(btns.length){
+        btns[0].focus();
+      }
       return;
     }
     if(isDown){
-      e.preventDefault();e.stopPropagation();
-      // ลง = ลดเสียงเล็กน้อย; ถ้าโฟกัสปุ่มให้ปล่อยให้การนำทางทำงาน
-      if(activeIsBtn)return;
-      try{v.volume=Math.max(0,(v.volume||0)-0.1)}catch(err){}
-      showPlayerUI(false);
+      if(activeIsBtn){try{v.focus({preventScroll:true})}catch(err){try{v.focus()}catch(e){}}}
+      else {try{v.volume=Math.max(0,(Number.isFinite(v.volume)?v.volume:1)-0.1)}catch(err){}}
       return;
     }
+    if(isConfirm){
+      if(activeIsBtn){try{active.click()}catch(err){}}
+      else {try{if(v.paused)v.play().catch(()=>{});else v.pause()}catch(err){}}
+      return;
+    }
+    if(isPlayPause){try{if(v.paused)v.play().catch(()=>{});else v.pause()}catch(err){}}
   },true);
 }
-
 let __didInitialRestore=false;
 window.addEventListener('focus',handleReturnFromExternalFocus);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)handleReturnFromExternalFocus();});
