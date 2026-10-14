@@ -10,7 +10,6 @@
      movie-main = หนังใหม่ 2026 / 2025 / Netflix / ฝรั่ง / เอเชีย / ไทย / การ์ตูน / 18+
      movie-24hd + player/provider logic เดิมคงไว้
 -->
-<!-- TIEA APP24 PATCH: PROJECTOR STARTUP + WINDOW-CAPTURE REMOTE KEYS 2026-10-14 R2 -->
 <!DOCTYPE html>
 <!-- TIEA CONFIRMED PLAY BASE 2026-10-04: 4.7.6 / 24HD-123HD 1.5.7 STABLE -->
 <html lang="th">
@@ -18,7 +17,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <script>try{if(new URLSearchParams(location.search).has("url"))document.documentElement.classList.add("app24-player-embed")}catch(e){}</script>
     <title>TIEA IPTV HOME V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>window.TIEA_HLS_LATEST=window.Hls;</script>
@@ -779,6 +777,25 @@
 
 
 
+
+        /* PROJECTOR: do not let the control bar disappear on the URL player */
+        body.tiea-standalone-player .player-panel.hide-ui .player-top {
+            opacity: 1 !important;
+            visibility: visible !important;
+            pointer-events: auto !important;
+            display: flex !important;
+            z-index: 10060 !important;
+        }
+        body.tiea-standalone-player .player-top {
+            padding-top: max(12px, env(safe-area-inset-top)) !important;
+            padding-left: max(12px, env(safe-area-inset-left)) !important;
+            padding-right: max(12px, env(safe-area-inset-right)) !important;
+        }
+        body.tiea-standalone-player .player-btn {
+            min-height: 44px !important;
+            touch-action: manipulation;
+        }
+
         /* ===== TIEA EXTERNAL PLAYER ENGINE V1.0 ===== */
         .external-settings-modal {
             position: fixed;
@@ -870,12 +887,6 @@
                 grid-template-columns: 1fr
             }
         }
-
-        /* APP24 flash guard: hide HOME chrome from the first paint when this page is an embedded player. */
-        .app24-player-embed,
-        .app24-player-embed body { background: #000 !important; }
-        .app24-player-embed .app { display: none !important; }
-        .app24-player-embed #playerPanel { background: #000 !important; }
     </style>
 </head>
 
@@ -2504,8 +2515,6 @@ function playCandidate(candidates,item,serverIndex,idx){
 
       startFragPrefetch:true,
       capLevelToPlayerSize:true,
-      // โปรเจคเตอร์เริ่มจากระดับต่ำสุดก่อน ลดเวลารอ segment แรก; อุปกรณ์อื่นคงค่าเดิม
-      startLevel:(isProjectorWeakMode()||isProjectorMode())?0:-1,
       testBandwidth:false,
       abrEwmaDefaultEstimate:mySeriesVod?650000:((isProjectorWeakMode()||isProjectorMode())?420000:1000000),
       abrBandWidthFactor:mySeriesVod?0.75:0.58,
@@ -2918,73 +2927,47 @@ function setupPlayerButtonNav(){
 function setupRemoteSeekControl(){
   if(setupRemoteSeekControl._ready)return;
   setupRemoteSeekControl._ready=true;
-  // ใช้ window capture เพื่อรับปุ่มรีโมทก่อน event จะถูก video/iframe กลืนไป
-  window.addEventListener('keydown',function(e){
+  document.addEventListener('keydown',function(e){
     const panel=document.getElementById('playerPanel');
     const v=document.getElementById('video');
     if(!panel||!panel.classList.contains('show')||!v)return;
+
     const key=e.key||'';
-    const code=e.keyCode||e.which||0;
+    const code=e.keyCode||e.which;
     const active=document.activeElement;
-    const btns=[...document.querySelectorAll('.player-top .player-btn')].filter(b=>b.offsetParent!==null);
-    const activeIsBtn=!!(active&&active.classList&&active.classList.contains('player-btn'));
-    const isRight=key==='ArrowRight'||code===39||code===22;
-    const isLeft=key==='ArrowLeft'||code===37||code===21;
-    const isUp=key==='ArrowUp'||code===38||code===19;
-    const isDown=key==='ArrowDown'||code===40||code===20;
-    const isConfirm=key==='Enter'||key==='OK'||key==='Select'||code===13||code===23||code===66;
-    const isPlayPause=key==='MediaPlayPause'||code===85;
-    const isBack=key==='Escape'||key==='Backspace'||code===4;
+    const activeIsBtn=active&&active.classList&&active.classList.contains('player-btn');
 
-    // ให้ปุ่ม Back ทำงานตามระบบเดิม
-    if(isBack)return;
-    // รีโมททุกปุ่มที่รู้จักต้องไม่ปล่อยให้ WebView เปลี่ยนโฟกัส/ออกจากหน้าเอง
-    if(isRight||isLeft||isUp||isDown||isConfirm||isPlayPause){
+    if(key==='ArrowRight'||code===39){
+      e.preventDefault();e.stopPropagation();
+      try{v.currentTime=isFinite(v.duration)?Math.min(v.duration,(v.currentTime||0)+10):(v.currentTime||0)+10}catch(err){}
+      return;
+    }
+    if(key==='ArrowLeft'||code===37){
+      e.preventDefault();e.stopPropagation();
+      try{v.currentTime=Math.max(0,(v.currentTime||0)-10)}catch(err){}
+      return;
+    }
+    if((key==='Enter'||key==='OK'||code===13||code===23)&&!activeIsBtn){
+      e.preventDefault();e.stopPropagation();
+      try{if(v.paused)v.play().catch(()=>{});else v.pause()}catch(err){}
+      return;
+    }
+    if(key==='ArrowUp'||code===38){
       e.preventDefault();
-      e.stopImmediatePropagation();
+      e.stopPropagation();
+      // ขึ้นบน = แสดงปุ่มและโฟกัส PLAYER/MX
       showPlayerUI(false);
-    }else{
-      // บางรีโมทส่งรหัส key ที่ไม่มาตรฐาน อย่างน้อยแสดงแถบควบคุมให้ผู้ใช้เห็น
-      showPlayerUI(false);
+      focusPlayerButtons();
       return;
     }
-
-    if(isRight||isLeft){
-      if(activeIsBtn){
-        const i=btns.indexOf(active);
-        const next=isRight?Math.min(btns.length-1,i+1):Math.max(0,i-1);
-        if(btns.length&&i>=0)btns[next].focus();
-        return;
-      }
-      try{
-        const t=v.currentTime||0;
-        v.currentTime=isRight?(Number.isFinite(v.duration)?Math.min(v.duration,t+10):t+10):Math.max(0,t-10);
-      }catch(err){}
+    if(key==='ArrowDown'||code===40){
+      e.preventDefault();e.stopPropagation();
+      try{v.volume=Math.max(0,(v.volume||0)-0.1)}catch(err){}
       return;
     }
-    if(isUp){
-      if(activeIsBtn){
-        const i=btns.indexOf(active);
-        if(i>0)btns[i-1].focus();
-        else if(btns.length)btns[0].focus();
-      }else if(btns.length){
-        btns[0].focus();
-      }
-      return;
-    }
-    if(isDown){
-      if(activeIsBtn){try{v.focus({preventScroll:true})}catch(err){try{v.focus()}catch(e){}}}
-      else {try{v.volume=Math.max(0,(Number.isFinite(v.volume)?v.volume:1)-0.1)}catch(err){}}
-      return;
-    }
-    if(isConfirm){
-      if(activeIsBtn){try{active.click()}catch(err){}}
-      else {try{if(v.paused)v.play().catch(()=>{});else v.pause()}catch(err){}}
-      return;
-    }
-    if(isPlayPause){try{if(v.paused)v.play().catch(()=>{});else v.pause()}catch(err){}}
   },true);
 }
+
 let __didInitialRestore=false;
 window.addEventListener('focus',handleReturnFromExternalFocus);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)handleReturnFromExternalFocus();});
@@ -3066,6 +3049,7 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
 (function(){
  const params=new URLSearchParams(location.search);
  const url=params.get('url'), title=params.get('title')||'กำลังเล่น', page=params.get('page')||'';
+  if(url) document.body.classList.add('tiea-standalone-player');
  const returnTo='https://tiea9999.github.io/test/app24/series-china.html';
  function leave(){try{window.TIEA_APP24_STOP?.()}catch(e){};if(window.parent!==window){window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}else location.href=returnTo;}
  window.addEventListener('DOMContentLoaded',()=>{
@@ -3082,7 +3066,7 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
   if(!url){document.getElementById('statusText').textContent='ไม่พบ URL สำหรับเล่น';return;}
   document.querySelector('.sidebar')?.remove();document.querySelector('.topbar')?.remove();
   document.getElementById('content').style.display='none';
-  playItem({title,servers:[{name:'Main',url,page}],page},0,title);
+  setTimeout(()=>playItem({title,servers:[{name:'Main',url,page}],page},0,title),200);
  });
  window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();leave()}},true);
 })();
