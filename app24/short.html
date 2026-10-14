@@ -6,27 +6,79 @@ const grid=document.getElementById('posters'), message=document.getElementById('
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function itemsFrom(data){if(Array.isArray(data))return data;for(const k of ['items','data','series','results','list'])if(Array.isArray(data?.[k]))return data[k];return []}
 function showDetails(item){
-  grid.hidden=true;details.hidden=false;
+  grid.hidden=true;
+  details.hidden=false;
+
   const title=item.title||item.name||'ไม่มีชื่อ';
   document.getElementById('detailTitle').textContent=title;
+
+  const list=document.getElementById('episodes');
+  const info=document.getElementById('episodeInfo');
+  list.replaceChildren();
+
   const eps=Array.isArray(item.episodes)?item.episodes:[];
-  const list=document.getElementById('episodes');list.replaceChildren();
-  if(!eps.length){list.textContent='เรื่องนี้ไม่มีรายการตอนใน JSON';return}
-  eps.forEach((ep,i)=>{
-    const b=document.createElement('button');b.className='ep';b.textContent=typeof ep==='string'?`EP ${i+1}`:(ep.title||ep.name||`EP ${i+1}`);
+  const servers=Array.isArray(item.servers)?item.servers:[];
+
+  // ถ้ามี episodes ให้ใช้ระบบเลือกตอนเดิม
+  // ถ้าไม่มี episodes แต่มี servers ให้แสดง Server เช่น Main
+  const entries=eps.length
+    ? eps.map((ep,i)=>({ep,label:typeof ep==='string'?`EP ${i+1}`:(ep.title||ep.name||`EP ${i+1}`),index:i}))
+    : servers.map((server,i)=>({ep:server,label:server.name||`Server ${i+1}`,index:i}));
+
+  if(!entries.length){
+    list.textContent='เรื่องนี้ไม่มีรายการตอนหรือ Server ใน JSON';
+    info.textContent='ไม่พบลิงก์เล่นของรายการนี้';
+    return;
+  }
+
+  entries.forEach(({ep,label})=>{
+    const b=document.createElement('button');
+    b.className='ep';
+    b.type='button';
+    b.textContent=label;
+
     b.addEventListener('click',()=>{
-      const server=(typeof ep==='object'&&Array.isArray(ep.servers)?ep.servers.find(s=>s&&s.url):null);
-      const url=server?.url||(typeof ep==='object'?(ep.url||ep.link||ep.stream||''):'');
-      if(!url){document.getElementById('episodeInfo').textContent='EP นี้ไม่มีลิงก์เล่นใน JSON';return;}
-      document.getElementById('episodeInfo').textContent='กำลังเปิด '+b.textContent;
-      const query=new URLSearchParams({url,title:title+' '+b.textContent,page:server?.page||ep.page||item.page||''});
-      document.getElementById('tieaPlayerFrame').src='https://tiea9999.github.io/test/app24/player-tiea.html?'+query.toString();
+      const isServer=servers.includes(ep);
+      const server=isServer
+        ? ep
+        : (typeof ep==='object'&&Array.isArray(ep.servers)
+            ? ep.servers.find(s=>s&&s.url)
+            : null);
+
+      const url=(isServer?ep.url:'')||
+        server?.url||
+        (typeof ep==='object'?(ep.url||ep.link||ep.stream||''):'');
+      
+      if(!url){
+        info.textContent=label+' ไม่มีลิงก์เล่นใน JSON';
+        return;
+      }
+
+      info.textContent='กำลังเปิด '+label;
+
+      const query=new URLSearchParams({
+        url,
+        title:title+' '+label,
+        page:server?.page||ep?.page||item.page||''
+      });
+
+      const frame=document.getElementById('tieaPlayerFrame');
+      frame.src='https://tiea9999.github.io/test/app24/player-tiea.html?'+query.toString();
       document.getElementById('tieaPlayerOverlay').classList.add('show');
-      document.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');
-    });list.appendChild(b)
+
+      document.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));
+      b.classList.add('selected');
+    });
+
+    list.appendChild(b);
   });
-  document.getElementById('episodeInfo').textContent='เลือกตอนที่ต้องการ';
+
+  info.textContent=eps.length
+    ? 'เลือกตอนที่ต้องการ'
+    : 'เลือกรายการ Server เพื่อเริ่มเล่น';
+
   window.scrollTo(0,0);
+}
 }
 window.addEventListener('message',e=>{if(e.origin!==location.origin||e.data?.type!=='TIEA_APP24_PLAYER_CLOSE')return;closeApp24Player();});
 document.getElementById('backList').onclick=()=>{details.hidden=true;grid.hidden=false;window.scrollTo(0,0)};
