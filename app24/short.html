@@ -94,12 +94,22 @@ async function load(){
     message.textContent='โหลดรายการไม่สำเร็จ กรุณาลองรีเฟรชอีกครั้ง ('+(e?.message||'เชื่อมต่อแหล่งข้อมูลไม่ได้')+')';
   }
 }
+function returnToSeriesList(){
+ const d=document.getElementById('details'),g=document.getElementById('posters');
+ if(d)d.hidden=true;
+ if(g)g.hidden=false;
+ const info=document.getElementById('episodeInfo');if(info)info.textContent='';
+ const list=document.getElementById('episodes');if(list)list.replaceChildren();
+ const title=document.getElementById('detailTitle');if(title)title.textContent='';
+ window.scrollTo(0,0);
+}
 function closeApp24Player(){
  const frame=document.getElementById('tieaPlayerFrame');
  try{if(frame&&frame.contentWindow){frame.contentWindow.postMessage({type:'TIEA_APP24_STOP'},location.origin);const v=frame.contentDocument&&frame.contentDocument.getElementById('video');if(v){v.pause();v.muted=true;v.removeAttribute('src');}}}catch(e){}
  const overlay=document.getElementById('tieaPlayerOverlay');if(overlay)overlay.classList.remove('show');if(frame)frame.src='about:blank';
+ returnToSeriesList();
 }
 window.addEventListener('pagehide',closeApp24Player);
-window.addEventListener('popstate',()=>{if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closeApp24Player();else if(!document.getElementById('details').hidden){document.getElementById('details').hidden=true;document.getElementById('posters').hidden=false;}});
+window.addEventListener('popstate',()=>{if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closeApp24Player();else if(!document.getElementById('details').hidden)returnToSeriesList();});
 load();
 </script></body></html>
