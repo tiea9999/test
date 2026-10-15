@@ -122,7 +122,15 @@ function showDetails(item){
    const b=document.createElement('button');b.type='button';b.className='ep';
    const label=typeof ep==='string'?'EP '+(i+1):text(ep.title||ep.name||ep.episode||('EP '+(i+1)));
    b.textContent=label;
-   b.addEventListener('click',()=>{openPlayer(item,typeof ep==='object'?ep:{url:ep},label);list.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')});
+   b.addEventListener('click',()=>{
+    const episode=typeof ep==='object'&&ep!==null?ep:{url:ep};
+    // Prefer the selected episode's own Main server URL.
+    const first=validServers(episode.servers)[0];
+    const normalized=first?{...episode,url:first.url,servers:[first]}:episode;
+    openPlayer(item,normalized,label);
+    list.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));
+    b.classList.add('selected');
+   });
    list.appendChild(b);
   });
   document.getElementById('episodeInfo').textContent='พบ '+eps.length+' ตอน • เลือกตอนเพื่อเล่น';
@@ -158,9 +166,11 @@ function render(){
   const sub=document.createElement('span');sub.className='sub';sub.textContent=text(item.language||item.quality||'ซีรี่ย์อัปเดตใหม่');
   meta.append(title,sub);b.append(img,meta);
   b.addEventListener('click',()=>{
+   // Series with episode arrays must open the EP selection view first.
    const eps=Array.isArray(item.episodes)?item.episodes:[];
    const servers=validServers(item.servers);
-   if(eps.length||servers.length>1){showDetails(item);return}
+   if(eps.length>0){showDetails(item);return}
+   if(servers.length>1){showDetails(item);return}
    if(getUrl(item,null)){openPlayer(item,null,'เล่นเรื่องนี้');return}
    showDetails(item);
   });
