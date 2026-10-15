@@ -17,6 +17,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <script>try{if(new URLSearchParams(location.search).has("url"))document.documentElement.classList.add("app24-player-embed")}catch(e){}</script>
     <title>TIEA IPTV HOME V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>window.TIEA_HLS_LATEST=window.Hls;</script>
@@ -777,25 +778,6 @@
 
 
 
-
-        /* PROJECTOR: do not let the control bar disappear on the URL player */
-        body.tiea-standalone-player .player-panel.hide-ui .player-top {
-            opacity: 1 !important;
-            visibility: visible !important;
-            pointer-events: auto !important;
-            display: flex !important;
-            z-index: 10060 !important;
-        }
-        body.tiea-standalone-player .player-top {
-            padding-top: max(12px, env(safe-area-inset-top)) !important;
-            padding-left: max(12px, env(safe-area-inset-left)) !important;
-            padding-right: max(12px, env(safe-area-inset-right)) !important;
-        }
-        body.tiea-standalone-player .player-btn {
-            min-height: 44px !important;
-            touch-action: manipulation;
-        }
-
         /* ===== TIEA EXTERNAL PLAYER ENGINE V1.0 ===== */
         .external-settings-modal {
             position: fixed;
@@ -887,6 +869,12 @@
                 grid-template-columns: 1fr
             }
         }
+
+        /* APP24 flash guard: hide HOME chrome from the first paint when this page is an embedded player. */
+        .app24-player-embed,
+        .app24-player-embed body { background: #000 !important; }
+        .app24-player-embed .app { display: none !important; }
+        .app24-player-embed #playerPanel { background: #000 !important; }
     </style>
 </head>
 
@@ -3049,7 +3037,6 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
 (function(){
  const params=new URLSearchParams(location.search);
  const url=params.get('url'), title=params.get('title')||'กำลังเล่น', page=params.get('page')||'';
-  if(url) document.body.classList.add('tiea-standalone-player');
  const returnTo='https://tiea9999.github.io/test/app24/series-china.html';
  function leave(){try{window.TIEA_APP24_STOP?.()}catch(e){};if(window.parent!==window){window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}else location.href=returnTo;}
  window.addEventListener('DOMContentLoaded',()=>{
@@ -3066,7 +3053,7 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
   if(!url){document.getElementById('statusText').textContent='ไม่พบ URL สำหรับเล่น';return;}
   document.querySelector('.sidebar')?.remove();document.querySelector('.topbar')?.remove();
   document.getElementById('content').style.display='none';
-  setTimeout(()=>playItem({title,servers:[{name:'Main',url,page}],page},0,title),200);
+  playItem({title,servers:[{name:'Main',url,page}],page},0,title);
  });
  window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();leave()}},true);
 })();
