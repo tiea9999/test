@@ -1,3 +1,223 @@
-<!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#141923"><title>อัปเดตใหม่ | TIEA APP24 TEST</title><style>
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#090c12;color:#fff;font-family:system-ui,'Segoe UI',sans-serif}body{padding-bottom:28px}.top{position:sticky;top:0;z-index:5;background:#141923ed;border-bottom:1px solid #32303b;padding:13px 16px;display:flex;align-items:center;gap:12px;min-height:64px;backdrop-filter:blur(12px)}.brand{font-weight:900;font-size:22px;letter-spacing:.7px}.brand b{color:#ff385a}.back{border:1px solid #59404a;border-radius:12px;background:#241720;color:white;text-decoration:none;padding:10px 13px;font-weight:700}.home{margin-left:auto;color:#fff;text-decoration:none;background:#b91f40;border-radius:12px;padding:10px 14px;font-weight:700}main{max-width:1100px;margin:auto;padding:22px 16px}.hero{background:linear-gradient(125deg,#401329,#181825 70%);border:1px solid #633148;border-radius:22px;padding:25px;margin-bottom:24px}h1{margin:0 0 9px;font-size:clamp(24px,5vw,38px)}p{color:#b9b9c8;line-height:1.6;margin:6px 0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.tile{min-width:0;text-decoration:none;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:160px;border-radius:19px;border:1px solid #49303b;background:linear-gradient(145deg,#25212f,#12151c);box-shadow:0 5px 22px #0004;padding:18px 10px;gap:10px}.tile:focus,.tile:hover{outline:3px solid #ff5577;outline-offset:2px;background:#3b2332}.emoji{font-size:43px;line-height:1.2}.name{font-size:clamp(15px,2vw,20px);font-weight:800}.sub{font-size:12px;color:#bdb3bf}.note{border:1px solid #3b3341;border-radius:16px;padding:18px;background:#151821;margin-top:18px}.pill{display:inline-block;padding:6px 12px;border:1px solid #684456;border-radius:30px;color:#ff9caf;font-size:12px;font-weight:700;margin-bottom:10px}.link{color:#ff8eaa}footer{color:#8b8795;text-align:center;font-size:12px;margin-top:24px}@media(max-width:600px){main{padding:15px 12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tile{min-height:128px;padding:14px 8px}.emoji{font-size:35px}.top{padding:10px}.brand{font-size:18px}.hero{padding:19px}.back,.home{padding:9px 11px}}@media(min-width:900px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-</style></head><body><header class="top"><a class="back" href="https://tiea9999.github.io/test/app24/series.html">❮ ย้อนกลับ</a><span class="brand">TIEA <b>APP24</b></span><a class="home" href="https://tiea9999.github.io/test/app24/index.html">⌂ HOME</a></header><main><section class="hero"><span class="pill">V1.0 • TEST ONLY</span><h1>อัปเดตใหม่</h1><p>หน้าแยกเฉพาะหมวด อัปเดตใหม่</p></section><div class="note"><span class="pill">ขั้นตอนถัดไป: เชื่อม JSON + Player เดิม</span><h2>พื้นที่รายการ อัปเดตใหม่</h2><p>หน้านี้สร้างแยกแล้ว เพื่อไม่ให้เมนูทับหน้าจอมือถือ ขณะนี้ยังไม่โหลดข้อมูลหรือเปิดเล่นหนัง เพื่อรักษาระบบเดิมไว้ก่อน</p><p>เมื่อเชื่อม JSON แล้ว จะเลือกเรื่อง → เลือกตอน → เปิด Player เต็มจอ และปิดกลับมาหน้าเดิมได้</p></div><footer>TIEA APP24 CLEAN HOME • แยกจาก tv-1 และ test/index.html</footer></main></body></html>
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#141923">
+<title>ซีรี่ย์อัปเดตใหม่ | TIEA APP24</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#090c12;color:#fff;font-family:system-ui,'Segoe UI',sans-serif}
+body{padding-bottom:30px}
+.top{position:sticky;top:0;z-index:5;background:#141923ed;border-bottom:1px solid #32303b;padding:11px 15px;display:flex;align-items:center;gap:11px;min-height:62px;backdrop-filter:blur(12px)}
+.brand{font-weight:900;font-size:21px;letter-spacing:.5px;white-space:nowrap}.brand b{color:#ff385a}
+.nav{border:1px solid #59404a;border-radius:11px;background:#241720;color:white;text-decoration:none;padding:9px 11px;font-weight:750;white-space:nowrap}
+.home{margin-left:auto;color:#fff;text-decoration:none;background:#b91f40;border-radius:11px;padding:9px 12px;font-weight:750;white-space:nowrap}
+main{max-width:1200px;margin:auto;padding:20px 16px}
+.hero{background:linear-gradient(125deg,#401329,#181825 70%);border:1px solid #633148;border-radius:20px;padding:22px;margin-bottom:17px}
+h1{margin:0 0 8px;font-size:clamp(24px,4.8vw,36px)}p{color:#c0bdca;line-height:1.55;margin:6px 0}
+.pill{display:inline-block;padding:5px 10px;border:1px solid #684456;border-radius:30px;color:#ff9caf;font-size:12px;font-weight:750;margin-bottom:9px}
+.tools{display:flex;gap:10px;align-items:center;margin:15px 0;flex-wrap:wrap}
+#search{flex:1;min-width:190px;background:#151923;border:1px solid #41404b;border-radius:12px;color:#fff;padding:12px 14px;font:inherit;outline:none}
+#search:focus{border-color:#ff5577;box-shadow:0 0 0 2px #ff557733}
+#message{font-size:13px;color:#b9b5c2;min-height:22px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.poster{min-width:0;display:flex;flex-direction:column;text-align:left;overflow:hidden;border:1px solid #39313e;border-radius:15px;background:linear-gradient(145deg,#211f2a,#11141b);color:white;padding:0;cursor:pointer;font:inherit;transition:border-color .15s,transform .15s}
+.poster:hover,.poster:focus-visible{outline:3px solid #ff5577;outline-offset:2px;border-color:#ff5577}
+.poster:active{transform:scale(.99)}
+.poster img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;background:#22212a}
+.poster .meta{padding:10px 11px 12px;display:flex;flex-direction:column;gap:6px}
+.poster .title{font-weight:800;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.poster .sub{font-size:12px;color:#c3aeba}
+.empty{padding:22px;border:1px dashed #51404a;border-radius:14px;text-align:center;color:#c5bdc7}
+#details{margin-top:16px;border:1px solid #3b3341;border-radius:16px;padding:17px;background:#151821}
+.action{border:1px solid #654052;border-radius:10px;background:#291b26;color:#fff;padding:9px 12px;font:inherit;font-weight:750;cursor:pointer}
+.action:focus-visible{outline:3px solid #ff5577}
+#detailTitle{margin:14px 0 5px;font-size:22px}
+.episodes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:13px}
+.ep{background:#24212c;color:white;border:1px solid #48404e;border-radius:10px;padding:12px;text-align:left;font:inherit;cursor:pointer;overflow-wrap:anywhere}
+.ep:hover,.ep:focus-visible,.ep.selected{outline:2px solid #ff5577;border-color:#ff5577;background:#3b2332}
+#tieaPlayerOverlay{position:fixed;inset:0;z-index:9999;background:#000;display:none}
+#tieaPlayerOverlay.show{display:block}
+#tieaPlayerFrame{border:0;width:100%;height:100%;display:block;background:#000}
+footer{text-align:center;color:#8b8795;font-size:12px;margin:25px 0 5px}
+@media(min-width:560px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.episodes{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:850px){.grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:15px}.poster .title{font-size:15px}}
+@media(min-width:1150px){.grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media(max-width:420px){.top{gap:7px;padding:9px}.brand{font-size:16px}.nav,.home{font-size:12px;padding:8px}.hero{padding:17px}main{padding:14px 11px}.grid{gap:9px}.poster .meta{padding:8px}.poster .title{font-size:13px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="nav" href="https://tiea9999.github.io/test/app24/series.html">❮ ซีรีส์</a>
+  <span class="brand">TIEA <b>APP24</b></span>
+  <a class="home" href="https://tiea9999.github.io/test/app24/index.html">⌂ HOME</a>
+</header>
+<main>
+  <section class="hero">
+    <span class="pill">APP24 • SERIES UPDATE</span>
+    <h1>🔥 ซีรี่ย์อัปเดตใหม่</h1>
+    <p>รวมซีรี่ย์อัปเดตใหม่จาก จีน • เกาหลี • ไทย • ญี่ปุ่น • ฝรั่ง เลือกเรื่องเพื่อเปิดเล่นด้วย Player เดิมของ APP24</p>
+  </section>
+  <div class="tools"><input id="search" type="search" placeholder="ค้นหาชื่อซีรีส์…" aria-label="ค้นหาชื่อซีรีส์"><span id="message" role="status">กำลังโหลดรายการ…</span></div>
+  <div id="posters" class="grid"></div>
+  <section id="details" hidden>
+    <button class="action" id="backList" type="button">❮ กลับรายการเรื่อง</button>
+    <h2 id="detailTitle"></h2><p id="episodeInfo">เลือกตอนที่ต้องการ</p>
+    <div id="episodes" class="episodes"></div>
+  </section>
+  <footer>TIEA APP24 • แยกหน้าเฉพาะหมวด ไม่แก้ระบบหมวดอื่น</footer>
+</main>
+<div id="tieaPlayerOverlay" aria-label="ตัวเล่นวิดีโอ"><iframe id="tieaPlayerFrame" title="TIEA APP24 Player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+<script>
+(function(){
+'use strict';
+const DATA_URLS=[
+ 'https://raw.githubusercontent.com/tiea9999/tv-online/main/myseries-china.json',
+ 'https://raw.githubusercontent.com/tiea9999/tv-online/main/myseries-korea.json',
+ 'https://raw.githubusercontent.com/tiea9999/tv-online/main/myseries-thai.json',
+ 'https://raw.githubusercontent.com/tiea9999/tv-online/main/myseries-japan.json',
+ 'https://raw.githubusercontent.com/tiea9999/tv-online/main/series24hd.json',
+ 'https://raw.githubusercontent.com/tiea9999/tv-online/main/myseries-short.json'
+];
+const PLAYER_URL='https://tiea9999.github.io/test/app24/player-tiea.html?';
+const grid=document.getElementById('posters'), message=document.getElementById('message');
+const details=document.getElementById('details'), search=document.getElementById('search');
+let allItems=[], visibleItems=[];
+function text(v){return String(v==null?'':v)}
+function safe(v){return text(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function getItems(data){if(Array.isArray(data))return data;for(const k of ['items','data','series','results','list'])if(Array.isArray(data&&data[k]))return data[k];return []}
+function hasUpdateGroup(item){
+ const g=item&&item.groups;
+ const groups=Array.isArray(g)?g:(typeof g==='string'?g.split(/[,;|]/):[]);
+ return groups.some(x=>String(x).trim().toLowerCase()==='series-update' || String(x).trim().toLowerCase()==='series_update' || String(x).trim().toLowerCase()==='update');
+}
+function validServers(list){return Array.isArray(list)?list.filter(s=>s&&typeof s.url==='string'&&s.url.trim()):[]}
+function getUrl(item,ep){
+ const epServers=validServers(ep&&ep.servers);
+ const itemServers=validServers(item&&item.servers);
+ return (epServers[0]&&epServers[0].url)||(ep&&(ep.url||ep.link||ep.stream))||(itemServers[0]&&itemServers[0].url)||(item&&(item.url||item.link||item.stream))||'';
+}
+function getPage(item,ep){
+ const s=validServers(ep&&ep.servers)[0]||validServers(item&&item.servers)[0];
+ return (s&&s.page)||(ep&&ep.page)||(item&&item.page)||'';
+}
+function openPlayer(item,ep,label){
+ const url=getUrl(item,ep);
+ if(!url){document.getElementById('episodeInfo').textContent='รายการนี้ยังไม่มีลิงก์เล่นใน JSON';return}
+ const title=text(item.title||item.name||'ซีรีส์')+(label?' • '+label:'');
+ const q=new URLSearchParams({url:url,title:title,page:getPage(item,ep)});
+ const frame=document.getElementById('tieaPlayerFrame');
+ frame.src=PLAYER_URL+q.toString();
+ document.getElementById('tieaPlayerOverlay').classList.add('show');
+}
+function showDetails(item){
+ grid.hidden=true;search.parentElement.hidden=true;details.hidden=false;
+ const title=text(item.title||item.name||'ไม่มีชื่อ');
+ document.getElementById('detailTitle').textContent=title;
+ const list=document.getElementById('episodes');list.replaceChildren();
+ const eps=Array.isArray(item.episodes)?item.episodes:[];
+ if(eps.length){
+  eps.forEach((ep,i)=>{
+   const b=document.createElement('button');b.type='button';b.className='ep';
+   const label=typeof ep==='string'?'EP '+(i+1):text(ep.title||ep.name||ep.episode||('EP '+(i+1)));
+   b.textContent=label;
+   b.addEventListener('click',()=>{openPlayer(item,typeof ep==='object'?ep:{url:ep},label);list.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')});
+   list.appendChild(b);
+  });
+  document.getElementById('episodeInfo').textContent='พบ '+eps.length+' ตอน • เลือกตอนเพื่อเล่น';
+ }else{
+  const servers=validServers(item.servers);
+  if(servers.length>1){
+   document.getElementById('episodeInfo').textContent='เลือกแหล่งเล่น';
+   servers.forEach((server,i)=>{
+    const b=document.createElement('button');b.type='button';b.className='ep';b.textContent=server.name||('แหล่งเล่น '+(i+1));
+    b.addEventListener('click',()=>{openPlayer({...item,servers:[server]},null,b.textContent);list.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));b.classList.add('selected')});
+    list.appendChild(b);
+   });
+  }else{
+   document.getElementById('episodeInfo').textContent=servers.length?'พร้อมเล่น • กดปุ่มด้านล่าง':'รายการนี้ยังไม่มีลิงก์เล่น';
+   if(servers.length){
+    const b=document.createElement('button');b.type='button';b.className='ep';b.textContent='▶ เล่นเรื่องนี้';
+    b.addEventListener('click',()=>openPlayer(item,null,'เล่นเรื่องนี้'));list.appendChild(b);
+   }
+  }
+ }
+ window.scrollTo(0,0);
+}
+function render(){
+ const q=search.value.trim().toLocaleLowerCase();
+ visibleItems=allItems.filter(item=>text(item.title||item.name).toLocaleLowerCase().includes(q));
+ grid.replaceChildren();
+ if(!visibleItems.length){grid.innerHTML='<div class="empty">ไม่พบรายการที่ตรงกับคำค้น</div>';message.textContent='0 รายการ';return}
+ visibleItems.forEach(item=>{
+  const b=document.createElement('button');b.type='button';b.className='poster';
+  const img=document.createElement('img');img.loading='lazy';img.alt='';img.src=item.poster||item.logo||item.image||item.thumb||'';img.onerror=()=>{img.onerror=null;img.style.visibility='hidden';img.alt='ไม่มีภาพโปสเตอร์'};
+  const meta=document.createElement('span');meta.className='meta';
+  const title=document.createElement('span');title.className='title';title.textContent=text(item.title||item.name||'ไม่มีชื่อ');
+  const sub=document.createElement('span');sub.className='sub';sub.textContent=text(item.language||item.quality||'ซีรี่ย์อัปเดตใหม่');
+  meta.append(title,sub);b.append(img,meta);
+  b.addEventListener('click',()=>{
+   const eps=Array.isArray(item.episodes)?item.episodes:[];
+   const servers=validServers(item.servers);
+   if(eps.length||servers.length>1){showDetails(item);return}
+   if(getUrl(item,null)){openPlayer(item,null,'เล่นเรื่องนี้');return}
+   showDetails(item);
+  });
+  grid.append(b);
+ });
+ message.textContent='พบ '+visibleItems.length+' เรื่อง';
+}
+async function fetchJson(url){
+ const controller=new AbortController();const timer=setTimeout(()=>controller.abort(),12000);
+ try{const r=await fetch(url,{cache:'no-store',signal:controller.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}
+ finally{clearTimeout(timer)}
+}
+async function load(){
+ message.textContent='กำลังรวบรวมซีรี่ย์อัปเดตจากหลายหมวด…';
+ const errors=[], collected=[], seen=new Set();
+ for(const url of DATA_URLS){
+  try{
+   const data=await fetchJson(url);
+   for(const raw of getItems(data)){
+    if(!raw || typeof raw!=='object' || !hasUpdateGroup(raw)) continue;
+    const title=text(raw.title||raw.name).trim();
+    if(!title) continue;
+    const key=title.toLocaleLowerCase().replace(/\s+/g,' ');
+    if(seen.has(key)) continue;
+    seen.add(key); collected.push(raw);
+   }
+  }catch(e){errors.push(url.split('/').pop()+': '+text(e&&e.message||e))}
+ }
+ allItems=collected;
+ if(allItems.length){
+  allItems.sort((a,b)=>{
+   const da=Date.parse(a.updated||a.update_date||a.date||'')||0;
+   const db=Date.parse(b.updated||b.update_date||b.date||'')||0;
+   if(db!==da)return db-da;
+   return (Number(b.latest_ep)||0)-(Number(a.latest_ep)||0);
+  });
+  render();
+  if(errors.length) message.textContent='พบ '+allItems.length+' เรื่อง • บางแหล่งโหลดไม่ได้';
+  return;
+ }
+ message.textContent='โหลดรายการซีรี่ย์ไม่ได้';
+ grid.innerHTML='<div class="empty">ยังโหลดรายการไม่ได้ กรุณาตรวจอินเทอร์เน็ตหรือแหล่ง JSON แล้วลองใหม่</div>';
+}
+function closePlayer(){
+ const frame=document.getElementById('tieaPlayerFrame');
+ try{if(frame&&frame.contentWindow)frame.contentWindow.postMessage({type:'TIEA_APP24_STOP'},location.origin)}catch(e){}
+ document.getElementById('tieaPlayerOverlay').classList.remove('show');
+ if(frame)frame.src='about:blank';
+}
+window.closeApp24Player=closePlayer;
+window.addEventListener('message',e=>{if(e.origin===location.origin&&e.data&&e.data.type==='TIEA_APP24_PLAYER_CLOSE')closePlayer()});
+document.getElementById('backList').addEventListener('click',()=>{details.hidden=true;grid.hidden=false;search.parentElement.hidden=false;window.scrollTo(0,0)});
+search.addEventListener('input',render);
+window.addEventListener('pagehide',closePlayer);
+window.addEventListener('popstate',()=>{if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closePlayer();else if(!details.hidden){details.hidden=true;grid.hidden=false;search.parentElement.hidden=false}});
+load();
+})();
+</script>
+</body>
+</html>
