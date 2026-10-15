@@ -17,6 +17,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <script>try{if(new URLSearchParams(location.search).has("url"))document.documentElement.classList.add("app24-player-embed")}catch(e){}</script>
     <title>TIEA IPTV HOME V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>window.TIEA_HLS_LATEST=window.Hls;</script>
@@ -868,6 +869,12 @@
                 grid-template-columns: 1fr
             }
         }
+
+        /* APP24 flash guard: hide HOME chrome from the first paint when this page is an embedded player. */
+        .app24-player-embed,
+        .app24-player-embed body { background: #000 !important; }
+        .app24-player-embed .app { display: none !important; }
+        .app24-player-embed #playerPanel { background: #000 !important; }
     </style>
 </head>
 
@@ -902,7 +909,7 @@ data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
     </div>
     <div class="player-panel" id="playerPanel">
         <div class="player-top">
-            <button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn home" id="playerHomeBtn">🏠 หน้าโฮม</button>
+            <button class="player-btn close" id="closePlayerBtn">✕ ปิด</button><button class="player-btn" id="app24ReloadBtn">⟳ โหลดใหม่</button><button class="player-btn" id="app24FullscreenBtn">⛶ เต็มจอ</button><button class="player-btn home" id="playerHomeBtn">⌂ HOME</button>
             <div class="player-title" id="playerTitle">กำลังเล่น</div>
         </div>
         <div class="player-wrap">
@@ -946,7 +953,7 @@ data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
         </div>
     </div>
     <script>
-        const HOME_URL='https://tiea9999.github.io/test/index.html',LIVE_URL='https://tiea9999.github.io/test/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
+        const HOME_URL='https://tiea9999.github.io/test/app24/index.html',LIVE_URL='https://tiea9999.github.io/test/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
 
 // Dynamic Provider Engine
 // Resolver ต้องเป็น API/Worker ที่ผู้ใช้ควบคุมและคืน JSON: {"url":"https://...m3u8"}
@@ -1449,6 +1456,8 @@ function closeExternalSettings(){
   setTimeout(()=>$('externalSettingsBtn')?.focus(),50);
 }
 function isAndroidDevice(){return /android/i.test(navigator.userAgent||'')}
+function isApp24Internal(){return location.pathname.includes('/test/app24/player-tiea.html') && new URLSearchParams(location.search).has('url')}
+
 function buildAndroidViewIntent(url,packageName=''){
   const u=new URL(url);
   const scheme=u.protocol.replace(':','');
@@ -1497,6 +1506,7 @@ function ask24PlayerMode(url,title){
   return launch24AndroidApp(url,'wiseplay',title);
 }
 function route24Player(url,title){
+  if(new URLSearchParams(location.search).has('url'))return open24NativePlayer(url,title);
   let mode=get24PlayerMode();
   if(mode==='ask')return ask24PlayerMode(url,title);
   if(mode==='web')return open24NativePlayer(url,title);
@@ -1815,6 +1825,7 @@ function dropProjectorQuality(){
 }
 
 function softRecoverPlayback(){
+  if(window.__TIEA_APP24_STOPPED)return;
   try{
     forceFullSound();
     if(state.hls){
@@ -1827,6 +1838,7 @@ function softRecoverPlayback(){
 }
 
 function setupProjectorVideoRecovery(){
+  if(window.__TIEA_APP24_STOPPED)return;
   if(setupProjectorVideoRecovery._ready)return;
   setupProjectorVideoRecovery._ready=true;
 
@@ -1851,7 +1863,7 @@ function setupProjectorVideoRecovery(){
   });
 }
 
-function forceFullSound(){try{video.muted=false;video.defaultMuted=false;video.volume=1;video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
+function forceFullSound(){try{if(hasRealPlayback()){video.muted=false;video.defaultMuted=false;video.volume=1}else{video.muted=true;video.defaultMuted=true;video.volume=0}video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
 
 
 function isProjectorWeakMode(){
@@ -2248,7 +2260,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
   // ALPHA 4.7.5:
   // Android / Projector ยังใช้ Player ของเครื่องเหมือนเดิม
   // Desktop PC ใช้ HLS.js + IPTV Worker 1.5.5 Dynamic AAA Host
-  if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original) && isAndroidDevice()){
+  if(original && is24PlayerHdUrl(original) && get24PlayerContentId(original) && isAndroidDevice() && !isApp24Internal() && !new URLSearchParams(location.search).has('url')){
     route24Player(original,title);
     return;
   }
@@ -2293,7 +2305,7 @@ async function playItem(item,serverIndex=0,displayTitle=''){
 
   // เผื่อ Resolver คืน URL ของ 24PlayerHD กลับมา
   // Desktop ใช้ HLS.js + IPTV Worker 1.5.5; Android ใช้ Player ของเครื่อง
-  if(is24PlayerHdUrl(original) && get24PlayerContentId(original) && isAndroidDevice()){
+  if(is24PlayerHdUrl(original) && get24PlayerContentId(original) && isAndroidDevice() && !isApp24Internal()){
     route24Player(original,title);
     return;
   }
@@ -2398,13 +2410,9 @@ function playCandidate(candidates,item,serverIndex,idx){
 
   playerPanel.classList.add('show');
   showPlayerUI();
-  if(sourceIs24 && !isAndroidDevice()){
-    // 24HD PC: do not force audible state before the first play() call.
-    // Audible autoplay can be blocked by Brave/Chrome.
-    try{video.muted=true;video.defaultMuted=true;video.volume=0}catch(e){}
-  }else{
-    forceFullSound();
-  }
+  // V1.0.18: all sources start muted so autoplay can be accepted by browsers;
+  // audio is restored by the playback-confirmation listener once video is moving.
+  try{video.muted=true;video.defaultMuted=true;video.volume=0}catch(e){}
 
   // ให้เวลาต้นทาง/Worker ทำงาน แต่ไม่เปิด intent:// อัตโนมัติ
   state.playTimer=setTimeout(()=>{
@@ -2441,11 +2449,8 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
       state.stuckCount=0;
       state._hlsFatalCount=0;
-      if(sourceIs24 && !isAndroidDevice()){
-        try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
-      }else{
-        forceFullSound();
-      }
+      // Restore audio only after real playback is confirmed.
+      try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
     }
   },{once:false}));
 
@@ -2519,7 +2524,7 @@ function playCandidate(candidates,item,serverIndex,idx){
       projectorPreferLowLevel();
       chooseProjectorSafeLevel();
       startWatchdog();
-      if(sourceIs24 && !isAndroidDevice()){
+      if(sourceIs24 && (!isAndroidDevice() || isApp24Internal())){
         setStatus('24PlayerHD • PC AUTO START • Movie2 V3.8');
         start24PcAutoplay();
       }else{
@@ -2975,6 +2980,84 @@ window.TIEA_24HD_PROVIDER_SCOPE=['main.24playerhd.com','main.123hd-serie.com'];
 console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserved');
 </script>
 
+<script>
+/* APP24 Android internal playback test: diagnostics only, no Worker changes */
+(function(){
+ const q=new URLSearchParams(location.search);if(!q.has('url'))return;
+ const style=document.createElement('style');style.textContent=`#app24Diag{position:fixed;bottom:12px;left:12px;right:12px;z-index:11000;max-height:28vh;overflow:auto;background:rgba(15,18,28,.90);color:#fff;border:1px solid #526072;border-radius:10px;padding:9px 12px;font:12px/1.5 Arial;pointer-events:none}#app24Diag.ok{display:none}`;document.head.appendChild(style);
+ const d=document.createElement('div');d.id='app24Diag';d.textContent='APP24 • กำลังเริ่มโหลด Player ภายใน…';document.body.appendChild(d);
+ const log=s=>{d.textContent='APP24 • '+String(s).slice(0,200)};
+ const v=document.getElementById('video');
+ if(v){v.addEventListener('playing',()=>{d.classList.add('ok')});v.addEventListener('error',()=>{log('VIDEO ERROR '+(v.error?.code||'unknown')+' • '+(v.error?.message||''))});v.addEventListener('waiting',()=>log('กำลังรอข้อมูลวิดีโอ…'));}
+ window.addEventListener('error',e=>log('JS ERROR '+(e.message||'unknown')));
+ window.addEventListener('unhandledrejection',e=>log('PROMISE '+(e.reason?.message||e.reason||'unknown')));
+ const originalSetStatus=window.setStatus;
+ if(typeof originalSetStatus==='function'){window.setStatus=function(t){originalSetStatus(t);if(!d.classList.contains('ok'))log(t)}}
+ setTimeout(()=>{if(!d.classList.contains('ok') && (!v||v.readyState<2))log('ยังไม่ได้ภาพ/เสียง • ตรวจ URL, HLS หรือข้อจำกัด Android WebView')},30000);
+})();
+/* APP24 V1.0.13: stop playback before leaving or hiding iframe */
+(function(){
+  let stopped=false;
+  function stopMedia(){
+    if(stopped)return;
+    stopped=true;
+    // Prevent delayed playback-recovery callbacks from restarting sound after close.
+    window.__TIEA_APP24_STOPPED=true;
+    try{if(typeof stopWatchdog==='function')stopWatchdog()}catch(e){}
+    try{if(typeof cleanupPlayer==='function')cleanupPlayer()}catch(e){}
+    try{
+      const v=document.getElementById('video');
+      if(v){
+        try{v.pause()}catch(e){}
+        try{v.muted=true;v.defaultMuted=true;v.volume=0}catch(e){}
+        try{v.play=function(){return Promise.resolve()}}catch(e){}
+        try{v.removeAttribute('src');v.src=''}catch(e){}
+      }
+    }catch(e){}
+    try{
+      const f=document.getElementById('native24Frame');
+      if(f){f.src='about:blank';f.removeAttribute('src');}
+    }catch(e){}
+    try{if(window.state?.playTimer)clearTimeout(window.state.playTimer)}catch(e){}
+  }
+  window.TIEA_APP24_STOP=stopMedia;
+  window.addEventListener('pagehide',stopMedia);
+  window.addEventListener('beforeunload',stopMedia);
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden && window.parent!==window) {
+      // A hidden embedded player must not continue making sound.
+      try{document.getElementById('video')?.pause()}catch(e){}
+    }
+  });
+  window.addEventListener('message',e=>{
+    if(e.origin===location.origin && e.data?.type==='TIEA_APP24_STOP')stopMedia();
+  });
+})();
+/* APP24 isolated bridge: source player engine unchanged */
+(function(){
+ const params=new URLSearchParams(location.search);
+ const url=params.get('url'), title=params.get('title')||'กำลังเล่น', page=params.get('page')||'';
+ const returnTo='https://tiea9999.github.io/test/app24/series-china.html';
+ function leave(){try{window.TIEA_APP24_STOP?.()}catch(e){};if(window.parent!==window){window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}else location.href=returnTo;}
+ window.addEventListener('DOMContentLoaded',()=>{
+  const panel=document.getElementById('playerPanel');
+  const reload=document.getElementById('app24ReloadBtn');
+  const full=document.getElementById('app24FullscreenBtn');
+  if(reload)reload.onclick=()=>{ if(url){try{cleanupPlayer()}catch(e){};playItem({title,servers:[{name:'Main',url,page}],page},0,title);} };
+  if(full)full.onclick=()=>{const target=panel||document.documentElement;if(!document.fullscreenElement){target.requestFullscreen?.().catch(()=>{});}else{document.exitFullscreen?.().catch(()=>{});}};
+  const home=document.getElementById('playerHomeBtn');
+  if(home)home.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();try{window.TIEA_APP24_STOP?.()}catch(err){};window.top.location.href='https://tiea9999.github.io/test/app24/index.html';},true);
+  for(const id of ['closePlayerBtn']){
+   const b=document.getElementById(id);if(b)b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();leave()},true);
+  }
+  if(!url){document.getElementById('statusText').textContent='ไม่พบ URL สำหรับเล่น';return;}
+  document.querySelector('.sidebar')?.remove();document.querySelector('.topbar')?.remove();
+  document.getElementById('content').style.display='none';
+  playItem({title,servers:[{name:'Main',url,page}],page},0,title);
+ });
+ window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();leave()}},true);
+})();
+</script>
 </body>
 
 </html>
