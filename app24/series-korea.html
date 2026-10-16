@@ -1,87 +1,123 @@
 <!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#141923"><title>ซีรีส์เกาหลี | TIEA APP24 TEST</title><style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#090c12;color:#fff;font-family:system-ui,'Segoe UI',sans-serif}body{padding-bottom:28px}.top{position:sticky;top:0;z-index:5;background:#141923ed;border-bottom:1px solid #32303b;padding:13px 16px;display:flex;align-items:center;gap:12px;min-height:64px;backdrop-filter:blur(12px)}.brand{font-weight:900;font-size:22px;letter-spacing:.7px}.brand b{color:#ff385a}.back{border:1px solid #59404a;border-radius:12px;background:#241720;color:white;text-decoration:none;padding:10px 13px;font-weight:700}.home{margin-left:auto;color:#fff;text-decoration:none;background:#b91f40;border-radius:12px;padding:10px 14px;font-weight:700}main{max-width:1100px;margin:auto;padding:22px 16px}.hero{background:linear-gradient(125deg,#401329,#181825 70%);border:1px solid #633148;border-radius:22px;padding:25px;margin-bottom:24px}h1{margin:0 0 9px;font-size:clamp(24px,5vw,38px)}p{color:#b9b9c8;line-height:1.6;margin:6px 0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.tile{min-width:0;text-decoration:none;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:160px;border-radius:19px;border:1px solid #49303b;background:linear-gradient(145deg,#25212f,#12151c);box-shadow:0 5px 22px #0004;padding:18px 10px;gap:10px}.tile:focus,.tile:hover{outline:3px solid #ff5577;outline-offset:2px;background:#3b2332}.emoji{font-size:43px;line-height:1.2}.name{font-size:clamp(15px,2vw,20px);font-weight:800}.sub{font-size:12px;color:#bdb3bf}.note{border:1px solid #3b3341;border-radius:16px;padding:18px;background:#151821;margin-top:18px}.pill{display:inline-block;padding:6px 12px;border:1px solid #684456;border-radius:30px;color:#ff9caf;font-size:12px;font-weight:700;margin-bottom:10px}.link{color:#ff8eaa}footer{color:#8b8795;text-align:center;font-size:12px;margin-top:24px}@media(max-width:600px){main{padding:15px 12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tile{min-height:128px;padding:14px 8px}.emoji{font-size:35px}.top{padding:10px}.brand{font-size:18px}.hero{padding:19px}.back,.home{padding:9px 11px}}@media(min-width:900px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-</style><style> .posters{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.poster{padding:0;background:#171a23;border:1px solid #41323e;border-radius:12px;overflow:hidden;color:white;text-align:left;cursor:pointer}.poster img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;background:#25212c}.poster span{display:block;padding:9px;font-weight:700;font-size:13px;line-height:1.4}.ep{background:#222635;color:white;border:1px solid #684052;border-radius:10px;padding:12px;cursor:pointer}.ep.selected{border-color:#ff3b68;background:#56263b}.episodes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.poster:focus,.ep:focus{outline:3px solid #ff5577}[hidden]{display:none!important}@media(max-width:700px){.posters{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.episodes{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:390px){.posters{grid-template-columns:repeat(2,minmax(0,1fr))}}</style><style>#tieaPlayerOverlay{position:fixed;inset:0;background:#000;z-index:99999;display:none}#tieaPlayerOverlay.show{display:block}#tieaPlayerFrame{width:100%;height:100%;border:0;background:#000}</style></head><body><header class="top"><a class="back" href="https://tiea9999.github.io/test/app24/series.html">❮ ย้อนกลับ</a><span class="brand">TIEA <b>APP24</b></span><a class="home" href="https://tiea9999.github.io/test/app24/index.html">⌂ HOME</a></header><main><h1>ซีรีส์เกาหลี</h1><p id="message">กำลังโหลด…</p><div id="posters" class="posters"></div><section id="details" hidden><button class="back" id="backList" type="button">❮ กลับรายการเรื่อง</button><h2 id="detailTitle"></h2><p id="episodeInfo"></p><div id="episodes" class="episodes"></div></section></main><div id="tieaPlayerOverlay"><iframe id="tieaPlayerFrame" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><script>window.TIEA_JSON_URL="https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-korea.json";</script><script>
+</style><style> .posters{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.poster{position:relative;padding:0;background:linear-gradient(180deg,#171717,#0e0e0e);border:1px solid #242424;border-radius:18px;overflow:hidden;color:white;text-align:left;cursor:pointer;min-width:0;transition:.18s}.poster:hover,.poster:focus{transform:scale(1.025);z-index:5;border-color:#00d0ff;box-shadow:0 0 18px rgba(0,208,255,.4)}.poster .poster-wrap{position:relative;display:block;overflow:hidden;background:#111}.poster img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;background:#25212c}.poster .lang-ribbon{position:absolute;top:17px;right:-39px;width:140px;transform:rotate(45deg);background:#ff1760;color:#fff;text-align:center;font-size:12px;font-weight:900;padding:7px 0;z-index:2;box-shadow:0 2px 8px #0008}.poster .cover-badges{position:absolute;left:0;right:0;bottom:9px;display:flex;align-items:center;justify-content:space-between;gap:5px}.poster .cover-badge{display:inline-block;background:#777;color:#fff;border-radius:0 7px 7px 0;padding:7px 9px;font-size:12px;font-weight:900;line-height:1.2}.poster .cover-badge.ep{background:#2585df;border-radius:7px;font-size:14px}.poster .poster-title{display:block;padding:9px;font-weight:800;font-size:13px;line-height:1.4}.ep{background:#222635;color:white;border:1px solid #684052;border-radius:10px;padding:12px;cursor:pointer}.ep.selected{border-color:#ff3b68;background:#56263b}.episodes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.poster:focus,.ep:focus{outline:3px solid #ff5577}[hidden]{display:none!important}@media(max-width:700px){.posters{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.episodes{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:390px){.posters{grid-template-columns:repeat(2,minmax(0,1fr))}}</style><style>#tieaPlayerOverlay{position:fixed;inset:0;background:#000;z-index:99999;display:none}#tieaPlayerOverlay.show{display:block}#tieaPlayerFrame{width:100%;height:100%;border:0;background:#000}</style></head><body><header class="top"><a class="back" href="https://tiea9999.github.io/test/app24/series.html">❮ ย้อนกลับ</a><span class="brand">TIEA <b>APP24</b></span><a class="home" href="https://tiea9999.github.io/test/app24/index.html">⌂ HOME</a></header><main><h1>ซีรีส์ละครสั้น</h1><p id="message">กำลังโหลด…</p><div id="posters" class="posters"></div><section id="details" hidden><button class="back" id="backList" type="button">❮ กลับรายการเรื่อง</button><h2 id="detailTitle"></h2><p id="episodeInfo"></p><div id="episodes" class="episodes"></div></section></main><div id="tieaPlayerOverlay"><iframe id="tieaPlayerFrame" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><script>window.TIEA_JSON_URL="https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-short.json";</script><script>
 const DATA_URL=window.TIEA_JSON_URL;
 const grid=document.getElementById('posters'), message=document.getElementById('message'), details=document.getElementById('details');
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function itemsFrom(data){if(Array.isArray(data))return data;for(const k of ['items','data','series','results','list'])if(Array.isArray(data?.[k]))return data[k];return []}
 function showDetails(item){
-  grid.hidden=true;details.hidden=false;
+  grid.hidden=true;
+  details.hidden=false;
   const title=item.title||item.name||'ไม่มีชื่อ';
   document.getElementById('detailTitle').textContent=title;
+  const list=document.getElementById('episodes');
+  const info=document.getElementById('episodeInfo');
+  list.replaceChildren();
   const eps=Array.isArray(item.episodes)?item.episodes:[];
-  const list=document.getElementById('episodes');list.replaceChildren();
-  if(!eps.length){list.textContent='เรื่องนี้ไม่มีรายการตอนใน JSON';return}
-  eps.forEach((ep,i)=>{
-    const b=document.createElement('button');b.className='ep';b.textContent=typeof ep==='string'?`EP ${i+1}`:(ep.title||ep.name||`EP ${i+1}`);
+  const servers=Array.isArray(item.servers)?item.servers:[];
+  // มี episodes ใช้ระบบเลือกตอนเดิม; ถ้าไม่มี episodes แต่มี servers ให้แสดงปุ่ม เช่น Main
+  const entries=eps.length
+    ? eps.map((ep,i)=>({ep,label:typeof ep==='string'?`EP ${i+1}`:(ep.title||ep.name||`EP ${i+1}`)}))
+    : servers.map((server,i)=>({ep:server,label:server.name||`Server ${i+1}`}));
+  if(!entries.length){
+    list.textContent='เรื่องนี้ไม่มีรายการตอนหรือ Server ใน JSON';
+    info.textContent='ไม่พบลิงก์เล่นของรายการนี้';
+    return;
+  }
+  entries.forEach(({ep,label})=>{
+    const b=document.createElement('button');
+    b.className='ep';b.type='button';b.textContent=label;
     b.addEventListener('click',()=>{
-      const server=(typeof ep==='object'&&Array.isArray(ep.servers)?ep.servers.find(s=>s&&s.url):null);
-      const url=server?.url||(typeof ep==='object'?(ep.url||ep.link||ep.stream||''):'');
-      if(!url){document.getElementById('episodeInfo').textContent='EP นี้ไม่มีลิงก์เล่นใน JSON';return;}
-      document.getElementById('episodeInfo').textContent='กำลังเปิด '+b.textContent;
-      const query=new URLSearchParams({url,title:title+' '+b.textContent,page:server?.page||ep.page||item.page||''});
-      document.getElementById('tieaPlayerFrame').src='https://tiea9999.github.io/test/app24/player-tiea.html?'+query.toString();
+      const isServer=servers.includes(ep);
+      const server=isServer?ep:(typeof ep==='object'&&Array.isArray(ep.servers)?ep.servers.find(s=>s&&s.url):null);
+      const url=(isServer?ep.url:'')||server?.url||(typeof ep==='object'?(ep.url||ep.link||ep.stream||''):'');
+      if(!url){info.textContent=label+' ไม่มีลิงก์เล่นใน JSON';return;}
+      info.textContent='กำลังเปิด '+label;
+      const query=new URLSearchParams({url,title:title+' '+label,page:server?.page||ep?.page||item.page||''});
+      const frame=document.getElementById('tieaPlayerFrame');
+      frame.src='https://tiea9999.github.io/test/app24/player-tiea.html?'+query.toString();
       document.getElementById('tieaPlayerOverlay').classList.add('show');
       document.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');
-    });list.appendChild(b)
+    });
+    list.appendChild(b);
   });
-  document.getElementById('episodeInfo').textContent='เลือกตอนที่ต้องการ';
+  info.textContent=eps.length?'เลือกตอนที่ต้องการ':'กำลังเริ่มเล่น…';
   window.scrollTo(0,0);
+  // หนังสั้นที่มี Server อย่าง Main เพียงอย่างเดียว: เริ่มเล่นทันทีเมื่อเลือกโปสเตอร์
+  // ถ้ามีรายการตอน (EP) ให้คงพฤติกรรมเดิม ไม่เปิดเล่นเอง
+  if(!eps.length && servers.length){
+    const buttons=[...list.querySelectorAll('button.ep')];
+    const mainButton=buttons.find(b=>b.textContent.trim().toLowerCase()==='main');
+    (mainButton||buttons[0])?.click();
+  }
 }
 window.addEventListener('message',e=>{if(e.origin!==location.origin||e.data?.type!=='TIEA_APP24_PLAYER_CLOSE')return;closeApp24Player();});
 document.getElementById('backList').onclick=()=>{details.hidden=true;grid.hidden=false;window.scrollTo(0,0)};
-async function fetchJSON(url, timeoutMs=12000){
+async function fetchJSON(url, timeoutMs=6500){
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),timeoutMs);
   try{
-    const r=await fetch(url,{cache:'no-store',signal:controller.signal});
+    const r=await fetch(url,{cache:'default',signal:controller.signal});
     if(!r.ok)throw new Error('HTTP '+r.status);
     return await r.json();
   }finally{clearTimeout(timer)}
 }
 async function load(){
-  message.textContent='กำลังโหลดรายการซีรีส์เกาหลี…';
+  message.textContent='กำลังโหลดรายการซีรีส์ละครสั้น…';
+  // ลองแหล่งข้อมูลพร้อมกัน แทนการรอทีละแหล่ง ช่วยลดเวลารอเมื่อ GitHub ช้า
   const sources=[
     DATA_URL,
     'https://cdn.jsdelivr.net/gh/tiea9999/tv-online@main/myseries-korea.json',
     'https://raw.githubusercontent.com/tiea9999/tv-online/main/myseries-korea.json'
   ];
-  let data=null, errors=[];
-  for(const [i,url] of sources.entries()){
-    try{
-      if(i)message.textContent='กำลังลองแหล่งข้อมูลสำรอง '+i+'…';
-      const parsed=await fetchJSON(url);
+  try{
+    const data=await Promise.any(sources.map(async url=>{
+      const parsed=await fetchJSON(url,6500);
       const items=itemsFrom(parsed);
       if(!items.length)throw new Error('JSON ไม่มีรายการ');
-      data=items;break;
-    }catch(e){errors.push(e.message||String(e))}
+      return items;
+    }));
+    message.textContent='พบ '+data.length+' รายการ';
+    grid.replaceChildren();
+    const frag=document.createDocumentFragment();
+    data.forEach(item=>{
+      const b=document.createElement('button');b.className='poster';b.type='button';
+      const wrap=document.createElement('span');wrap.className='poster-wrap';
+      const im=document.createElement('img');
+      im.loading='lazy';im.decoding='async';im.fetchPriority='low';im.alt='';
+      im.src=item.poster||item.logo||item.image||item.thumb||'';
+      im.onerror=()=>{im.style.visibility='hidden'};
+      const lang=String(item.language||item.quality||'').trim();
+      if(lang){const ribbon=document.createElement('span');ribbon.className='lang-ribbon';ribbon.textContent=lang;wrap.appendChild(ribbon);}
+      const badges=document.createElement('span');badges.className='cover-badges';
+      const latest=Math.max(0,Number(item.latest_ep)||0),total=Math.max(0,Number(item.total_ep)||latest);
+      const status=document.createElement('span');status.className='cover-badge';status.textContent=(total>0&&latest>=total)?'จบแล้ว':'กำลังฉาย';
+      const ep=document.createElement('span');ep.className='cover-badge ep';ep.textContent='EP.'+latest+'/'+total;
+      badges.append(status,ep);wrap.append(im,badges);
+      const label=document.createElement('span');label.className='poster-title';label.textContent=item.title||item.name||'ไม่มีชื่อ';
+      b.append(wrap,label);b.onclick=()=>showDetails(item);frag.append(b);
+    });
+    grid.append(frag);
+  }catch(e){
+    message.textContent='โหลดรายการไม่สำเร็จ กรุณาลองรีเฟรชอีกครั้ง ('+(e?.message||'เชื่อมต่อแหล่งข้อมูลไม่ได้')+')';
   }
-  if(!data){message.textContent='โหลดซีรีส์เกาหลีไม่สำเร็จ ('+errors.join(' / ')+')';return}
-  message.textContent='พบ '+data.length+' รายการ';
-  grid.replaceChildren();
-  data.forEach(item=>{
-    const b=document.createElement('button');b.className='poster';b.type='button';
-    const im=document.createElement('img');im.loading='lazy';im.alt='';im.src=item.poster||item.logo||item.image||item.thumb||'';
-    im.onerror=()=>im.style.visibility='hidden';
-    const label=document.createElement('span');label.textContent=item.title||item.name||'ไม่มีชื่อ';
-    b.append(im,label);b.onclick=()=>showDetails(item);grid.append(b);
-  });
 }
-
+function returnToSeriesList(){
+ const d=document.getElementById('details'),g=document.getElementById('posters');
+ if(d)d.hidden=true;
+ if(g)g.hidden=false;
+ const info=document.getElementById('episodeInfo');if(info)info.textContent='';
+ const list=document.getElementById('episodes');if(list)list.replaceChildren();
+ const title=document.getElementById('detailTitle');if(title)title.textContent='';
+ window.scrollTo(0,0);
+}
 function closeApp24Player(){
  const frame=document.getElementById('tieaPlayerFrame');
- // Stop media before hiding the overlay, then destroy the iframe document so
- // audio cannot continue if a browser delays the postMessage handler.
  try{if(frame&&frame.contentWindow){frame.contentWindow.postMessage({type:'TIEA_APP24_STOP'},location.origin);const v=frame.contentDocument&&frame.contentDocument.getElementById('video');if(v){v.pause();v.muted=true;v.removeAttribute('src');}}}catch(e){}
- const overlay=document.getElementById('tieaPlayerOverlay');
- if(overlay)overlay.classList.remove('show');
- if(frame){frame.src='about:blank';}
+ const overlay=document.getElementById('tieaPlayerOverlay');if(overlay)overlay.classList.remove('show');if(frame)frame.src='about:blank';
+ returnToSeriesList();
 }
 window.addEventListener('pagehide',closeApp24Player);
-window.addEventListener('popstate',()=>{
- if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closeApp24Player();
- else if(!document.getElementById('details').hidden){document.getElementById('details').hidden=true;document.getElementById('posters').hidden=false;}
-});
-
+window.addEventListener('popstate',()=>{if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closeApp24Player();else if(!document.getElementById('details').hidden)returnToSeriesList();});
 load();
 </script></body></html>
