@@ -22,6 +22,7 @@ h1{margin:0 0 8px;font-size:clamp(24px,4.8vw,36px)}p{color:#c0bdca;line-height:1
 #search:focus{border-color:#ff5577;box-shadow:0 0 0 2px #ff557733}
 #message{font-size:13px;color:#b9b5c2;min-height:22px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid[hidden]{display:none!important}
 .poster{min-width:0;display:flex;flex-direction:column;text-align:left;overflow:hidden;border:1px solid #39313e;border-radius:15px;background:linear-gradient(145deg,#211f2a,#11141b);color:white;padding:0;cursor:pointer;font:inherit;transition:border-color .15s,transform .15s}
 .poster:hover,.poster:focus-visible{outline:3px solid #ff5577;outline-offset:2px;border-color:#ff5577}
 .poster:active{transform:scale(.99)}
@@ -54,7 +55,11 @@ footer{text-align:center;color:#8b8795;font-size:12px;margin:25px 0 5px}
   <a class="home" href="https://tiea9999.github.io/test/app24/index.html">⌂ HOME</a>
 </header>
 <main>
-
+  <section class="hero">
+    <span class="pill">APP24 • SERIES UPDATE</span>
+    <h1>🔥 ซีรี่ย์อัปเดตใหม่</h1>
+    <p>รวมซีรี่ย์อัปเดตใหม่จาก จีน • เกาหลี • ไทย • ญี่ปุ่น • ฝรั่ง เลือกเรื่องเพื่อเปิดเล่นด้วย Player เดิมของ APP24</p>
+  </section>
   <div class="tools"><input id="search" type="search" placeholder="ค้นหาชื่อซีรีส์…" aria-label="ค้นหาชื่อซีรีส์"><span id="message" role="status">กำลังโหลดรายการ…</span></div>
   <div id="posters" class="grid"></div>
   <section id="details" hidden>
