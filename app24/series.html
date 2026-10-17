@@ -235,6 +235,34 @@
         </div>
 
     </main>
+<script>
+/* APP24 remote V2: grid-aware, one move per key, no global OK interception */
+(function(){
+ const sel='a[href],button:not([disabled]),[tabindex="0"]';
+ const visible=e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&!e.closest('[hidden]')&&getComputedStyle(e).visibility!=='hidden'};
+ document.addEventListener('keydown',function(e){
+  const k=({19:'ArrowUp',20:'ArrowDown',21:'ArrowLeft',22:'ArrowRight'})[e.keyCode]||e.key;
+  if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k))return;
+  if(document.getElementById('tieaPlayerOverlay')?.classList.contains('show'))return;
+  const a=document.activeElement;
+  if(a&&['INPUT','TEXTAREA','SELECT','VIDEO','IFRAME'].includes(a.tagName))return;
+  const items=[...document.querySelectorAll(sel)].filter(visible);
+  if(!items.length)return;
+  if(!items.includes(a)){e.preventDefault();items[0].focus();return}
+  const r=a.getBoundingClientRect(),x=(r.left+r.right)/2,y=(r.top+r.bottom)/2;
+  let best=null,score=Infinity;
+  for(const item of items){if(item===a)continue;
+   const q=item.getBoundingClientRect(),dx=(q.left+q.right)/2-x,dy=(q.top+q.bottom)/2-y;
+   const main=k==='ArrowRight'?dx:k==='ArrowLeft'?-dx:k==='ArrowDown'?dy:-dy;
+   if(main<5)continue;
+   const side=k==='ArrowLeft'||k==='ArrowRight'?Math.abs(dy):Math.abs(dx);
+   const cost=main+side*5;
+   if(cost<score){score=cost;best=item}
+  }
+  if(best){e.preventDefault();best.focus({preventScroll:true});best.scrollIntoView({block:'nearest',inline:'nearest'});}
+ },false);
+})();
+</script>
 </body>
 
 </html>
