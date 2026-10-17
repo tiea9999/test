@@ -328,11 +328,11 @@
         <div class="topBtns">
             <div class="btnBox"><button id="closeTopBtn" class="btn red" onclick="goHome()">✕ ปิด</button><button id="playerHomeTopBtn" class="btn green" onclick="goHome()">🏠 HOME</button></div>
             <div class="btnBox">
-                <button class="btn purple" onclick="copyCurrentLink()">คัดลอก</button><button class="btn blue" onclick="openSystemPlayer()">▶ PLAYER</button><button class="btn blue" onclick="openExternal()">▶ MX</button>
+                <button class="btn purple" id="openWebBtn" onclick="openVipWeb()">🌐 เปิดเว็บ</button><button class="btn purple" onclick="copyCurrentLink()">คัดลอก</button><button class="btn blue" onclick="openSystemPlayer()">▶ PLAYER</button><button class="btn blue" onclick="openExternal()">▶ MX</button>
             </div>
         </div>
         <video id="video" tabindex="0" playsinline webkit-playsinline x5-playsinline controls autoplay preload="auto"></video>
-        <iframe id="frame" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <iframe id="frame" tabindex="0" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
         <div id="statusbar" class="statusbar">AUTO GROUP UNLIMITED • Main + Worker พร้อมเล่น</div>
     </div>
     <script>
@@ -523,6 +523,14 @@ async function fetchText(url,ms){const c=new AbortController();const t=setTimeou
 function extractPlayable(txt,base){txt=String(txt||'');const abs=txt.match(/https?:[^'"\s<>]+\.m3u8[^'"\s<>]*/i);if(abs)return abs[0].replace(/\\\//g,'/');const file=txt.match(/["']([^"']+\.m3u8[^"']*)["']/i);if(file){try{return new URL(file[1].replace(/\\\//g,'/'),base).toString()}catch(e){return file[1]}}return''}
 function playNativeVideo(url){video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;return new Promise((resolve,reject)=>{let done=false;const ok=()=>{if(done)return;done=true;clear();video.muted=false;video.play().then(resolve).catch(resolve)};const fail=()=>{if(done)return;done=true;clear();reject('video error')};const clear=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('canplay',ok);video.removeEventListener('playing',ok);video.removeEventListener('error',fail)};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('canplay',ok,{once:true});video.addEventListener('playing',ok,{once:true});video.addEventListener('error',fail,{once:true});video.src=url;video.load();setTimeout(()=>{if(!done)fail()},16000)})}
 function playHlsMain(url,referer){const source=proxyUrl(url,referer||getAutoReferer(url));video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;return new Promise((resolve,reject)=>{let settled=false;const ok=()=>{if(settled)return;settled=true;clear();video.muted=false;video.play().then(resolve).catch(resolve)};const fail=()=>{if(settled)return;settled=true;clear();reject('hls error')};const clear=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('canplay',ok);video.removeEventListener('playing',ok);video.removeEventListener('error',fail);if(hls){hls.off(Hls.Events.MANIFEST_PARSED,ok);hls.off(Hls.Events.LEVEL_LOADED,ok);hls.off(Hls.Events.ERROR,onErr)}};const onErr=(ev,data)=>{if(data&&data.fatal){if(data.type===Hls.ErrorTypes.NETWORK_ERROR){try{hls.startLoad()}catch(e){}}else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){try{hls.recoverMediaError()}catch(e){}}else fail()}};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('canplay',ok,{once:true});video.addEventListener('playing',ok,{once:true});video.addEventListener('error',fail,{once:true});if(window.Hls&&Hls.isSupported()){hls=new Hls({enableWorker:false,lowLatencyMode:false,maxBufferLength:45,maxMaxBufferLength:60,backBufferLength:20,manifestLoadingTimeOut:20000,fragLoadingTimeOut:25000,levelLoadingTimeOut:20000,manifestLoadingMaxRetry:6,fragLoadingMaxRetry:8,levelLoadingMaxRetry:6});hls.on(Hls.Events.MANIFEST_PARSED,ok);hls.on(Hls.Events.LEVEL_LOADED,ok);hls.on(Hls.Events.ERROR,onErr);hls.loadSource(source);hls.attachMedia(video)}else{video.src=source;video.load()}setTimeout(()=>{if(!settled)fail()},20000)})}
+// เปิดหน้าเว็บต้นทางด้วยเบราว์เซอร์โดยตรง สำหรับเว็บฝังที่รีโมทควบคุมโฆษณาไม่ได้
+function openVipWeb(){
+  const item=currentList[currentIndex];
+  const url=(item&&item.url)||currentUrl;
+  if(!url)return;
+  try{window.open(url,'_blank','noopener,noreferrer') || (window.location.href=url)}
+  catch(e){window.location.href=url}
+}
 function openSystemPlayer(){const item=currentList[currentIndex];const url=(item&&item.url)||currentUrl;if(!url)return;try{const u=new URL(url);let intent='intent://'+u.host+u.pathname+(u.search||'')+'#Intent;scheme='+u.protocol.replace(':','')+';action=android.intent.action.VIEW;type=video/*;S.browser_fallback_url='+encodeURIComponent(url)+';end';window.location.href=intent}catch(e){window.open(url,'_blank')}}
 function openExternal(){const item=currentList[currentIndex];const url=(item&&item.url)||currentUrl;if(!url)return;try{const u=new URL(url);let intent='intent://'+u.host+u.pathname+(u.search||'')+'#Intent;scheme='+u.protocol.replace(':','')+';action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;S.browser_fallback_url='+encodeURIComponent(url)+';end';window.location.href=intent}catch(e){window.open(url,'_blank')}}
 async function copyCurrentLink(){const item=currentList[currentIndex];const url=(item&&item.url)||currentUrl;if(!url)return;try{await navigator.clipboard.writeText(url);alert('คัดลอกลิงก์ Main แล้ว')}catch(e){prompt('คัดลอกลิงก์ Main',url)}}
@@ -572,7 +580,7 @@ function focusPlayerClose(){showPlayerUI(true);setTimeout(()=>{const b=document.
 document.addEventListener('keydown',e=>{const key=e.key;if(player.style.display==='block')showPlayerUI();
 if(player.style.display==='block'){
   if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();focusPlayerClose();return}
-  if((key==='ArrowDown'||e.keyCode===20)&&isPlayerTopFocused()){e.preventDefault();video.focus();showPlayerUI();return}
+  if((key==='ArrowDown'||e.keyCode===20)&&isPlayerTopFocused()){e.preventDefault();const target=frame.style.display!=='none'?frame:video;target.focus();showPlayerUI();return}
   if(video.style.display!=='none'){
     if(key==='ArrowRight'||key==='MediaFastForward'||e.keyCode===22){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('right'); else seekVideoBy(15); return}
     if(key==='ArrowLeft'||key==='MediaRewind'||e.keyCode===21){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('left'); else seekVideoBy(-15); return}
