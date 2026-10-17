@@ -17,7 +17,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <script>try{if(new URLSearchParams(location.search).has("url"))document.documentElement.classList.add("app24-player-embed")}catch(e){}</script>
     <title>TIEA IPTV HOME V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>window.TIEA_HLS_LATEST=window.Hls;</script>
@@ -869,12 +868,6 @@
                 grid-template-columns: 1fr
             }
         }
-
-        /* APP24 flash guard: hide HOME chrome from the first paint when this page is an embedded player. */
-        .app24-player-embed,
-        .app24-player-embed body { background: #000 !important; }
-        .app24-player-embed .app { display: none !important; }
-        .app24-player-embed #playerPanel { background: #000 !important; }
     </style>
 </head>
 
@@ -1825,7 +1818,6 @@ function dropProjectorQuality(){
 }
 
 function softRecoverPlayback(){
-  if(window.__TIEA_APP24_STOPPED)return;
   try{
     forceFullSound();
     if(state.hls){
@@ -1838,7 +1830,6 @@ function softRecoverPlayback(){
 }
 
 function setupProjectorVideoRecovery(){
-  if(window.__TIEA_APP24_STOPPED)return;
   if(setupProjectorVideoRecovery._ready)return;
   setupProjectorVideoRecovery._ready=true;
 
@@ -1863,7 +1854,7 @@ function setupProjectorVideoRecovery(){
   });
 }
 
-function forceFullSound(){try{if(hasRealPlayback()){video.muted=false;video.defaultMuted=false;video.volume=1}else{video.muted=true;video.defaultMuted=true;video.volume=0}video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
+function forceFullSound(){try{video.muted=false;video.defaultMuted=false;video.volume=1;video.play().catch(()=>{})}catch(e){}}function stopWatchdog(){if(state.watchdog){clearInterval(state.watchdog);state.watchdog=null}}
 
 
 function isProjectorWeakMode(){
@@ -2410,9 +2401,13 @@ function playCandidate(candidates,item,serverIndex,idx){
 
   playerPanel.classList.add('show');
   showPlayerUI();
-  // V1.0.18: all sources start muted so autoplay can be accepted by browsers;
-  // audio is restored by the playback-confirmation listener once video is moving.
-  try{video.muted=true;video.defaultMuted=true;video.volume=0}catch(e){}
+  if(sourceIs24 && (!isAndroidDevice() || isApp24Internal())){
+    // 24HD PC: do not force audible state before the first play() call.
+    // Audible autoplay can be blocked by Brave/Chrome.
+    try{video.muted=true;video.defaultMuted=true;video.volume=0}catch(e){}
+  }else{
+    forceFullSound();
+  }
 
   // ให้เวลาต้นทาง/Worker ทำงาน แต่ไม่เปิด intent:// อัตโนมัติ
   state.playTimer=setTimeout(()=>{
@@ -2449,8 +2444,11 @@ function playCandidate(candidates,item,serverIndex,idx){
       if(state.playTimer){clearTimeout(state.playTimer);state.playTimer=null}
       state.stuckCount=0;
       state._hlsFatalCount=0;
-      // Restore audio only after real playback is confirmed.
-      try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
+      if(sourceIs24 && (!isAndroidDevice() || isApp24Internal())){
+        try{video.muted=false;video.defaultMuted=false;video.volume=1}catch(e){}
+      }else{
+        forceFullSound();
+      }
     }
   },{once:false}));
 
@@ -2995,50 +2993,12 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
  if(typeof originalSetStatus==='function'){window.setStatus=function(t){originalSetStatus(t);if(!d.classList.contains('ok'))log(t)}}
  setTimeout(()=>{if(!d.classList.contains('ok') && (!v||v.readyState<2))log('ยังไม่ได้ภาพ/เสียง • ตรวจ URL, HLS หรือข้อจำกัด Android WebView')},30000);
 })();
-/* APP24 V1.0.13: stop playback before leaving or hiding iframe */
-(function(){
-  let stopped=false;
-  function stopMedia(){
-    if(stopped)return;
-    stopped=true;
-    // Prevent delayed playback-recovery callbacks from restarting sound after close.
-    window.__TIEA_APP24_STOPPED=true;
-    try{if(typeof stopWatchdog==='function')stopWatchdog()}catch(e){}
-    try{if(typeof cleanupPlayer==='function')cleanupPlayer()}catch(e){}
-    try{
-      const v=document.getElementById('video');
-      if(v){
-        try{v.pause()}catch(e){}
-        try{v.muted=true;v.defaultMuted=true;v.volume=0}catch(e){}
-        try{v.play=function(){return Promise.resolve()}}catch(e){}
-        try{v.removeAttribute('src');v.src=''}catch(e){}
-      }
-    }catch(e){}
-    try{
-      const f=document.getElementById('native24Frame');
-      if(f){f.src='about:blank';f.removeAttribute('src');}
-    }catch(e){}
-    try{if(window.state?.playTimer)clearTimeout(window.state.playTimer)}catch(e){}
-  }
-  window.TIEA_APP24_STOP=stopMedia;
-  window.addEventListener('pagehide',stopMedia);
-  window.addEventListener('beforeunload',stopMedia);
-  document.addEventListener('visibilitychange',()=>{
-    if(document.hidden && window.parent!==window) {
-      // A hidden embedded player must not continue making sound.
-      try{document.getElementById('video')?.pause()}catch(e){}
-    }
-  });
-  window.addEventListener('message',e=>{
-    if(e.origin===location.origin && e.data?.type==='TIEA_APP24_STOP')stopMedia();
-  });
-})();
 /* APP24 isolated bridge: source player engine unchanged */
 (function(){
  const params=new URLSearchParams(location.search);
  const url=params.get('url'), title=params.get('title')||'กำลังเล่น', page=params.get('page')||'';
  const returnTo='https://tiea9999.github.io/test/app24/series-china.html';
- function leave(){try{window.TIEA_APP24_STOP?.()}catch(e){};if(window.parent!==window){window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}else location.href=returnTo;}
+ function leave(){try{cleanupPlayer()}catch(e){};if(window.parent!==window){window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}else location.href=returnTo;}
  window.addEventListener('DOMContentLoaded',()=>{
   const panel=document.getElementById('playerPanel');
   const reload=document.getElementById('app24ReloadBtn');
@@ -3046,14 +3006,14 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
   if(reload)reload.onclick=()=>{ if(url){try{cleanupPlayer()}catch(e){};playItem({title,servers:[{name:'Main',url,page}],page},0,title);} };
   if(full)full.onclick=()=>{const target=panel||document.documentElement;if(!document.fullscreenElement){target.requestFullscreen?.().catch(()=>{});}else{document.exitFullscreen?.().catch(()=>{});}};
   const home=document.getElementById('playerHomeBtn');
-  if(home)home.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();try{window.TIEA_APP24_STOP?.()}catch(err){};window.top.location.href='https://tiea9999.github.io/test/app24/index.html';},true);
+  if(home)home.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();try{cleanupPlayer()}catch(err){};window.top.location.href='https://tiea9999.github.io/test/app24/index.html';},true);
   for(const id of ['closePlayerBtn']){
    const b=document.getElementById(id);if(b)b.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();leave()},true);
   }
   if(!url){document.getElementById('statusText').textContent='ไม่พบ URL สำหรับเล่น';return;}
   document.querySelector('.sidebar')?.remove();document.querySelector('.topbar')?.remove();
   document.getElementById('content').style.display='none';
-  playItem({title,servers:[{name:'Main',url,page}],page},0,title);
+  setTimeout(()=>playItem({title,servers:[{name:'Main',url,page}],page},0,title),200);
  });
  window.addEventListener('keydown',e=>{if(e.key==='Escape'||e.key==='Backspace'){e.preventDefault();leave()}},true);
 })();
