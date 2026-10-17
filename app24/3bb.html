@@ -91,7 +91,7 @@ DOOTVZ Clean Start / Remote Smooth / DRM / production Workers unchanged.
 
 <body>
 
-    <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
+    <button type="button" class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</button>
    <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
@@ -1471,7 +1471,7 @@ function setupCategoryMenu(){
     btn.onclick=()=>renderCategory(btn.dataset.group);
     btn.onkeydown=e=>{
       if(e.key==="ArrowRight"){e.preventDefault();buttons[(index+1)%buttons.length].focus();}
-      else if(e.key==="ArrowLeft"){e.preventDefault();buttons[(index-1+buttons.length)%buttons.length].focus();}
+      else if(e.key==="ArrowLeft"){e.preventDefault();if(index===0) document.querySelector(".back-home")?.focus(); else buttons[index-1].focus();}
       else if(e.key==="ArrowDown"){e.preventDefault();document.querySelector(".channel")?.focus();}
       else if(e.key==="Enter"||e.key==="OK"||e.key===" "){e.preventDefault();renderCategory(btn.dataset.group);}
     };
@@ -1745,6 +1745,14 @@ console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
     try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
     el.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});
   }
+
+  // TV page: allow D-pad access to Back/Home without disrupting channel grid.
+  document.addEventListener("keydown",function(e){
+    if(!["ArrowRight","ArrowDown"].includes(e.key)) return;
+    if(!document.activeElement?.classList?.contains("back-home")) return;
+    e.preventDefault();e.stopImmediatePropagation();
+    (e.key==="ArrowRight"?document.querySelector(".category-btn"):document.querySelector(".channel"))?.focus();
+  },true);
 
   // One navigation owner only. No 55ms key-drop throttle:
   // every D-pad key event advances exactly one target from current focus.
