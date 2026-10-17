@@ -236,31 +236,37 @@
 
     </main>
 <script>
-/* APP24 remote V2: grid-aware, one move per key, no global OK interception */
+/* APP24 remote V3: strict direction, row/column alignment, no duplicate native movement */
 (function(){
- const sel='a[href],button:not([disabled]),[tabindex="0"]';
- const visible=e=>{const r=e.getBoundingClientRect();return r.width>0&&r.height>0&&!e.closest('[hidden]')&&getComputedStyle(e).visibility!=='hidden'};
+ const selector='a[href],button:not([disabled]),[tabindex="0"]';
+ function visible(el){const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&!el.closest('[hidden]')&&getComputedStyle(el).visibility!=='hidden';}
+ function center(r){return {x:(r.left+r.right)/2,y:(r.top+r.bottom)/2};}
  document.addEventListener('keydown',function(e){
-  const k=({19:'ArrowUp',20:'ArrowDown',21:'ArrowLeft',22:'ArrowRight'})[e.keyCode]||e.key;
-  if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(k))return;
+  const key=e.key==='Left'?'ArrowLeft':e.key==='Right'?'ArrowRight':e.key==='Up'?'ArrowUp':e.key==='Down'?'ArrowDown':e.key;
+  if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(key))return;
   if(document.getElementById('tieaPlayerOverlay')?.classList.contains('show'))return;
-  const a=document.activeElement;
-  if(a&&['INPUT','TEXTAREA','SELECT','VIDEO','IFRAME'].includes(a.tagName))return;
-  const items=[...document.querySelectorAll(sel)].filter(visible);
+  const active=document.activeElement;
+  if(active&&['INPUT','TEXTAREA','SELECT','VIDEO','IFRAME'].includes(active.tagName))return;
+  const items=Array.from(document.querySelectorAll(selector)).filter(visible);
   if(!items.length)return;
-  if(!items.includes(a)){e.preventDefault();items[0].focus();return}
-  const r=a.getBoundingClientRect(),x=(r.left+r.right)/2,y=(r.top+r.bottom)/2;
-  let best=null,score=Infinity;
-  for(const item of items){if(item===a)continue;
-   const q=item.getBoundingClientRect(),dx=(q.left+q.right)/2-x,dy=(q.top+q.bottom)/2-y;
-   const main=k==='ArrowRight'?dx:k==='ArrowLeft'?-dx:k==='ArrowDown'?dy:-dy;
-   if(main<5)continue;
-   const side=k==='ArrowLeft'||k==='ArrowRight'?Math.abs(dy):Math.abs(dx);
-   const cost=main+side*5;
-   if(cost<score){score=cost;best=item}
+  // Prevent WebView's own focus scrolling competing with our navigation.
+  e.preventDefault();e.stopPropagation();
+  if(!items.includes(active)){items[0].focus({preventScroll:true});items[0].scrollIntoView({block:'nearest'});return;}
+  const a=active.getBoundingClientRect(),p=center(a),horizontal=key==='ArrowLeft'||key==='ArrowRight';
+  const sign=(key==='ArrowRight'||key==='ArrowDown')?1:-1;
+  let best=null,bestScore=Infinity;
+  for(const el of items){if(el===active)continue;
+   const r=el.getBoundingClientRect(),q=center(r);
+   const primary=sign*(horizontal?q.x-p.x:q.y-p.y);
+   if(primary<=3)continue;
+   const secondary=horizontal?Math.abs(q.y-p.y):Math.abs(q.x-p.x);
+   const overlap=horizontal?Math.min(a.bottom,r.bottom)-Math.max(a.top,r.top):Math.min(a.right,r.right)-Math.max(a.left,r.left);
+   // Strongly prefer a neighbor in the same row/column, even if another item is physically nearer.
+   const score=(overlap>0?0:100000)+primary+secondary*8;
+   if(score<bestScore){bestScore=score;best=el;}
   }
-  if(best){e.preventDefault();best.focus({preventScroll:true});best.scrollIntoView({block:'nearest',inline:'nearest'});}
- },false);
+  if(best){best.focus({preventScroll:true});best.scrollIntoView({block:'nearest',inline:'nearest'});}
+ },true);
 })();
 </script>
 </body>
