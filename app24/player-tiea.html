@@ -3052,12 +3052,18 @@ console.log('TIEA 24HD/123HD 1.5.7 Stable bridge active; other providers preserv
  if(url) document.body.classList.add('tiea-standalone-player');
  const returnTo='https://tiea9999.github.io/test/app24/series-china.html';
  function leave(){
-  // Notify the host first: HLS teardown may block Android WebView for seconds.
+  // Silence now, before notifying the parent or expensive HLS cleanup.
+  try{
+   for(const media of document.querySelectorAll('video,audio')){
+    try{media.muted=true;media.defaultMuted=true;media.volume=0;media.pause()}catch(e){}
+   }
+  }catch(e){}
   if(window.parent!==window){
-    try{window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}catch(e){}
-    setTimeout(()=>{try{window.TIEA_APP24_STOP?.()}catch(e){}},0);
+   try{window.parent.postMessage({type:'TIEA_APP24_PLAYER_CLOSE'},location.origin)}catch(e){}
+   setTimeout(()=>{try{window.TIEA_APP24_STOP?.()}catch(e){}},0);
   }else{
-    location.href=returnTo;
+   try{window.TIEA_APP24_STOP?.()}catch(e){}
+   location.href=returnTo;
   }
  }
  window.addEventListener('DOMContentLoaded',()=>{
