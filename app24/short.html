@@ -130,9 +130,17 @@ function returnToSeriesList(){
 }
 function closeApp24Player(){
  const frame=document.getElementById('tieaPlayerFrame');
- try{if(frame&&frame.contentWindow){frame.contentWindow.postMessage({type:'TIEA_APP24_STOP'},location.origin);const v=frame.contentDocument&&frame.contentDocument.getElementById('video');if(v){v.pause();v.muted=true;v.removeAttribute('src');}}}catch(e){}
- const overlay=document.getElementById('tieaPlayerOverlay');if(overlay)overlay.classList.remove('show');if(frame)frame.src='about:blank';
+ const overlay=document.getElementById('tieaPlayerOverlay');
+ // Paint the list first. Do not block the close button on media teardown.
+ if(overlay)overlay.classList.remove('show');
  returnToSeriesList();
+ if(frame){
+   try{frame.contentWindow?.postMessage({type:'TIEA_APP24_STOP'},location.origin)}catch(e){}
+   setTimeout(()=>{
+     if(overlay && overlay.classList.contains('show'))return;
+     try{frame.src='about:blank'}catch(e){}
+   },50);
+ }
 }
 window.addEventListener('pagehide',closeApp24Player);
 window.addEventListener('popstate',()=>{if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))closeApp24Player();else if(!document.getElementById('details').hidden)returnToSeriesList();});
