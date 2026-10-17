@@ -138,6 +138,20 @@
             object-fit: contain
         }
 
+        /* AV-VIP ซับไทย: reduce external web player only, keep other categories full-screen */
+        #player.avVipCompact #frame {
+            position: absolute;
+            width: 82%;
+            height: 76%;
+            left: 9%;
+            top: 13%;
+            border: 2px solid #3b4350;
+            border-radius: 12px;
+            background: #000;
+        }
+        @media (max-width: 600px) {
+            #player.avVipCompact #frame { width: 94%; left: 3%; height: 74%; top: 15%; }
+        }
         .topBtns {
             position: absolute;
             top: 10px;
@@ -345,6 +359,7 @@ const SOURCES=[
 ];
 const FALLBACK_IMG="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 let grid=document.getElementById('grid'),overlay=document.getElementById('overlay'),video=document.getElementById('video'),frame=document.getElementById('frame'),player=document.getElementById('player'),statusbar=document.getElementById('statusbar');
+const avVipItems=new WeakSet();
 let hls=null,store={},allView={active:false,name:'',page:1},currentList=[],currentIndex=0,currentUrl='',lastFocus=null;
 function setStatus(t){t=String(t||'');if(t.includes('กำลังเล่น Main ผ่าน Worker'))t='';statusbar.textContent=t}
 function safeId(t){return String(t).replace(/[^\wก-๙-]/g,'_')}
@@ -459,6 +474,7 @@ async function loadAll(){
       let list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));
       for(const item of list){
         if(!item||typeof item!=='object') continue;
+        if(s.name==='AV-VIP ซับไทย') avVipItems.add(item);
         const key=dedupeKey(item);
         if(seen.has(key)) continue;
         seen.add(key);
@@ -513,7 +529,7 @@ function seeAll(name){allView={active:true,name,page:1};renderAllPage()}
 function renderAllPage(){const obj=store[allView.name];if(!obj)return;const perPage=20,total=obj.data.length,totalPages=Math.max(1,Math.ceil(total/perPage)),page=Math.min(allView.page,totalPages),items=obj.data.slice((page-1)*perPage,page*perPage);overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(allView.name)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="seeall" onclick="prevAllPage()">◀ ก่อนหน้า</button><button class="seeall" onclick="nextAllPage()">ถัดไป ▶</button><button class="seeall" onclick="backToGrid()">← กลับ</button></div></div><div style="padding:0 10px 10px;color:#00e5ff">หน้า ${page} / ${totalPages} &nbsp; | &nbsp; ทั้งหมด ${total} เรื่อง</div><div id="allBox" class="all-grid"></div>`;const box=document.getElementById('allBox');if(!items.length){box.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>box.appendChild(createCard(item,()=>openItem(item))))}
 function nextAllPage(){const obj=store[allView.name];if(obj&&allView.page<Math.ceil(obj.data.length/20)){allView.page++;renderAllPage()}}
 function prevAllPage(){if(allView.page>1){allView.page--;renderAllPage()}}
-function openItem(item){lastFocus=document.activeElement;if(Array.isArray(item.episodes)&&item.episodes.length){showEP(item);return}const servers=pickMainOnly(item.servers||item.sources||item.links||[]);const url=getDirectUrl(item);startPlay(servers.length?servers:[{name:'Main',url}])}
+function openItem(item){player.classList.toggle('avVipCompact',avVipItems.has(item));lastFocus=document.activeElement;if(Array.isArray(item.episodes)&&item.episodes.length){showEP(item);return}const servers=pickMainOnly(item.servers||item.sources||item.links||[]);const url=getDirectUrl(item);startPlay(servers.length?servers:[{name:'Main',url}])}
 function showEP(item){overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between"><h2 style="margin:0">${esc(getTitle(item))}</h2><button class="seeall" onclick="backToListOrGrid()">← กลับ</button></div><div class="ep-wrap" id="epBox"></div>`;const box=document.getElementById('epBox');item.episodes.forEach((ep,i)=>{const d=document.createElement('div');d.className='ep-card';d.tabIndex=0;d.textContent=ep.name||ep.title||`EP ${i+1}`;d.onclick=()=>{lastFocus=d;const servers=pickMainOnly(ep.servers||ep.sources||ep.links||ep.files||ep.playlist||[]);const single=getDirectUrl(ep);startPlay(servers.length?servers:[{name:'Main',url:single}])};d.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();d.click()}};box.appendChild(d)});setTimeout(()=>box.querySelector('.ep-card')?.focus(),100)}
 function startPlay(list){currentList=(list||[]).filter(x=>x&&x.url);currentIndex=0;if(!currentList.length){alert('❌ ไม่พบลิงก์ Main');return}overlay.style.display='none';player.style.display='block';showPlayerUI(false);playMain(currentList[0])}
 function cleanupPlayers(){if(hls){try{hls.destroy()}catch(e){}hls=null}try{video.pause();video.removeAttribute('src');video.load()}catch(e){}video.style.display='none';frame.src='';frame.style.display='none'}
@@ -539,6 +555,7 @@ function backToGrid(){overlay.style.display='none';overlay.innerHTML='';grid.sty
 function goHome(){
   cleanupPlayers();
   player.style.display='none';
+  player.classList.remove('avVipCompact');
   currentList=[];
   currentIndex=0;
 
