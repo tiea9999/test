@@ -18,6 +18,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
     <title>TIEA IPTV HOME V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE</title>
+    <!-- APP24 FLASH FIX: decide standalone mode before the first page paint. -->
+    <script>if(new URLSearchParams(location.search).has('url'))document.documentElement.classList.add('app24-player-only');</script>
+    <style>
+      html.app24-player-only,html.app24-player-only body{background:#000!important;}
+      html.app24-player-only .app{display:none!important;}
+      html.app24-player-only #app24Diag{display:none!important;}
+    </style>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>window.TIEA_HLS_LATEST=window.Hls;</script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
