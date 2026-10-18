@@ -344,8 +344,15 @@ function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt
 function getTitle(item){return item.title||item.name||item.ep_name||'ไม่มีชื่อ'}
 function getImage(item){return item.image||item.poster||item.poster_url||item.thumb||item.thumbnail||item.logo||FALLBACK_IMG}
 function getDirectUrl(item){if(!item||typeof item!=='object')return'';return item.url||item.file||item.src||item.link||item.stream||item.play||item.video||item.video_url||item.m3u8||item.player||item.embed||item.stream_url||''}
-function getAutoReferer(url){const u=String(url||'').toLowerCase();if(u.includes('ok-hd.com'))return'https://ok-hd.com/';if(u.includes('master.streamhls.com')||u.includes('stream1689.com')||u.includes('037hddmovie.com')||u.includes('037hdmovie.com'))return'https://www.037hddmovie.com/';return'https://www.037hddmovie.com/'}
-function proxyUrl(url,ref){let out=PROXY+encodeURIComponent(url);const r=ref||getAutoReferer(url);if(r)out+='&referer='+encodeURIComponent(r);return out}
+function getAutoReferer(url){const u=String(url||'').toLowerCase();if(u.includes('vdohls.com'))return'https://playk.playhdhls.xyz/';if(u.includes('ok-hd.com'))return'https://ok-hd.com/';if(u.includes('master.streamhls.com')||u.includes('stream1689.com')||u.includes('037hddmovie.com')||u.includes('037hdmovie.com'))return'https://www.037hddmovie.com/';return'https://www.037hddmovie.com/'}
+function proxyUrl(url,ref){
+  // Keep already-proxied TIEA links unchanged; do not proxy twice.
+  try{const u=new URL(String(url||''));if(u.hostname.toLowerCase()==='iptv.tawatchai250958.workers.dev')return url}catch(e){}
+  let out=PROXY+encodeURIComponent(url);
+  const r=ref||getAutoReferer(url);
+  if(r)out+='&referer='+encodeURIComponent(r);
+  return out;
+}
 function cacheKey(url){try{return 'tiea037_main_'+btoa(unescape(encodeURIComponent(String(url||'')))).slice(0,120)}catch(e){return 'tiea037_main_'+String(url||'').slice(0,120)}}
 function getCachedMain(url){try{const v=localStorage.getItem(cacheKey(url));if(!v)return'';const o=JSON.parse(v);if(!o.url||Date.now()-(o.t||0)>1000*60*60*12)return'';return o.url}catch(e){return''}}
 function setCachedMain(url,playable){try{if(url&&playable&&url!==playable)localStorage.setItem(cacheKey(url),JSON.stringify({url:playable,t:Date.now()}))}catch(e){}}
