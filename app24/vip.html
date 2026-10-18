@@ -1,789 +1,230 @@
-<!-- TIEA PATCH 2026-10-06: MEE55 P2P DIRECT IFRAME TEST
-     player1.mee55player.com/p2p/* -> direct iframe
-     NO production Worker / NO HLS.js / other providers preserved
--->
-<!-- TIEA TEST 2026-10-06: VDOHLS RAW AUTO ROUTE
-     TEST 5 LINKS / READY FOR 100+ ITEMS
-     raw vdohls -> TIEA Worker once + playk referer
-     existing TIEA Worker URL -> keep unchanged
-     other providers preserved
--->
-<!DOCTYPE html>
-<!-- TIEA PATCH 2026-10-06: NO DOUBLE PROXY
-     ถ้า URL ผ่าน iptv.tawatchai250958.workers.dev อยู่แล้ว จะไม่ครอบ Worker ซ้ำ
-     VDOHLS AUTO REFERER / provider อื่นคงเดิม
--->
-<!-- TIEA PATCH 2026-10-06: VDOHLS AUTO REFERER
-     vdohls.com -> https://playk.playhdhls.xyz/
-     JSON / Worker / provider อื่นคงเดิม
--->
-<html lang="th">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <!-- VIP URL-format experiment: fembeqv2 master.txt HLS; rakhuay isHost iframe; no worker edits -->
-    <title>TIEA IPTV PLAYER AUTO HIDE 5S — KEEP CURRENT PAGE</title>
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-    <style>
-        * {
-            box-sizing: border-box
-        }
-
-        body {
-            margin: 0;
-            background: #000;
-            color: #fff;
-            font-family: Arial, sans-serif;
-            overflow-x: hidden
-        }
-
-        #homeBtn {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            z-index: 9999;
-            padding: 10px 14px;
-            background: #00c853;
-            border: 0;
-            border-radius: 10px;
-            color: #fff;
-            cursor: pointer;
-            font-weight: 700
-        }
-
-        .row-title {
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: #00e5ff;
-            font-weight: 700;
-            font-size: 18px
-        }
-
-        .seeall {
-            background: #ff9800;
-            border: 0;
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: #fff;
-            cursor: pointer;
-            font-weight: 700
-        }
-
-        .row-items {
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 10px;
-            scrollbar-width: thin
-        }
-
-        .card {
-            min-width: 190px;
-            max-width: 190px;
-            background: #111;
-            border-radius: 10px;
-            padding: 8px;
-            text-align: center;
-            cursor: pointer;
-            flex-shrink: 0;
-            border: 1px solid #222
-        }
-
-        .card img {
-            width: 100%;
-            height: 260px;
-            object-fit: cover;
-            border-radius: 8px;
-            background: #1a1a1a;
-            display: block
-        }
-
-        .card-title {
-            margin-top: 8px;
-            font-size: 14px;
-            line-height: 1.35;
-            word-break: break-word
-        }
-
-        #overlay,
-        #player {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none
-        }
-
-        #overlay {
-            background: #000;
-            z-index: 999;
-            overflow: auto;
-            padding-top: 50px
-        }
-
-        #player {
-            background: #000;
-            z-index: 10000
-        }
-
-        video,
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: 0;
-            background: #000;
-            object-fit: contain
-        }
-
-        /* AV-VIP ซับไทย: reduce external web player only, keep other categories full-screen */
-        #player.avVipCompact #frame {
-            position: absolute;
-            width: 82%;
-            height: 76%;
-            left: 9%;
-            top: 13%;
-            border: 2px solid #3b4350;
-            border-radius: 12px;
-            background: #000;
-        }
-        @media (max-width: 600px) {
-            #player.avVipCompact #frame { width: 94%; left: 3%; height: 74%; top: 15%; }
-        }
-
-        /* AV-VIP only: prominent remote-focusable web button, not auto-hidden */
-        #avOpenWebFixed{display:none;position:absolute;left:50%;top:66px;transform:translateX(-50%);z-index:10010;background:#ffb300;color:#151515;border:3px solid #fff;border-radius:12px;padding:14px 24px;font-size:19px;font-weight:800;cursor:pointer;white-space:nowrap}
-        #player.avVipCompact #avOpenWebFixed{display:block}
-        #avOpenWebFixed:focus{outline:5px solid #00e5ff;outline-offset:3px}
-        #player.avVipCompact #frame{position:static;width:100%;height:100%;left:auto;top:auto;border:0;border-radius:0}
-
-        .topBtns {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            z-index: 10003;
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            pointer-events: none
-        }
-
-        .btnBox {
-            display: flex;
-            gap: 8px;
-            pointer-events: auto
-        }
-
-        .btn {
-            padding: 10px;
-            border: 0;
-            border-radius: 8px;
-            color: #fff;
-            cursor: pointer;
-            font-weight: 700
-        }
-
-        .red {
-            background: #f00
-        }
-
-        .blue {
-            background: #2196f3
-        }
-
-        .purple {
-            background: #9c27b0
-        }
-
-        .green {
-            background: #00c853
-        }
-
-        .statusbar {
-            position: absolute;
-            left: 10px;
-            right: 10px;
-            bottom: 10px;
-            z-index: 1002;
-            background: rgba(0, 0, 0, .65);
-            padding: 8px 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            color: #fff
-        }
-
-        .statusbar:empty {
-            display: none
-        }
-
-        .status {
-            padding: 14px;
-            color: #fff
-        }
-
-        .ep-wrap {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            padding: 10px
-        }
-
-        .ep-card {
-            min-width: 110px;
-            background: #111;
-            border-radius: 10px;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            border: 1px solid #222
-        }
-
-        .card:focus,
-        .ep-card:focus,
-        button:focus {
-            outline: 3px solid #00e5ff;
-            outline-offset: 2px
-        }
-
-        .all-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 12px;
-            padding: 10px
-        }
-
-        .all-grid .card {
-            min-width: 0;
-            max-width: none;
-            width: 100%
-        }
-
-        @media(min-width:700px) {
-            .all-grid {
-                grid-template-columns: repeat(4, minmax(0, 1fr))
-            }
-        }
-
-        @media(min-width:1100px) {
-            .all-grid {
-                grid-template-columns: repeat(6, minmax(0, 1fr))
-            }
-        }
-
-        @media(max-width:700px) {
-            .card {
-                min-width: 150px;
-                max-width: 150px
-            }
-
-            .card img {
-                height: 215px
-            }
-
-            .row-items {
-                gap: 10px
-            }
-
-            .btn {
-                padding: 9px 10px;
-                font-size: 13px
-            }
-        }
-
-        @media(max-width:420px) {
-            .card {
-                min-width: 135px;
-                max-width: 135px
-            }
-
-            .card img {
-                height: 195px
-            }
-
-            .card-title {
-                font-size: 13px
-            }
-        }
-
-        .playerUIHidden .topBtns,
-        .playerUIHidden .statusbar,
-        .playerUIHidden .mobile-seek-controls {
-            opacity: 0 !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-        }
-
-        .topBtns,
-        .statusbar,
-        .mobile-seek-controls {
-            transition: opacity .25s ease, visibility .25s ease;
-        }
-    
-        /* ===== PLAYER AUTO HIDE 5 SECONDS PATCH ===== */
-        #player .topBtns,
-        #player .statusbar,
-        #player .mobile-seek-controls {
-            opacity: 1;
-            visibility: visible;
-        }
-        #player.playerUIHidden .topBtns,
-        #player.playerUIHidden .statusbar,
-        #player.playerUIHidden .mobile-seek-controls {
-            opacity: 0 !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-        }
-        </style>
-
-
-</head>
-
-<body>
-    <button id="homeBtn">🏠 HOME</button>
-    <div id="grid"></div>
-    <div id="overlay"></div>
-    <div id="player">
-        <div class="topBtns">
-            <div class="btnBox"><button id="closeTopBtn" class="btn red" onclick="goHome()">✕ ปิด</button><button id="playerHomeTopBtn" class="btn green" onclick="goHome()">🏠 HOME</button></div>
-            <div class="btnBox">
-                <button class="btn purple" id="openWebBtn" onclick="openVipWeb()">🌐 เปิดเว็บ</button><button class="btn purple" onclick="copyCurrentLink()">คัดลอก</button><button class="btn blue" onclick="openSystemPlayer()">▶ PLAYER</button><button class="btn blue" onclick="openExternal()">▶ MX</button>
-            </div>
-        </div>
-      
-        <video id="video" tabindex="0" playsinline webkit-playsinline x5-playsinline controls autoplay preload="auto"></video>
-        <iframe id="frame" tabindex="0" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
-        <div id="statusbar" class="statusbar">AUTO GROUP UNLIMITED • Main + Worker พร้อมเล่น</div>
-    </div>
-    <script>
-        const PROXY="https://iptv.tawatchai250958.workers.dev/?url=";
-const SOURCES=[
-{name:"AV-VIP ซับไทย",url:"https://raw.githubusercontent.com/tiea9999/test/refs/heads/main/AV-VIP%E0%B8%8B%E0%B8%B1%E0%B8%9A%E0%B9%84%E0%B8%97%E0%B8%A2"},
-{name:"jav24 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-1/refs/heads/main/playlist_jav24.json"},
-{name:"inter 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-1/refs/heads/main/VIP%2018%2B.json"},
-{name:"inter 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-1/refs/heads/main/inter.json"},    
-];
-const FALLBACK_IMG="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
-let grid=document.getElementById('grid'),overlay=document.getElementById('overlay'),video=document.getElementById('video'),frame=document.getElementById('frame'),player=document.getElementById('player'),statusbar=document.getElementById('statusbar');
-const avVipItems=new WeakSet();
-let hls=null,store={},allView={active:false,name:'',page:1},currentList=[],currentIndex=0,currentUrl='',lastFocus=null;
-function setStatus(t){t=String(t||'');if(t.includes('กำลังเล่น Main ผ่าน Worker'))t='';statusbar.textContent=t}
-function safeId(t){return String(t).replace(/[^\wก-๙-]/g,'_')}
-function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]))}
-function getTitle(item){return item.title||item.name||item.ep_name||'ไม่มีชื่อ'}
-function getImage(item){return item.image||item.poster||item.poster_url||item.thumb||item.thumbnail||item.logo||FALLBACK_IMG}
-function getDirectUrl(item){if(!item||typeof item!=='object')return'';return item.url||item.file||item.src||item.link||item.stream||item.play||item.video||item.video_url||item.m3u8||item.player||item.embed||item.stream_url||''}
-function getAutoReferer(url){const u=String(url||'').toLowerCase();if(u.includes('fembeqv2.xyz'))return'https://av-sugoi.net/';if(u.includes('rakhuay.com'))return'https://rakhuay.com/';if(u.includes('vdohls.com'))return'https://playk.playhdhls.xyz/';if(u.includes('ok-hd.com'))return'https://ok-hd.com/';if(u.includes('master.streamhls.com')||u.includes('stream1689.com')||u.includes('037hddmovie.com')||u.includes('037hdmovie.com'))return'https://www.037hddmovie.com/';return'https://www.037hddmovie.com/'}
-function proxyUrl(url,ref){
-  url=String(url||'').trim();
-  if(!url)return url;
-
-  // 1) URL ที่ผ่าน TIEA Worker อยู่แล้ว: ห้ามครอบซ้ำ
-  try{
-    const u=new URL(url);
-    if(u.hostname.toLowerCase()==='iptv.tawatchai250958.workers.dev') return url;
-  }catch(e){}
-
-  // 2) VDOHLS ดิบ: ใช้กฎเดียวกันทุกเรื่อง
-  //    raw vdohls -> Worker 1 ชั้น + playk Referer
-  try{
-    const u=new URL(url);
-    if(u.hostname.toLowerCase()==='vdohls.com' || u.hostname.toLowerCase().endsWith('.vdohls.com')){
-      return PROXY+encodeURIComponent(url)+'&referer='+encodeURIComponent('https://playk.playhdhls.xyz/');
-    }
-  }catch(e){}
-
-  // 3) Provider อื่น: ใช้ระบบเดิมทั้งหมด
-  let out=PROXY+encodeURIComponent(url);
-  const r=ref||getAutoReferer(url);
-  if(r)out+='&referer='+encodeURIComponent(r);
-  return out;
-}
-function cacheKey(url){try{return 'tiea037_main_'+btoa(unescape(encodeURIComponent(String(url||'')))).slice(0,120)}catch(e){return 'tiea037_main_'+String(url||'').slice(0,120)}}
-function getCachedMain(url){try{const v=localStorage.getItem(cacheKey(url));if(!v)return'';const o=JSON.parse(v);if(!o.url||Date.now()-(o.t||0)>1000*60*60*12)return'';return o.url}catch(e){return''}}
-function setCachedMain(url,playable){try{if(url&&playable&&url!==playable)localStorage.setItem(cacheKey(url),JSON.stringify({url:playable,t:Date.now()}))}catch(e){}}
-function isHls(url){return /\.m3u8(\?|$)/i.test(url)||/m3u8/i.test(url)||/^https?:\/\/[^/]*fembeqv2\.xyz\/cdn\/hls\/[^?#]+\/master\.txt(?:[?#]|$)/i.test(String(url||''))}
-function isVideoFile(url){return /\.(mp4|m4v|webm|ogg|ogv|mov)(\?|$)/i.test(url)}
-function isMee55P2P(url){
-  try{
-    const u=new URL(String(url||'').trim());
-    return u.protocol==='https:' &&
-      u.hostname.toLowerCase()==='player1.mee55player.com' &&
-      /^\/p2p\/[A-Za-z0-9_-]+\/?$/.test(u.pathname);
-  }catch(e){return false}
-}
-function playMee55P2P(url){
-  cleanupPlayers();
-  currentUrl=url;
-  video.style.display='none';
-  frame.style.display='block';
-  frame.src=url;
-  setStatus('');
-  showPlayerUI(false);
-}
-
-function isEmbeddable(url){return /youtube\.com|youtu\.be|vk\.com|ok\.ru|dailymotion\.com|player|embed/i.test(url)}
-function normalizeServers(servers){if(!Array.isArray(servers))return[];return servers.map((s,i)=>{if(typeof s==='string')return{name:'',url:s,idx:i};if(s&&typeof s==='object')return{name:String(s.name||s.title||s.label||s.server||s.quality||''),url:getDirectUrl(s),referer:s.referer||s.referrer||s.origin||'',idx:i};return{name:'',url:'',idx:i}}).filter(s=>s.url)}
-function pickMainOnly(list){const arr=normalizeServers(list);if(!arr.length)return[];let main=arr.find(s=>/^(main|หลัก)$/i.test(s.name.trim()))||arr.find(s=>/main|หลัก|server\s*1|สำรอง\s*0/i.test(s.name))||arr[0];return[main]}
-function normalizeGroupName(g, fallback){
-  g=String(g||'').trim();
-  if(!g) g=String(fallback||'อื่นๆ').trim()||'อื่นๆ';
-  const compact=g.replace(/\s+/g,'');
-  const aliases={
-    'หนังใหม่2026':'หนังใหม่2026',
-    'หนังใหม่ 2026':'หนังใหม่2026',
-    'หนังใหม่2025':'หนังใหม่2025',
-    'หนังใหม่ 2025':'หนังใหม่2025',
-    'netflix':'Netflix',
-    'NETFLIX':'Netflix'
-  };
-  return aliases[g]||aliases[compact]||g;
-}
-function getItemGroups(item, fallback){
-  let gs=[];
-  if(Array.isArray(item.groups)) gs.push(...item.groups);
-  if(item.group) gs.push(item.group);
-  if(item.category) gs.push(item.category);
-  if(item.type_group) gs.push(item.type_group);
-  if(!gs.length) gs=[fallback||'อื่นๆ'];
-  return [...new Set(gs.map(x=>normalizeGroupName(x,fallback)).filter(Boolean))];
-}
-function getUpdatedTime(item){
-  const raw=String(item.updated||item.update||item.date||item.added||item.created||item.last_update||'').trim();
-  if(!raw) return 0;
-  let t=Date.parse(raw);
-  if(!Number.isNaN(t)) return t;
-  const m=raw.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
-  if(m) return new Date(Number(m[3]),Number(m[2])-1,Number(m[1])).getTime();
-  return 0;
-}
-function dedupeKey(item){
-  const title=String(getTitle(item)||'').trim().toLowerCase();
-  let url='';
-  try{url=(item.servers&&item.servers[0]&&(item.servers[0].url||item.servers[0].link||item.servers[0].file))||getDirectUrl(item)||'';}catch(e){}
-  return title+'|'+String(url).trim().toLowerCase();
-}
-async function loadAll(){
-  grid.innerHTML='<div class="status">⚡ LOADING AUTO GROUP...</div>';
-  store={};
-  const groupMap={};
-  const latest=[];
-  const seen=new Set();
-  const sourceNames=SOURCES.map(s=>s.name);
-  const groupOrder=[...sourceNames];
-
-  for(const s of SOURCES){
-    try{
-      const res=await fetch(s.url+'?t='+Date.now(),{cache:'no-store'});
-      if(!res.ok)throw new Error(res.status);
-      const data=await res.json();
-      let list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));
-      for(const item of list){
-        if(!item||typeof item!=='object') continue;
-        if(s.name==='AV-VIP ซับไทย') avVipItems.add(item);
-        const key=dedupeKey(item);
-        if(seen.has(key)) continue;
-        seen.add(key);
-        const groups=getItemGroups(item,s.name);
-        const t=getUpdatedTime(item);
-        if(t>0) latest.push({...item,__updatedTime:t});
-        for(const g of groups){
-          if(!groupMap[g]){groupMap[g]=[]; if(!groupOrder.includes(g)) groupOrder.push(g);}
-          groupMap[g].push(item);
-        }
-      }
-    }catch(e){
-      const g=normalizeGroupName(s.name);
-      if(!groupMap[g]) groupMap[g]=[];
-      store[g]={data:[],page:1,error:'โหลดรายการไม่ได้'};
-      if(!groupOrder.includes(g)) groupOrder.push(g);
-    }
+[
+  {
+    "title": "[ซับไทยลดเซ็น] JUR-728 เพื่อนลูกว้าวซ่าไฟหน้าทอร์นาโด Kana Kusakabe",
+    "stream": "https://cache11224510.kuylive.com/hls/dFBxMXlkaWRWZXYzcTBPMk1uUlZJQT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/JUR-728%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] JUR-511 สามีเมินเฉยลงเอยพ่อบ้าน Meguri ",
+    "stream": "https://cache11224510.kuylive.com/hls/Ui84bUF6S1EzdlJUTncxRE9wYm5rdz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/JUR-511%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] JUR-082 อยากมีเบบี๋พ่อสามีพาลุย Mio Kuon แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/Y05LTWZSY3hUcDlVaFk5bWpIbnJpQT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/JUR-082%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] NSPS-998 หวงแทบแย่คุณแม่มือนวด Shuri Yamaguchi แปลไทยโดย JohnMichael",
+    "stream": "https://cache11224510.kuylive.com/hls/cWRlQzFaQldSRWlMUktkZDc2YnR4UT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/NSPS-998%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] JUR-627 หัวหน้าส่งเลียเสียเมียให้รุ่นน้อง Haruka Nanba แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/ekdqcnBxMHYwYXJyd2M1TG42OHpzQT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/JUR-627%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] JUR-749 ออฟฟิศซู่ซ่าเมียหัวหน้าแซ่บหลาย Maki Hojo แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/KzhjUkZZU0hFV0pCRFB2OTB0M2s3UT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/JUR-749%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] JUR-857 พลีกายเยี่ยงทาสบ่วงบาศชำระหนี้ Ichika แปลไทยโดย Shared",
+    "stream": "https://cache11224510.kuylive.com/hls/YzdMREtpNXQxWVlhenpvOU5RODBzdz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/JUR-857%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] ALDN-586 ด้านมืดหลังบ้านศีลร่านเสมอกัน Yuka Mizuno แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/enN3Z3U4anFRNTF6c3JmWll4WEtMZz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/ALDN-586%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] JUR-533 ภารกิจอุ้มหลานเอวหวานพ่อสามี Haruka Kitagawa แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/d0QrcUg3dnJBUVM3RzRNNzB6Z0FYZz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/JUR-533%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] HODV-21855 สาวนีทสุดซอยปล่อยจอยกับพี่ชาย Nanami Sena แปลไทยโดย for all mankind",
+    "stream": "https://cache11224510.kuylive.com/hls/ZkZ1VzZ3eTF5TmVpeGtuckZnOGZ0QT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/HODV-21855%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] URE-134 ออนเซ็นเสียรู้ลอบชู้พ่อสามี Miku Arima แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/RnYyWTJFU2g4VVFza0lIQmxJa0p1UT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/URE-134%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ลดเซ็น] SNOS-411 เย็ดสาวหุ่นนางแบบก่อนรถไฟเที่ยวสุดท้ายออก Kaede Fua",
+    "stream": "https://cache11224510.kuylive.com/hls/eWk2SDNZTUk1VnM4VzhNdjdkREZXdz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/SNOS-411.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ลดเซ็น] SNOS-366 เรียนโยคะโดนครูจับเย็ดท่ายากมากลีลา Kiyohara Miyu",
+    "stream": "https://cache11224510.kuylive.com/hls/ckpqYURjaVlVYmVNRHBjU0ZFUjVpUT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/SNOS-366.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] IPZZ-917 น้ำพี่หยดแหมะฝนแฉะหนูทนได้ Mitsuri Nagahama แปลไทยโดย SuperAok",
+    "stream": "https://cache11224510.kuylive.com/hls/T0lYcVhidWZMVTVqNTJRN3F6SFFTUT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/IPZZ-917%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] PFES-131 บ้ากามถูกจริตเพื่อนสนิทติดคุณพ่อ Meguri Minoshima แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/dHFFa09IZUdsb3BiUjhDRVJGcUpJQT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/PFES-131%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ลดเซ็น] SNOS-440 นอนไม่หลับต้องสะกดจิตจับเย็ด Saki Okuda",
+    "stream": "https://cache11224510.kuylive.com/hls/Q2JZM00rUEFiYUdiZWRvR1BLcEJLUT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/SNOS-440.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ลดเซ็น] IPZZ-964 น้องติดหนี้มาเฟียพี่สาวเอาตัวเข้าแลก Hinano Kanon",
+    "stream": "
+https://cache11224510.kuylive.com/hls/eEVmSHJvSzRUbW9ZZ0JXK0pYK0YxUT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/IPZZ-964.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] JUR-546 มดลูกสำราญลมปราณพ่อสามี Kiho Hoshina แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/elJVRlF6d1RWUkI2TEpUUld2VEkzZz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/JUR-546%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] ROE-488 อาจารย์อมดูดหลักสูตรนอกตำรา Yuka Oshima แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/cG1oQWRNc09aS0JqNEJuMWN2NkhQUT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/10/ROE-488%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] NGOD-328 มีดีเรื่องป้อคุณพ่อไม่เอาไหน Hina Nitori แปลไทยโดย JAVWOW.COM",
+    "stream":"https://cache11224510.kuylive.com/hls/R21mU0grbmJWWmRaMkRwVTZZOTdldz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/NGOD-328%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] MIDA-409 แผนกามวิปริตภารกิจเรียกคุณพ่อ Kanna Sannoki แปลไทยโดย JAVWOW.COM",
+    "stream":"https://cache11224510.kuylive.com/hls/MWQwWGcwMTl5Mkd4cXJITkRHYnNUdz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/MIDA-409%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] JUR-543 ลูกเลี้ยงของดีสามีอ่อนด้อย Sakura Satsuki แปลไทยโดย JAVWOW.COM",
+    "stream":"https://cache11224510.kuylive.com/hls/cjM1MmZqOWU0dkhSTnMzUEhYVWYxdz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/JUR-543%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] MIDA-644 สูตรลับพ่อตาฤทธิ์ยาปลุกอารมณ์ Maria Ayase แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/cmV0NHlkRitrb3JyYmZMZEhZaldKZz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/MIDA-644%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] MIDA-580 ปิดดีลเอาชัวร์ส่งตัวเข้าแลก Kanan Amamiya แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/LzNpYUNrK1piVG12WEltZWJWZ2dvZz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/MIDA-580%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] SNOS-283 ร้านสะดวกเสียวกวางเหลียวสะดวกซัก Fua Kaede แปลไทยโดย JAVWOW.COM",
+    "stream": "
+https://cache11224510.kuylive.com/hls/YktBd2Z6VGkxclQrK3JoMFJ4MWhPUT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/SNOS-283%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] ADN-771 ไฟหน้ากระดานราบนวดแล้วนาบซาลอน Karen Ishida แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/T3FuQWRVdFU4VExYQ0xZd2NaTmszZz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/ADN-771%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] ADN-770 หัวใจลอบสลักมนต์รักเซรามิก Mahiro Ichiki แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/VkFyOThkNC9NaW9TSDZnMk4zcFpKUT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/ADN-770%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] SNOS-217 สัญญาณชวนย่องข้างห้องแตงโม Haru Minato แปลไทยโดย JAVWOW.COM",
+    "stream": "
+https://cache11224510.kuylive.com/hls/WWhtS0FFUlN5RnNMQjdlSUVRSlU2QT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/SNOS-217%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] ADN-780 ความรักต้องสาบตราบาปคุณแม่ Yuna Shiina แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/dkE4Vzd5d0xyVTRjNUFvdTl6aEFGUT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/ADN-780%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] WAAA-631 เพื่อนรักหว่านล้อมขอซ้อมเรื่องบนเตียง Moka Haruhi แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/MUtPNU1kSFBiTHJYcmtJVnUxZkhyQT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/WAAA-631%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "ซับไทยลดเซ็น] EBWH-332 ชุดบางพารั่วหุ่นยั่วไม่ตั้งใจ Fumika Kashiwagi แปลไทยโดย JAVWOW.COM",
+    "stream": "
+https://cache11224510.kuylive.com/hls/ZkxQVkY3Ym5ubEtNTVhoVEJwRXhCQT09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/EBWH-332%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
+  },
+  {
+    "title": "[ซับไทยลดเซ็น] ALDN-584 หลังบ้านพังยับความลับเพื่อนเมีย Shiori Tsukata แปลไทยโดย JAVWOW.COM",
+    "stream": "https://cache11224510.kuylive.com/hls/WFkzY01Wd2NxaTFwY2kzVEFuNTBHdz09/xfgdYshjhYhj=!sdsHsyG",
+    "poster": "https://www4.avkuy.com/wp-content/uploads/2026/09/ALDN-584%20Avkuy.jpg",
+    "group": "av-kuy",
+    "referer": "https://av-kuy.com/"
   }
-
-  const rows=[];
-  // ===== TIEA 037HD CATEGORY PRIORITY =====
-  // บังคับให้ หนังใหม่2026 แสดงก่อน หนังใหม่ชนโรง เสมอ
-  const priorityGroups=['หนังใหม่2026','หนังใหม่ชนโรง'];
-  priorityGroups.forEach(g=>{
-    const i=groupOrder.indexOf(g);
-    if(i>=0) groupOrder.splice(i,1);
-  });
-  groupOrder.unshift(...priorityGroups);
-
-  if(latest.length){
-    latest.sort((a,b)=>(b.__updatedTime||0)-(a.__updatedTime||0));
-    store['🔥 อัปเดทล่าสุด']={data:latest,page:1,error:''};
-    rows.push('🔥 อัปเดทล่าสุด');
-  }
-  for(const g of groupOrder){
-    if(groupMap[g]&&groupMap[g].length){
-      store[g]={data:groupMap[g],page:1,error:''};
-      rows.push(g);
-    }else if(store[g]){
-      rows.push(g);
-    }
-  }
-  Object.keys(groupMap).forEach(g=>{if(!rows.includes(g)){store[g]={data:groupMap[g],page:1,error:''};rows.push(g)}});
-  grid.innerHTML='';
-  rows.forEach(renderRow);
-  setTimeout(()=>document.getElementById('homeBtn')?.focus(),250);
-}
-function renderRow(name){const rowId=safeId(name),row=document.createElement('div');row.innerHTML=`<div class="row-title"><span>${esc(name)}</span><button class="seeall" onclick="seeAll('${name.replace(/'/g,"\\'")}')">ดูทั้งหมด</button></div><div class="row-items" id="row-${rowId}"></div>`;grid.appendChild(row);renderPage(name)}
-function createCard(item,onClick){const div=document.createElement('div');div.className='card';div.tabIndex=0;div.innerHTML=`<img src="${esc(getImage(item))}" alt="${esc(getTitle(item))}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'"><div class="card-title">${esc(getTitle(item))}</div>`;div.onclick=onClick;div.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();onClick()}};return div}
-function renderPage(name){const obj=store[name],row=document.getElementById('row-'+safeId(name));if(!obj||!row)return;row.innerHTML='';if(obj.error){row.innerHTML=`<div class="status">❌ ${obj.error}</div>`;return}const items=obj.data.slice(0,15);if(!items.length){row.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>row.appendChild(createCard(item,()=>openItem(item))))}
-function seeAll(name){allView={active:true,name,page:1};renderAllPage()}
-function renderAllPage(){const obj=store[allView.name];if(!obj)return;const perPage=20,total=obj.data.length,totalPages=Math.max(1,Math.ceil(total/perPage)),page=Math.min(allView.page,totalPages),items=obj.data.slice((page-1)*perPage,page*perPage);overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(allView.name)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="seeall" onclick="prevAllPage()">◀ ก่อนหน้า</button><button class="seeall" onclick="nextAllPage()">ถัดไป ▶</button><button class="seeall" onclick="backToGrid()">← กลับ</button></div></div><div style="padding:0 10px 10px;color:#00e5ff">หน้า ${page} / ${totalPages} &nbsp; | &nbsp; ทั้งหมด ${total} เรื่อง</div><div id="allBox" class="all-grid"></div>`;const box=document.getElementById('allBox');if(!items.length){box.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>box.appendChild(createCard(item,()=>openItem(item))))}
-function nextAllPage(){const obj=store[allView.name];if(obj&&allView.page<Math.ceil(obj.data.length/20)){allView.page++;renderAllPage()}}
-function prevAllPage(){if(allView.page>1){allView.page--;renderAllPage()}}
-function openItem(item){player.classList.toggle('avVipCompact',avVipItems.has(item));lastFocus=document.activeElement;if(Array.isArray(item.episodes)&&item.episodes.length){showEP(item);return}const servers=pickMainOnly(item.servers||item.sources||item.links||[]);const url=getDirectUrl(item);const ref=item.referer||item.referrer||item.origin||'';const host=String(item.isHost||'').toLowerCase()==='true'||item.isHost===true;startPlay(servers.length?servers.map(x=>({...x,referer:x.referer||ref,isHost:host})): [{name:'Main',url,referer:ref,isHost:host}])}
-function showEP(item){overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between"><h2 style="margin:0">${esc(getTitle(item))}</h2><button class="seeall" onclick="backToListOrGrid()">← กลับ</button></div><div class="ep-wrap" id="epBox"></div>`;const box=document.getElementById('epBox');item.episodes.forEach((ep,i)=>{const d=document.createElement('div');d.className='ep-card';d.tabIndex=0;d.textContent=ep.name||ep.title||`EP ${i+1}`;d.onclick=()=>{lastFocus=d;const servers=pickMainOnly(ep.servers||ep.sources||ep.links||ep.files||ep.playlist||[]);const single=getDirectUrl(ep);startPlay(servers.length?servers:[{name:'Main',url:single}])};d.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();d.click()}};box.appendChild(d)});setTimeout(()=>box.querySelector('.ep-card')?.focus(),100)}
-function startPlay(list){currentList=(list||[]).filter(x=>x&&x.url);currentIndex=0;if(!currentList.length){alert('❌ ไม่พบลิงก์ Main');return}overlay.style.display='none';player.style.display='block';showPlayerUI(false);playMain(currentList[0]);if(player.classList.contains('avVipCompact'))setTimeout(()=>document.getElementById('avOpenWebFixed')?.focus(),350)}
-function cleanupPlayers(){const p=document.getElementById('tieaWiseplayPanel');if(p)p.style.display='none';if(hls){try{hls.destroy()}catch(e){}hls=null}try{video.pause();video.removeAttribute('src');video.load()}catch(e){}video.style.display='none';frame.src='';frame.style.display='none'}
-async function playMain(item){cleanupPlayers();const url=item.url;currentUrl=url;
-  // เว็บ isHost เป็นหน้าเล่น ไม่ใช่ไฟล์วิดีโอ: แสดงผ่าน iframe เฉพาะเว็บที่ระบุ
-  if((item.isHost===true||String(item.isHost||'').toLowerCase()==='true') && /^https:\/\/([^/]+\.)?rakhuay\.com\/v\//i.test(url)){
-    // Wiseplay เล่น URL ชนิด isHost ได้ แต่ browser iframe ถูกเว็บปลายทางปฏิเสธ
-    // แสดงตัวเลือกเปิดด้วย player ในเครื่องแทนการฝัง iframe ที่จอดำ
-    video.style.display='none';frame.style.display='none';
-    setStatus('ลิงก์นี้เล่นผ่าน Wiseplay ได้ • เลือกปุ่มเปิดผ่านแอปด้านล่าง');
-    let panel=document.getElementById('tieaWiseplayPanel');
-    if(!panel){
-      panel=document.createElement('div');panel.id='tieaWiseplayPanel';
-      panel.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;background:#070707;color:#fff;z-index:10001';
-      const title=document.createElement('div');title.textContent='ลิงก์นี้ต้องเปิดด้วยแอปเล่นวิดีโอ';title.style.cssText='font-size:20px;font-weight:bold';
-      const note=document.createElement('div');note.textContent='Wiseplay เล่นได้ แต่เว็บไซต์ต้นทางไม่แสดงวิดีโอในเบราว์เซอร์';note.style.cssText='font-size:14px;color:#bbb';
-      const open=document.createElement('button');open.id='tieaOpenWiseplay';open.textContent='▶ เปิดผ่านแอปเล่นวิดีโอ';open.style.cssText='background:#00a65a;color:white;border:0;border-radius:10px;padding:16px 22px;font-size:18px;font-weight:bold';open.onclick=()=>openSystemPlayer();
-      const copy=document.createElement('button');copy.textContent='คัดลอกลิงก์';copy.style.cssText='background:#2857b8;color:white;border:0;border-radius:8px;padding:12px 18px;font-size:16px';copy.onclick=()=>copyCurrentLink();
-      const close=document.createElement('button');close.textContent='✕ กลับรายการ';close.style.cssText='background:#a52323;color:white;border:0;border-radius:8px;padding:12px 18px;font-size:16px';close.onclick=()=>goHome();
-      panel.append(title,note,open,copy,close);player.appendChild(panel);
-    }
-    panel.style.display='flex';showPlayerUI(false);setTimeout(()=>document.getElementById('tieaOpenWiseplay')?.focus(),100);return;
-  }
-  // V11: kuylive HLS only. V6 path for every other provider stays untouched.
-  if(/^https:\/\/[^/]*kuylive\.com\/hls\//i.test(url)){
-    playKuyliveV11(url,item.referer||'https://av-kuy.com/');
-    return;
-  }
-  if(isMee55P2P(url)){playMee55P2P(url);return}setStatus('Main เท่านั้น • กำลังหาไฟล์เล่นจาก Main...');try{const playable=await resolveMainUrl(url,item.referer);if(isHls(playable)){await playHlsMain(playable,item.referer||getAutoReferer(url));setStatus('');return}if(isVideoFile(playable)){await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}catch(e){console.warn(e);setStatus('Main ยังไม่ขึ้นภาพ • ไม่สลับ Backup • ให้กด MX หรือคัดลอกลิงก์');}}
-async function resolveMainUrl(url,referer){if(isHls(url)||isVideoFile(url))return url;const cached=getCachedMain(url);if(cached){setStatus('Main เท่านั้น • ใช้ลิงก์ที่จำไว้ กำลังเล่นเร็วขึ้น...');return cached}try{const txt=await fetchText(proxyUrl(url,referer||getAutoReferer(url)),12000);const found=extractPlayable(txt,url);if(found){setCachedMain(url,found);return found}}catch(e){console.warn('resolve fail',e)}return url}
-async function fetchText(url,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||10000);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}catch(e){clearTimeout(t);throw e}}
-function extractPlayable(txt,base){txt=String(txt||'');const abs=txt.match(/https?:[^'"\s<>]+\.m3u8[^'"\s<>]*/i);if(abs)return abs[0].replace(/\\\//g,'/');const file=txt.match(/["']([^"']+\.m3u8[^"']*)["']/i);if(file){try{return new URL(file[1].replace(/\\\//g,'/'),base).toString()}catch(e){return file[1]}}return''}
-function playNativeVideo(url){video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;return new Promise((resolve,reject)=>{let done=false;const ok=()=>{if(done)return;done=true;clear();video.muted=false;video.play().then(resolve).catch(resolve)};const fail=()=>{if(done)return;done=true;clear();reject('video error')};const clear=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('canplay',ok);video.removeEventListener('playing',ok);video.removeEventListener('error',fail)};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('canplay',ok,{once:true});video.addEventListener('playing',ok,{once:true});video.addEventListener('error',fail,{once:true});video.src=url;video.load();setTimeout(()=>{if(!done)fail()},16000)})}
-function playHlsMain(url,referer){const source=proxyUrl(url,referer||getAutoReferer(url));video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;return new Promise((resolve,reject)=>{let settled=false;const ok=()=>{if(settled)return;settled=true;clear();video.muted=false;video.play().then(resolve).catch(resolve)};const fail=()=>{if(settled)return;settled=true;clear();reject('hls error')};const clear=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('canplay',ok);video.removeEventListener('playing',ok);video.removeEventListener('error',fail);if(hls){hls.off(Hls.Events.MANIFEST_PARSED,ok);hls.off(Hls.Events.LEVEL_LOADED,ok);hls.off(Hls.Events.ERROR,onErr)}};const onErr=(ev,data)=>{if(data&&data.fatal){if(data.type===Hls.ErrorTypes.NETWORK_ERROR){try{hls.startLoad()}catch(e){}}else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){try{hls.recoverMediaError()}catch(e){}}else fail()}};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('canplay',ok,{once:true});video.addEventListener('playing',ok,{once:true});video.addEventListener('error',fail,{once:true});if(window.Hls&&Hls.isSupported()){hls=new Hls({enableWorker:false,lowLatencyMode:false,maxBufferLength:45,maxMaxBufferLength:60,backBufferLength:20,manifestLoadingTimeOut:20000,fragLoadingTimeOut:25000,levelLoadingTimeOut:20000,manifestLoadingMaxRetry:6,fragLoadingMaxRetry:8,levelLoadingMaxRetry:6});hls.on(Hls.Events.MANIFEST_PARSED,ok);hls.on(Hls.Events.LEVEL_LOADED,ok);hls.on(Hls.Events.ERROR,onErr);hls.loadSource(source);hls.attachMedia(video)}else{video.src=source;video.load()}setTimeout(()=>{if(!settled)fail()},20000)})}
-// V11 KUYLIVE ONLY: rewrite HLS playlist URIs before Hls.js parses them.
-// Other sources continue using the original V6 player path unchanged.
-function playKuyliveV11(originUrl,referer){
-  const origin=new URL(originUrl);
-  const workerHost='iptv.tawatchai250958.workers.dev';
-  video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;
-  setStatus('ลิงก์ 2: กำลังอ่าน Playlist และแปลง Segment...');
-  if(!(window.Hls&&Hls.isSupported())){
-    video.src=proxyUrl(originUrl,referer);video.load();
-    video.play().catch(()=>setStatus('ลิงก์ 2: ตัวเล่นเครื่องยังเริ่มไม่ได้'));
-    return;
-  }
-  const BaseLoader=Hls.DefaultConfig.loader;
-  function sourceUrl(request){
-    try{
-      const u=new URL(request);
-      if(u.hostname===workerHost){
-        const original=u.searchParams.get('url');
-        if(original)return original;
-        // Hls.js resolved an unqualified segment against the Worker URL.
-        // Use original manifest's directory, not the Worker root.
-        return new URL(u.pathname.replace(/^\//,'')+u.search,originUrl).href;
-      }
-      return u.href;
-    }catch(e){return request}
-  }
-  function rewritePlaylist(data,base){
-    if(typeof data!=='string'||!/^\s*#EXTM3U/.test(data))return data;
-    let converted=0;
-    const makeUrl=(value)=>{
-      try{
-        const decoded=value.replace(/&amp;/g,'&');
-        if(/^(data:|skd:|blob:)/i.test(decoded))return value;
-        const abs=new URL(decoded,base);
-        if(!/^https?:$/.test(abs.protocol))return value;
-        converted++;
-        return proxyUrl(abs.href,referer);
-      }catch(e){return value}
-    };
-    const result=data.split(/\r?\n/).map(line=>{
-      const trimmed=line.trim();
-      if(!trimmed)return line;
-      if(trimmed[0]!=='#')return makeUrl(trimmed);
-      // EXT-X-KEY, EXT-X-MAP, EXT-X-MEDIA, EXT-X-I-FRAME-STREAM-INF, etc.
-      return line.replace(/URI=("([^"]*)"|'([^']*)')/g,(full,quoted,dq,sq)=>{
-        const val=dq!==undefined?dq:sq;
-        const q=quoted[0];return 'URI='+q+makeUrl(val)+q;
-      });
-    }).join('\n');
-    console.info('V11 kuylive playlist rewritten:',converted,'URI(s)',base);
-    return result;
-  }
-  class KuylivePlaylistLoader extends BaseLoader{
-    load(context,config,callbacks){
-      const type=context.type;
-      const original=sourceUrl(context.url);
-      try{
-        const u=new URL(context.url);
-        if(u.hostname===workerHost){
-          if(!u.searchParams.has('url'))context.url=proxyUrl(original,referer);
-        }else if(u.hostname===origin.hostname){
-          context.url=proxyUrl(u.href,referer);
-        }
-      }catch(e){console.warn('V11 URL normalization',e)}
-      const isPlaylist=['manifest','level','audioTrack','subtitleTrack'].includes(type);
-      if(!isPlaylist)return super.load(context,config,callbacks);
-      const cb={...callbacks,onSuccess:(response,stats,ctx,networkDetails)=>{
-        if(typeof response.data==='string'){
-          response.data=rewritePlaylist(response.data,original);
-          if(!/^\s*#EXTM3U/.test(response.data)){
-            setStatus('ลิงก์ 2: Worker ไม่ได้ส่ง Playlist HLS กลับมา');
-          }
-        }
-        callbacks.onSuccess(response,stats,ctx,networkDetails);
-      }};
-      return super.load(context,config,cb);
-    }
-  }
-  let fragCount=0,playing=false;
-  hls=new Hls({loader:KuylivePlaylistLoader,enableWorker:false,lowLatencyMode:false,
-    manifestLoadingTimeOut:15000,fragLoadingTimeOut:20000,
-    manifestLoadingMaxRetry:1,fragLoadingMaxRetry:1,levelLoadingMaxRetry:1});
-  hls.on(Hls.Events.MANIFEST_PARSED,()=>{
-    setStatus('ลิงก์ 2: Playlist ผ่านแล้ว • รอข้อมูลวิดีโอ...');
-    video.play().catch(()=>setStatus('ลิงก์ 2: กด ▶ เพื่อเริ่มเล่น'));
-  });
-  hls.on(Hls.Events.FRAG_LOADED,()=>{
-    fragCount++;
-    if(!playing)setStatus('ลิงก์ 2: โหลด Segment '+fragCount+' ชิ้น • กำลังรอภาพและเสียง...');
-  });
-  hls.on(Hls.Events.ERROR,(_ev,d)=>{
-    if(!d)return;
-    if(d.fatal){
-      const code=d.response&&d.response.code;
-      setStatus('ลิงก์ 2: '+(d.details||d.type||'error')+(code?' HTTP '+code:'')+' • ยังเล่นไม่ได้');
-      console.warn('V11 kuylive fatal',d);
-      try{hls.stopLoad()}catch(e){}
-    }
-  });
-  video.addEventListener('playing',()=>{if(hls&&fragCount){playing=true;setStatus('')}},{once:true});
-  hls.loadSource(proxyUrl(originUrl,referer));
-  hls.attachMedia(video);
-}
-// เปิดหน้าเว็บต้นทางด้วยเบราว์เซอร์โดยตรง สำหรับเว็บฝังที่รีโมทควบคุมโฆษณาไม่ได้
-function openVipWeb(){
-  const item=currentList[currentIndex];
-  const url=(item&&item.url)||currentUrl;
-  if(!url)return;
-  try{window.open(url,'_blank','noopener,noreferrer') || (window.location.href=url)}
-  catch(e){window.location.href=url}
-}
-function openSystemPlayer(){const item=currentList[currentIndex];const url=(item&&item.url)||currentUrl;if(!url)return;try{const u=new URL(url);let intent='intent://'+u.host+u.pathname+(u.search||'')+'#Intent;scheme='+u.protocol.replace(':','')+';action=android.intent.action.VIEW;type=video/*;S.browser_fallback_url='+encodeURIComponent(url)+';end';window.location.href=intent}catch(e){window.open(url,'_blank')}}
-function openExternal(){const item=currentList[currentIndex];const url=(item&&item.url)||currentUrl;if(!url)return;try{const u=new URL(url);let intent='intent://'+u.host+u.pathname+(u.search||'')+'#Intent;scheme='+u.protocol.replace(':','')+';action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;S.browser_fallback_url='+encodeURIComponent(url)+';end';window.location.href=intent}catch(e){window.open(url,'_blank')}}
-async function copyCurrentLink(){const item=currentList[currentIndex];const url=(item&&item.url)||currentUrl;if(!url)return;try{await navigator.clipboard.writeText(url);alert('คัดลอกลิงก์ Main แล้ว')}catch(e){prompt('คัดลอกลิงก์ Main',url)}}
-function backToListOrGrid(){if(allView.active)renderAllPage();else backToGrid()}
-function backToGrid(){overlay.style.display='none';overlay.innerHTML='';grid.style.display='block';allView={active:false,name:'',page:1};setTimeout(()=>lastFocus?.focus?.(),100)}
-function goHome(){
-  cleanupPlayers();
-  player.style.display='none';
-  player.classList.remove('avVipCompact');
-  currentList=[];
-  currentIndex=0;
-
-  // ===== KEEP CURRENT LIST PAGE =====
-  // ถ้าเปิดหนังมาจาก "ดูทั้งหมด" ให้กลับหน้าหมวด/เลขหน้าเดิม
-  // เช่น เปิดจากหน้า 20 -> กด X/หยุด -> กลับหน้า 20
-  if(allView.active){
-    renderAllPage();
-    setTimeout(()=>lastFocus?.focus?.(),120);
-    return;
-  }
-
-  // ถ้าเปิดจากหน้าแถวหลัก ให้กลับตำแหน่งเดิม ไม่เด้งขึ้นบนสุด
-  overlay.style.display='none';
-  overlay.innerHTML='';
-  grid.style.display='block';
-  setTimeout(()=>{
-    try{
-      lastFocus?.focus?.();
-      lastFocus?.scrollIntoView?.({block:'nearest',inline:'nearest'});
-    }catch(e){}
-  },120);
-}
-function seekVideoBy(sec){
-  try{
-    if(!video || video.style.display==='none')return;
-    const cur=Number(video.currentTime||0);
-    const dur=Number(video.duration||0);
-    let next=cur+sec;
-    if(Number.isFinite(dur)&&dur>0) next=Math.max(0,Math.min(dur,next));
-    else next=Math.max(0,next);
-    video.currentTime=next;
-    showPlayerUI();
-  }catch(e){}
-}
-document.getElementById('homeBtn').onclick=()=>{cleanupPlayers();window.location.href='https://tiea9999.github.io/test/app24/index.html'};
-function isPlayerTopFocused(){try{return !!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.topBtns'))}catch(e){return false}}
-function focusPlayerClose(){showPlayerUI(true);setTimeout(()=>{const b=document.getElementById('closeTopBtn')||document.querySelector('#player .btn.red');if(b)b.focus()},30)}
-document.addEventListener('keydown',e=>{const key=e.key;if(player.style.display==='block')showPlayerUI();
-if(player.style.display==='block'){
-  if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();focusPlayerClose();return}
-  if((key==='ArrowDown'||e.keyCode===20)&&isPlayerTopFocused()){e.preventDefault();const target=player.classList.contains('avVipCompact')?document.getElementById('avOpenWebFixed'):(frame.style.display!=='none'?frame:video);target.focus();showPlayerUI();return}
-  if(video.style.display!=='none'){
-    if(key==='ArrowRight'||key==='MediaFastForward'||e.keyCode===22){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('right'); else seekVideoBy(15); return}
-    if(key==='ArrowLeft'||key==='MediaRewind'||e.keyCode===21){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('left'); else seekVideoBy(-15); return}
-  }
-}
-if(key==='ArrowRight'||e.keyCode===22){e.preventDefault();moveFocus('right');return}if(key==='ArrowLeft'||e.keyCode===21){e.preventDefault();moveFocus('left');return}if(key==='ArrowDown'||e.keyCode===20){e.preventDefault();moveFocus('down');return}if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();moveFocus('up');return}if(key==='Escape'||key==='Backspace'||key==='GoBack'||e.keyCode===10009){e.preventDefault();if(player.style.display==='block'){goHome();return}if(overlay.style.display==='block'){backToListOrGrid();return}}if((key==='Enter'||key==='OK'||e.keyCode===23||e.keyCode===66)&&document.activeElement&&typeof document.activeElement.click==='function'){e.preventDefault();document.activeElement.click()}});
-
-let uiTimer=null;
-function showPlayerUI(forceFocus){
-  try{
-    player.classList.remove('playerUIHidden');
-    clearTimeout(uiTimer);
-
-    // ถ้าเป็นการกดขึ้นไปหา X/PLAYER/MX ให้ค้างไว้ก่อน ไม่ซ่อนทันที
-    if(forceFocus) return;
-
-    uiTimer=setTimeout(()=>{
-      if(player.style.display==='block'){
-        try{
-          const a=document.activeElement;
-          if(a && a.closest && a.closest('.topBtns')) return;
-        }catch(e){}
-        player.classList.add('playerUIHidden');
-      }
-    },5000);
-  }catch(e){}
-}
-['mousemove','mousedown','touchstart','touchmove','pointermove','pointerdown','click'].forEach(ev=>{
-  player.addEventListener(ev,()=>showPlayerUI(false),{passive:true});
-});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden && player.style.display==='block')showPlayerUI(false);});
-window.addEventListener('focus',()=>{if(player.style.display==='block')showPlayerUI(false);});
-
-function visibleFocusables(){return Array.from(document.querySelectorAll('button,.card,.ep-card')).filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(el).visibility!=='hidden'&&getComputedStyle(el).display!=='none'})}
-function moveFocus(dir){
-  const els=visibleFocusables(); if(!els.length)return;
-  const cur=document.activeElement&&els.includes(document.activeElement)?document.activeElement:els[0];
-  const r=cur.getBoundingClientRect(); const cx=r.left+r.width/2, cy=r.top+r.height/2;
-  let best=null,score=1e9;
-  for(const el of els){if(el===cur)continue;const b=el.getBoundingClientRect();const x=b.left+b.width/2,y=b.top+b.height/2;const dx=x-cx,dy=y-cy;
-    if(dir==='right'&&dx<=8)continue; if(dir==='left'&&dx>=-8)continue; if(dir==='down'&&dy<=8)continue; if(dir==='up'&&dy>=-8)continue;
-    const primary=(dir==='right'||dir==='left')?Math.abs(dx):Math.abs(dy); const secondary=(dir==='right'||dir==='left')?Math.abs(dy):Math.abs(dx);
-    const s=primary*10+secondary; if(s<score){score=s;best=el;}
-  }
-  if(best){best.focus();best.scrollIntoView({block:'nearest',inline:'nearest'});}
-}
-
-loadAll();
-    </script>
-</body>
-
-</html>
+]
