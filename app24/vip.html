@@ -338,7 +338,7 @@
     <script>
         const PROXY="https://iptv.tawatchai250958.workers.dev/?url=";
 const SOURCES=[
-{name:"AV-VIP ซับไทย",url:"https://raw.githubusercontent.com/tiea9999/tv-1/refs/heads/main/AV-VIP%E0%B8%8B%E0%B8%B1%E0%B8%9A%E0%B9%84%E0%B8%97%E0%B8%A2"},
+{name:"AV-VIP ซับไทย",url:"https://raw.githubusercontent.com/tiea9999/test/refs/heads/main/AV-VIP%E0%B8%8B%E0%B8%B1%E0%B8%9A%E0%B9%84%E0%B8%97%E0%B8%A2"},
 {name:"jav24 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-1/refs/heads/main/playlist_jav24.json"},
 {name:"inter 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-1/refs/heads/main/VIP%2018%2B.json"},
 {name:"inter 18+",url:"https://raw.githubusercontent.com/tiea9999/tv-1/refs/heads/main/inter.json"},    
@@ -457,8 +457,9 @@ async function loadAll(){
       if(!res.ok)throw new Error(res.status);
       const data=await res.json();
       let list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));
-      for(const item of list){
-        if(!item||typeof item!=='object') continue;
+      for(const rawItem of list){
+        if(!rawItem||typeof rawItem!=='object') continue;
+        const item=s.name==="AV-VIP ซับไทย"?{...rawItem,__avSubTest:true}:rawItem;
         const key=dedupeKey(item);
         if(seen.has(key)) continue;
         seen.add(key);
@@ -513,11 +514,20 @@ function seeAll(name){allView={active:true,name,page:1};renderAllPage()}
 function renderAllPage(){const obj=store[allView.name];if(!obj)return;const perPage=20,total=obj.data.length,totalPages=Math.max(1,Math.ceil(total/perPage)),page=Math.min(allView.page,totalPages),items=obj.data.slice((page-1)*perPage,page*perPage);overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(allView.name)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="seeall" onclick="prevAllPage()">◀ ก่อนหน้า</button><button class="seeall" onclick="nextAllPage()">ถัดไป ▶</button><button class="seeall" onclick="backToGrid()">← กลับ</button></div></div><div style="padding:0 10px 10px;color:#00e5ff">หน้า ${page} / ${totalPages} &nbsp; | &nbsp; ทั้งหมด ${total} เรื่อง</div><div id="allBox" class="all-grid"></div>`;const box=document.getElementById('allBox');if(!items.length){box.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>box.appendChild(createCard(item,()=>openItem(item))))}
 function nextAllPage(){const obj=store[allView.name];if(obj&&allView.page<Math.ceil(obj.data.length/20)){allView.page++;renderAllPage()}}
 function prevAllPage(){if(allView.page>1){allView.page--;renderAllPage()}}
-function openItem(item){lastFocus=document.activeElement;if(Array.isArray(item.episodes)&&item.episodes.length){showEP(item);return}const servers=pickMainOnly(item.servers||item.sources||item.links||[]);const url=getDirectUrl(item);startPlay(servers.length?servers:[{name:'Main',url}])}
+function openItem(item){lastFocus=document.activeElement;if(Array.isArray(item.episodes)&&item.episodes.length){showEP(item);return}const servers=pickMainOnly(item.servers||item.sources||item.links||[]);const url=getDirectUrl(item);const ref=item.referer||item.referrer||'';const av=!!item.__avSubTest;startPlay((servers.length?servers:[{name:'Main',url}]).map(x=>({...x,referer:x.referer||ref,__avSubTest:av})))}
 function showEP(item){overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between"><h2 style="margin:0">${esc(getTitle(item))}</h2><button class="seeall" onclick="backToListOrGrid()">← กลับ</button></div><div class="ep-wrap" id="epBox"></div>`;const box=document.getElementById('epBox');item.episodes.forEach((ep,i)=>{const d=document.createElement('div');d.className='ep-card';d.tabIndex=0;d.textContent=ep.name||ep.title||`EP ${i+1}`;d.onclick=()=>{lastFocus=d;const servers=pickMainOnly(ep.servers||ep.sources||ep.links||ep.files||ep.playlist||[]);const single=getDirectUrl(ep);startPlay(servers.length?servers:[{name:'Main',url:single}])};d.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();d.click()}};box.appendChild(d)});setTimeout(()=>box.querySelector('.ep-card')?.focus(),100)}
 function startPlay(list){currentList=(list||[]).filter(x=>x&&x.url);currentIndex=0;if(!currentList.length){alert('❌ ไม่พบลิงก์ Main');return}overlay.style.display='none';player.style.display='block';showPlayerUI(false);playMain(currentList[0])}
 function cleanupPlayers(){if(hls){try{hls.destroy()}catch(e){}hls=null}try{video.pause();video.removeAttribute('src');video.load()}catch(e){}video.style.display='none';frame.src='';frame.style.display='none'}
-async function playMain(item){cleanupPlayers();const url=item.url;currentUrl=url;if(isMee55P2P(url)){playMee55P2P(url);return}setStatus('Main เท่านั้น • กำลังหาไฟล์เล่นจาก Main...');try{const playable=await resolveMainUrl(url,item.referer);if(isHls(playable)){await playHlsMain(playable,item.referer||getAutoReferer(url));setStatus('');return}if(isVideoFile(playable)){await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}catch(e){console.warn(e);setStatus('Main ยังไม่ขึ้นภาพ • ไม่สลับ Backup • ให้กด MX หรือคัดลอกลิงก์');}}
+async function playMain(item){cleanupPlayers();const url=item.url;currentUrl=url;if(isMee55P2P(url)){playMee55P2P(url);return}
+  // TEST เฉพาะ AV ซับไทย: kuylive HLS ไม่มี .m3u8
+  if(item.__avSubTest && /^https:\/\/([\w-]+\.)*kuylive\.com\/hls\//i.test(url)){
+    const ref=item.referer||'https://av-kuy.com/';
+    setStatus('AV ซับไทย: ทดลองเล่น HLS แบบไม่มีนามสกุล...');
+    try{await playHlsMain(url,ref);setStatus('');}
+    catch(e){console.warn('AV kuylive HLS',e);setStatus('HLS ทดลองยังไม่สำเร็จ • ตรวจ Worker/CORS/Referer ใน Network');}
+    return;
+  }
+  setStatus('Main เท่านั้น • กำลังหาไฟล์เล่นจาก Main...');try{const playable=await resolveMainUrl(url,item.referer);if(isHls(playable)){await playHlsMain(playable,item.referer||getAutoReferer(url));setStatus('');return}if(isVideoFile(playable)){await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}catch(e){console.warn(e);setStatus('Main ยังไม่ขึ้นภาพ • ไม่สลับ Backup • ให้กด MX หรือคัดลอกลิงก์');}}
 async function resolveMainUrl(url,referer){if(isHls(url)||isVideoFile(url))return url;const cached=getCachedMain(url);if(cached){setStatus('Main เท่านั้น • ใช้ลิงก์ที่จำไว้ กำลังเล่นเร็วขึ้น...');return cached}try{const txt=await fetchText(proxyUrl(url,referer||getAutoReferer(url)),12000);const found=extractPlayable(txt,url);if(found){setCachedMain(url,found);return found}}catch(e){console.warn('resolve fail',e)}return url}
 async function fetchText(url,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||10000);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}catch(e){clearTimeout(t);throw e}}
 function extractPlayable(txt,base){txt=String(txt||'');const abs=txt.match(/https?:[^'"\s<>]+\.m3u8[^'"\s<>]*/i);if(abs)return abs[0].replace(/\\\//g,'/');const file=txt.match(/["']([^"']+\.m3u8[^"']*)["']/i);if(file){try{return new URL(file[1].replace(/\\\//g,'/'),base).toString()}catch(e){return file[1]}}return''}
