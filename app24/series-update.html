@@ -49,6 +49,15 @@ footer{text-align:center;color:#8b8795;font-size:12px;margin:25px 0 5px}
 @media(min-width:1150px){.grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:420px){.top{gap:7px;padding:9px}.brand{font-size:16px}.nav,.home{font-size:12px;padding:8px}.hero{padding:17px}main{padding:14px 11px}.grid{gap:9px}.poster .meta{padding:8px}.poster .title{font-size:13px}}
 </style>
+
+<style id="tiea-series-language-badges">
+.poster .tiea-cover{position:relative;display:block;padding:0;overflow:hidden;width:100%}
+.poster .tiea-cover img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover}
+.poster .tiea-lang{position:absolute;top:17px;right:-39px;width:140px;transform:rotate(45deg);background:#ff1760;color:white;text-align:center;font-size:12px;font-weight:900;padding:7px 0;z-index:2;box-shadow:0 2px 8px #0008}
+.poster .tiea-epbadges{position:absolute;bottom:9px;left:4px;right:4px;display:flex;justify-content:space-between;gap:5px;padding:0!important}
+.poster .tiea-epbadges .tiea-badge{display:inline-block;background:#bd1639;color:#fff;border-radius:4px;padding:3px 5px;font-size:11px;font-weight:800;line-height:1.2}
+.poster .tiea-epbadges .tiea-badge.ep{background:#ff1760;border:0}
+</style>
 </head>
 <body>
 <header class="top">
@@ -69,6 +78,24 @@ footer{text-align:center;color:#8b8795;font-size:12px;margin:25px 0 5px}
 </main>
 <div id="tieaPlayerOverlay" aria-label="ตัวเล่นวิดีโอ"><button id="tieaCloseBtn" type="button" onclick="closeApp24Player()">✕ ปิด / กลับ EP</button><iframe tabindex="-1" id="tieaPlayerFrame" title="TIEA APP24 Player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
 <script>
+function tieaSeriesCover(item,img){
+  const wrap=document.createElement('span');wrap.className='tiea-cover';
+  wrap.appendChild(img);
+  const raw=String(item.language||item.audio_language||item.audio||item.lang||'').trim();
+  if(raw){
+    const lang=document.createElement('span');lang.className='tiea-lang';lang.textContent=raw;wrap.appendChild(lang);
+  }
+  const latest=Math.max(0,Number(item.latest_ep)||0);
+  const total=Math.max(0,Number(item.total_ep)||latest);
+  if(latest>0&&total>0){
+    const badges=document.createElement('span');badges.className='tiea-epbadges';
+    const state=document.createElement('span');state.className='tiea-badge';state.textContent=latest>=total?'จบแล้ว':'กำลังฉาย';
+    const ep=document.createElement('span');ep.className='tiea-badge ep';ep.textContent='EP.'+latest+'/'+total;
+    badges.append(state,ep);wrap.appendChild(badges);
+  }
+  return wrap;
+}
+
 (function(){
 'use strict';
 const DATA_URLS=[
@@ -166,7 +193,7 @@ function render(){
   const meta=document.createElement('span');meta.className='meta';
   const title=document.createElement('span');title.className='title';title.textContent=text(item.title||item.name||'ไม่มีชื่อ');
   const sub=document.createElement('span');sub.className='sub';sub.textContent=text(item.language||item.quality||'ซีรี่ย์อัปเดตใหม่');
-  meta.append(title,sub);b.append(img,meta);
+  meta.append(title,sub);b.append(tieaSeriesCover(item,img),meta);
   b.addEventListener('click',()=>{
    // Series with episode arrays must open the EP selection view first.
    const eps=Array.isArray(item.episodes)?item.episodes:[];
