@@ -297,6 +297,11 @@
             visibility: hidden !important;
             pointer-events: none !important;
         }
+
+        /* TIEA MOVIE 2026: language ribbon, without changing card focus or playback */
+        .movie-poster-wrap{position:relative;display:block;overflow:hidden;border-radius:8px}
+        .movie-poster-wrap img{display:block;width:100%}
+        .movie-language-ribbon{position:absolute;top:11px;left:-32px;width:116px;transform:rotate(-45deg);padding:5px 0;background:#e11d48;color:white;font-size:12px;font-weight:700;text-align:center;z-index:1;pointer-events:none;box-shadow:0 2px 6px #0008}
         </style>
 
 
@@ -421,8 +426,7 @@ async function loadAll(){
           if(!groupMap[g]){groupMap[g]=[]; if(!groupOrder.includes(g)) groupOrder.push(g);}
 
           // หนังใหม่2026: รายการที่เพิ่มท้าย JSON ให้ขึ้นต้นแถวอัตโนมัติ
-          if(g==='หนังใหม่2026') groupMap[g].unshift(item);
-          else groupMap[g].push(item);
+          groupMap[g].push(item);
         }
       }
     }catch(e){
@@ -431,6 +435,11 @@ async function loadAll(){
       store[g]={data:[],page:1,error:'โหลดรายการไม่ได้'};
       if(!groupOrder.includes(g)) groupOrder.push(g);
     }
+  }
+
+  // หนังใหม่2026: เรียงวันที่อัปเดตใหม่ก่อน หากไม่มีวันที่คงลำดับต้นฉบับ JSON
+  if(groupMap['หนังใหม่2026']){
+    groupMap['หนังใหม่2026'].sort((a,b)=>getUpdatedTime(b)-getUpdatedTime(a));
   }
 
   const rows=[];
@@ -466,7 +475,14 @@ async function loadAll(){
   setTimeout(()=>document.getElementById('homeBtn')?.focus(),250);
 }
 function renderRow(name){const rowId=safeId(name),row=document.createElement('div');row.innerHTML=`<div class="row-title"><span>${esc(name)}</span><button class="seeall" onclick="seeAll('${name.replace(/'/g,"\\'")}')">ดูทั้งหมด</button></div><div class="row-items" id="row-${rowId}"></div>`;grid.appendChild(row);renderPage(name)}
-function createCard(item,onClick){const div=document.createElement('div');div.className='card';div.tabIndex=0;div.innerHTML=`<img src="${esc(getImage(item))}" alt="${esc(getTitle(item))}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'"><div class="card-title">${esc(getTitle(item))}</div>`;div.onclick=onClick;div.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();onClick()}};return div}
+function getMovieLanguage(item){
+  const raw=String(item.language||item.audio_language||item.audio||item.lang||'').trim();
+  if(!raw)return '';
+  if(/พากย์ไทย|เสียงไทย|thai\s*dub|dub\s*thai/i.test(raw))return 'พากย์ไทย';
+  if(/ซับไทย|บรรยายไทย|thai\s*sub|sub\s*thai/i.test(raw))return 'ซับไทย';
+  return /^(HD|FHD|FULLHD|UHD|4K|1080P|720P|480P)$/i.test(raw)?'':raw;
+}
+function createCard(item,onClick){const div=document.createElement('div');div.className='card';div.tabIndex=0;const lang=getMovieLanguage(item);div.innerHTML=`<span class="movie-poster-wrap"><img src="${esc(getImage(item))}" alt="${esc(getTitle(item))}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">${lang?`<span class="movie-language-ribbon">${esc(lang)}</span>`:''}</span><div class="card-title">${esc(getTitle(item))}</div>`;div.onclick=onClick;div.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();onClick()}};return div}
 function renderPage(name){const obj=store[name],row=document.getElementById('row-'+safeId(name));if(!obj||!row)return;row.innerHTML='';if(obj.error){row.innerHTML=`<div class="status">❌ ${obj.error}</div>`;return}const items=obj.data.slice(0,15);if(!items.length){row.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>row.appendChild(createCard(item,()=>openItem(item))))}
 function seeAll(name){allView={active:true,name,page:1};renderAllPage()}
 function renderAllPage(){const obj=store[allView.name];if(!obj)return;const perPage=20,total=obj.data.length,totalPages=Math.max(1,Math.ceil(total/perPage)),page=Math.min(allView.page,totalPages),items=obj.data.slice((page-1)*perPage,page*perPage);overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(allView.name)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="seeall" onclick="prevAllPage()">◀ ก่อนหน้า</button><button class="seeall" onclick="nextAllPage()">ถัดไป ▶</button><button class="seeall" onclick="backToGrid()">← กลับ</button></div></div><div style="padding:0 10px 10px;color:#00e5ff">หน้า ${page} / ${totalPages} &nbsp; | &nbsp; ทั้งหมด ${total} เรื่อง</div><div id="allBox" class="all-grid"></div>`;const box=document.getElementById('allBox');if(!items.length){box.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>box.appendChild(createCard(item,()=>openItem(item))))}
