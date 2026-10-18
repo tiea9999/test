@@ -22,6 +22,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <!-- VIP URL-format experiment: fembeqv2 master.txt HLS; rakhuay isHost iframe; no worker edits -->
     <title>TIEA IPTV PLAYER AUTO HIDE 5S — KEEP CURRENT PAGE</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
@@ -137,6 +138,27 @@
             background: #000;
             object-fit: contain
         }
+
+        /* AV-VIP ซับไทย: reduce external web player only, keep other categories full-screen */
+        #player.avVipCompact #frame {
+            position: absolute;
+            width: 82%;
+            height: 76%;
+            left: 9%;
+            top: 13%;
+            border: 2px solid #3b4350;
+            border-radius: 12px;
+            background: #000;
+        }
+        @media (max-width: 600px) {
+            #player.avVipCompact #frame { width: 94%; left: 3%; height: 74%; top: 15%; }
+        }
+
+        /* AV-VIP only: prominent remote-focusable web button, not auto-hidden */
+        #avOpenWebFixed{display:none;position:absolute;left:50%;top:66px;transform:translateX(-50%);z-index:10010;background:#ffb300;color:#151515;border:3px solid #fff;border-radius:12px;padding:14px 24px;font-size:19px;font-weight:800;cursor:pointer;white-space:nowrap}
+        #player.avVipCompact #avOpenWebFixed{display:block}
+        #avOpenWebFixed:focus{outline:5px solid #00e5ff;outline-offset:3px}
+        #player.avVipCompact #frame{position:static;width:100%;height:100%;left:auto;top:auto;border:0;border-radius:0}
 
         .topBtns {
             position: absolute;
@@ -331,6 +353,7 @@
                 <button class="btn purple" id="openWebBtn" onclick="openVipWeb()">🌐 เปิดเว็บ</button><button class="btn purple" onclick="copyCurrentLink()">คัดลอก</button><button class="btn blue" onclick="openSystemPlayer()">▶ PLAYER</button><button class="btn blue" onclick="openExternal()">▶ MX</button>
             </div>
         </div>
+        <button id="avOpenWebFixed" type="button" onclick="openVipWeb()">🌐 เปิดเว็บ AV ซับไทย</button>
         <video id="video" tabindex="0" playsinline webkit-playsinline x5-playsinline controls autoplay preload="auto"></video>
         <iframe id="frame" tabindex="0" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen referrerpolicy="no-referrer-when-downgrade"></iframe>
         <div id="statusbar" class="statusbar">AUTO GROUP UNLIMITED • Main + Worker พร้อมเล่น</div>
@@ -345,6 +368,7 @@ const SOURCES=[
 ];
 const FALLBACK_IMG="https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54";
 let grid=document.getElementById('grid'),overlay=document.getElementById('overlay'),video=document.getElementById('video'),frame=document.getElementById('frame'),player=document.getElementById('player'),statusbar=document.getElementById('statusbar');
+const avVipItems=new WeakSet();
 let hls=null,store={},allView={active:false,name:'',page:1},currentList=[],currentIndex=0,currentUrl='',lastFocus=null;
 function setStatus(t){t=String(t||'');if(t.includes('กำลังเล่น Main ผ่าน Worker'))t='';statusbar.textContent=t}
 function safeId(t){return String(t).replace(/[^\wก-๙-]/g,'_')}
@@ -352,7 +376,7 @@ function esc(s){return String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt
 function getTitle(item){return item.title||item.name||item.ep_name||'ไม่มีชื่อ'}
 function getImage(item){return item.image||item.poster||item.poster_url||item.thumb||item.thumbnail||item.logo||FALLBACK_IMG}
 function getDirectUrl(item){if(!item||typeof item!=='object')return'';return item.url||item.file||item.src||item.link||item.stream||item.play||item.video||item.video_url||item.m3u8||item.player||item.embed||item.stream_url||''}
-function getAutoReferer(url){const u=String(url||'').toLowerCase();if(u.includes('vdohls.com'))return'https://playk.playhdhls.xyz/';if(u.includes('ok-hd.com'))return'https://ok-hd.com/';if(u.includes('master.streamhls.com')||u.includes('stream1689.com')||u.includes('037hddmovie.com')||u.includes('037hdmovie.com'))return'https://www.037hddmovie.com/';return'https://www.037hddmovie.com/'}
+function getAutoReferer(url){const u=String(url||'').toLowerCase();if(u.includes('fembeqv2.xyz'))return'https://av-sugoi.net/';if(u.includes('rakhuay.com'))return'https://rakhuay.com/';if(u.includes('vdohls.com'))return'https://playk.playhdhls.xyz/';if(u.includes('ok-hd.com'))return'https://ok-hd.com/';if(u.includes('master.streamhls.com')||u.includes('stream1689.com')||u.includes('037hddmovie.com')||u.includes('037hdmovie.com'))return'https://www.037hddmovie.com/';return'https://www.037hddmovie.com/'}
 function proxyUrl(url,ref){
   url=String(url||'').trim();
   if(!url)return url;
@@ -381,7 +405,7 @@ function proxyUrl(url,ref){
 function cacheKey(url){try{return 'tiea037_main_'+btoa(unescape(encodeURIComponent(String(url||'')))).slice(0,120)}catch(e){return 'tiea037_main_'+String(url||'').slice(0,120)}}
 function getCachedMain(url){try{const v=localStorage.getItem(cacheKey(url));if(!v)return'';const o=JSON.parse(v);if(!o.url||Date.now()-(o.t||0)>1000*60*60*12)return'';return o.url}catch(e){return''}}
 function setCachedMain(url,playable){try{if(url&&playable&&url!==playable)localStorage.setItem(cacheKey(url),JSON.stringify({url:playable,t:Date.now()}))}catch(e){}}
-function isHls(url){return /\.m3u8(\?|$)/i.test(url)||/m3u8/i.test(url)}
+function isHls(url){return /\.m3u8(\?|$)/i.test(url)||/m3u8/i.test(url)||/^https?:\/\/[^/]*fembeqv2\.xyz\/cdn\/hls\/[^?#]+\/master\.txt(?:[?#]|$)/i.test(String(url||''))}
 function isVideoFile(url){return /\.(mp4|m4v|webm|ogg|ogv|mov)(\?|$)/i.test(url)}
 function isMee55P2P(url){
   try{
@@ -457,9 +481,9 @@ async function loadAll(){
       if(!res.ok)throw new Error(res.status);
       const data=await res.json();
       let list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));
-      for(const rawItem of list){
-        if(!rawItem||typeof rawItem!=='object') continue;
-        const item=s.name==="AV-VIP ซับไทย"?{...rawItem,__avSubTest:true}:rawItem;
+      for(const item of list){
+        if(!item||typeof item!=='object') continue;
+        if(s.name==='AV-VIP ซับไทย') avVipItems.add(item);
         const key=dedupeKey(item);
         if(seen.has(key)) continue;
         seen.add(key);
@@ -514,25 +538,144 @@ function seeAll(name){allView={active:true,name,page:1};renderAllPage()}
 function renderAllPage(){const obj=store[allView.name];if(!obj)return;const perPage=20,total=obj.data.length,totalPages=Math.max(1,Math.ceil(total/perPage)),page=Math.min(allView.page,totalPages),items=obj.data.slice((page-1)*perPage,page*perPage);overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(allView.name)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="seeall" onclick="prevAllPage()">◀ ก่อนหน้า</button><button class="seeall" onclick="nextAllPage()">ถัดไป ▶</button><button class="seeall" onclick="backToGrid()">← กลับ</button></div></div><div style="padding:0 10px 10px;color:#00e5ff">หน้า ${page} / ${totalPages} &nbsp; | &nbsp; ทั้งหมด ${total} เรื่อง</div><div id="allBox" class="all-grid"></div>`;const box=document.getElementById('allBox');if(!items.length){box.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>box.appendChild(createCard(item,()=>openItem(item))))}
 function nextAllPage(){const obj=store[allView.name];if(obj&&allView.page<Math.ceil(obj.data.length/20)){allView.page++;renderAllPage()}}
 function prevAllPage(){if(allView.page>1){allView.page--;renderAllPage()}}
-function openItem(item){lastFocus=document.activeElement;if(Array.isArray(item.episodes)&&item.episodes.length){showEP(item);return}const servers=pickMainOnly(item.servers||item.sources||item.links||[]);const url=getDirectUrl(item);const ref=item.referer||item.referrer||'';const av=!!item.__avSubTest;startPlay((servers.length?servers:[{name:'Main',url}]).map(x=>({...x,referer:x.referer||ref,__avSubTest:av})))}
+function openItem(item){player.classList.toggle('avVipCompact',avVipItems.has(item));lastFocus=document.activeElement;if(Array.isArray(item.episodes)&&item.episodes.length){showEP(item);return}const servers=pickMainOnly(item.servers||item.sources||item.links||[]);const url=getDirectUrl(item);const ref=item.referer||item.referrer||item.origin||'';const host=String(item.isHost||'').toLowerCase()==='true'||item.isHost===true;startPlay(servers.length?servers.map(x=>({...x,referer:x.referer||ref,isHost:host})): [{name:'Main',url,referer:ref,isHost:host}])}
 function showEP(item){overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between"><h2 style="margin:0">${esc(getTitle(item))}</h2><button class="seeall" onclick="backToListOrGrid()">← กลับ</button></div><div class="ep-wrap" id="epBox"></div>`;const box=document.getElementById('epBox');item.episodes.forEach((ep,i)=>{const d=document.createElement('div');d.className='ep-card';d.tabIndex=0;d.textContent=ep.name||ep.title||`EP ${i+1}`;d.onclick=()=>{lastFocus=d;const servers=pickMainOnly(ep.servers||ep.sources||ep.links||ep.files||ep.playlist||[]);const single=getDirectUrl(ep);startPlay(servers.length?servers:[{name:'Main',url:single}])};d.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();d.click()}};box.appendChild(d)});setTimeout(()=>box.querySelector('.ep-card')?.focus(),100)}
-function startPlay(list){currentList=(list||[]).filter(x=>x&&x.url);currentIndex=0;if(!currentList.length){alert('❌ ไม่พบลิงก์ Main');return}overlay.style.display='none';player.style.display='block';showPlayerUI(false);playMain(currentList[0])}
-function cleanupPlayers(){if(hls){try{hls.destroy()}catch(e){}hls=null}try{video.pause();video.removeAttribute('src');video.load()}catch(e){}video.style.display='none';frame.src='';frame.style.display='none'}
-async function playMain(item){cleanupPlayers();const url=item.url;currentUrl=url;if(isMee55P2P(url)){playMee55P2P(url);return}
-  // TEST เฉพาะ AV ซับไทย: kuylive HLS ไม่มี .m3u8
-  if(item.__avSubTest && /^https:\/\/([\w-]+\.)*kuylive\.com\/hls\//i.test(url)){
-    const ref=item.referer||'https://av-kuy.com/';
-    setStatus('AV ซับไทย: ทดลองเล่น HLS แบบไม่มีนามสกุล...');
-    try{await playHlsMain(url,ref);setStatus('');}
-    catch(e){console.warn('AV kuylive HLS',e);setStatus('HLS ทดลองยังไม่สำเร็จ • ตรวจ Worker/CORS/Referer ใน Network');}
+function startPlay(list){currentList=(list||[]).filter(x=>x&&x.url);currentIndex=0;if(!currentList.length){alert('❌ ไม่พบลิงก์ Main');return}overlay.style.display='none';player.style.display='block';showPlayerUI(false);playMain(currentList[0]);if(player.classList.contains('avVipCompact'))setTimeout(()=>document.getElementById('avOpenWebFixed')?.focus(),350)}
+function cleanupPlayers(){const p=document.getElementById('tieaWiseplayPanel');if(p)p.style.display='none';if(hls){try{hls.destroy()}catch(e){}hls=null}try{video.pause();video.removeAttribute('src');video.load()}catch(e){}video.style.display='none';frame.src='';frame.style.display='none'}
+async function playMain(item){cleanupPlayers();const url=item.url;currentUrl=url;
+  // เว็บ isHost เป็นหน้าเล่น ไม่ใช่ไฟล์วิดีโอ: แสดงผ่าน iframe เฉพาะเว็บที่ระบุ
+  if((item.isHost===true||String(item.isHost||'').toLowerCase()==='true') && /^https:\/\/([^/]+\.)?rakhuay\.com\/v\//i.test(url)){
+    // Wiseplay เล่น URL ชนิด isHost ได้ แต่ browser iframe ถูกเว็บปลายทางปฏิเสธ
+    // แสดงตัวเลือกเปิดด้วย player ในเครื่องแทนการฝัง iframe ที่จอดำ
+    video.style.display='none';frame.style.display='none';
+    setStatus('ลิงก์นี้เล่นผ่าน Wiseplay ได้ • เลือกปุ่มเปิดผ่านแอปด้านล่าง');
+    let panel=document.getElementById('tieaWiseplayPanel');
+    if(!panel){
+      panel=document.createElement('div');panel.id='tieaWiseplayPanel';
+      panel.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px;text-align:center;background:#070707;color:#fff;z-index:10001';
+      const title=document.createElement('div');title.textContent='ลิงก์นี้ต้องเปิดด้วยแอปเล่นวิดีโอ';title.style.cssText='font-size:20px;font-weight:bold';
+      const note=document.createElement('div');note.textContent='Wiseplay เล่นได้ แต่เว็บไซต์ต้นทางไม่แสดงวิดีโอในเบราว์เซอร์';note.style.cssText='font-size:14px;color:#bbb';
+      const open=document.createElement('button');open.id='tieaOpenWiseplay';open.textContent='▶ เปิดผ่านแอปเล่นวิดีโอ';open.style.cssText='background:#00a65a;color:white;border:0;border-radius:10px;padding:16px 22px;font-size:18px;font-weight:bold';open.onclick=()=>openSystemPlayer();
+      const copy=document.createElement('button');copy.textContent='คัดลอกลิงก์';copy.style.cssText='background:#2857b8;color:white;border:0;border-radius:8px;padding:12px 18px;font-size:16px';copy.onclick=()=>copyCurrentLink();
+      const close=document.createElement('button');close.textContent='✕ กลับรายการ';close.style.cssText='background:#a52323;color:white;border:0;border-radius:8px;padding:12px 18px;font-size:16px';close.onclick=()=>goHome();
+      panel.append(title,note,open,copy,close);player.appendChild(panel);
+    }
+    panel.style.display='flex';showPlayerUI(false);setTimeout(()=>document.getElementById('tieaOpenWiseplay')?.focus(),100);return;
+  }
+  // V11: kuylive HLS only. V6 path for every other provider stays untouched.
+  if(/^https:\/\/[^/]*kuylive\.com\/hls\//i.test(url)){
+    playKuyliveV11(url,item.referer||'https://av-kuy.com/');
     return;
   }
-  setStatus('Main เท่านั้น • กำลังหาไฟล์เล่นจาก Main...');try{const playable=await resolveMainUrl(url,item.referer);if(isHls(playable)){await playHlsMain(playable,item.referer||getAutoReferer(url));setStatus('');return}if(isVideoFile(playable)){await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}catch(e){console.warn(e);setStatus('Main ยังไม่ขึ้นภาพ • ไม่สลับ Backup • ให้กด MX หรือคัดลอกลิงก์');}}
+  if(isMee55P2P(url)){playMee55P2P(url);return}setStatus('Main เท่านั้น • กำลังหาไฟล์เล่นจาก Main...');try{const playable=await resolveMainUrl(url,item.referer);if(isHls(playable)){await playHlsMain(playable,item.referer||getAutoReferer(url));setStatus('');return}if(isVideoFile(playable)){await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}await playNativeVideo(proxyUrl(playable,item.referer||getAutoReferer(url)));setStatus('');return}catch(e){console.warn(e);setStatus('Main ยังไม่ขึ้นภาพ • ไม่สลับ Backup • ให้กด MX หรือคัดลอกลิงก์');}}
 async function resolveMainUrl(url,referer){if(isHls(url)||isVideoFile(url))return url;const cached=getCachedMain(url);if(cached){setStatus('Main เท่านั้น • ใช้ลิงก์ที่จำไว้ กำลังเล่นเร็วขึ้น...');return cached}try{const txt=await fetchText(proxyUrl(url,referer||getAutoReferer(url)),12000);const found=extractPlayable(txt,url);if(found){setCachedMain(url,found);return found}}catch(e){console.warn('resolve fail',e)}return url}
 async function fetchText(url,ms){const c=new AbortController();const t=setTimeout(()=>c.abort(),ms||10000);try{const r=await fetch(url,{cache:'no-store',signal:c.signal});clearTimeout(t);if(!r.ok)throw new Error('HTTP '+r.status);return await r.text()}catch(e){clearTimeout(t);throw e}}
 function extractPlayable(txt,base){txt=String(txt||'');const abs=txt.match(/https?:[^'"\s<>]+\.m3u8[^'"\s<>]*/i);if(abs)return abs[0].replace(/\\\//g,'/');const file=txt.match(/["']([^"']+\.m3u8[^"']*)["']/i);if(file){try{return new URL(file[1].replace(/\\\//g,'/'),base).toString()}catch(e){return file[1]}}return''}
 function playNativeVideo(url){video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;return new Promise((resolve,reject)=>{let done=false;const ok=()=>{if(done)return;done=true;clear();video.muted=false;video.play().then(resolve).catch(resolve)};const fail=()=>{if(done)return;done=true;clear();reject('video error')};const clear=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('canplay',ok);video.removeEventListener('playing',ok);video.removeEventListener('error',fail)};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('canplay',ok,{once:true});video.addEventListener('playing',ok,{once:true});video.addEventListener('error',fail,{once:true});video.src=url;video.load();setTimeout(()=>{if(!done)fail()},16000)})}
 function playHlsMain(url,referer){const source=proxyUrl(url,referer||getAutoReferer(url));video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;return new Promise((resolve,reject)=>{let settled=false;const ok=()=>{if(settled)return;settled=true;clear();video.muted=false;video.play().then(resolve).catch(resolve)};const fail=()=>{if(settled)return;settled=true;clear();reject('hls error')};const clear=()=>{video.removeEventListener('loadedmetadata',ok);video.removeEventListener('canplay',ok);video.removeEventListener('playing',ok);video.removeEventListener('error',fail);if(hls){hls.off(Hls.Events.MANIFEST_PARSED,ok);hls.off(Hls.Events.LEVEL_LOADED,ok);hls.off(Hls.Events.ERROR,onErr)}};const onErr=(ev,data)=>{if(data&&data.fatal){if(data.type===Hls.ErrorTypes.NETWORK_ERROR){try{hls.startLoad()}catch(e){}}else if(data.type===Hls.ErrorTypes.MEDIA_ERROR){try{hls.recoverMediaError()}catch(e){}}else fail()}};video.addEventListener('loadedmetadata',ok,{once:true});video.addEventListener('canplay',ok,{once:true});video.addEventListener('playing',ok,{once:true});video.addEventListener('error',fail,{once:true});if(window.Hls&&Hls.isSupported()){hls=new Hls({enableWorker:false,lowLatencyMode:false,maxBufferLength:45,maxMaxBufferLength:60,backBufferLength:20,manifestLoadingTimeOut:20000,fragLoadingTimeOut:25000,levelLoadingTimeOut:20000,manifestLoadingMaxRetry:6,fragLoadingMaxRetry:8,levelLoadingMaxRetry:6});hls.on(Hls.Events.MANIFEST_PARSED,ok);hls.on(Hls.Events.LEVEL_LOADED,ok);hls.on(Hls.Events.ERROR,onErr);hls.loadSource(source);hls.attachMedia(video)}else{video.src=source;video.load()}setTimeout(()=>{if(!settled)fail()},20000)})}
+// V11 KUYLIVE ONLY: rewrite HLS playlist URIs before Hls.js parses them.
+// Other sources continue using the original V6 player path unchanged.
+function playKuyliveV11(originUrl,referer){
+  const origin=new URL(originUrl);
+  const workerHost='iptv.tawatchai250958.workers.dev';
+  video.style.display='block';frame.style.display='none';video.muted=false;video.volume=1;
+  setStatus('ลิงก์ 2: กำลังอ่าน Playlist และแปลง Segment...');
+  if(!(window.Hls&&Hls.isSupported())){
+    video.src=proxyUrl(originUrl,referer);video.load();
+    video.play().catch(()=>setStatus('ลิงก์ 2: ตัวเล่นเครื่องยังเริ่มไม่ได้'));
+    return;
+  }
+  const BaseLoader=Hls.DefaultConfig.loader;
+  function sourceUrl(request){
+    try{
+      const u=new URL(request);
+      if(u.hostname===workerHost){
+        const original=u.searchParams.get('url');
+        if(original)return original;
+        // Hls.js resolved an unqualified segment against the Worker URL.
+        // Use original manifest's directory, not the Worker root.
+        return new URL(u.pathname.replace(/^\//,'')+u.search,originUrl).href;
+      }
+      return u.href;
+    }catch(e){return request}
+  }
+  function rewritePlaylist(data,base){
+    if(typeof data!=='string'||!/^\s*#EXTM3U/.test(data))return data;
+    let converted=0;
+    const makeUrl=(value)=>{
+      try{
+        const decoded=value.replace(/&amp;/g,'&');
+        if(/^(data:|skd:|blob:)/i.test(decoded))return value;
+        const abs=new URL(decoded,base);
+        if(!/^https?:$/.test(abs.protocol))return value;
+        converted++;
+        return proxyUrl(abs.href,referer);
+      }catch(e){return value}
+    };
+    const result=data.split(/\r?\n/).map(line=>{
+      const trimmed=line.trim();
+      if(!trimmed)return line;
+      if(trimmed[0]!=='#')return makeUrl(trimmed);
+      // EXT-X-KEY, EXT-X-MAP, EXT-X-MEDIA, EXT-X-I-FRAME-STREAM-INF, etc.
+      return line.replace(/URI=("([^"]*)"|'([^']*)')/g,(full,quoted,dq,sq)=>{
+        const val=dq!==undefined?dq:sq;
+        const q=quoted[0];return 'URI='+q+makeUrl(val)+q;
+      });
+    }).join('\n');
+    console.info('V11 kuylive playlist rewritten:',converted,'URI(s)',base);
+    return result;
+  }
+  class KuylivePlaylistLoader extends BaseLoader{
+    load(context,config,callbacks){
+      const type=context.type;
+      const original=sourceUrl(context.url);
+      try{
+        const u=new URL(context.url);
+        if(u.hostname===workerHost){
+          if(!u.searchParams.has('url'))context.url=proxyUrl(original,referer);
+        }else if(u.hostname===origin.hostname){
+          context.url=proxyUrl(u.href,referer);
+        }
+      }catch(e){console.warn('V11 URL normalization',e)}
+      const isPlaylist=['manifest','level','audioTrack','subtitleTrack'].includes(type);
+      if(!isPlaylist)return super.load(context,config,callbacks);
+      const cb={...callbacks,onSuccess:(response,stats,ctx,networkDetails)=>{
+        if(typeof response.data==='string'){
+          response.data=rewritePlaylist(response.data,original);
+          if(!/^\s*#EXTM3U/.test(response.data)){
+            setStatus('ลิงก์ 2: Worker ไม่ได้ส่ง Playlist HLS กลับมา');
+          }
+        }
+        callbacks.onSuccess(response,stats,ctx,networkDetails);
+      }};
+      return super.load(context,config,cb);
+    }
+  }
+  let fragCount=0,playing=false;
+  hls=new Hls({loader:KuylivePlaylistLoader,enableWorker:false,lowLatencyMode:false,
+    manifestLoadingTimeOut:15000,fragLoadingTimeOut:20000,
+    manifestLoadingMaxRetry:1,fragLoadingMaxRetry:1,levelLoadingMaxRetry:1});
+  hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+    setStatus('ลิงก์ 2: Playlist ผ่านแล้ว • รอข้อมูลวิดีโอ...');
+    video.play().catch(()=>setStatus('ลิงก์ 2: กด ▶ เพื่อเริ่มเล่น'));
+  });
+  hls.on(Hls.Events.FRAG_LOADED,()=>{
+    fragCount++;
+    if(!playing)setStatus('ลิงก์ 2: โหลด Segment '+fragCount+' ชิ้น • กำลังรอภาพและเสียง...');
+  });
+  hls.on(Hls.Events.ERROR,(_ev,d)=>{
+    if(!d)return;
+    if(d.fatal){
+      const code=d.response&&d.response.code;
+      setStatus('ลิงก์ 2: '+(d.details||d.type||'error')+(code?' HTTP '+code:'')+' • ยังเล่นไม่ได้');
+      console.warn('V11 kuylive fatal',d);
+      try{hls.stopLoad()}catch(e){}
+    }
+  });
+  video.addEventListener('playing',()=>{if(hls&&fragCount){playing=true;setStatus('')}},{once:true});
+  hls.loadSource(proxyUrl(originUrl,referer));
+  hls.attachMedia(video);
+}
 // เปิดหน้าเว็บต้นทางด้วยเบราว์เซอร์โดยตรง สำหรับเว็บฝังที่รีโมทควบคุมโฆษณาไม่ได้
 function openVipWeb(){
   const item=currentList[currentIndex];
@@ -549,6 +692,7 @@ function backToGrid(){overlay.style.display='none';overlay.innerHTML='';grid.sty
 function goHome(){
   cleanupPlayers();
   player.style.display='none';
+  player.classList.remove('avVipCompact');
   currentList=[];
   currentIndex=0;
 
@@ -590,7 +734,7 @@ function focusPlayerClose(){showPlayerUI(true);setTimeout(()=>{const b=document.
 document.addEventListener('keydown',e=>{const key=e.key;if(player.style.display==='block')showPlayerUI();
 if(player.style.display==='block'){
   if(key==='ArrowUp'||e.keyCode===19){e.preventDefault();focusPlayerClose();return}
-  if((key==='ArrowDown'||e.keyCode===20)&&isPlayerTopFocused()){e.preventDefault();const target=frame.style.display!=='none'?frame:video;target.focus();showPlayerUI();return}
+  if((key==='ArrowDown'||e.keyCode===20)&&isPlayerTopFocused()){e.preventDefault();const target=player.classList.contains('avVipCompact')?document.getElementById('avOpenWebFixed'):(frame.style.display!=='none'?frame:video);target.focus();showPlayerUI();return}
   if(video.style.display!=='none'){
     if(key==='ArrowRight'||key==='MediaFastForward'||e.keyCode===22){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('right'); else seekVideoBy(15); return}
     if(key==='ArrowLeft'||key==='MediaRewind'||e.keyCode===21){e.preventDefault(); if(isPlayerTopFocused()) moveFocus('left'); else seekVideoBy(-15); return}
