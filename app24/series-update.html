@@ -49,16 +49,19 @@ footer{text-align:center;color:#8b8795;font-size:12px;margin:25px 0 5px}
 @media(min-width:1150px){.grid{grid-template-columns:repeat(5,minmax(0,1fr))}}
 @media(max-width:420px){.top{gap:7px;padding:9px}.brand{font-size:16px}.nav,.home{font-size:12px;padding:8px}.hero{padding:17px}main{padding:14px 11px}.grid{gap:9px}.poster .meta{padding:8px}.poster .title{font-size:13px}}
 </style>
-
-<style id="tiea-series-language-badges">
-.poster .tiea-cover{position:relative;display:block;padding:0;overflow:hidden;width:100%}
-.poster .tiea-cover img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover}
-.poster .tiea-lang{position:absolute;top:17px;right:-39px;width:140px;transform:rotate(45deg);background:#ff1760;color:white;text-align:center;font-size:12px;font-weight:900;padding:7px 0;z-index:2;box-shadow:0 2px 8px #0008}
-.poster .tiea-epbadges{position:absolute;bottom:9px;left:4px;right:4px;display:flex;justify-content:space-between;gap:5px;padding:0!important}
-.poster .tiea-epbadges .tiea-badge{display:inline-block;background:#bd1639;color:#fff;border-radius:4px;padding:3px 5px;font-size:11px;font-weight:800;line-height:1.2}
-.poster .tiea-epbadges .tiea-badge.ep{background:#ff1760;border:0}
-</style>
-</head>
+<style id="tiea-tv1-auto-controls">
+#tieaCloseBtn{font-size:14px!important;padding:9px 13px!important;border:1px solid rgba(255,255,255,.3)!important;border-radius:10px!important;transition:opacity .22s ease!important}
+#tieaPlayerOverlay.show.tiea-hide-controls #tieaCloseBtn{opacity:0;pointer-events:none}
+#tieaPlayerOverlay.show:not(.tiea-hide-controls) #tieaCloseBtn{opacity:1;pointer-events:auto}
+</style><style id="tiea-tv1-topbar-v3">
+#tieaPlayerOverlay #tieaTv1Bar{position:absolute;top:0;left:0;right:0;z-index:15;display:flex;align-items:center;gap:9px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));background:linear-gradient(to bottom,rgba(0,0,0,.88),rgba(0,0,0,.3),transparent);transition:opacity .22s ease;pointer-events:auto}
+#tieaPlayerOverlay #tieaCloseBtn{position:static;flex:0 0 auto;background:#702025;color:white;border:0;border-radius:12px;padding:10px 15px;min-height:44px;font-size:16px;font-weight:800;box-shadow:none}
+#tieaPlayerOverlay #tieaTv1Home{flex:0 0 auto;background:#00996c;color:#fff;text-decoration:none;border:0;border-radius:12px;padding:10px 15px;min-height:44px;display:flex;align-items:center;font-size:16px;font-weight:800}
+#tieaPlayerOverlay #tieaTv1Title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800;font-size:clamp(14px,1.6vw,20px)}
+#tieaPlayerOverlay #tieaTv1Home:focus-visible,#tieaPlayerOverlay #tieaCloseBtn:focus-visible{outline:3px solid #00e5ff;outline-offset:3px}
+#tieaPlayerOverlay.tiea-hide-controls #tieaTv1Bar{opacity:0;pointer-events:none}
+@media(max-width:600px){#tieaPlayerOverlay #tieaTv1Bar{gap:6px;padding:7px}#tieaPlayerOverlay #tieaCloseBtn,#tieaPlayerOverlay #tieaTv1Home{font-size:13px;padding:8px 10px;min-height:36px;border-radius:9px}#tieaPlayerOverlay #tieaTv1Title{font-size:12px}}
+</style><style>/* Only the original player-tiea controls are displayed. */ #tieaTv1Bar{display:none!important} #tieaCloseBtn{display:none!important}</style></head>
 <body>
 <header class="top">
   <a class="nav" href="https://tiea9999.github.io/test/app24/series.html">❮ ซีรีส์</a>
@@ -76,26 +79,8 @@ footer{text-align:center;color:#8b8795;font-size:12px;margin:25px 0 5px}
   </section>
   <footer>TIEA APP24 • แยกหน้าเฉพาะหมวด ไม่แก้ระบบหมวดอื่น</footer>
 </main>
-<div id="tieaPlayerOverlay" aria-label="ตัวเล่นวิดีโอ"><button id="tieaCloseBtn" type="button" onclick="closeApp24Player()">✕ ปิด / กลับ EP</button><iframe tabindex="-1" id="tieaPlayerFrame" title="TIEA APP24 Player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+<div id="tieaPlayerOverlay" aria-label="ตัวเล่นวิดีโอ"><div id="tieaTv1Bar"><button id="tieaCloseBtn" type="button" aria-label="ปิดและกลับหน้าเลือก EP" onclick="closeApp24Player()">✕ ปิด</button><a id="tieaTv1Home" href="https://tiea9999.github.io/test/app24/index.html">🏠 หน้าโฮม</a><span id="tieaTv1Title"></span></div><iframe tabindex="0" id="tieaPlayerFrame" title="TIEA APP24 Player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
 <script>
-function tieaSeriesCover(item,img){
-  const wrap=document.createElement('span');wrap.className='tiea-cover';
-  wrap.appendChild(img);
-  const raw=String(item.language||item.audio_language||item.audio||item.lang||'').trim();
-  if(raw){
-    const lang=document.createElement('span');lang.className='tiea-lang';lang.textContent=raw;wrap.appendChild(lang);
-  }
-  const latest=Math.max(0,Number(item.latest_ep)||0);
-  const total=Math.max(0,Number(item.total_ep)||latest);
-  if(latest>0&&total>0){
-    const badges=document.createElement('span');badges.className='tiea-epbadges';
-    const state=document.createElement('span');state.className='tiea-badge';state.textContent=latest>=total?'จบแล้ว':'กำลังฉาย';
-    const ep=document.createElement('span');ep.className='tiea-badge ep';ep.textContent='EP.'+latest+'/'+total;
-    badges.append(state,ep);wrap.appendChild(badges);
-  }
-  return wrap;
-}
-
 (function(){
 'use strict';
 const DATA_URLS=[
@@ -138,7 +123,7 @@ function openPlayer(item,ep,label){
  lastPlayButton=(document.activeElement instanceof HTMLElement && document.activeElement.matches('.ep,.poster'))?document.activeElement:lastPlayButton;
  document.getElementById('tieaPlayerOverlay').classList.add('show');
  frame.src=PLAYER_URL+q.toString();
- document.getElementById('tieaCloseBtn').focus({preventScroll:true});
+ document.getElementById('tieaPlayerFrame').focus({preventScroll:true});
 }
 function showDetails(item){
  grid.hidden=true;search.parentElement.hidden=true;details.hidden=false;
@@ -193,7 +178,7 @@ function render(){
   const meta=document.createElement('span');meta.className='meta';
   const title=document.createElement('span');title.className='title';title.textContent=text(item.title||item.name||'ไม่มีชื่อ');
   const sub=document.createElement('span');sub.className='sub';sub.textContent=text(item.language||item.quality||'ซีรี่ย์อัปเดตใหม่');
-  meta.append(title,sub);b.append(tieaSeriesCover(item,img),meta);
+  meta.append(title,sub);b.append(img,meta);
   b.addEventListener('click',()=>{
    // Series with episode arrays must open the EP selection view first.
    const eps=Array.isArray(item.episodes)?item.episodes:[];
@@ -252,7 +237,7 @@ function closePlayer(){
 }
 window.closeApp24Player=closePlayer;
 document.getElementById('tieaPlayerFrame').addEventListener('load',()=>{
- if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))document.getElementById('tieaCloseBtn').focus({preventScroll:true});
+ if(document.getElementById('tieaPlayerOverlay').classList.contains('show'))document.getElementById('tieaPlayerFrame').focus({preventScroll:true});
 });
 document.addEventListener('keydown',e=>{
  if(!document.getElementById('tieaPlayerOverlay').classList.contains('show'))return;
@@ -267,5 +252,39 @@ window.addEventListener('popstate',()=>{if(document.getElementById('tieaPlayerOv
 load();
 })();
 </script>
-</body>
+<script id="tiea-tv1-topbar-v3-js">
+/* APP24 series TV-1 topbar, 6 seconds, same-origin iframe input forwarding. */
+(function(){
+ const overlay=document.getElementById('tieaPlayerOverlay'),frame=document.getElementById('tieaPlayerFrame');
+ const bar=document.getElementById('tieaTv1Bar'),close=document.getElementById('tieaCloseBtn'),home=document.getElementById('tieaTv1Home'),title=document.getElementById('tieaTv1Title');
+ if(!overlay||!frame||!bar)return;
+ let timer=0,open=false;
+ function show(){if(!overlay.classList.contains('show'))return;overlay.classList.remove('tiea-hide-controls');clearTimeout(timer);timer=setTimeout(()=>{
+   if(!overlay.classList.contains('show'))return;
+   overlay.classList.add('tiea-hide-controls');
+   if(bar.contains(document.activeElement)){try{frame.focus({preventScroll:true})}catch(e){}}
+ },6000)}
+ function setTitle(){try{const u=new URL(frame.src,location.href);title.textContent=u.searchParams.get('title')||''}catch(e){title.textContent=''}}
+ function wireFrame(){try{
+   const d=frame.contentDocument;if(!d||d.__tieaTv1BarV3)return;d.__tieaTv1BarV3=true;
+   ['mousemove','pointermove','pointerdown','touchstart','keydown'].forEach(ev=>d.addEventListener(ev,show,{capture:true,passive:true}));
+   d.addEventListener('keydown',e=>{
+     if(!overlay.classList.contains('show'))return;
+     if(['Escape','Backspace','BrowserBack','GoBack'].includes(e.key)){e.preventDefault();e.stopPropagation();closeApp24Player();return}
+     if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key) && overlay.classList.contains('tiea-hide-controls')){
+       show();close.focus({preventScroll:true});e.preventDefault();e.stopPropagation();
+     }
+   },true);
+ }catch(e){}}
+ ['mousemove','pointermove','pointerdown','touchstart','keydown'].forEach(ev=>document.addEventListener(ev,show,{capture:true,passive:true}));
+ frame.addEventListener('load',()=>{if(overlay.classList.contains('show')){wireFrame();setTitle();show()}});
+ const mo=new MutationObserver(()=>{
+   const now=overlay.classList.contains('show');
+   if(now&&!open){open=true;setTitle();wireFrame();show()}
+   if(!now&&open){open=false;clearTimeout(timer);overlay.classList.remove('tiea-hide-controls')}
+ });mo.observe(overlay,{attributes:true,attributeFilter:['class']});
+ const sm=new MutationObserver(()=>{if(overlay.classList.contains('show'))setTitle()});sm.observe(frame,{attributes:true,attributeFilter:['src']});
+ close.addEventListener('focus',show);home.addEventListener('focus',show);
+})();
+</script></body>
 </html>
