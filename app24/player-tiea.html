@@ -895,6 +895,20 @@
             }
         }
     </style>
+
+<!-- APP24 SERIES: restore native player bar auto-hide after 6 seconds -->
+<style>
+html.app24-player-only body.tiea-standalone-player .player-panel.hide-ui .player-top {
+ opacity:0!important;visibility:hidden!important;pointer-events:none!important;
+}
+html.app24-player-only body.tiea-standalone-player .player-panel:not(.hide-ui) .player-top {
+ opacity:1!important;visibility:visible!important;pointer-events:auto!important;
+}
+html.app24-player-only .player-top{flex-wrap:nowrap!important;gap:8px!important;padding:8px 10px!important}
+html.app24-player-only .player-btn{padding:8px 10px!important;font-size:13px!important;white-space:nowrap}
+html.app24-player-only #app24ReloadBtn,html.app24-player-only #app24FullscreenBtn{display:none!important}
+html.app24-player-only .player-title{min-width:0!important;font-size:14px}
+</style>
 </head>
 
 <body>
@@ -2135,7 +2149,7 @@ function startWatchdog(){
       state.lastRecoverAt=Date.now();
       projectorGentleStartLoad('สัญญาณค้าง • ต่อใหม่ '+state.recoverCount);
     }
-  },3000);
+  },(document.documentElement.classList.contains('app24-player-only')?6000:3000));
 }
 function cleanupPlayer(fullReset=true){
   if(state._cleanupBusy)return;
