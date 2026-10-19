@@ -91,7 +91,7 @@ DOOTVZ Clean Start / Remote Smooth / DRM / production Workers unchanged.
 
 <body>
 
-    <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
+    <div class="back-home" tabindex="0" role="button" aria-label="กลับหน้าหลัก" onclick="goHome()">⬅ กลับหน้าหลัก</div>
    <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
@@ -1860,6 +1860,32 @@ console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
     best.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
   },true);
   document.addEventListener('focusin',function(e){document.querySelectorAll('.tiea-remote-focus').forEach(x=>x.classList.remove('tiea-remote-focus'));if(e.target.matches?.(itemSelector))e.target.classList.add('tiea-remote-focus');});
+})();
+</script>
+
+<!-- APP24 TV HOME FOCUS V2: focusable back-home and category -> home navigation -->
+<style>.back-home:focus,.back-home:focus-visible{outline:4px solid #36c9ff!important;outline-offset:4px!important;background:#244b61!important;box-shadow:0 0 0 6px rgba(54,201,255,.28)!important}</style>
+<script>
+(function(){
+  'use strict';
+  const home=document.querySelector('.back-home');
+  if(!home)return;
+  home.setAttribute('tabindex','0');
+  home.setAttribute('role','button');
+  function focus(el){if(!el)return;try{el.focus({preventScroll:true});}catch(_){el.focus();}if(el!==home)el.scrollIntoView({block:'nearest',inline:'nearest'});}
+  document.addEventListener('keydown',function(e){
+    if(document.getElementById('player-container')?.style.display==='block')return;
+    const a=document.activeElement;
+    const key=({Up:'ArrowUp',Down:'ArrowDown',Left:'ArrowLeft',Right:'ArrowRight'})[e.key]||e.key;
+    if(a===home){
+      if(key==='Enter'||key===' '||key==='NumpadEnter'){e.preventDefault();e.stopImmediatePropagation();home.click();return;}
+      if(key==='ArrowDown'||key==='ArrowRight'){e.preventDefault();e.stopImmediatePropagation();focus(document.querySelector('.category-btn.active')||document.querySelector('.category-btn')||document.querySelector('#channel-list .channel'));}
+      return;
+    }
+    if(a?.matches?.('.category-btn')&&key==='ArrowUp'){
+      e.preventDefault();e.stopImmediatePropagation();focus(home);
+    }
+  },true);
 })();
 </script>
 </body>
