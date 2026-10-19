@@ -61,7 +61,15 @@ footer{text-align:center;color:#8b8795;font-size:12px;margin:25px 0 5px}
 #tieaPlayerOverlay #tieaTv1Home:focus-visible,#tieaPlayerOverlay #tieaCloseBtn:focus-visible{outline:3px solid #00e5ff;outline-offset:3px}
 #tieaPlayerOverlay.tiea-hide-controls #tieaTv1Bar{opacity:0;pointer-events:none}
 @media(max-width:600px){#tieaPlayerOverlay #tieaTv1Bar{gap:6px;padding:7px}#tieaPlayerOverlay #tieaCloseBtn,#tieaPlayerOverlay #tieaTv1Home{font-size:13px;padding:8px 10px;min-height:36px;border-radius:9px}#tieaPlayerOverlay #tieaTv1Title{font-size:12px}}
-</style><style>/* Only the original player-tiea controls are displayed. */ #tieaTv1Bar{display:none!important} #tieaCloseBtn{display:none!important}</style></head>
+</style><style>/* Only the original player-tiea controls are displayed. */ #tieaTv1Bar{display:none!important} #tieaCloseBtn{display:none!important}</style><style id="tiea-series-language-badges">
+.poster .tiea-cover{position:relative;display:block;padding:0;overflow:hidden;width:100%}
+.poster .tiea-cover img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover}
+.poster .tiea-lang{position:absolute;top:17px;right:-39px;width:140px;transform:rotate(45deg);background:#ff1760;color:white;text-align:center;font-size:12px;font-weight:900;padding:7px 0;z-index:2;box-shadow:0 2px 8px #0008}
+.poster .tiea-epbadges{position:absolute;bottom:9px;left:4px;right:4px;display:flex;justify-content:space-between;gap:5px;padding:0!important}
+.poster .tiea-epbadges .tiea-badge{display:inline-block;background:#bd1639;color:#fff;border-radius:4px;padding:3px 5px;font-size:11px;font-weight:800;line-height:1.2}
+.poster .tiea-epbadges .tiea-badge.ep{background:#ff1760;border:0}
+</style>
+</head>
 <body>
 <header class="top">
   <a class="nav" href="https://tiea9999.github.io/test/app24/series.html">❮ ซีรีส์</a>
@@ -81,6 +89,24 @@ footer{text-align:center;color:#8b8795;font-size:12px;margin:25px 0 5px}
 </main>
 <div id="tieaPlayerOverlay" aria-label="ตัวเล่นวิดีโอ"><div id="tieaTv1Bar"><button id="tieaCloseBtn" type="button" aria-label="ปิดและกลับหน้าเลือก EP" onclick="closeApp24Player()">✕ ปิด</button><a id="tieaTv1Home" href="https://tiea9999.github.io/test/app24/index.html">🏠 หน้าโฮม</a><span id="tieaTv1Title"></span></div><iframe tabindex="0" id="tieaPlayerFrame" title="TIEA APP24 Player" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
 <script>
+function tieaSeriesCover(item,img){
+  const wrap=document.createElement('span');wrap.className='tiea-cover';
+  wrap.appendChild(img);
+  const raw=String(item.language||item.audio_language||item.audio||item.lang||'').trim();
+  if(raw){
+    const lang=document.createElement('span');lang.className='tiea-lang';lang.textContent=raw;wrap.appendChild(lang);
+  }
+  const latest=Math.max(0,Number(item.latest_ep)||0);
+  const total=Math.max(0,Number(item.total_ep)||latest);
+  if(latest>0&&total>0){
+    const badges=document.createElement('span');badges.className='tiea-epbadges';
+    const state=document.createElement('span');state.className='tiea-badge';state.textContent=latest>=total?'จบแล้ว':'กำลังฉาย';
+    const ep=document.createElement('span');ep.className='tiea-badge ep';ep.textContent='EP.'+latest+'/'+total;
+    badges.append(state,ep);wrap.appendChild(badges);
+  }
+  return wrap;
+}
+
 (function(){
 'use strict';
 const DATA_URLS=[
@@ -178,7 +204,7 @@ function render(){
   const meta=document.createElement('span');meta.className='meta';
   const title=document.createElement('span');title.className='title';title.textContent=text(item.title||item.name||'ไม่มีชื่อ');
   const sub=document.createElement('span');sub.className='sub';sub.textContent=text(item.language||item.quality||'ซีรี่ย์อัปเดตใหม่');
-  meta.append(title,sub);b.append(img,meta);
+  meta.append(title,sub);b.append(tieaSeriesCover(item,img),meta);
   b.addEventListener('click',()=>{
    // Series with episode arrays must open the EP selection view first.
    const eps=Array.isArray(item.episodes)?item.episodes:[];
