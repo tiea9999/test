@@ -91,7 +91,7 @@ DOOTVZ Clean Start / Remote Smooth / DRM / production Workers unchanged.
 
 <body>
 
-    <div class="back-home" tabindex="0" role="button" aria-label="กลับหน้าหลัก" onclick="goHome()">⬅ กลับหน้าหลัก</div>
+    <div class="back-home" tabindex="0" role="button" onclick="goHome()">⬅ กลับหน้าหลัก</div>
    <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
@@ -1863,29 +1863,38 @@ console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
 })();
 </script>
 
-<!-- APP24 TV HOME FOCUS V2: focusable back-home and category -> home navigation -->
-<style>.back-home:focus,.back-home:focus-visible{outline:4px solid #36c9ff!important;outline-offset:4px!important;background:#244b61!important;box-shadow:0 0 0 6px rgba(54,201,255,.28)!important}</style>
+<!-- APP24 TV V3: keep V1 channel navigation unchanged; deterministic category/home bridge only -->
+<style>.back-home:focus-visible,.back-home:focus{outline:4px solid #36c9ff!important;outline-offset:3px!important;box-shadow:0 0 0 6px rgba(54,201,255,.25)!important}</style>
 <script>
 (function(){
-  'use strict';
-  const home=document.querySelector('.back-home');
-  if(!home)return;
-  home.setAttribute('tabindex','0');
-  home.setAttribute('role','button');
-  function focus(el){if(!el)return;try{el.focus({preventScroll:true});}catch(_){el.focus();}if(el!==home)el.scrollIntoView({block:'nearest',inline:'nearest'});}
-  document.addEventListener('keydown',function(e){
-    if(document.getElementById('player-container')?.style.display==='block')return;
-    const a=document.activeElement;
-    const key=({Up:'ArrowUp',Down:'ArrowDown',Left:'ArrowLeft',Right:'ArrowRight'})[e.key]||e.key;
-    if(a===home){
-      if(key==='Enter'||key===' '||key==='NumpadEnter'){e.preventDefault();e.stopImmediatePropagation();home.click();return;}
-      if(key==='ArrowDown'||key==='ArrowRight'){e.preventDefault();e.stopImmediatePropagation();focus(document.querySelector('.category-btn.active')||document.querySelector('.category-btn')||document.querySelector('#channel-list .channel'));}
-      return;
-    }
-    if(a?.matches?.('.category-btn')&&key==='ArrowUp'){
-      e.preventDefault();e.stopImmediatePropagation();focus(home);
-    }
-  },true);
+ 'use strict';
+ const home=document.querySelector('.back-home');
+ if(!home)return;
+ function visible(el){if(!el)return false;const r=el.getBoundingClientRect();return r.width>0&&r.height>0&&getComputedStyle(el).visibility!=='hidden';}
+ function focus(el){if(!visible(el))return;try{el.focus({preventScroll:true});}catch(_){el.focus();}el.scrollIntoView({block:'nearest',inline:'nearest',behavior:'auto'});}
+ function categories(){return [...document.querySelectorAll('.category-btn')].filter(visible);}
+ function channels(){return [...document.querySelectorAll('#channel-list .channel')].filter(visible);}
+ function nearest(items,reference){if(!items.length)return null;const x=reference.getBoundingClientRect();const cx=(x.left+x.right)/2;return items.reduce((best,el)=>{const r=el.getBoundingClientRect(),d=Math.abs((r.left+r.right)/2-cx);return !best||d<best.d?{el,d}:best;},null).el;}
+ document.addEventListener('keydown',function(e){
+  const key=({Up:'ArrowUp',Down:'ArrowDown',Left:'ArrowLeft',Right:'ArrowRight'})[e.key]||e.key;
+  const player=document.getElementById('player-container');if(player&&player.style.display==='block')return;
+  const a=document.activeElement, cats=categories(), ci=cats.indexOf(a);
+  if(a!==home&&ci<0)return; // Channel keys belong exclusively to the working V1 handler.
+  let target=null;
+  if(a===home){
+   if(['Enter','NumpadEnter',' '].includes(key)){e.preventDefault();e.stopImmediatePropagation();home.click();return;}
+   if(key==='ArrowDown')target=document.querySelector('.category-btn.active')||cats[0];
+  }else if(ci>=0){
+   if(key==='ArrowUp')target=home;
+   else if(key==='ArrowLeft')target=cats[Math.max(0,ci-1)];
+   else if(key==='ArrowRight')target=cats[Math.min(cats.length-1,ci+1)];
+   else if(key==='ArrowDown')target=nearest(channels(),a);
+  }
+  if(!['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(key))return;
+  // Keep focus at the boundary rather than letting native Android focus jump.
+  e.preventDefault();e.stopImmediatePropagation();
+  if(target)focus(target);
+ },true);
 })();
 </script>
 </body>
