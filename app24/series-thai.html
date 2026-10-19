@@ -1,33 +1,18 @@
 <!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#141923"><title>ซีรีส์ไทย | TIEA APP24 TEST</title><style>
 *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#090c12;color:#fff;font-family:system-ui,'Segoe UI',sans-serif}body{padding-bottom:28px}.top{position:sticky;top:0;z-index:5;background:#141923ed;border-bottom:1px solid #32303b;padding:13px 16px;display:flex;align-items:center;gap:12px;min-height:64px;backdrop-filter:blur(12px)}.brand{font-weight:900;font-size:22px;letter-spacing:.7px}.brand b{color:#ff385a}.back{border:1px solid #59404a;border-radius:12px;background:#241720;color:white;text-decoration:none;padding:10px 13px;font-weight:700}.home{margin-left:auto;color:#fff;text-decoration:none;background:#b91f40;border-radius:12px;padding:10px 14px;font-weight:700}main{max-width:1100px;margin:auto;padding:22px 16px}.hero{background:linear-gradient(125deg,#401329,#181825 70%);border:1px solid #633148;border-radius:22px;padding:25px;margin-bottom:24px}h1{margin:0 0 9px;font-size:clamp(24px,5vw,38px)}p{color:#b9b9c8;line-height:1.6;margin:6px 0}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.tile{min-width:0;text-decoration:none;color:white;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:160px;border-radius:19px;border:1px solid #49303b;background:linear-gradient(145deg,#25212f,#12151c);box-shadow:0 5px 22px #0004;padding:18px 10px;gap:10px}.tile:focus,.tile:hover{outline:3px solid #ff5577;outline-offset:2px;background:#3b2332}.emoji{font-size:43px;line-height:1.2}.name{font-size:clamp(15px,2vw,20px);font-weight:800}.sub{font-size:12px;color:#bdb3bf}.note{border:1px solid #3b3341;border-radius:16px;padding:18px;background:#151821;margin-top:18px}.pill{display:inline-block;padding:6px 12px;border:1px solid #684456;border-radius:30px;color:#ff9caf;font-size:12px;font-weight:700;margin-bottom:10px}.link{color:#ff8eaa}footer{color:#8b8795;text-align:center;font-size:12px;margin-top:24px}@media(max-width:600px){main{padding:15px 12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tile{min-height:128px;padding:14px 8px}.emoji{font-size:35px}.top{padding:10px}.brand{font-size:18px}.hero{padding:19px}.back,.home{padding:9px 11px}}@media(min-width:900px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-</style><style> .posters{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.poster{padding:0;background:#171a23;border:1px solid #41323e;border-radius:12px;overflow:hidden;color:white;text-align:left;cursor:pointer}.poster img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;background:#25212c}.poster span{display:block;padding:9px;font-weight:700;font-size:13px;line-height:1.4}.ep{background:#222635;color:white;border:1px solid #684052;border-radius:10px;padding:12px;cursor:pointer}.ep.selected{border-color:#ff3b68;background:#56263b}.episodes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.poster:focus,.ep:focus{outline:3px solid #ff5577}[hidden]{display:none!important}@media(max-width:700px){.posters{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.episodes{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:390px){.posters{grid-template-columns:repeat(2,minmax(0,1fr))}}</style><style>#tieaPlayerOverlay{position:fixed;inset:0;background:#000;z-index:99999;display:none}#tieaPlayerOverlay.show{display:block}#tieaPlayerFrame{width:100%;height:100%;border:0;background:#000}#tieaCloseBtn{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:2;border:2px solid #fff;border-radius:12px;background:rgba(0,0,0,.82);color:#fff;font-size:20px;font-weight:800;padding:10px 18px;cursor:pointer}#tieaCloseBtn:focus{outline:4px solid #00e5ff;outline-offset:2px}</style>
-<style id="tiea-series-language-badges">
-.poster .tiea-cover{position:relative;display:block;padding:0;overflow:hidden;width:100%}
-.poster .tiea-cover img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover}
-.poster .tiea-lang{position:absolute;top:17px;right:-39px;width:140px;transform:rotate(45deg);background:#ff1760;color:white;text-align:center;font-size:12px;font-weight:900;padding:7px 0;z-index:2;box-shadow:0 2px 8px #0008}
-.poster .tiea-epbadges{position:absolute;bottom:9px;left:4px;right:4px;display:flex;justify-content:space-between;gap:5px;padding:0!important}
-.poster .tiea-epbadges .tiea-badge{display:inline-block;background:#bd1639;color:#fff;border-radius:4px;padding:3px 5px;font-size:11px;font-weight:800;line-height:1.2}
-.poster .tiea-epbadges .tiea-badge.ep{background:#ff1760;border:0}
-</style>
-</head><body><header class="top"><a class="back" href="https://tiea9999.github.io/test/app24/series.html">❮ ย้อนกลับ</a><span class="brand">TIEA <b>APP24</b></span><a class="home" href="https://tiea9999.github.io/test/app24/index.html">⌂ HOME</a></header><main><h1>ซีรีส์ไทย</h1><p id="message">กำลังโหลด…</p><div id="posters" class="posters"></div><section id="details" hidden><button class="back" id="backList" type="button">❮ กลับรายการเรื่อง</button><h2 id="detailTitle"></h2><p id="episodeInfo"></p><div id="episodes" class="episodes"></div></section></main><div id="tieaPlayerOverlay"><button id="tieaCloseBtn" type="button" onclick="closeApp24Player()">✕ ปิด / กลับ EP</button><iframe tabindex="-1" id="tieaPlayerFrame" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><script>
-function tieaSeriesCover(item,img){
-  const wrap=document.createElement('span');wrap.className='tiea-cover';
-  wrap.appendChild(img);
-  const raw=String(item.language||item.audio_language||item.audio||item.lang||'').trim();
-  if(raw){
-    const lang=document.createElement('span');lang.className='tiea-lang';lang.textContent=raw;wrap.appendChild(lang);
-  }
-  const latest=Math.max(0,Number(item.latest_ep)||0);
-  const total=Math.max(0,Number(item.total_ep)||latest);
-  if(latest>0&&total>0){
-    const badges=document.createElement('span');badges.className='tiea-epbadges';
-    const state=document.createElement('span');state.className='tiea-badge';state.textContent=latest>=total?'จบแล้ว':'กำลังฉาย';
-    const ep=document.createElement('span');ep.className='tiea-badge ep';ep.textContent='EP.'+latest+'/'+total;
-    badges.append(state,ep);wrap.appendChild(badges);
-  }
-  return wrap;
-}
-window.TIEA_JSON_URL="https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-thai.json";</script><script>
+</style><style> .posters{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}.poster{padding:0;background:#171a23;border:1px solid #41323e;border-radius:12px;overflow:hidden;color:white;text-align:left;cursor:pointer}.poster img{display:block;width:100%;aspect-ratio:2/3;object-fit:cover;background:#25212c}.poster span{display:block;padding:9px;font-weight:700;font-size:13px;line-height:1.4}.ep{background:#222635;color:white;border:1px solid #684052;border-radius:10px;padding:12px;cursor:pointer}.ep.selected{border-color:#ff3b68;background:#56263b}.episodes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.poster:focus,.ep:focus{outline:3px solid #ff5577}[hidden]{display:none!important}@media(max-width:700px){.posters{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.episodes{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:390px){.posters{grid-template-columns:repeat(2,minmax(0,1fr))}}</style><style>#tieaPlayerOverlay{position:fixed;inset:0;background:#000;z-index:99999;display:none}#tieaPlayerOverlay.show{display:block}#tieaPlayerFrame{width:100%;height:100%;border:0;background:#000}#tieaCloseBtn{position:absolute;top:max(12px,env(safe-area-inset-top));left:max(12px,env(safe-area-inset-left));z-index:2;border:2px solid #fff;border-radius:12px;background:rgba(0,0,0,.82);color:#fff;font-size:20px;font-weight:800;padding:10px 18px;cursor:pointer}#tieaCloseBtn:focus{outline:4px solid #00e5ff;outline-offset:2px}</style><style id="tiea-tv1-auto-controls">
+#tieaCloseBtn{font-size:14px!important;padding:9px 13px!important;border:1px solid rgba(255,255,255,.3)!important;border-radius:10px!important;transition:opacity .22s ease!important}
+#tieaPlayerOverlay.show.tiea-hide-controls #tieaCloseBtn{opacity:0;pointer-events:none}
+#tieaPlayerOverlay.show:not(.tiea-hide-controls) #tieaCloseBtn{opacity:1;pointer-events:auto}
+</style><style id="tiea-tv1-topbar-v3">
+#tieaPlayerOverlay #tieaTv1Bar{position:absolute;top:0;left:0;right:0;z-index:15;display:flex;align-items:center;gap:9px;padding:10px 12px;padding-top:max(10px,env(safe-area-inset-top));background:linear-gradient(to bottom,rgba(0,0,0,.88),rgba(0,0,0,.3),transparent);transition:opacity .22s ease;pointer-events:auto}
+#tieaPlayerOverlay #tieaCloseBtn{position:static;flex:0 0 auto;background:#702025;color:white;border:0;border-radius:12px;padding:10px 15px;min-height:44px;font-size:16px;font-weight:800;box-shadow:none}
+#tieaPlayerOverlay #tieaTv1Home{flex:0 0 auto;background:#00996c;color:#fff;text-decoration:none;border:0;border-radius:12px;padding:10px 15px;min-height:44px;display:flex;align-items:center;font-size:16px;font-weight:800}
+#tieaPlayerOverlay #tieaTv1Title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800;font-size:clamp(14px,1.6vw,20px)}
+#tieaPlayerOverlay #tieaTv1Home:focus-visible,#tieaPlayerOverlay #tieaCloseBtn:focus-visible{outline:3px solid #00e5ff;outline-offset:3px}
+#tieaPlayerOverlay.tiea-hide-controls #tieaTv1Bar{opacity:0;pointer-events:none}
+@media(max-width:600px){#tieaPlayerOverlay #tieaTv1Bar{gap:6px;padding:7px}#tieaPlayerOverlay #tieaCloseBtn,#tieaPlayerOverlay #tieaTv1Home{font-size:13px;padding:8px 10px;min-height:36px;border-radius:9px}#tieaPlayerOverlay #tieaTv1Title{font-size:12px}}
+</style><style>/* Only the original player-tiea controls are displayed. */ #tieaTv1Bar{display:none!important} #tieaCloseBtn{display:none!important}</style></head><body><header class="top"><a class="back" href="https://tiea9999.github.io/test/app24/series.html">❮ ย้อนกลับ</a><span class="brand">TIEA <b>APP24</b></span><a class="home" href="https://tiea9999.github.io/test/app24/index.html">⌂ HOME</a></header><main><h1>ซีรีส์ไทย</h1><p id="message">กำลังโหลด…</p><div id="posters" class="posters"></div><section id="details" hidden><button class="back" id="backList" type="button">❮ กลับรายการเรื่อง</button><h2 id="detailTitle"></h2><p id="episodeInfo"></p><div id="episodes" class="episodes"></div></section></main><div id="tieaPlayerOverlay"><div id="tieaTv1Bar"><button id="tieaCloseBtn" type="button" aria-label="ปิดและกลับหน้าเลือก EP" onclick="closeApp24Player()">✕ ปิด</button><a id="tieaTv1Home" href="https://tiea9999.github.io/test/app24/index.html">🏠 หน้าโฮม</a><span id="tieaTv1Title"></span></div><iframe tabindex="0" id="tieaPlayerFrame" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe></div><script>window.TIEA_JSON_URL="https://raw.githubusercontent.com/tiea9999/tv-online/refs/heads/main/myseries-thai.json";</script><script>
 const DATA_URL=window.TIEA_JSON_URL;
 const grid=document.getElementById('posters'), message=document.getElementById('message'), details=document.getElementById('details');
 let lastEpisodeButton=null;
@@ -51,7 +36,7 @@ function showDetails(item){
       document.getElementById('tieaPlayerFrame').src='https://tiea9999.github.io/test/app24/player-tiea.html?'+query.toString();
       document.getElementById('tieaPlayerOverlay').classList.add('show');
       lastEpisodeButton=b;
-      document.getElementById('tieaCloseBtn').focus({preventScroll:true});
+      document.getElementById('tieaPlayerFrame').focus({preventScroll:true});
       document.querySelectorAll('.ep').forEach(x=>x.classList.remove('selected'));b.classList.add('selected');
     });list.appendChild(b)
   });
@@ -94,7 +79,7 @@ async function load(){
     const im=document.createElement('img');im.loading='lazy';im.alt='';im.src=item.poster||item.logo||item.image||item.thumb||'';
     im.onerror=()=>im.style.visibility='hidden';
     const label=document.createElement('span');label.textContent=item.title||item.name||'ไม่มีชื่อ';
-    b.append(tieaSeriesCover(item,im),label);b.onclick=()=>showDetails(item);grid.append(b);
+    b.append(im,label);b.onclick=()=>showDetails(item);grid.append(b);
   });
 }
 
@@ -126,7 +111,7 @@ document.getElementById('tieaPlayerFrame').addEventListener('load',()=>{
  const overlay=document.getElementById('tieaPlayerOverlay');
  const frame=document.getElementById('tieaPlayerFrame');
  if(overlay.classList.contains('show') && frame.getAttribute('src')!=='about:blank')
-   document.getElementById('tieaCloseBtn').focus({preventScroll:true});
+   document.getElementById('tieaPlayerFrame').focus({preventScroll:true});
 });
 window.addEventListener('pagehide',closeApp24Player);
 window.addEventListener('popstate',()=>{
@@ -135,4 +120,38 @@ window.addEventListener('popstate',()=>{
 });
 
 load();
+</script><script id="tiea-tv1-topbar-v3-js">
+/* APP24 series TV-1 topbar, 6 seconds, same-origin iframe input forwarding. */
+(function(){
+ const overlay=document.getElementById('tieaPlayerOverlay'),frame=document.getElementById('tieaPlayerFrame');
+ const bar=document.getElementById('tieaTv1Bar'),close=document.getElementById('tieaCloseBtn'),home=document.getElementById('tieaTv1Home'),title=document.getElementById('tieaTv1Title');
+ if(!overlay||!frame||!bar)return;
+ let timer=0,open=false;
+ function show(){if(!overlay.classList.contains('show'))return;overlay.classList.remove('tiea-hide-controls');clearTimeout(timer);timer=setTimeout(()=>{
+   if(!overlay.classList.contains('show'))return;
+   overlay.classList.add('tiea-hide-controls');
+   if(bar.contains(document.activeElement)){try{frame.focus({preventScroll:true})}catch(e){}}
+ },6000)}
+ function setTitle(){try{const u=new URL(frame.src,location.href);title.textContent=u.searchParams.get('title')||''}catch(e){title.textContent=''}}
+ function wireFrame(){try{
+   const d=frame.contentDocument;if(!d||d.__tieaTv1BarV3)return;d.__tieaTv1BarV3=true;
+   ['mousemove','pointermove','pointerdown','touchstart','keydown'].forEach(ev=>d.addEventListener(ev,show,{capture:true,passive:true}));
+   d.addEventListener('keydown',e=>{
+     if(!overlay.classList.contains('show'))return;
+     if(['Escape','Backspace','BrowserBack','GoBack'].includes(e.key)){e.preventDefault();e.stopPropagation();closeApp24Player();return}
+     if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key) && overlay.classList.contains('tiea-hide-controls')){
+       show();close.focus({preventScroll:true});e.preventDefault();e.stopPropagation();
+     }
+   },true);
+ }catch(e){}}
+ ['mousemove','pointermove','pointerdown','touchstart','keydown'].forEach(ev=>document.addEventListener(ev,show,{capture:true,passive:true}));
+ frame.addEventListener('load',()=>{if(overlay.classList.contains('show')){wireFrame();setTitle();show()}});
+ const mo=new MutationObserver(()=>{
+   const now=overlay.classList.contains('show');
+   if(now&&!open){open=true;setTitle();wireFrame();show()}
+   if(!now&&open){open=false;clearTimeout(timer);overlay.classList.remove('tiea-hide-controls')}
+ });mo.observe(overlay,{attributes:true,attributeFilter:['class']});
+ const sm=new MutationObserver(()=>{if(overlay.classList.contains('show'))setTitle()});sm.observe(frame,{attributes:true,attributeFilter:['src']});
+ close.addEventListener('focus',show);home.addEventListener('focus',show);
+})();
 </script></body></html>
