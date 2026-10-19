@@ -563,7 +563,7 @@ async function playMain(item){cleanupPlayers();const url=item.url;currentUrl=url
     panel.style.display='flex';showPlayerUI(false);setTimeout(()=>document.getElementById('tieaOpenWiseplay')?.focus(),100);return;
   }
   // V11: kuylive HLS only. V6 path for every other provider stays untouched.
-  if(/^https:\/\/[^/]*kuylive\.com\/hls\//i.test(url)){
+  if(/^https:\/\/[^/]*kuylive\.com\/hls\//i.test(url) || /^https:\/\/[^/]*\.isusss\.com\/hls\//i.test(url)){
     playKuyliveV11(url,item.referer||'https://av-kuy.com/');
     return;
   }
