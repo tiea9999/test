@@ -430,88 +430,57 @@ function movieYear(item,sourceName){
 }
 function yearRowName(y){return y?'หนังปี '+y:'ไม่ระบุปี'}
 async function loadAll(){
-  grid.innerHTML='<div class="status">⚡ LOADING AUTO GROUP...</div>';
+  grid.innerHTML='<div class="status">⚡ กำลังโหลดหนังทั้งหมด...</div>';
   store={};
-  const groupMap={};
-  const latest=[];
-  const seen=new Set();
-  const sourceNames=SOURCES.map(s=>s.name);
-  const groupOrder=[...sourceNames];
-
-  for(const s of SOURCES){
+  const groupMap={}, allMovies=[], yearMap={}, seen=new Set();
+  const mainSource=SOURCES.find(s=>s.name==='หนังทั้งหมด.json');
+  const sources=[mainSource,...SOURCES.filter(s=>s!==mainSource)].filter(Boolean);
+  const groupOrder=SOURCES.filter(s=>s!==mainSource).map(s=>s.name);
+  // New central JSON first: items appended to the end of that JSON appear first.
+  for(const s of sources){
     try{
       const res=await fetch(s.url+'?t='+Date.now(),{cache:'no-store'});
-      if(!res.ok)throw new Error(res.status);
+      if(!res.ok)throw new Error('HTTP '+res.status);
       const data=await res.json();
-      let list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));
-      for(const item of list){
-        if(!item||typeof item!=='object') continue;
+      const list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));
+      const entries=s===mainSource?[...list].reverse():list;
+      for(const item of entries){
+        if(!item||typeof item!=='object')continue;
         const key=dedupeKey(item);
-        if(seen.has(key)) continue;
+        if(seen.has(key))continue;
         seen.add(key);
-        // ===== TIEA 037HD 2026 GROUP FIX =====
-        // ไฟล์หนังใหม่2026 ให้เข้าหมวดหนังใหม่2026 เท่านั้น
-        // ป้องกันค่า group เก่าใน JSON เช่น "หนังใหม่ชนโรง" สร้างแถวกลับมาอีก
-        const groups = (s.name==='หนังใหม่2026')
-          ? ['หนังใหม่2026']
-          : getItemGroups(item,s.name);
-
-        const t=getUpdatedTime(item);
-        if(t>0) latest.push({...item,__updatedTime:t});
-
+        allMovies.push(item);
+        const year=movieYear(item,s.name),yearKey=yearRowName(year);
+        (yearMap[yearKey]??=[]).push(item);
+        const groups=s.name==='หนังใหม่2026'?['หนังใหม่2026']:getItemGroups(item,s.name);
         for(const g of groups){
-          if(!groupMap[g]){groupMap[g]=[]; if(!groupOrder.includes(g)) groupOrder.push(g);}
-
-          // หนังใหม่2026: รายการที่เพิ่มท้าย JSON ให้ขึ้นต้นแถวอัตโนมัติ
-          groupMap[g].push(item);
+          (groupMap[g]??=[]).push(item);
+          if(!groupOrder.includes(g))groupOrder.push(g);
         }
       }
     }catch(e){
-      const g=normalizeGroupName(s.name);
-      if(!groupMap[g]) groupMap[g]=[];
-      store[g]={data:[],page:1,error:'โหลดรายการไม่ได้'};
-      if(!groupOrder.includes(g)) groupOrder.push(g);
+      console.warn('TIEA movie source unavailable:',s.name,e);
+      // Optional central source may be absent during first setup; old sources still load.
+      if(!s.optional)store[s.name]={data:[],page:1,error:'โหลดรายการไม่ได้'};
     }
   }
-
-  // หนังใหม่2026: เรียงวันที่อัปเดตใหม่ก่อน หากไม่มีวันที่คงลำดับต้นฉบับ JSON
-  if(groupMap['หนังใหม่2026']){
-    groupMap['หนังใหม่2026'].sort((a,b)=>getUpdatedTime(b)-getUpdatedTime(a));
-  }
-
-  const rows=[];
-  // ===== TIEA 037HD CATEGORY PRIORITY =====
-  // ใช้หนังใหม่2026 เป็นแถวแรก และไม่สร้างแถวหนังใหม่ชนโรง
-  const priorityGroups=['หนังใหม่2026'];
-  priorityGroups.forEach(g=>{
-    const i=groupOrder.indexOf(g);
-    if(i>=0) groupOrder.splice(i,1);
-  });
-  groupOrder.unshift(...priorityGroups);
-
-  // กันข้อมูลเก่า/แคชที่ยังมีชื่อหนังใหม่ชนโรง
   delete groupMap['หนังใหม่ชนโรง'];
-  delete store['หนังใหม่ชนโรง'];
-
-  if(latest.length){
-    latest.sort((a,b)=>(b.__updatedTime||0)-(a.__updatedTime||0));
-    store['🔥 อัปเดทล่าสุด']={data:latest,page:1,error:''};
-    rows.push('🔥 อัปเดทล่าสุด');
-  }
+  const rows=[];
+  store['หนังทั้งหมด']={data:allMovies,page:1,error:''};rows.push('หนังทั้งหมด');
+  const years=Object.keys(yearMap).filter(k=>/^หนังปี \d{4}$/.test(k))
+    .sort((a,b)=>Number(b.slice(7))-Number(a.slice(7)));
+  if(yearMap['ไม่ระบุปี'])years.push('ไม่ระบุปี');
+  for(const y of years){store[y]={data:yearMap[y],page:1,error:''};rows.push(y);}
+  // Keep original categories, after the unified/year sections.
   for(const g of groupOrder){
-    if(groupMap[g]&&groupMap[g].length){
-      store[g]={data:groupMap[g],page:1,error:''};
-      rows.push(g);
-    }else if(store[g]){
-      rows.push(g);
-    }
+    if(g==='หนังทั้งหมด.json'||g==='หนังใหม่ชนโรง')continue;
+    if(groupMap[g]?.length){store[g]={data:groupMap[g],page:1,error:''};rows.push(g);}
+    else if(store[g])rows.push(g);
   }
-  Object.keys(groupMap).forEach(g=>{if(!rows.includes(g)){store[g]={data:groupMap[g],page:1,error:''};rows.push(g)}});
-  grid.innerHTML='';
-  rows.forEach(renderRow);
+  grid.innerHTML='';rows.forEach(renderRow);
   setTimeout(()=>document.getElementById('homeBtn')?.focus(),250);
 }
-function renderRow(name){const rowId=safeId(name),row=document.createElement('div');row.innerHTML=`<div class="row-title"><span>${esc(name)}</span><button class="seeall" onclick="seeAll('${name.replace(/'/g,"\\'")}')">ดูทั้งหมด</button></div><div class="row-items" id="row-${rowId}"></div>`;grid.appendChild(row);renderPage(name)}
+function renderRow(name){const rowId=safeId(name),row=document.createElement('div');row.innerHTML=`<div class="row-title"><span>${esc(name)} <small style="color:#aaa;font-size:12px">(${store[name]?.data?.length||0} เรื่อง)</small></span><button class="seeall" onclick="seeAll('${name.replace(/'/g,"\\'")}')">ดูทั้งหมด</button></div><div class="row-items" id="row-${rowId}"></div>`;grid.appendChild(row);renderPage(name)}
 function getMovieLanguage(item){
   const raw=String(item.language||item.audio_language||item.audio||item.lang||'').trim();
   if(!raw)return '';
@@ -520,10 +489,10 @@ function getMovieLanguage(item){
   return /^(HD|FHD|FULLHD|UHD|4K|1080P|720P|480P)$/i.test(raw)?'':raw;
 }
 function createCard(item,onClick){const div=document.createElement('div');div.className='card';div.tabIndex=0;const lang=getMovieLanguage(item);div.innerHTML=`<span class="movie-poster-wrap"><img src="${esc(getImage(item))}" alt="${esc(getTitle(item))}" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${FALLBACK_IMG}'">${lang?`<span class="movie-language-ribbon">${esc(lang)}</span>`:''}</span><div class="card-title">${esc(getTitle(item))}</div>`;div.onclick=onClick;div.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();onClick()}};return div}
-function renderPage(name){const obj=store[name],row=document.getElementById('row-'+safeId(name));if(!obj||!row)return;row.innerHTML='';if(obj.error){row.innerHTML=`<div class="status">❌ ${obj.error}</div>`;return}const items=obj.data.slice(0,15);if(!items.length){row.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>row.appendChild(createCard(item,()=>openItem(item))))}
+function renderPage(name){const obj=store[name],row=document.getElementById('row-'+safeId(name));if(!obj||!row)return;row.innerHTML='';if(obj.error){row.innerHTML=`<div class="status">❌ ${obj.error}</div>`;return}const items=obj.data.slice(0,30);if(!items.length){row.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>row.appendChild(createCard(item,()=>openItem(item))))}
 function seeAll(name){allView={active:true,name,page:1};renderAllPage()}
-function renderAllPage(){const obj=store[allView.name];if(!obj)return;const perPage=20,total=obj.data.length,totalPages=Math.max(1,Math.ceil(total/perPage)),page=Math.min(allView.page,totalPages),items=obj.data.slice((page-1)*perPage,page*perPage);overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(allView.name)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="seeall" onclick="prevAllPage()">◀ ก่อนหน้า</button><button class="seeall" onclick="nextAllPage()">ถัดไป ▶</button><button class="seeall" onclick="backToGrid()">← กลับ</button></div></div><div style="padding:0 10px 10px;color:#00e5ff">หน้า ${page} / ${totalPages} &nbsp; | &nbsp; ทั้งหมด ${total} เรื่อง</div><div id="allBox" class="all-grid"></div>`;const box=document.getElementById('allBox');if(!items.length){box.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>box.appendChild(createCard(item,()=>openItem(item))))}
-function nextAllPage(){const obj=store[allView.name];if(obj&&allView.page<Math.ceil(obj.data.length/20)){allView.page++;renderAllPage()}}
+function renderAllPage(){const obj=store[allView.name];if(!obj)return;const perPage=30,total=obj.data.length,totalPages=Math.max(1,Math.ceil(total/perPage)),page=Math.min(allView.page,totalPages),items=obj.data.slice((page-1)*perPage,page*perPage);overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap"><h2 style="margin:0">${esc(allView.name)}</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="seeall" onclick="prevAllPage()">◀ ก่อนหน้า</button><button class="seeall" onclick="nextAllPage()">ถัดไป ▶</button><button class="seeall" onclick="backToGrid()">← กลับ</button></div></div><div style="padding:0 10px 10px;color:#00e5ff">หน้า ${page} / ${totalPages} &nbsp; | &nbsp; ทั้งหมด ${total} เรื่อง</div><div id="allBox" class="all-grid"></div>`;const box=document.getElementById('allBox');if(!items.length){box.innerHTML='<div class="status">ไม่มีข้อมูล</div>';return}items.forEach(item=>box.appendChild(createCard(item,()=>openItem(item))))}
+function nextAllPage(){const obj=store[allView.name];if(obj&&allView.page<Math.ceil(obj.data.length/30)){allView.page++;renderAllPage()}}
 function prevAllPage(){if(allView.page>1){allView.page--;renderAllPage()}}
 function openItem(item){lastFocus=document.activeElement;if(Array.isArray(item.episodes)&&item.episodes.length){showEP(item);return}const servers=pickMainOnly(item.servers||item.sources||item.links||[]);const url=getDirectUrl(item);startPlay(servers.length?servers:[{name:'Main',url}])}
 function showEP(item){overlay.style.display='block';grid.style.display='none';overlay.innerHTML=`<div style="padding:10px;display:flex;align-items:center;justify-content:space-between"><h2 style="margin:0">${esc(getTitle(item))}</h2><button class="seeall" onclick="backToListOrGrid()">← กลับ</button></div><div class="ep-wrap" id="epBox"></div>`;const box=document.getElementById('epBox');item.episodes.forEach((ep,i)=>{const d=document.createElement('div');d.className='ep-card';d.tabIndex=0;d.textContent=ep.name||ep.title||`EP ${i+1}`;d.onclick=()=>{lastFocus=d;const servers=pickMainOnly(ep.servers||ep.sources||ep.links||ep.files||ep.playlist||[]);const single=getDirectUrl(ep);startPlay(servers.length?servers:[{name:'Main',url:single}])};d.onkeydown=e=>{if(e.key==='Enter'||e.key==='OK'||e.keyCode===23||e.keyCode===66){e.preventDefault();d.click()}};box.appendChild(d)});setTimeout(()=>box.querySelector('.ep-card')?.focus(),100)}
