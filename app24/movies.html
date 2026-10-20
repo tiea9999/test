@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>TIEA IPTV 037HD PLAYER AUTO HIDE 5S</title>
+    <title>TIEA APP24 หนังทั้งหมด แยกปีอัตโนมัติ (LAB)</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         * {
@@ -302,7 +302,19 @@
         .movie-poster-wrap{position:relative;display:block;overflow:hidden;border-radius:8px}
         .movie-poster-wrap img{display:block;width:100%}
         .movie-language-ribbon{position:absolute;top:11px;left:-32px;width:116px;transform:rotate(-45deg);padding:5px 0;background:#e11d48;color:white;font-size:12px;font-weight:700;text-align:center;z-index:1;pointer-events:none;box-shadow:0 2px 6px #0008}
-        </style>
+        
+/* APP24 MOVIES ALL LAB: display only; existing playback and remote handling preserved */
+.movie-all-head{padding:12px 12px 4px}.movie-all-head h2{margin:8px 0 6px;font-size:23px}
+.movie-all-info{color:#9dd6e3;font-size:14px;padding:4px 0 10px}.movie-warning{color:#ffba69;font-size:13px}
+.movie-year-filters{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.movie-year-btn,.movie-pages button{border:1px solid #555;background:#202020;color:#fff;border-radius:9px;padding:10px 16px;font-weight:700;cursor:pointer}
+.movie-year-btn.active{background:#008d6c;border-color:#00dba6}.movie-year-btn:focus,.movie-pages button:focus{outline:3px solid #36c9ff}
+.movie-all-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.movie-all-grid .card{min-width:0;max-width:none;width:100%;text-align:left}
+.movie-all-grid .card img{height:auto;aspect-ratio:2/3;object-fit:cover}.movie-year-label{color:#00e5ff;font-size:12px;margin-top:5px}
+.movie-pages{display:flex;justify-content:center;gap:14px;padding:15px}.movie-pages button:disabled{opacity:.3}
+@media(min-width:700px){.movie-all-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:1100px){.movie-all-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
+</style>
 
 
 </head>
@@ -409,87 +421,82 @@ function dedupeKey(item){
   try{url=(item.servers&&item.servers[0]&&(item.servers[0].url||item.servers[0].link||item.servers[0].file))||getDirectUrl(item)||'';}catch(e){}
   return title+'|'+String(url).trim().toLowerCase();
 }
+// APP24 MOVIES ALL LAB: same 8 JSON sources, existing player untouched
+let movieAllItems=[],movieYear='ทั้งหมด',moviePage=1;
+const MOVIE_PAGE_SIZE=30;
+function movieReleaseYear(item,sourceName){
+  const fields=[item.year,item.release_year,item.releaseYear,item.release_date,item.releaseDate,item.premiere,item.production_year];
+  for(const v of fields){
+    if(v===undefined||v===null||v==='')continue;
+    const m=String(v).match(/(?:19|20)\d{2}/);
+    if(m)return m[0];
+  }
+  const name=String(getTitle(item));
+  const match=name.match(/(?:^|[^\d])((?:19|20)\d{2})(?!\d)/);
+  if(match)return match[1];
+  // These two source lists explicitly designate their year.
+  if(sourceName==='หนังใหม่2026')return '2026';
+  if(sourceName==='หนังใหม่2025')return '2025';
+  return 'ไม่ระบุปี';
+}
 async function loadAll(){
-  grid.innerHTML='<div class="status">⚡ LOADING AUTO GROUP...</div>';
-  store={};
-  const groupMap={};
-  const latest=[];
-  const seen=new Set();
-  const sourceNames=SOURCES.map(s=>s.name);
-  const groupOrder=[...sourceNames];
-
-  for(const s of SOURCES){
+  grid.innerHTML='<div class="status">⏳ กำลังโหลดรายการหนัง APP24...</div>';
+  const seen=new Set();movieAllItems=[];let failures=[];
+  const outcomes=await Promise.all(SOURCES.map(async s=>{
     try{
       const res=await fetch(s.url+'?t='+Date.now(),{cache:'no-store'});
-      if(!res.ok)throw new Error(res.status);
+      if(!res.ok)throw new Error('HTTP '+res.status);
       const data=await res.json();
-      let list=Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]));
-      for(const item of list){
-        if(!item||typeof item!=='object') continue;
-        const key=dedupeKey(item);
-        if(seen.has(key)) continue;
-        seen.add(key);
-        // ===== TIEA 037HD 2026 GROUP FIX =====
-        // ไฟล์หนังใหม่2026 ให้เข้าหมวดหนังใหม่2026 เท่านั้น
-        // ป้องกันค่า group เก่าใน JSON เช่น "หนังใหม่ชนโรง" สร้างแถวกลับมาอีก
-        const groups = (s.name==='หนังใหม่2026')
-          ? ['หนังใหม่2026']
-          : getItemGroups(item,s.name);
-
-        const t=getUpdatedTime(item);
-        if(t>0) latest.push({...item,__updatedTime:t});
-
-        for(const g of groups){
-          if(!groupMap[g]){groupMap[g]=[]; if(!groupOrder.includes(g)) groupOrder.push(g);}
-
-          // หนังใหม่2026: รายการที่เพิ่มท้าย JSON ให้ขึ้นต้นแถวอัตโนมัติ
-          groupMap[g].push(item);
-        }
-      }
-    }catch(e){
-      const g=normalizeGroupName(s.name);
-      if(!groupMap[g]) groupMap[g]=[];
-      store[g]={data:[],page:1,error:'โหลดรายการไม่ได้'};
-      if(!groupOrder.includes(g)) groupOrder.push(g);
+      return {source:s.name,items:Array.isArray(data)?data:(Array.isArray(data.items)?data.items:(Array.isArray(data.data)?data.data:[]))};
+    }catch(e){return {source:s.name,items:[],error:String(e.message||e)}};
+  }));
+  for(const result of outcomes){
+    if(result.error){failures.push(result.source);continue;}
+    for(const item of result.items){
+      if(!item||typeof item!=='object')continue;
+      const key=dedupeKey(item);if(seen.has(key))continue;seen.add(key);
+      movieAllItems.push({...item,__movieYear:movieReleaseYear(item,result.source),__movieSource:result.source});
     }
   }
-
-  // หนังใหม่2026: เรียงวันที่อัปเดตใหม่ก่อน หากไม่มีวันที่คงลำดับต้นฉบับ JSON
-  if(groupMap['หนังใหม่2026']){
-    groupMap['หนังใหม่2026'].sort((a,b)=>getUpdatedTime(b)-getUpdatedTime(a));
-  }
-
-  const rows=[];
-  // ===== TIEA 037HD CATEGORY PRIORITY =====
-  // ใช้หนังใหม่2026 เป็นแถวแรก และไม่สร้างแถวหนังใหม่ชนโรง
-  const priorityGroups=['หนังใหม่2026'];
-  priorityGroups.forEach(g=>{
-    const i=groupOrder.indexOf(g);
-    if(i>=0) groupOrder.splice(i,1);
+  movieAllItems.sort((a,b)=>{
+    const ay=/^\d{4}$/.test(a.__movieYear)?Number(a.__movieYear):0;
+    const by=/^\d{4}$/.test(b.__movieYear)?Number(b.__movieYear):0;
+    return by-ay || getUpdatedTime(b)-getUpdatedTime(a);
   });
-  groupOrder.unshift(...priorityGroups);
-
-  // กันข้อมูลเก่า/แคชที่ยังมีชื่อหนังใหม่ชนโรง
-  delete groupMap['หนังใหม่ชนโรง'];
-  delete store['หนังใหม่ชนโรง'];
-
-  if(latest.length){
-    latest.sort((a,b)=>(b.__updatedTime||0)-(a.__updatedTime||0));
-    store['🔥 อัปเดทล่าสุด']={data:latest,page:1,error:''};
-    rows.push('🔥 อัปเดทล่าสุด');
+  movieYear='ทั้งหมด';moviePage=1;renderMovieAll();
+  if(failures.length){
+    const warn=document.getElementById('movieLoadWarning');
+    if(warn)warn.textContent='⚠ โหลดไม่สำเร็จ: '+failures.join(', ');
   }
-  for(const g of groupOrder){
-    if(groupMap[g]&&groupMap[g].length){
-      store[g]={data:groupMap[g],page:1,error:''};
-      rows.push(g);
-    }else if(store[g]){
-      rows.push(g);
-    }
-  }
-  Object.keys(groupMap).forEach(g=>{if(!rows.includes(g)){store[g]={data:groupMap[g],page:1,error:''};rows.push(g)}});
+}
+function renderMovieAll(){
+  const years=[...new Set(movieAllItems.map(x=>x.__movieYear).filter(y=>/^\d{4}$/.test(y)))].sort((a,b)=>Number(b)-Number(a));
+  if(movieAllItems.some(x=>x.__movieYear==='ไม่ระบุปี'))years.push('ไม่ระบุปี');
+  const filtered=movieYear==='ทั้งหมด'?movieAllItems:movieAllItems.filter(x=>x.__movieYear===movieYear);
+  const totalPages=Math.max(1,Math.ceil(filtered.length/MOVIE_PAGE_SIZE));
+  moviePage=Math.min(moviePage,totalPages);
+  const shown=filtered.slice((moviePage-1)*MOVIE_PAGE_SIZE,moviePage*MOVIE_PAGE_SIZE);
   grid.innerHTML='';
-  rows.forEach(renderRow);
-  setTimeout(()=>document.getElementById('homeBtn')?.focus(),250);
+  const header=document.createElement('div');header.className='movie-all-head';
+  header.innerHTML='<h2>🎬 หนังทั้งหมด APP24</h2><div class="movie-all-info">รวม '+movieAllItems.length+' เรื่อง • แยกตามปีอัตโนมัติ</div><div id="movieLoadWarning" class="movie-warning"></div>';
+  const filters=document.createElement('div');filters.className='movie-year-filters';
+  for(const y of ['ทั้งหมด',...years]){
+    const btn=document.createElement('button');btn.className='movie-year-btn'+(y===movieYear?' active':'');btn.textContent=y;
+    btn.setAttribute('aria-pressed',String(y===movieYear));
+    btn.onclick=()=>{movieYear=y;moviePage=1;renderMovieAll();document.querySelector('.movie-year-btn.active')?.focus();};
+    filters.appendChild(btn);
+  }
+  header.appendChild(filters);
+  const summary=document.createElement('div');summary.className='movie-all-info';summary.textContent='แสดง '+filtered.length+' เรื่อง • หน้า '+moviePage+' / '+totalPages;
+  header.appendChild(summary);grid.appendChild(header);
+  const cards=document.createElement('div');cards.className='all-grid movie-all-grid';
+  shown.forEach(item=>{const card=createCard(item,()=>openItem(item));const label=document.createElement('div');label.className='movie-year-label';label.textContent=item.__movieYear;card.appendChild(label);cards.appendChild(card);});
+  if(!shown.length)cards.innerHTML='<div class="status">ไม่มีหนังในหมวดปีนี้</div>';
+  grid.appendChild(cards);
+  const nav=document.createElement('div');nav.className='movie-pages';
+  const prev=document.createElement('button');prev.textContent='◀ ก่อนหน้า';prev.disabled=moviePage<=1;prev.onclick=()=>{moviePage--;renderMovieAll();window.scrollTo(0,0)};
+  const next=document.createElement('button');next.textContent='ถัดไป ▶';next.disabled=moviePage>=totalPages;next.onclick=()=>{moviePage++;renderMovieAll();window.scrollTo(0,0)};
+  nav.append(prev,next);grid.appendChild(nav);
 }
 function renderRow(name){const rowId=safeId(name),row=document.createElement('div');row.innerHTML=`<div class="row-title"><span>${esc(name)}</span><button class="seeall" onclick="seeAll('${name.replace(/'/g,"\\'")}')">ดูทั้งหมด</button></div><div class="row-items" id="row-${rowId}"></div>`;grid.appendChild(row);renderPage(name)}
 function getMovieLanguage(item){
