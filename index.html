@@ -880,16 +880,16 @@
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
             <div class="group-title">ทีวีออนไลน์</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/test/3bb.html">📡 ทีวีออนไลน์</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/tv-1/3bb.html">📡 ทีวีออนไลน์</button>
             <div class="group-title">หนัง</div>
             <button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button>
             <div class="group-title">ซีรีส์</div>
             <button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn"         
 data-source="series-24hd">📺 ซีรีส์ ฝรั่ง</button><button class="menu-btn"            
 data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn"  
-data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
+data-vip-link="https://tiea9999.github.io/tv-1/VIP.html">💎 VIP</button>
             <div class="group-title">ระบบ</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/test/index.html">🏠 HOME จริง</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/tv-1/index.html">🏠 HOME จริง</button>
         </aside>
         <main class="main">
             <div class="topbar">
@@ -946,7 +946,7 @@ data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
         </div>
     </div>
     <script>
-        const HOME_URL='https://tiea9999.github.io/test/index.html',LIVE_URL='https://tiea9999.github.io/test/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
+        const HOME_URL='https://tiea9999.github.io/tv-1/index.html',LIVE_URL='https://tiea9999.github.io/tv-1/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
 
 // Dynamic Provider Engine
 // Resolver ต้องเป็น API/Worker ที่ผู้ใช้ควบคุมและคืน JSON: {"url":"https://...m3u8"}
@@ -961,7 +961,7 @@ const MY_CHINA=RAW+'myseries-china.json',MY_KOREA=RAW+'myseries-korea.json',MY_T
 const TV_LINKS=[
 {kind:'link',title:'LiveDooMovies',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/livedoomovies.html',group:'ทีวีออนไลน์'},
 {kind:'link',title:'ตารางแข่งขัน',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/live.html',group:'ทีวีออนไลน์'},
-{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/test/3bb.html',group:'ทีวีออนไลน์'},
+{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/3bb.html',group:'ทีวีออนไลน์'},
 {kind:'folder',title:'DOOBALL6395',image:FOLDER_LOGO,source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u',group:'ทีวีออนไลน์'}
 ];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'ดูซีรี่ย์จีน',image:FOLDER_LOGO,source:MY_CHINA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์เกาหลี',image:FOLDER_LOGO,source:MY_KOREA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์ไทย',image:FOLDER_LOGO,source:MY_THAI,group:'MySeries'},{kind:'folder',title:'ซีรี่ย์ญี่ปุ่น',image:FOLDER_LOGO,source:MY_JAPAN,group:'MySeries'},{kind:'folder',title:'ดูละครสั้น',image:FOLDER_LOGO,source:MY_SHORT,group:'MySeries'},{kind:'folder',title:'ดูหนังออนไลน์',image:FOLDER_LOGO,source:MY_MOVIE,group:'MySeries'}];
@@ -978,7 +978,7 @@ const SOURCES={'tv-6395':[{title:'DooBall6395',source:'https://raw.githubusercon
 
 ],
 'movie-24hd':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],'series-main':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA},{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ดูซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ดูละครสั้น',source:MY_SHORT},{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-update':[{title:'ซีรี่ย์จีน',source:MY_CHINA},{title:'ซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ซีรี่ย์สั้น',source:MY_SHORT}],'series-china':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA}],'series-korea':[{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA}],'series-thai':[{title:'ดูซีรี่ย์ไทย',source:MY_THAI}],'series-japan':[{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN}],'series-short':[{title:'ดูละครสั้น',source:MY_SHORT}],'series-movie':[{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]};
-const state={rows:[],modalItems:[],page:1,perPage:20,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null};
+const state={rows:[],modalItems:[],page:1,perPage:30,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null};
 const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel'),native24Frame=$('native24Frame');
 
 function setStatus(t){statusText.textContent=t||'พร้อมใช้งาน'}function cleanUrl(u){return String(u||'').trim()}function isJsonUrl(u){return /\.json($|\?)/i.test(String(u||''))||String(u||'').includes('githubusercontent.com')}function imgOf(i){return i.poster||i.image||i.thumb||i.logo||i.cover||''}
@@ -1084,7 +1084,36 @@ async function fetchText(url){
   }
 }
 async function loadUrl(url,parent=''){let text=await fetchText(url),trim=text.trim();if(trim.startsWith('{')||trim.startsWith('['))return normalize(JSON.parse(text),parent);if(trim.includes('#EXTM3U')||trim.includes('#EXTINF'))return parseM3U(text,parent);return[]}
-async function loadSourcePack(key){if(key==='tv-main')return TV_LINKS;let pack=SOURCES[key]||[],all=[];for(const s of pack){try{all.push(...await loadUrl(s.source,s.title))}catch(e){console.log('โหลดไม่ได้',s.source,e)}}return all}
+// TIEA MOVIE JSON CENTER V1: existing 8 feeds remain unchanged.
+const TIEA_MOVIE_ALL_JSON='https://raw.githubusercontent.com/tiea9999/037hd/main/json/'+encodeURIComponent('หนังทั้งหมด.json');
+function tieaMovieKey(item){
+  const title=String(item?.title||'').trim().toLowerCase().replace(/\s+/g,' ');
+  return title || String(item?.servers?.[0]?.url||'').trim().toLowerCase();
+}
+function tieaMovieMerge(newItems,oldItems){
+  const seen=new Set(),out=[];
+  for(const item of [...newItems,...oldItems]){
+    if(!item || item.kind==='folder')continue;
+    const key=tieaMovieKey(item);
+    if(!key||seen.has(key))continue;
+    seen.add(key);out.push(item);
+  }
+  return out;
+}
+async function loadSourcePack(key){
+  if(key==='tv-main')return TV_LINKS;
+  const pack=SOURCES[key]||[],all=[];
+  if(key==='movie-main'){
+    // New entries are appended at the end of the central JSON; show them first.
+    let fresh=[];
+    try{fresh=(await loadUrl(TIEA_MOVIE_ALL_JSON,'หนังทั้งหมด')).reverse();}
+    catch(e){console.warn('Central movie JSON unavailable; keeping old feeds',e);}
+    for(const src of pack){try{all.push(...await loadUrl(src.source,src.title))}catch(e){console.log('โหลดไม่ได้',src.source,e)}}
+    return tieaMovieMerge(fresh,all);
+  }
+  for(const src of pack){try{all.push(...await loadUrl(src.source,src.title))}catch(e){console.log('โหลดไม่ได้',src.source,e)}}
+  return all;
+}
 async function loadFolder(item){state.activeSource='folder:'+item.title;setStatus('กำลังโหลด '+item.title+' ...');try{let items=await loadUrl(item.source,item.title);renderRows(makeRows(items),item.title);setStatus(items.length?'โหลด '+item.title+' สำเร็จ '+items.length+' รายการ':'โหลด '+item.title+' ได้ 0 รายการ')}catch(e){setStatus('โหลดไม่สำเร็จ '+e.message)}}
 
 function getUpdateTime(item){
@@ -1176,15 +1205,17 @@ function renderUpdatePage(items,label){
 function makeRows(items){let order=['ดูซีรี่ย์จีน','ดูซีรี่ย์เกาหลี','ดูซีรี่ย์ไทย','ซีรี่ย์ญี่ปุ่น','ดูหนังออนไลน์','ดูละครสั้น','ทีวีออนไลน์','ทีวี','กีฬา','อื่นๆ'],map={};items.forEach(item=>{let cats=item.groups&&item.groups.length?item.groups:[item.group||'อื่นๆ'];cats.forEach(c=>{c=groupName(c);if(c==='ดูซีรี่ย์ออนไลน์')return;if(!map[c])map[c]=[];if(!map[c].some(x=>x.title===item.title))map[c].push(item)})});return Object.keys(map).sort((a,b)=>{let ia=order.indexOf(a)<0?99:order.indexOf(a),ib=order.indexOf(b)<0?99:order.indexOf(b);return ia-ib||a.localeCompare(b,'th')}).map(title=>({title,items:map[title]}))}
 
 function movieYearOf(item){
-  let candidates=[
-    item&&item.year,
-    item&&item.group,
-    ...(item&&Array.isArray(item.groups)?item.groups:[]),
-    item&&item.title
-  ].filter(Boolean).map(String);
-  for(const s of candidates){
-    let m=s.match(/\b(19|20)\d{2}\b/);
-    if(m)return m[0];
+  const raw=item?.raw||{};
+  const year=Number(item?.year||raw.year||raw.release_year||raw.releaseYear);
+  if(Number.isInteger(year)&&year>=1888&&year<=2100)return String(year);
+  // Prefer the film's year in its title over the JSON folder's year.
+  const title=String(item?.title||raw.title||'');
+  const matches=[...title.matchAll(/\((18\d{2}|19\d{2}|20\d{2})\)/g)];
+  if(matches.length)return matches[matches.length-1][1];
+  const groups=[item?.group,...(Array.isArray(item?.groups)?item.groups:[])];
+  for(const group of groups){
+    const m=String(group||'').match(/หนัง(?:ใหม่|ปี)?\s*(20\d{2}|19\d{2})/);
+    if(m)return m[1];
   }
   return 'ไม่ระบุปี';
 }
@@ -1204,7 +1235,7 @@ function renderMoviePage(items,label='หนังทั้งหมด'){
   allSec.className='section';
   allSec.innerHTML=`<div class="section-head"><div class="section-title">หนังทั้งหมด</div><div class="section-tools"><div class="badge">${items.length} รายการ</div><button class="see-all-btn">ดูทั้งหมด</button></div></div><div class="row"></div>`;
   let allRow=allSec.querySelector('.row');
-  items.slice(0,18).forEach(item=>allRow.appendChild(createCard(item)));
+  items.slice(0,30).forEach(item=>allRow.appendChild(createCard(item)));
   allSec.querySelector('.see-all-btn').onclick=()=>openModal('หนังทั้งหมด',items);
   content.appendChild(allSec);
 
@@ -1228,7 +1259,7 @@ function renderMoviePage(items,label='หนังทั้งหมด'){
     let title=y==='ไม่ระบุปี'?'หนังไม่ระบุปี':'หนังปี '+y;
     sec.innerHTML=`<div class="section-head"><div class="section-title">${title}</div><div class="section-tools"><div class="badge">${yearMap[y].length} รายการ</div><button class="see-all-btn">ดูทั้งหมด</button></div></div><div class="row"></div>`;
     let row=sec.querySelector('.row');
-    yearMap[y].slice(0,18).forEach(item=>row.appendChild(createCard(item)));
+    yearMap[y].slice(0,30).forEach(item=>row.appendChild(createCard(item)));
     sec.querySelector('.see-all-btn').onclick=()=>openModal(title,yearMap[y]);
     content.appendChild(sec);
   });
