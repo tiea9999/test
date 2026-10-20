@@ -87,11 +87,18 @@ DOOTVZ Clean Start / Remote Smooth / DRM / production Workers unchanged.
 .channel img{content-visibility:auto}
 </style>
 
+<style id="app24-home-next-to-heading-v5">
+/* HOME on the SAME line as “หมวด: หนัง”, to its far left. */
+#category-menu{justify-content:center;}
+#category-heading-row{width:min(1400px,calc(100% - 24px));display:flex;align-items:center;gap:16px;box-sizing:border-box;padding:4px 12px;}
+#category-heading-row .back-home{position:static;top:auto;left:auto;z-index:auto;flex:0 0 auto;white-space:nowrap;display:flex;align-items:center;justify-content:center;min-height:45px;margin:0;font-size:16px;}
+#category-heading-row #category-title{width:auto;flex:1;min-width:0;padding:8px 0;}
+@media(max-width:768px){#category-heading-row{width:calc(100% - 12px);gap:10px;padding:4px 8px;}#category-heading-row .back-home{padding:8px 12px;font-size:14px;min-height:40px;}#category-heading-row #category-title{font-size:18px;}}
+</style>
 </head>
 
 <body>
 
-    <div class="back-home" tabindex="0" role="button" onclick="goHome()">⬅ กลับหน้าหลัก</div>
    <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
@@ -116,13 +123,17 @@ DOOTVZ Clean Start / Remote Smooth / DRM / production Workers unchanged.
   
   
   <div id="category-menu">
+
         <button class="category-btn active" data-group="ดิจิตอล">📺 ดิจิตอล</button>
         <button class="category-btn" data-group="หนัง">🎬 หนัง</button>
         <button class="category-btn" data-group="กีฬา">⚽ กีฬา</button>
         <button class="category-btn" data-group="การ์ตูน">🧸 การ์ตูน</button>
         <button class="category-btn" data-group="ทั้งหมด">⭐ ทั้งหมด</button>
     </div>
-    <div id="category-title">หมวด: ดิจิตอล</div>
+    <div id="category-heading-row">
+      <div class="back-home" tabindex="0" role="button" onclick="goHome()">⬅ กลับหน้าหลัก</div>
+      <div id="category-title">หมวด: ดิจิตอล</div>
+    </div>
     <div id="channel-list"></div>
 
     <script>
@@ -1883,10 +1894,12 @@ console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
   let target=null;
   if(a===home){
    if(['Enter','NumpadEnter',' '].includes(key)){e.preventDefault();e.stopImmediatePropagation();home.click();return;}
-   if(key==='ArrowDown')target=document.querySelector('.category-btn.active')||cats[0];
+   if(key==='ArrowUp')target=document.querySelector('.category-btn.active')||cats[0];
+   else if(key==='ArrowDown')target=nearest(channels(),home);
+   else if(key==='ArrowRight')target=cats[0];
   }else if(ci>=0){
    if(key==='ArrowUp')target=home;
-   else if(key==='ArrowLeft')target=cats[Math.max(0,ci-1)];
+   else if(key==='ArrowLeft')target=ci===0?home:cats[ci-1];
    else if(key==='ArrowRight')target=cats[Math.min(cats.length-1,ci+1)];
    else if(key==='ArrowDown')target=nearest(channels(),a);
   }
