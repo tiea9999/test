@@ -880,16 +880,16 @@
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
             <div class="group-title">ทีวีออนไลน์</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/tv-1/3bb.html">📡 ทีวีออนไลน์</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/test/3bb.html">📡 ทีวีออนไลน์</button>
             <div class="group-title">หนัง</div>
             <button class="menu-btn" data-source="movie-main">🎬 หนังทั้งหมด</button>
             <div class="group-title">ซีรีส์</div>
             <button class="menu-btn" data-source="series-update">🔥 ซีรี่ย์อัพเดทใหม่</button><button class="menu-btn" data-source="series-china">🇨🇳 ซีรี่ย์จีน</button><button class="menu-btn" data-source="series-korea">🇰🇷 ซีรี่ย์เกาหลี</button><button class="menu-btn" data-source="series-thai">🇹🇭 ซีรี่ย์ไทย</button><button class="menu-btn" data-source="series-japan">🇯🇵 ซีรี่ย์ญี่ปุ่น</button><button class="menu-btn"         
 data-source="series-24hd">📺 ซีรีส์ ฝรั่ง</button><button class="menu-btn"            
 data-source="series-short">🎞️ ละครสั้น</button><button class="menu-btn"  
-data-vip-link="https://tiea9999.github.io/tv-1/VIP.html">💎 VIP</button>
+data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
             <div class="group-title">ระบบ</div>
-            <button class="menu-btn" data-link="https://tiea9999.github.io/tv-1/index.html">🏠 HOME จริง</button>
+            <button class="menu-btn" data-link="https://tiea9999.github.io/test/index.html">🏠 HOME จริง</button>
         </aside>
         <main class="main">
             <div class="topbar">
@@ -946,7 +946,7 @@ data-vip-link="https://tiea9999.github.io/tv-1/VIP.html">💎 VIP</button>
         </div>
     </div>
     <script>
-        const HOME_URL='https://tiea9999.github.io/tv-1/index.html',LIVE_URL='https://tiea9999.github.io/tv-1/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
+        const HOME_URL='https://tiea9999.github.io/test/index.html',LIVE_URL='https://tiea9999.github.io/test/live.html',RAW='https://raw.githubusercontent.com/tiea9999/tv-online/main/',PROXY='https://iptv.tawatchai250958.workers.dev/?url=',MOVIE2_PROXY='https://movie2.tawatchai250958.workers.dev/?url=',FOLDER_LOGO='https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54',VIP_PASSWORD='9999';
 
 // Dynamic Provider Engine
 // Resolver ต้องเป็น API/Worker ที่ผู้ใช้ควบคุมและคืน JSON: {"url":"https://...m3u8"}
@@ -961,7 +961,7 @@ const MY_CHINA=RAW+'myseries-china.json',MY_KOREA=RAW+'myseries-korea.json',MY_T
 const TV_LINKS=[
 {kind:'link',title:'LiveDooMovies',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/livedoomovies.html',group:'ทีวีออนไลน์'},
 {kind:'link',title:'ตารางแข่งขัน',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/live.html',group:'ทีวีออนไลน์'},
-{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/tv-1/3bb.html',group:'ทีวีออนไลน์'},
+{kind:'link',title:'3BB IPTV',image:FOLDER_LOGO,url:'https://tiea9999.github.io/test/3bb.html',group:'ทีวีออนไลน์'},
 {kind:'folder',title:'DOOBALL6395',image:FOLDER_LOGO,source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u',group:'ทีวีออนไลน์'}
 ];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'ดูซีรี่ย์จีน',image:FOLDER_LOGO,source:MY_CHINA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์เกาหลี',image:FOLDER_LOGO,source:MY_KOREA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์ไทย',image:FOLDER_LOGO,source:MY_THAI,group:'MySeries'},{kind:'folder',title:'ซีรี่ย์ญี่ปุ่น',image:FOLDER_LOGO,source:MY_JAPAN,group:'MySeries'},{kind:'folder',title:'ดูละครสั้น',image:FOLDER_LOGO,source:MY_SHORT,group:'MySeries'},{kind:'folder',title:'ดูหนังออนไลน์',image:FOLDER_LOGO,source:MY_MOVIE,group:'MySeries'}];
@@ -2345,6 +2345,10 @@ async function playItem(item,serverIndex=0,displayTitle=''){
     candidates=[workerUrlFor(original)];
   }else if(isBcdnUrl(original)){
     // B-CDN short movie: movie2 only, no direct fallback.
+    candidates=[workerUrlFor(original)];
+  }else if((()=>{try{const h=new URL(original).hostname.toLowerCase();return h==='ezycdn.stream'||h.endsWith('.ezycdn.stream')}catch(e){return false}})()){
+    // APP24-compatible route: ezycdn HLS must use the IPTV Worker first.
+    // No generic 037HD referer, no browser-direct fallback.
     candidates=[workerUrlFor(original)];
   }else if(is037HlsUrl(original)){
     // 037HD StreamHLS direct browser request is 403: Worker only, no direct fallback.
