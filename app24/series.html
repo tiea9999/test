@@ -212,9 +212,22 @@
             }
         }
     </style>
+
+<!-- TIEA APP24 VIP GATE TEST V1 -->
+<style>
+ html:not(.tiea-app24-approved) body > :not(#tieaApp24Gate){visibility:hidden!important}
+ #tieaApp24Gate{position:fixed;inset:0;z-index:2147483647;background:#090c12;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font:16px system-ui,Arial,sans-serif}
+ #tieaApp24Gate strong{display:block;color:#ff6a8a;font-size:23px;margin-bottom:12px}
+ html.tiea-app24-approved #tieaApp24Gate{display:none}
+ .tiea-app24-member{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 14px;padding:9px 12px;background:#171c28;border:1px solid #514154;border-radius:12px;font:600 13px system-ui,Arial,sans-serif;color:#fff}
+ .tiea-app24-member small{color:#ffb4c6;font-size:12px;font-weight:400}
+ .tiea-app24-member button{margin-left:auto;background:#812c43;color:white;border:1px solid #a3445c;border-radius:9px;padding:8px 11px;font-weight:700;cursor:pointer}
+ .tiea-app24-member button:focus{outline:3px solid #ff5577}
+</style>
+<script type="module" src="./vip-gate.js"></script>
 </head>
 
-<body>
+<body><div id="tieaApp24Gate"><div><strong>TIEA APP24 VIP</strong><span id="tieaApp24GateText">กำลังตรวจสอบสมาชิก...</span></div></div>
     <header class="top"><a class="back" href="https://tiea9999.github.io/test/app24/index.html">❮
             ย้อนกลับ</a><span class="brand">TIEA <b>APP24</b></span><a class="home"
             href="https://tiea9999.github.io/test/app24/index.html">⌂ HOME</a></header>
