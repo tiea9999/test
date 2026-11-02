@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>TIEA Register</title><style>
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#050505;color:#fff;font-family:Arial,sans-serif;display:flex;align-items:center;justify-content:center;padding:18px}
+.card{width:100%;max-width:440px;background:#111;border:1px solid #333;border-radius:20px;padding:24px;box-shadow:0 0 35px rgba(0,200,255,.13)}
+.logo{text-align:center;font-size:28px;font-weight:900;color:#00e5ff;margin-bottom:8px}.sub{text-align:center;color:#bbb;line-height:1.5;margin-bottom:18px}
+label{display:block;margin:12px 0 6px;font-weight:700}input{width:100%;padding:14px;border-radius:12px;border:1px solid #444;background:#050505;color:#fff;font-size:16px}
+button,.btn{width:100%;display:block;text-align:center;margin-top:14px;padding:14px;border-radius:999px;border:0;background:linear-gradient(90deg,#00c6ff,#0072ff);color:#fff;font-size:16px;font-weight:900;text-decoration:none;cursor:pointer}
+.secondary{background:#222!important;border:1px solid #444}.danger{background:#4b1111!important}.msg{margin-top:14px;text-align:center;color:#ffcc66;white-space:pre-wrap;line-height:1.5}.ok{color:#72ff9a}.bad{color:#ff7676}.small{text-align:center;color:#aaa;margin-top:14px;font-size:13px;line-height:1.5}
+.wrap{max-width:980px;width:100%}.admin-card{max-width:980px}table{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}th,td{border-bottom:1px solid #333;padding:9px;text-align:left}
+.badge{padding:4px 8px;border-radius:999px;font-size:12px;font-weight:900}.vip{background:#124d20;color:#83ff9b}.wait{background:#513b06;color:#ffd36e}
+</style></head><body>
+<div class="card"><div class="logo">สมัครสมาชิก</div><div class="sub">สมัครแล้วรอแอดมินอนุมัติ VIP</div>
+<label>ชื่อ</label><input id="name" placeholder="ชื่อของคุณ"><label>อีเมล</label><input id="email" type="email" placeholder="อีเมล"><label>รหัสผ่าน</label><input id="password" type="password" placeholder="อย่างน้อย 6 ตัว">
+<button onclick="register()">สมัครสมาชิก</button><a class="btn secondary" href="login.html">กลับไปเข้าสู่ระบบ</a><div id="msg" class="msg"></div></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
+const app=initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app),msg=document.getElementById("msg");
+function show(t,ok=false){msg.textContent=t;msg.className=ok?"msg ok":"msg bad"}
+window.register=async()=>{try{const name=document.getElementById("name").value.trim(),email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
+if(!name||!email||!password)return show("กรอกข้อมูลให้ครบ");if(password.length<6)return show("รหัสผ่านอย่างน้อย 6 ตัว");
+const cred=await createUserWithEmailAndPassword(auth,email,password);await updateProfile(cred.user,{displayName:name});
+await setDoc(doc(db,"members",cred.user.uid),{uid:cred.user.uid,name,email,vip:false,active:false,role:"member",createdAt:serverTimestamp(),approvedAt:null,expire:null});
+show("สมัครสำเร็จ รอแอดมินอนุมัติ VIP",true);setTimeout(()=>location.href="waiting.html",1200);}catch(e){console.log(e);show("สมัครไม่สำเร็จ หรืออีเมลนี้ใช้แล้ว");}}
+</script></body></html>
