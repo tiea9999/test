@@ -17,7 +17,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-    <title>TIEA IPTV HOME V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE</title>
+    <title>TIEA IPTV</title>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <script>window.TIEA_HLS_LATEST=window.Hls;</script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js"></script>
@@ -868,7 +868,27 @@
                 grid-template-columns: 1fr
             }
         }
-    </style>
+    
+/* TIEA TEST VIP PRESENTATION PATCH - web only */
+.app {
+  background: linear-gradient(rgba(0,0,0,.83),rgba(0,0,0,.88)), url('https://dl.dropboxusercontent.com/scl/fi/k77ovxc35qm0girjo43mt/logo.png?rlkey=1x7w8nk1fl6gptnt9jiaugt54') center center / min(65vw,650px) auto no-repeat fixed, #050505 !important;
+}
+.main, .content { background:transparent !important; }
+.hero { background:rgba(12,16,19,.80) !important; }
+.status { display:none !important; }
+.topbar { flex-wrap:wrap; }
+.tiea-member-panel {
+  margin-left:auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  background:rgba(12,19,23,.95); border:1px solid #24505b;
+  padding:6px 9px; border-radius:12px; font-size:13px; font-weight:bold;
+}
+.tiea-member-panel small { color:#9fe7ed; font-size:12px; font-weight:normal; }
+.tiea-logout { padding:8px 10px !important; background:#54252b !important; }
+@media(max-width:700px) {
+  .tiea-member-panel { width:100%; margin-left:0; justify-content:space-between; }
+  .app { background-size:75vw auto !important; }
+}
+</style>
 
 <!-- TIEA WEB VIP GATE TEST V1: website /test only; APP24 untouched -->
 <style>
@@ -884,13 +904,26 @@
 </style>
 <script type="module">
 import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
 import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 import { firebaseConfig } from './member/firebase-config.js';
 const LOGIN='./member/login.html', WAIT='./member/waiting.html';
 const gateText = text => {const el=document.getElementById('tieaVipGateText');if(el)el.textContent=text;};
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth=getAuth(app),db=getFirestore(app);
+function showMemberInfo(user, d, exp) {
+  const name=document.getElementById('tieaMemberName');
+  const expiry=document.getElementById('tieaMemberExpiry');
+  const logout=document.getElementById('tieaLogoutBtn');
+  if(name) name.textContent=String(d.name||d.displayName||user.displayName||user.email||'สมาชิก');
+  if(expiry) expiry.textContent=d.role==='admin' ? 'ผู้ดูแลระบบ' :
+    (Number.isFinite(exp) ? 'หมดอายุ '+new Date(exp).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}) : 'ไม่ระบุวันหมดอายุ');
+  if(logout) logout.onclick=async()=>{
+    logout.disabled=true;
+    try { await signOut(auth); location.replace(LOGIN); }
+    catch(e) { console.error(e); alert('ออกจากระบบไม่สำเร็จ กรุณาลองอีกครั้ง'); logout.disabled=false; }
+  };
+}
 function expiryMs(value){
   if(!value)return null;
   if(typeof value.toMillis==='function')return value.toMillis();
@@ -910,6 +943,7 @@ onAuthStateChanged(auth,async user=>{
     const exp=expiryMs(d.expire);
     const validExpiry=exp!==null && Number.isFinite(exp) && exp>Date.now();
     if(admin || (d.vip===true && d.active===true && validExpiry)){
+      showMemberInfo(user,d,exp);
       document.documentElement.classList.add('tiea-vip-approved');
       return;
     }
@@ -927,8 +961,7 @@ onAuthStateChanged(auth,async user=>{
     <!-- BUILD: V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE -->
     <div class="app">
         <aside class="sidebar">
-            <div class="brand">TIEA IPTV<div class="subbrand">HOME V7.2 ALPHA 4.7.5 24HD WORKER 3.8 AUTOPLAY</div>
-            </div>
+            <div class="brand">TIEA IPTV</div>
             <div class="group-title">เมนูหลัก</div>
             <button class="menu-btn active" data-action="home">🏠 หน้าแรก</button>
             <div class="group-title">ทีวีออนไลน์</div>
@@ -946,8 +979,12 @@ data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
         <main class="main">
             <div class="topbar">
                 <button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><button class="top-btn live" id="externalSettingsBtn">⚙ PLAYER</button>
-                <div class="status" id="statusText">พร้อมใช้งาน • MySeries แยกหมวด • fullscreen auto hide no hint + ep
-                    return</div>
+                <div class="status" id="statusText" aria-live="polite">พร้อมใช้งาน</div>
+                <div class="tiea-member-panel" aria-label="ข้อมูลสมาชิก VIP">
+                    <span id="tieaMemberName">สมาชิก</span>
+                    <small id="tieaMemberExpiry">กำลังตรวจสอบ...</small>
+                    <button type="button" id="tieaLogoutBtn" class="top-btn tiea-logout">ออกจากระบบ</button>
+                </div>
             </div>
             <div class="content" id="content"></div>
         </main>
@@ -1324,7 +1361,7 @@ function renderMoviePage(items,label='หนังทั้งหมด'){
 function renderHome(){
 state.activeSource='home';
 setStatus('กำลังโหลดหน้าแรก V7.1...');
-content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV HOME V7.2 ALPHA 2 DYNAMIC PROVIDER ENGINE</div><div class="hero-sub">แก้ GitHub 429 • หนัง/ซีรีส์โหลดผ่านสำรอง • ไม่โหลดทีวีออนไลน์บนหน้าแรก</div></div><div id="homeRows"><div class="empty">กำลังโหลดหนังและซีรีส์...</div></div>`;
+content.innerHTML=`<div class="hero"><div class="hero-title">TIEA IPTV</div><div class="hero-sub">หนัง • ซีรีส์ • ทีวีออนไลน์</div></div><div id="homeRows"><div class="empty">กำลังโหลดหนังและซีรีส์...</div></div>`;
 
 const homeRows=document.getElementById('homeRows');
 
