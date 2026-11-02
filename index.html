@@ -869,9 +869,61 @@
             }
         }
     </style>
+
+<!-- TIEA WEB VIP GATE TEST V1: website /test only; APP24 untouched -->
+<style>
+  html:not(.tiea-vip-approved) .app,
+  html:not(.tiea-vip-approved) .player-panel,
+  html:not(.tiea-vip-approved) .modal,
+  html:not(.tiea-vip-approved) .external-settings-modal { display:none !important; }
+  #tieaVipGate { position:fixed;inset:0;z-index:2147483647;background:#050505;color:white;
+    display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;padding:24px;text-align:center; }
+  html.tiea-vip-approved #tieaVipGate { display:none; }
+  #tieaVipGate div {max-width:440px;line-height:1.65}
+  #tieaVipGate h2 {color:#00d0ff}
+</style>
+<script type="module">
+import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
+import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
+import { firebaseConfig } from './member/firebase-config.js';
+const LOGIN='./member/login.html', WAIT='./member/waiting.html';
+const gateText = text => {const el=document.getElementById('tieaVipGateText');if(el)el.textContent=text;};
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+const auth=getAuth(app),db=getFirestore(app);
+function expiryMs(value){
+  if(!value)return null;
+  if(typeof value.toMillis==='function')return value.toMillis();
+  if(typeof value.seconds==='number')return value.seconds*1000;
+  if(typeof value==='number')return value < 1e11 ? value*1000 : value;
+  if(typeof value==='string'){const n=Date.parse(value);return Number.isFinite(n)?n:NaN;}
+  return NaN;
+}
+onAuthStateChanged(auth,async user=>{
+  if(!user){location.replace(LOGIN);return;}
+  try{
+    gateText('กำลังตรวจสอบสถานะ VIP...');
+    const snap=await getDoc(doc(db,'members',user.uid));
+    if(!snap.exists()){location.replace(WAIT);return;}
+    const d=snap.data();
+    const admin=d.role==='admin';
+    const exp=expiryMs(d.expire);
+    const validExpiry=exp!==null && Number.isFinite(exp) && exp>Date.now();
+    if(admin || (d.vip===true && d.active===true && validExpiry)){
+      document.documentElement.classList.add('tiea-vip-approved');
+      return;
+    }
+    location.replace(WAIT);
+  }catch(err){
+    console.error('TIEA VIP gate error',err);
+    gateText('ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาโหลดหน้าใหม่อีกครั้ง');
+  }
+},err=>{console.error(err);gateText('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่');});
+</script>
 </head>
 
 <body>
+<div id="tieaVipGate"><div><h2>TIEA VIP</h2><p id="tieaVipGateText">กำลังตรวจสอบสมาชิก...</p></div></div>
     <!-- BUILD: V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE -->
     <div class="app">
         <aside class="sidebar">
