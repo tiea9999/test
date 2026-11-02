@@ -6,6 +6,12 @@ import { firebaseConfig } from '../member/firebase-config.js';
 const LOGIN='../member/login.html', WAIT='../member/waiting.html';
 const app=getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth=getAuth(app), db=getFirestore(app);
+// Fail closed: never leave a blank checking screen indefinitely.
+const redirectLogin=()=>location.replace(LOGIN);
+const gateDeadline=setTimeout(()=>{
+ if(!document.documentElement.classList.contains('tiea-app24-approved'))redirectLogin();
+},5000);
+
 const $=id=>document.getElementById(id);
 let currentUser=null, checking=false;
 function gateText(t){if($('tieaApp24GateText'))$('tieaApp24GateText').textContent=t;}
@@ -35,11 +41,12 @@ async function checkMember(user){
   const d=snap.data(), exp=expiryMs(d.expire);
   if(d.role==='admin'||(d.vip===true&&d.active===true&&exp!==null&&Number.isFinite(exp)&&exp>Date.now())){
    memberUI(user,d,exp);
+   clearTimeout(gateDeadline);
    document.documentElement.classList.add('tiea-app24-approved');
   }else{document.documentElement.classList.remove('tiea-app24-approved');location.replace(WAIT);}
  }catch(err){
   console.error('APP24 VIP check failed',err);
-  if(!document.documentElement.classList.contains('tiea-app24-approved'))gateText('ตรวจสอบสมาชิกไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วโหลดหน้าใหม่');
+  if(!document.documentElement.classList.contains('tiea-app24-approved'))redirectLogin();
  }finally{checking=false;}
 }
 onAuthStateChanged(auth,user=>{
@@ -47,6 +54,6 @@ onAuthStateChanged(auth,user=>{
  if(!user){document.documentElement.classList.remove('tiea-app24-approved');location.replace(LOGIN);return;}
  gateText('กำลังตรวจสอบสิทธิ์ VIP...');
  checkMember(user);
-},err=>{console.error(err);gateText('ตรวจสอบการเข้าสู่ระบบไม่สำเร็จ กรุณาโหลดหน้าใหม่');});
+},err=>{console.error(err);redirectLogin();});
 // Recheck when returning to APP24, including after membership changes.
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentUser)checkMember(currentUser);});
