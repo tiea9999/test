@@ -3,7 +3,7 @@ import {initializeApp,getApps,getApp} from 'https://www.gstatic.com/firebasejs/1
 import {getAuth,onAuthStateChanged,signOut} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
 import {getFirestore,doc,getDoc} from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 import {firebaseConfig} from '../member/firebase-config.js';
-const LOGIN='https://tiea9999.github.io/test/member/login.html';
+const LOGIN='https://tiea9999.github.io/test/member/login.html?from=app24';
 const name=document.getElementById('name'),expiry=document.getElementById('expiry'),logout=document.getElementById('logout'),login=document.getElementById('login');
 login.href=LOGIN;
 const app=getApps().length?getApp():initializeApp(firebaseConfig),auth=getAuth(app),db=getFirestore(app);
