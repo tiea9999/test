@@ -3,9 +3,7 @@ import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebase
 import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
 import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
 import { firebaseConfig } from '../member/firebase-config.js';
-// Absolute HTTPS destinations: Android WebView may load APP24 from http://localhost/.
-const LOGIN='https://tiea9999.github.io/test/member/login.html';
-const WAIT='https://tiea9999.github.io/test/member/waiting.html';
+const LOGIN='https://tiea9999.github.io/test/member/login.html?from=app24', WAIT='https://tiea9999.github.io/test/member/waiting.html';
 const app=getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth=getAuth(app), db=getFirestore(app);
 // Fail closed: never leave a blank checking screen indefinitely.
