@@ -2,6 +2,7 @@
 <html lang="th">
 
 <head>
+<!-- APP24 REMOTE V6: restored V2.1 native grid focus; V5 override removed. -->
 <!-- STABLE LOCK 2026-09-26: V0.15R2 confirmed on GitHub Pages. Remote OK + ticket/auth OK + internal player. No DIAG code. -->
 <!-- V0.15R2: REMOTE DIRECT + ORIGINAL V0.12 INTERNAL AUTH. Fix: no second ticket-resolution of signed /watch URL. -->
 <!-- V0.15: TrueSport MAIN only — stability-first baseline HLS profile. No fixed level, no live-edge seek, no watchdog. Google backup/list/DRM/DOOTVZ/Workers unchanged. -->
@@ -1508,7 +1509,21 @@ function setupCategoryMenu(){
   const buttons=Array.from(document.querySelectorAll(".category-btn"));
   buttons.forEach((btn,index)=>{
     btn.onclick=()=>renderCategory(btn.dataset.group);
-
+    // V2.1 stable menu remote behavior: browser handles channel grid natively.
+    btn.onkeydown=e=>{
+      if(e.key==="ArrowRight"){
+        e.preventDefault();e.stopPropagation();
+        buttons[(index+1)%buttons.length].focus();
+      }else if(e.key==="ArrowLeft"){
+        e.preventDefault();e.stopPropagation();
+        buttons[(index-1+buttons.length)%buttons.length].focus();
+      }else if(e.key==="ArrowDown"){
+        e.preventDefault();e.stopPropagation();
+        document.querySelector("#channel-list .channel")?.focus();
+      }else if(e.key==="Enter"||e.key==="OK"||e.key===" "){
+        e.preventDefault();renderCategory(btn.dataset.group);
+      }
+    };
   });
 }
 document.addEventListener("DOMContentLoaded",function(){
@@ -1810,93 +1825,5 @@ console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
 
 
 
-<!-- TIEA APP24 TV REMOTE V4: geometric focus navigation between category bar and channel grid -->
-<style id="tiea-tv-focus-v4-style">
-#channel-list .channel:focus,#category-menu .category-btn:focus,.back-home:focus{
- outline:4px solid #35caff!important;outline-offset:2px!important;
- box-shadow:0 0 0 5px rgba(53,202,255,.18)!important;
- transform:none!important;transition:none!important;
-}
-</style>
-<script id="tiea-tv-focus-v4">
-(function(){
- 'use strict';
- const arrows=['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'];
- const cards=()=>Array.from(document.querySelectorAll('#channel-list .channel'));
- const tabs=()=>Array.from(document.querySelectorAll('#category-menu .category-btn'));
- const home=()=>document.querySelector('.back-home');
- const playerOpen=()=>{const p=document.getElementById('player-container');return !!p&&p.style.display==='block';};
- let lastCardIndex=0;
- function focusOn(el){
-   if(!el)return;
-   try{el.focus({preventScroll:true});}catch(_){el.focus();}
-   // Scroll only after focus is committed. Avoid the browser's native spatial navigation.
-   try{el.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});}catch(_){el.scrollIntoView(false);}
- }
- const center=el=>{const r=el.getBoundingClientRect();return {x:(r.left+r.right)/2,y:(r.top+r.bottom)/2};};
- function nextInGrid(current,key,all){
-   const a=center(current),tol=8;
-   const candidates=all.filter(el=>el!==current).map(el=>({el,p:center(el)}));
-   // On left/right, stay in the same visual row; up/down prefer same visual column.
-   const row=candidates.filter(z=>Math.abs(z.p.y-a.y)<tol);
-   if(key==='ArrowRight')return row.filter(z=>z.p.x>a.x+tol).sort((u,v)=>u.p.x-v.p.x)[0]?.el||null;
-   if(key==='ArrowLeft')return row.filter(z=>z.p.x<a.x-tol).sort((u,v)=>v.p.x-u.p.x)[0]?.el||null;
-   const sign=key==='ArrowDown'?1:-1;
-   const directional=candidates.filter(z=>(z.p.y-a.y)*sign>tol);
-   if(!directional.length)return null;
-   // First choose nearest row, then closest column in that row.
-   const nearest=Math.min(...directional.map(z=>Math.abs(z.p.y-a.y)));
-   return directional.filter(z=>Math.abs(Math.abs(z.p.y-a.y)-nearest)<tol)
-      .sort((u,v)=>Math.abs(u.p.x-a.x)-Math.abs(v.p.x-a.x))[0]?.el||null;
- }
- function nearestCardTo(el,all){
-   if(!all.length)return null;
-   const p=center(el),firstY=Math.min(...all.map(c=>center(c).y));
-   return all.filter(c=>Math.abs(center(c).y-firstY)<8)
-     .sort((a,b)=>Math.abs(center(a).x-p.x)-Math.abs(center(b).x-p.x))[0]||all[0];
- }
- function handle(e){
-   if(playerOpen()||e.altKey||e.ctrlKey||e.metaKey)return;
-   const key=e.key;
-   if(!arrows.includes(key))return;
-   const all=cards(),ts=tabs(),h=home(),active=document.activeElement;
-   const ci=all.indexOf(active),ti=ts.indexOf(active),isHome=active===h;
-   if(ci<0&&ti<0&&!isHome)return;
-   e.preventDefault();e.stopImmediatePropagation();
-   let target=null;
-   if(ci>=0){
-     lastCardIndex=ci;
-     target=nextInGrid(active,key,all);
-     if(!target&&key==='ArrowUp')target=ts.find(t=>t.classList.contains('active'))||ts[0];
-   }else if(ti>=0){
-     if(key==='ArrowLeft')target=ts[ti-1]||h;
-     if(key==='ArrowRight')target=ts[ti+1]||null;
-     if(key==='ArrowDown')target=nearestCardTo(active,all);
-     if(key==='ArrowUp')target=h;
-   }else if(isHome){
-     if(key==='ArrowRight'||key==='ArrowUp')target=ts.find(t=>t.classList.contains('active'))||ts[0];
-     if(key==='ArrowDown')target=all[Math.min(lastCardIndex,all.length-1)]||null;
-   }
-   if(target)focusOn(target);
- }
- document.addEventListener('keydown',handle,true);
- // After switching categories, restore focus to a valid channel instead of a removed DOM node.
- document.addEventListener('click',function(e){
-   const tab=e.target.closest?.('#category-menu .category-btn');
-   if(!tab)return;
-   lastCardIndex=0;
-   if(e.detail===0){ // remote Enter/keyboard click: keep focus on category until Down
-     try{tab.focus({preventScroll:true});}catch(_){tab.focus();}
-   }
- },false);
- // Initial focus only if the browser has no selected control.
- window.addEventListener('load',function(){
-   setTimeout(function(){
-     const a=document.activeElement;
-     if(a===document.body||a===document.documentElement||!a)focusOn(cards()[0]);
-   },180);
- },{once:true});
-})();
-</script>
 </body>
 </html>
