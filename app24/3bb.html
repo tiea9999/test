@@ -1757,48 +1757,45 @@ console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
 </script>
 
 
-<script id="tiea-remote-direct-v015r1">
+<script id="tiea-remote-direct-v016-tv-focus-fix">
 (function(){
   "use strict";
-
-  function items(){ return Array.from(document.querySelectorAll("#channel-list .channel")); }
-  function cols(){
+  const keys={Left:"ArrowLeft",Right:"ArrowRight",Up:"ArrowUp",Down:"ArrowDown"};
+  function channels(){return Array.from(document.querySelectorAll("#channel-list .channel"));}
+  function columns(){
     const list=document.getElementById("channel-list");
-    if(!list) return 1;
-    const n=(getComputedStyle(list).gridTemplateColumns||"").split(" ").filter(Boolean).length;
-    return Math.max(1,n||1);
+    if(!list)return 1;
+    const grid=getComputedStyle(list).gridTemplateColumns;
+    return Math.max(1,grid.split(/\s+/).filter(Boolean).length);
   }
-  function move(a,i){
-    if(!a.length) return;
-    i=Math.max(0,Math.min(a.length-1,i));
-    const el=a[i];
-    try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
+  function focusItem(el){
+    if(!el)return;
+    try{el.focus({preventScroll:true});}catch(_){el.focus();}
+    // Only scroll when necessary; never scroll back to the beginning of the list.
     el.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});
   }
-
-  // One navigation owner only. No 55ms key-drop throttle:
-  // every D-pad key event advances exactly one target from current focus.
   document.addEventListener("keydown",function(e){
+    if(e.altKey||e.ctrlKey||e.metaKey)return;
+    const key=keys[e.key]||e.key;
+    if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(key))return;
     const player=document.getElementById("player-container");
-    if(player && player.style.display==="block") return;
-
+    if(player&&player.style.display==="block")return;
     const active=document.activeElement;
-    if(!active || !active.classList || !active.classList.contains("channel")) return;
-    if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    const a=items(), i=a.indexOf(active), c=cols();
-    if(i<0) return;
-    if(e.key==="ArrowLeft")  move(a,i-1);
-    else if(e.key==="ArrowRight") move(a,i+1);
-    else if(e.key==="ArrowDown") move(a,i+c);
-    else if(e.key==="ArrowUp"){
-      if(i-c>=0) move(a,i-c);
-      else document.querySelector(".category-btn.active")?.focus();
+    if(!active||!active.matches("#channel-list .channel"))return;
+    const a=channels(),i=a.indexOf(active),c=columns();
+    if(i<0)return;
+    // Own channel navigation; block browser/Android native spatial focus.
+    e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();
+    const col=i%c;
+    let next=i;
+    if(key==="ArrowRight"&&col<c-1&&i+1<a.length)next=i+1;
+    else if(key==="ArrowLeft"&&col>0)next=i-1;
+    else if(key==="ArrowDown"&&i+c<a.length)next=i+c;
+    else if(key==="ArrowUp"){
+      if(i-c>=0)next=i-c;
+      else {focusItem(document.querySelector(".category-btn.active"));return;}
     }
+    if(next!==i)focusItem(a[next]);
   },true);
 })();
 </script>
@@ -1856,42 +1853,7 @@ console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
 <style>
 .card:focus-visible,.channel:focus-visible,.card.tiea-remote-focus,.channel.tiea-remote-focus{outline:4px solid #36c9ff!important;outline-offset:3px!important;box-shadow:0 0 0 6px rgba(54,201,255,.22)!important;position:relative;z-index:2}
 </style>
-<script>
-(function(){
-  'use strict';
-  const itemSelector='.card, .channel';
-  const arrows={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1],Left:[-1,0],Right:[1,0],Up:[0,-1],Down:[0,1]};
-  function shown(el){const r=el.getBoundingClientRect(),s=getComputedStyle(el);return r.width>0&&r.height>0&&s.display!=='none'&&s.visibility!=='hidden'&&!el.closest('[hidden],[aria-hidden="true"]');}
-  function center(r){return {x:(r.left+r.right)/2,y:(r.top+r.bottom)/2};}
-  document.addEventListener('keydown',function(e){
-    const dir=arrows[e.key];if(!dir||e.altKey||e.ctrlKey||e.metaKey)return;
-    const active=document.activeElement;
-    if(!active||!active.matches(itemSelector)||!shown(active))return;
-    // Never intercept playback controls, dialogs, or episode selection.
-    if(document.querySelector('#player[style*="display: block"],#player-container[style*="display: block"],#tieaPlayerOverlay.show,.player-panel.show,#playerPanel.show,[role="dialog"][aria-modal="true"]'))return;
-    const parent=active.closest('.grid,#channel-list,.channel-list,.cards,.movie-grid,.poster-grid');
-    if(!parent)return;
-    const items=Array.from(parent.querySelectorAll(itemSelector)).filter(el=>shown(el)&&!el.closest('[aria-hidden="true"]'));
-    if(items.length<2)return;
-    const a=active.getBoundingClientRect(),p=center(a);let best=null,bestScore=Infinity;
-    for(const el of items){if(el===active)continue;
-      const r=el.getBoundingClientRect(),q=center(r),dx=q.x-p.x,dy=q.y-p.y;
-      const primary=dir[0]?dx*dir[0]:dy*dir[1];if(primary<=Math.max(4,(dir[0]?a.width:a.height)*.15))continue;
-      const secondary=dir[0]?Math.abs(dy):Math.abs(dx);
-      const overlap=dir[0]?Math.min(a.bottom,r.bottom)-Math.max(a.top,r.top):Math.min(a.right,r.right)-Math.max(a.left,r.left);
-      // Prioritize a matching row/column; within that lane choose the nearest item.
-      const score=(overlap>0?0:100000)+primary+secondary*4;
-      if(score<bestScore){bestScore=score;best=el;}
-    }
-    if(!best)return;
-    e.preventDefault();e.stopImmediatePropagation();
-    active.classList.remove('tiea-remote-focus');best.classList.add('tiea-remote-focus');
-    try{best.focus({preventScroll:true});}catch(_){best.focus();}
-    best.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
-  },true);
-  document.addEventListener('focusin',function(e){document.querySelectorAll('.tiea-remote-focus').forEach(x=>x.classList.remove('tiea-remote-focus'));if(e.target.matches?.(itemSelector))e.target.classList.add('tiea-remote-focus');});
-})();
-</script>
+<!-- TV REMOTE V1: removed competing geometric channel key handler -->
 
 <!-- APP24 TV V3: keep V1 channel navigation unchanged; deterministic category/home bridge only -->
 <style>.back-home:focus-visible,.back-home:focus{outline:4px solid #36c9ff!important;outline-offset:3px!important;box-shadow:0 0 0 6px rgba(54,201,255,.25)!important}</style>
