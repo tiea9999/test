@@ -2,6 +2,7 @@
 <html lang="th">
 
 <head>
+<!-- APP24 REMOTE V6: restored V2.1 native grid focus; V5 override removed. -->
 <!-- STABLE LOCK 2026-09-26: V0.15R2 confirmed on GitHub Pages. Remote OK + ticket/auth OK + internal player. No DIAG code. -->
 <!-- V0.15R2: REMOTE DIRECT + ORIGINAL V0.12 INTERNAL AUTH. Fix: no second ticket-resolution of signed /watch URL. -->
 <!-- V0.15: TrueSport MAIN only — stability-first baseline HLS profile. No fixed level, no live-edge seek, no watchdog. Google backup/list/DRM/DOOTVZ/Workers unchanged. -->
@@ -87,11 +88,31 @@ DOOTVZ Clean Start / Remote Smooth / DRM / production Workers unchanged.
 .channel img{content-visibility:auto}
 </style>
 
-</head>
+<style id="app24-home-next-to-heading-v5">
+/* HOME on the SAME line as “หมวด: หนัง”, to its far left. */
+#category-menu{justify-content:center;}
+#category-heading-row{width:min(1400px,calc(100% - 24px));display:flex;align-items:center;gap:16px;box-sizing:border-box;padding:4px 12px;}
+#category-heading-row .back-home{position:static;top:auto;left:auto;z-index:auto;flex:0 0 auto;white-space:nowrap;display:flex;align-items:center;justify-content:center;min-height:45px;margin:0;font-size:16px;}
+#category-heading-row #category-title{width:auto;flex:1;min-width:0;padding:8px 0;}
+@media(max-width:768px){#category-heading-row{width:calc(100% - 12px);gap:10px;padding:4px 8px;}#category-heading-row .back-home{padding:8px 12px;font-size:14px;min-height:40px;}#category-heading-row #category-title{font-size:18px;}}
+</style>
 
-<body>
+<!-- TIEA APP24 VIP GATE TEST V1 -->
+<style>
+ html:not(.tiea-app24-approved) body > :not(#tieaApp24Gate){visibility:hidden!important}
+ #tieaApp24Gate{position:fixed;inset:0;z-index:2147483647;background:#090c12;color:#fff;display:flex;align-items:center;justify-content:center;padding:24px;text-align:center;font:16px system-ui,Arial,sans-serif}
+ #tieaApp24Gate strong{display:block;color:#ff6a8a;font-size:23px;margin-bottom:12px}
+ html.tiea-app24-approved #tieaApp24Gate{display:none}
+ .tiea-app24-member{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:8px 0 14px;padding:9px 12px;background:#171c28;border:1px solid #514154;border-radius:12px;font:600 13px system-ui,Arial,sans-serif;color:#fff}
+ .tiea-app24-member small{color:#ffb4c6;font-size:12px;font-weight:400}
+ .tiea-app24-member button{margin-left:auto;background:#812c43;color:white;border:1px solid #a3445c;border-radius:9px;padding:8px 11px;font-weight:700;cursor:pointer}
+ .tiea-app24-member button:focus{outline:3px solid #ff5577}
+</style>
+<script type="module" src="./vip-gate.js"></script>
+<script>(function(){setTimeout(function(){if(!document.documentElement.classList.contains('tiea-app24-approved'))location.replace('../member/login.html');},5500);})();</script></head>
 
-    <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
+<body><div id="tieaApp24Gate"><div><strong>TIEA APP24 VIP</strong><span id="tieaApp24GateText">กำลังตรวจสอบสมาชิก (ไม่เกิน 5 วินาที)...</span><div style="margin-top:20px"><a href="../member/login.html" style="display:inline-block;color:white;background:#b91f40;padding:12px 20px;border-radius:12px;text-decoration:none;font-weight:800">เข้าสู่ระบบทันที</a></div></div></div>
+
    <div id="player-container">
         <div class="player-controls">
             <div class="left-buttons">
@@ -116,13 +137,17 @@ DOOTVZ Clean Start / Remote Smooth / DRM / production Workers unchanged.
   
   
   <div id="category-menu">
+
         <button class="category-btn active" data-group="ดิจิตอล">📺 ดิจิตอล</button>
         <button class="category-btn" data-group="หนัง">🎬 หนัง</button>
         <button class="category-btn" data-group="กีฬา">⚽ กีฬา</button>
         <button class="category-btn" data-group="การ์ตูน">🧸 การ์ตูน</button>
         <button class="category-btn" data-group="ทั้งหมด">⭐ ทั้งหมด</button>
     </div>
-    <div id="category-title">หมวด: ดิจิตอล</div>
+    <div id="category-heading-row">
+      <div class="back-home" tabindex="0" role="button" onclick="goHome()">⬅ กลับหน้าหลัก</div>
+      <div id="category-title">หมวด: ดิจิตอล</div>
+    </div>
     <div id="channel-list"></div>
 
     <script>
@@ -145,7 +170,7 @@ const channels = [
 {name:"MAX5",logo:"https://raw.githubusercontent.com/zaxacaasada/logotv/refs/heads/main/MonomaxSportsTV.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.googlecdnforstreaming.live%2Flive%2Fmonomax-sports5%2Fchunks.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F",drm:false,group:"กีฬา"},
 {name:"MAX6",logo:"https://raw.githubusercontent.com/zaxacaasada/logotv/refs/heads/main/MonomaxSportsTV.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.googlecdnforstreaming.live%2Flive%2Fmonomax-sports6%2Fchunks.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F",drm:false,group:"กีฬา"},
 {name:"MAX7",logo:"https://raw.githubusercontent.com/zaxacaasada/logotv/refs/heads/main/MonomaxSportsTV.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.googlecdnforstreaming.live%2Flive%2Fmonomax-sports7%2Fchunks.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F",drm:false,group:"กีฬา"},
-{name:"MONOMAX1",logo:"https://tse1.mm.bing.net/th/id/OIP.dYVIDHBYvTJLyZ71jgYpGwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=monomax1-2",drm:false,group:"กีฬา"},
+{name:"MONOMAX1",logo:"https://tse1.mm.bing.net/th/id/OIP.dYVIDHBYvTJLyZ71jgYpGwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=monomax1",drm:false,group:"กีฬา"},
 {name:"MONOMAX2",logo:"https://tse1.mm.bing.net/th/id/OIP.dYVIDHBYvTJLyZ71jgYpGwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=monomax2",drm:false,group:"กีฬา"},
 {name:"MONOMAX3",logo:"https://tse1.mm.bing.net/th/id/OIP.dYVIDHBYvTJLyZ71jgYpGwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=monomax3",drm:false,group:"กีฬา"},
 {name:"MONOMAX4",logo:"https://tse1.mm.bing.net/th/id/OIP.dYVIDHBYvTJLyZ71jgYpGwHaHa?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=monomax4",drm:false,group:"กีฬา"},
@@ -183,7 +208,7 @@ const channels = [
 {name:"AIS PLAY 96",logo:"https://tr.play-rfcdn.ais.th/iptvepg/images/poster/20260731134957064655.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=aisplay96",drm:false,group:"กีฬา"},
 {name:"EUROSPORT M-FIXER",logo:"https://tr.play-rfcdn.ais.th/iptvepg/images/poster/20250717161338006023.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=eurosport",drm:false,group:"กีฬา"},
 {name:"REAL MADRID TV M-FIXER",logo:"https://tr.play-rfcdn.ais.th/iptvepg/images/poster/20250814102145019502.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=realmadridtv",drm:false,group:"กีฬา"},
-{name:"mutv",logo:"https://beta.m-fixer.net/uploads/tv_image/mutv.jpg",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.googlecdnforstreaming.live%2Flive%2Fmutv%2Fplaylist.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F",drm:false,group:"กีฬา"},
+
 {name:"MUTV M-FIXER",logo:"https://beta.m-fixer.net/uploads/tv_image/mutv.jpg",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=mutv",drm:false,group:"กีฬา"},
 {name:"lfctv",logo:"https://beta.m-fixer.net/uploads/tv_image/lfc-t6czf365s21e.jpg",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=lfctv",drm:false,group:"กีฬา"},    
 {name:"W-SPORT M-FIXER",logo:"https://tr.play-rfcdn.ais.th/iptvepg/images/poster/20250717135007006041.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=wsport",drm:false,group:"กีฬา"},
@@ -195,14 +220,15 @@ const channels = [
 {name:"Golf 2 HD",logo:"https://6395online.com:8443/logotv/sport/golf2.jpg",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=golf2",drm:false,group:"กีฬา"},
 
 {name:"tennisplus",logo:"https://www.dropbox.com/scl/fi/mi30clmdx4cdycp77gbjh/tennis-plus.jpg?rlkey=vskrs28u16zgl1o3k949897o2&dl=1",file:"https://amg01935-amg01935c1-amgplt0165.playout.now3.amagi.tv/1080p-cc/index.m3u8",drm:false,group:"กีฬา"},
- {name:"True Premier Football 3",logo:"https://beta.m-fixer.net/uploads/tv_image/true-premier-football-3-ss.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.amazaa.live%2Fdbl%2Ftpf3%2Fchunks.m3u8&referer=https%3A%2F%2Fdooballland.com%2F",drm:false,group:"กีฬา"},
-  {name:"True Premier Football 3",logo:"https://beta.m-fixer.net/uploads/tv_image/true-premier-football-3-ss.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truepremierhd3",drm:false,group:"กีฬา"},
+{name:"True Premier Football 3",logo:"https://beta.m-fixer.net/uploads/tv_image/true-premier-football-3-ss.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.amazaa.live%2Fdbl%2Ftpf3%2Fchunks.m3u8&referer=https%3A%2F%2Fdooballland.com%2F",drm:false,group:"กีฬา"},
+{name:"True Premier Football 3",logo:"https://beta.m-fixer.net/uploads/tv_image/true-premier-football-3-ss.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truepremierhd3",drm:false,group:"กีฬา"},
 
-{name:"True Premier Football 4",logo:"https://beta.m-fixer.net/uploads/tv_image/true-premier-football-4-ss.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.amazaa.live%2Fdbl%2Ftpf4%2Fchunks.m3u8&referer=https%3A%2F%2Fdooballland.com%2F",drm:false,group:"กีฬา"},      
+{name:"True Premier Football 4",logo:"https://beta.m-fixer.net/uploads/tv_image/true-premier-football-4-ss.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.amazaa.live%2Fdbl%2Ftpf4%2Fchunks.m3u8&referer=https%3A%2F%2Fdooballland.com%2F",drm:false,group:"กีฬา"},  
 {name:"True Premier Football 4",logo:"https://beta.m-fixer.net/uploads/tv_image/true-premier-football-4-ss.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truepremierhd4",drm:false,group:"กีฬา"},
-      
+
 {name:"True Premier Football 5",logo:"https://beta.m-fixer.net/uploads/tv_image/true-premier-football-5-ss.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.amazaa.live%2Fdbl%2Ftpf5%2Fchunks.m3u8&referer=https%3A%2F%2Fdooballland.com%2F",drm:false,group:"กีฬา"},
 {name:"True Premier Football 5",logo:"https://beta.m-fixer.net/uploads/tv_image/true-premier-football-5-ss.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truepremierhd5",drm:false,group:"กีฬา"},
+
 
 
   
@@ -241,7 +267,7 @@ const channels = [
     
 
 {name:"TrueSport 5",logo:"https://6395online.com:8443/logotv/sport/sd-tsport5.png",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.amazaa.live%2Fdbl%2Ftsp5%2Fplaylist.m3u8&referer=https%3A%2F%2Fdooballland.com%2F",drm:false,group:"กีฬา"},
-{name:"TrueSport 5สำรอง",logo:"https://6395online.com:8443/logotv/sport/sd-tsport5.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truesport5 ",drm:false,group:"กีฬา"},      
+{name:"TrueSport 5สำรอง",logo:"https://6395online.com:8443/logotv/sport/sd-tsport5.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truesport5 ",drm:false,group:"กีฬา"},    
 {name:"TrueSport 5สำรอง",logo:"https://6395online.com:8443/logotv/sport/sd-tsport5.png",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truesport5-2 ",drm:false,group:"กีฬา"},    
 
   
@@ -261,7 +287,7 @@ const channels = [
     
 {name:"NBA TV",logo:"https://beta.m-fixer.net/uploads/tv_image/nba-1.jpg",file:"https://iptv.tawatchai250958.workers.dev/?url=https%3A%2F%2Fcdn1.googlecdnforstreaming.live%2Flive%2Fnba%2Fchunks.m3u8&referer=https%3A%2F%2Fwarpdooball.net%2F",drm:false,group:"กีฬา"},       
 
-{name:"fifa-plus",logo:"https://beta.m-fixer.net/uploads/tv_image/fifa-women-yg0579cgw301.png",file:"https://a62dad94.wurl.com/manifest/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/e4b5d05f-bf1a-4221-a7dc-764f8522751b/1.m3u8",drm:false,group:"กีฬา"},
+{name:"fifa-plus",logo:"https://beta.m-fixer.net/uploads/tv_image/fifa-women-yg0579cgw301.png",file:"https://a62dad94.wurl.com/manifest/f36d25e7e52f1ba8d7e56eb859c636563214f541/UmFrdXRlblRWLWV1X0ZJRkFQbHVzRW5nbGlzaF9ITFM/9550d011-8344-4549-b114-9d1566612567/2.m3u8",drm:false,group:"กีฬา"},
 {name:"NBC Sports NOW",logo:"https://nbcsports.brightspotcdn.com/dims4/default/0557931/2147483647/strip/true/crop/3840x2160+0+0/resize/1440x810!/quality/90/?url=https%3A%2F%2Fnbc-sports-production-nbc-sports.s3.us-east-1.amazonaws.com%2Fbrightspot%2Fe4%2F17%2F4c61949740dd9e7b329afdb62f69%2Fnbcsnow-3840x2160.jpg",file:"https://d4whmvwm0rdvi.cloudfront.net/10007/99993008/hls/master.m3u8?ads.xumo_channelId=99993008",drm:false,group:"กีฬา"},
 {name:"TUDN USA",logo:"https://cdn.i.haymarketmedia.asia/?n=campaign-asia%2Fcontent%2FTraceSports.jpg&h=570&w=855&q=100&v=20250320&c=1",file:"https://lightning-tracesport-samsungau.amagi.tv/playlist1080p.m3u8",drm:false,group:"กีฬา"},
 {name:"BEIN SPORTS XTRA",logo:"https://static.wikia.nocookie.net/logopedia/images/b/b6/Xtra.png",file:"https://amg01334-beinsportsllc-beinxtra-localnow-kcy6r.amagi.tv/playlist.m3u8",drm:false,group:"กีฬา"},
@@ -289,8 +315,8 @@ const channels = [
 {name:"TRUE Thai Film ",logo:"https://6395online.com:8443/logotv/movie/sd-thaifilm.png",group:"หนัง",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truethaifilm",drm:false},
 {name:"TRUE Thai Film สำรอง",logo:"https://6395online.com:8443/logotv/movie/sd-thaifilm.png",group:"หนัง",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=truethaifilm-2",drm:false},
 
-
 {name:"ccm",logo:"https://6395online.com:8443/logotv/movie/ccm.png",group:"หนัง",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=ccm",drm:false},
+{name:"ccm",logo:"https://6395online.com:8443/logotv/movie/ccm.png",group:"หนัง",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=ccm2",drm:false},
 
 {name:"AXN",logo:"https://6395online.com:8443/logotv/movie/hd-axn.png",group:"หนัง",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=axn",drm:false},
 {name:"AXNสำรอง",logo:"https://6395online.com:8443/logotv/movie/hd-axn.png",group:"หนัง",file:"https://movieproxy.tawatchai250958.workers.dev/watch?id=axn2",drm:false},
@@ -1424,7 +1450,7 @@ async function closePlayer(){
 }
 
 function goHome(){
-  window.location.href = "https://tiea9999.github.io/test/app24/index.html";
+  window.location.href = "https://tiea9999.github.io/test/index.html";
 }
 
 document.addEventListener("keydown",function(e){
@@ -1468,17 +1494,35 @@ function renderCategory(group){
     div.onkeydown=e=>{if(e.key==="Enter"||e.key==="OK"||e.key===" "){e.preventDefault();loadChannel(ch,div);}};
     listContainer.appendChild(div);
   });
-  setTimeout(()=>listContainer.querySelector(".channel")?.focus(),100);
+  // Focus the first channel only on initial entry; never reset an existing channel selection.
+  if (!window.__tieaRemoteInitialized) {
+    window.__tieaRemoteInitialized = true;
+    setTimeout(()=>{
+      const focused=document.activeElement;
+      if(focused===document.body || focused===document.documentElement || !focused) {
+        listContainer.querySelector('.channel')?.focus({preventScroll:true});
+      }
+    },100);
+  }
 }
 function setupCategoryMenu(){
   const buttons=Array.from(document.querySelectorAll(".category-btn"));
   buttons.forEach((btn,index)=>{
     btn.onclick=()=>renderCategory(btn.dataset.group);
+    // V2.1 stable menu remote behavior: browser handles channel grid natively.
     btn.onkeydown=e=>{
-      if(e.key==="ArrowRight"){e.preventDefault();buttons[(index+1)%buttons.length].focus();}
-      else if(e.key==="ArrowLeft"){e.preventDefault();buttons[(index-1+buttons.length)%buttons.length].focus();}
-      else if(e.key==="ArrowDown"){e.preventDefault();document.querySelector(".channel")?.focus();}
-      else if(e.key==="Enter"||e.key==="OK"||e.key===" "){e.preventDefault();renderCategory(btn.dataset.group);}
+      if(e.key==="ArrowRight"){
+        e.preventDefault();e.stopPropagation();
+        buttons[(index+1)%buttons.length].focus();
+      }else if(e.key==="ArrowLeft"){
+        e.preventDefault();e.stopPropagation();
+        buttons[(index-1+buttons.length)%buttons.length].focus();
+      }else if(e.key==="ArrowDown"){
+        e.preventDefault();e.stopPropagation();
+        document.querySelector("#channel-list .channel")?.focus();
+      }else if(e.key==="Enter"||e.key==="OK"||e.key===" "){
+        e.preventDefault();renderCategory(btn.dataset.group);
+      }
     };
   });
 }
@@ -1732,53 +1776,6 @@ console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
 </script>
 
 
-<script id="tiea-remote-direct-v015r1">
-(function(){
-  "use strict";
-
-  function items(){ return Array.from(document.querySelectorAll("#channel-list .channel")); }
-  function cols(){
-    const list=document.getElementById("channel-list");
-    if(!list) return 1;
-    const n=(getComputedStyle(list).gridTemplateColumns||"").split(" ").filter(Boolean).length;
-    return Math.max(1,n||1);
-  }
-  function move(a,i){
-    if(!a.length) return;
-    i=Math.max(0,Math.min(a.length-1,i));
-    const el=a[i];
-    try{ el.focus({preventScroll:true}); }catch(e){ el.focus(); }
-    el.scrollIntoView({block:"nearest",inline:"nearest",behavior:"auto"});
-  }
-
-  // One navigation owner only. No 55ms key-drop throttle:
-  // every D-pad key event advances exactly one target from current focus.
-  document.addEventListener("keydown",function(e){
-    const player=document.getElementById("player-container");
-    if(player && player.style.display==="block") return;
-
-    const active=document.activeElement;
-    if(!active || !active.classList || !active.classList.contains("channel")) return;
-    if(!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown"].includes(e.key)) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    const a=items(), i=a.indexOf(active), c=cols();
-    if(i<0) return;
-    if(e.key==="ArrowLeft")  move(a,i-1);
-    else if(e.key==="ArrowRight") move(a,i+1);
-    else if(e.key==="ArrowDown") move(a,i+c);
-    else if(e.key==="ArrowUp"){
-      if(i-c>=0) move(a,i-c);
-      else document.querySelector(".category-btn.active")?.focus();
-    }
-  },true);
-})();
-</script>
-
-
 <script id="tiea-dootvz-clean-start-v011">
 (function(){
   "use strict";
@@ -1825,6 +1822,7 @@ console.log("TIEA PROJECTOR SPORT BUFFER FIX 20260927 loaded");
   };
 })();
 </script>
+
 
 
 </body>
