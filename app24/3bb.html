@@ -88,13 +88,9 @@ DOOTVZ Clean Start / Remote Smooth / DRM / production Workers unchanged.
 .channel img{content-visibility:auto}
 </style>
 
-<style id="app24-home-next-to-heading-v5">
-/* HOME on the SAME line as “หมวด: หนัง”, to its far left. */
-#category-menu{justify-content:center;}
-#category-heading-row{width:min(1400px,calc(100% - 24px));display:flex;align-items:center;gap:16px;box-sizing:border-box;padding:4px 12px;}
-#category-heading-row .back-home{position:static;top:auto;left:auto;z-index:auto;flex:0 0 auto;white-space:nowrap;display:flex;align-items:center;justify-content:center;min-height:45px;margin:0;font-size:16px;}
-#category-heading-row #category-title{width:auto;flex:1;min-width:0;padding:8px 0;}
-@media(max-width:768px){#category-heading-row{width:calc(100% - 12px);gap:10px;padding:4px 8px;}#category-heading-row .back-home{padding:8px 12px;font-size:14px;min-height:40px;}#category-heading-row #category-title{font-size:18px;}}
+<style id="app24-home-original-position-v7">
+/* Restore original stable HOME placement: top-left, outside channel grid navigation. */
+.back-home{position:fixed;top:15px;left:15px;z-index:9999;}
 </style>
 
 <!-- TIEA APP24 VIP GATE TEST V1 -->
@@ -144,10 +140,8 @@ DOOTVZ Clean Start / Remote Smooth / DRM / production Workers unchanged.
         <button class="category-btn" data-group="การ์ตูน">🧸 การ์ตูน</button>
         <button class="category-btn" data-group="ทั้งหมด">⭐ ทั้งหมด</button>
     </div>
-    <div id="category-heading-row">
-      <div class="back-home" tabindex="0" role="button" onclick="goHome()">⬅ กลับหน้าหลัก</div>
-      <div id="category-title">หมวด: ดิจิตอล</div>
-    </div>
+    <div class="back-home" onclick="goHome()">⬅ กลับหน้าหลัก</div>
+    <div id="category-title">หมวด: ดิจิตอล</div>
     <div id="channel-list"></div>
 
     <script>
