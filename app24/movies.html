@@ -1224,7 +1224,7 @@ function movieYearOf(item){
 }
 
 function renderMoviePage(items,label='หนังทั้งหมด'){
-  // APP24: display lightweight year folders first, not thousands of posters.
+  // APP24: show a 20-poster preview for each year, with See All for the full year.
   items=(items||[]).filter(Boolean);
   state.activeSource='movie-main';
   const yearMap={};
@@ -1240,30 +1240,30 @@ function renderMoviePage(items,label='หนังทั้งหมด'){
     return;
   }
   content.innerHTML='';
-  const hero=document.createElement('div');
-  hero.className='hero';
-  hero.innerHTML='<div class="hero-title">🎬 เลือกหมวดหนัง</div><div class="hero-sub">เลือกปีที่ต้องการก่อนแสดงโปสเตอร์ • แหล่งหนัง 123HD</div>';
+  const hero=document.createElement('div');hero.className='hero';
+  hero.innerHTML='<div class="hero-title">🎬 หนังทั้งหมด</div><div class="hero-sub">แสดงโปสเตอร์ปีละ 20 เรื่อง • กดดูทั้งหมดเพื่อเลือกหนังเพิ่มเติม • แหล่งหนัง 123HD</div>';
   content.appendChild(hero);
-  const grid=document.createElement('div');
-  grid.className='grid';
-  grid.style.gridTemplateColumns='repeat(auto-fill,minmax(180px,1fr))';
-  function folder(title,count,callback){
-    const btn=document.createElement('button');
-    btn.type='button';btn.className='menu-btn';
-    btn.style.cssText='min-height:110px;text-align:center;font-size:20px';
-    const heading=document.createElement('div');heading.textContent=title;
-    const total=document.createElement('div');total.style.cssText='font-size:13px;color:#9deeff;margin-top:10px';total.textContent=count+' รายการ';
-    btn.append(heading,total);btn.onclick=callback;grid.appendChild(btn);
-  }
-  folder('🎬 หนังทั้งหมด',items.length,()=>showMovieYear('',items));
-  years.forEach(y=>folder(y==='ไม่ระบุปี'?'🎞️ ไม่ระบุปี':'🎞️ หนังปี '+y,yearMap[y].length,()=>showMovieYear(y,yearMap[y])));
-  content.appendChild(grid);
-  setStatus('พร้อมใช้งาน • เลือกหมวดหนัง');
+  const sectionFor=(title,arr,year)=>{
+    const sec=document.createElement('div');sec.className='section';
+    const head=document.createElement('div');head.className='section-head';
+    const name=document.createElement('div');name.className='section-title';name.textContent=title;
+    const tools=document.createElement('div');tools.className='section-tools';
+    const count=document.createElement('span');count.className='badge';count.textContent=arr.length+' รายการ';
+    const more=document.createElement('button');more.className='see-all-btn';more.type='button';more.textContent='ดูทั้งหมด';
+    more.onclick=()=>showMovieYear(year,arr);
+    tools.append(count,more);head.append(name,tools);
+    const row=document.createElement('div');row.className='row';
+    arr.slice(0,20).forEach(item=>row.appendChild(createCard(item)));
+    sec.append(head,row);content.appendChild(sec);
+  };
+  years.forEach(y=>sectionFor(y==='ไม่ระบุปี'?'หนังไม่ระบุปี':'หนังปี '+y,yearMap[y],y));
+  if(!years.length)content.innerHTML='<div class="hero"><div class="hero-title">ไม่พบรายการหนัง</div></div>';
+  setStatus('พร้อมใช้งาน • หนัง '+items.length+' รายการ');
 }
 function showMovieYear(year,items){
   content.innerHTML='';
   const hero=document.createElement('div');hero.className='hero';
-  const back=document.createElement('button');back.type='button';back.className='top-btn home';back.textContent='◀ เลือกปี';
+  const back=document.createElement('button');back.type='button';back.className='top-btn home';back.textContent='◀ กลับหมวดหนัง';
   back.onclick=()=>renderMoviePage(state.rows[0].items);
   const title=document.createElement('div');title.className='hero-title';title.style.marginTop='12px';
   title.textContent=year?(year==='ไม่ระบุปี'?'หนังไม่ระบุปี':'หนังปี '+year):'หนังทั้งหมด';
@@ -1272,7 +1272,7 @@ function showMovieYear(year,items){
   const sec=document.createElement('div');sec.className='section';
   sec.innerHTML='<div class="section-head"><div class="section-title">รายการหนัง</div><div class="section-tools"><button class="see-all-btn">ดูทั้งหมด</button></div></div><div class="grid"></div>';
   const grid=sec.querySelector('.grid');
-  items.slice(0,30).forEach(item=>grid.appendChild(createCard(item)));
+  items.slice(0,20).forEach(item=>grid.appendChild(createCard(item)));
   sec.querySelector('.see-all-btn').onclick=()=>openModal(title.textContent,items);
   content.appendChild(sec);
   setStatus('พร้อมใช้งาน • '+items.length+' รายการ');
