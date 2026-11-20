@@ -877,88 +877,19 @@
 .hero { background:rgba(12,16,19,.80) !important; }
 .status { display:none !important; }
 .topbar { flex-wrap:wrap; }
-.tiea-member-panel {
-  margin-left:auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  background:rgba(12,19,23,.95); border:1px solid #24505b;
-  padding:6px 9px; border-radius:12px; font-size:13px; font-weight:bold;
-}
-.tiea-member-panel small { color:#9fe7ed; font-size:12px; font-weight:normal; }
-.tiea-logout { padding:8px 10px !important; background:#54252b !important; }
+
+
+
 @media(max-width:700px) {
-  .tiea-member-panel { width:100%; margin-left:0; justify-content:space-between; }
+  
   .app { background-size:75vw auto !important; }
 }
 </style>
 
-<!-- TIEA WEB VIP GATE TEST V1: website /test only; APP24 untouched -->
-<style>
-  html:not(.tiea-vip-approved) .app,
-  html:not(.tiea-vip-approved) .player-panel,
-  html:not(.tiea-vip-approved) .modal,
-  html:not(.tiea-vip-approved) .external-settings-modal { display:none !important; }
-  #tieaVipGate { position:fixed;inset:0;z-index:2147483647;background:#050505;color:white;
-    display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif;padding:24px;text-align:center; }
-  html.tiea-vip-approved #tieaVipGate { display:none; }
-  #tieaVipGate div {max-width:440px;line-height:1.65}
-  #tieaVipGate h2 {color:#00d0ff}
-</style>
-<script type="module">
-import { initializeApp, getApps, getApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
-import { getAuth, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
-import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js';
-import { firebaseConfig } from './member/firebase-config.js';
-const LOGIN='./member/login.html', WAIT='./member/waiting.html';
-const gateText = text => {const el=document.getElementById('tieaVipGateText');if(el)el.textContent=text;};
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-const auth=getAuth(app),db=getFirestore(app);
-function showMemberInfo(user, d, exp) {
-  const name=document.getElementById('tieaMemberName');
-  const expiry=document.getElementById('tieaMemberExpiry');
-  const logout=document.getElementById('tieaLogoutBtn');
-  if(name) name.textContent=String(d.name||d.displayName||user.displayName||user.email||'สมาชิก');
-  if(expiry) expiry.textContent=d.role==='admin' ? 'ผู้ดูแลระบบ' :
-    (Number.isFinite(exp) ? 'หมดอายุ '+new Date(exp).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'numeric'}) : 'ไม่ระบุวันหมดอายุ');
-  if(logout) logout.onclick=async()=>{
-    logout.disabled=true;
-    try { await signOut(auth); location.replace(LOGIN); }
-    catch(e) { console.error(e); alert('ออกจากระบบไม่สำเร็จ กรุณาลองอีกครั้ง'); logout.disabled=false; }
-  };
-}
-function expiryMs(value){
-  if(!value)return null;
-  if(typeof value.toMillis==='function')return value.toMillis();
-  if(typeof value.seconds==='number')return value.seconds*1000;
-  if(typeof value==='number')return value < 1e11 ? value*1000 : value;
-  if(typeof value==='string'){const n=Date.parse(value);return Number.isFinite(n)?n:NaN;}
-  return NaN;
-}
-onAuthStateChanged(auth,async user=>{
-  if(!user){location.replace(LOGIN);return;}
-  try{
-    gateText('กำลังตรวจสอบสถานะ VIP...');
-    const snap=await getDoc(doc(db,'members',user.uid));
-    if(!snap.exists()){location.replace(WAIT);return;}
-    const d=snap.data();
-    const admin=d.role==='admin';
-    const exp=expiryMs(d.expire);
-    const validExpiry=exp!==null && Number.isFinite(exp) && exp>Date.now();
-    if(admin || (d.vip===true && d.active===true && validExpiry)){
-      showMemberInfo(user,d,exp);
-      document.documentElement.classList.add('tiea-vip-approved');
-      return;
-    }
-    location.replace(WAIT);
-  }catch(err){
-    console.error('TIEA VIP gate error',err);
-    gateText('ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาโหลดหน้าใหม่อีกครั้ง');
-  }
-},err=>{console.error(err);gateText('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่');});
-</script>
 <style id="vip-auth-style">html:not(.vip-auth-ok) body> :not(#vipAuthGate):not(script){visibility:hidden!important}#vipAuthGate{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:#0a0c13;color:#fff;font:16px system-ui,Arial;padding:24px;text-align:center}#vipAuthGate[hidden],#vipMemberInfo[hidden]{display:none!important}#vipAuthGate .inner{max-width:460px}#vipAuthGate a,#vipAuthGate button,#vipMemberLogout{background:#b91f40;border:0;border-radius:9px;color:#fff;padding:10px 15px;font-weight:700;text-decoration:none;cursor:pointer}#vipAuthGate a[hidden],#vipAuthGate button[hidden]{display:none!important}#vipMemberInfo{margin:10px auto;max-width:1050px;padding:10px 14px;background:#19212b;border-radius:10px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}</style></head>
 
 <body><div id="vipAuthGate" role="status"><div class="inner"><h2>ตรวจสอบสมาชิก VIP</h2><p id="vipAuthMessage">กำลังตรวจสอบสมาชิก...</p><a id="vipAuthAction" hidden href="../member/login.html?from=app24">เข้าสู่ระบบ</a> <button id="vipAuthRetry" hidden type="button">ลองใหม่</button></div></div><div id="vipMemberInfo" hidden><div><strong id="vipMemberName"></strong><div id="vipMemberExpiry"></div></div><button id="vipMemberLogout" type="button">ออกจากระบบ</button></div><script type="module" src="vip-access.js"></script>
-<div id="tieaVipGate"><div><h2>TIEA VIP</h2><p id="tieaVipGateText">กำลังตรวจสอบสมาชิก...</p></div></div>
-    <!-- BUILD: V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE -->
+<!-- BUILD: V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE -->
     <div class="app">
         <aside class="sidebar">
             <div class="brand">TIEA IPTV</div>
@@ -980,11 +911,6 @@ data-vip-link="https://tiea9999.github.io/test/VIP.html">💎 VIP</button>
             <div class="topbar">
                 <button class="top-btn home" id="homeBtn">🏠 HOME</button><button class="top-btn reload" id="reloadBtn">⟳ โหลดใหม่</button><button class="top-btn live" id="externalSettingsBtn">⚙ PLAYER</button>
                 <div class="status" id="statusText" aria-live="polite">พร้อมใช้งาน</div>
-                <div class="tiea-member-panel" aria-label="ข้อมูลสมาชิก VIP">
-                    <span id="tieaMemberName">สมาชิก</span>
-                    <small id="tieaMemberExpiry">กำลังตรวจสอบ...</small>
-                    <button type="button" id="tieaLogoutBtn" class="top-btn tiea-logout">ออกจากระบบ</button>
-                </div>
             </div>
             <div class="content" id="content"></div>
         </main>
