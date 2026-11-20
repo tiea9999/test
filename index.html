@@ -1054,18 +1054,7 @@ const TV_LINKS=[
 {kind:'folder',title:'DOOBALL6395',image:FOLDER_LOGO,source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u',group:'ทีวีออนไลน์'}
 ];
 const MYSERIES_FOLDERS=[{kind:'folder',title:'ดูซีรี่ย์จีน',image:FOLDER_LOGO,source:MY_CHINA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์เกาหลี',image:FOLDER_LOGO,source:MY_KOREA,group:'MySeries'},{kind:'folder',title:'ดูซีรี่ย์ไทย',image:FOLDER_LOGO,source:MY_THAI,group:'MySeries'},{kind:'folder',title:'ซีรี่ย์ญี่ปุ่น',image:FOLDER_LOGO,source:MY_JAPAN,group:'MySeries'},{kind:'folder',title:'ดูละครสั้น',image:FOLDER_LOGO,source:MY_SHORT,group:'MySeries'},{kind:'folder',title:'ดูหนังออนไลน์',image:FOLDER_LOGO,source:MY_MOVIE,group:'MySeries'}];
-const SOURCES={'tv-6395':[{title:'DooBall6395',source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u'}],'movie-main':[
-  {title:'หนังใหม่ ',source:'https://raw.githubusercontent.com/tiea9999/123HD/refs/heads/main/123-movie_m3u8'},
-  {title:'หนังใหม่ 2026',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%882026.json'},
-  {title:'หนังใหม่ 2025',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%83%E0%B8%AB%E0%B8%A1%E0%B9%88%202025.json'},
-  {title:'Netflix',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/Netflix.json'},
-  {title:'หนังฝรั่ง',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B8%9D%E0%B8%A3%E0%B8%B1%E0%B9%88%E0%B8%87.json'},
-  {title:'หนังเอเชีย',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%80%E0%B8%AD%E0%B9%80%E0%B8%8A%E0%B8%B5%E0%B8%A2.json'},
-  {title:'หนังไทย',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B9%84%E0%B8%97%E0%B8%A2.json'},
-  {title:'หนังการ์ตูน',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%8C%E0%B8%95%E0%B8%B9%E0%B8%99.json'},
-  {title:'หนัง 18+',source:'https://raw.githubusercontent.com/tiea9999/037hd/refs/heads/main/json/%E0%B8%AB%E0%B8%99%E0%B8%B1%E0%B8%87%2018%2B.json'}
-
-],
+const SOURCES={'tv-6395':[{title:'DooBall6395',source:'https://raw.githubusercontent.com/tiea9999/GODTV/refs/heads/main/M3U/playlist_mrpoogapooga.m3u'}],'movie-main':[{title:'หนัง 123HD',source:'https://raw.githubusercontent.com/tiea9999/123HD/refs/heads/main/123-movie_m3u8'}],
 'movie-24hd':[{title:'หนัง 24HD',source:RAW+'movie24hd.json'}],'series-main':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA},{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ดูซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ดูละครสั้น',source:MY_SHORT},{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-update':[{title:'ซีรี่ย์จีน',source:MY_CHINA},{title:'ซีรี่ย์เกาหลี',source:MY_KOREA},{title:'ซีรี่ย์ไทย',source:MY_THAI},{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN},{title:'ซีรี่ย์สั้น',source:MY_SHORT}],'series-china':[{title:'ดูซีรี่ย์จีน',source:MY_CHINA}],'series-korea':[{title:'ดูซีรี่ย์เกาหลี',source:MY_KOREA}],'series-thai':[{title:'ดูซีรี่ย์ไทย',source:MY_THAI}],'series-japan':[{title:'ซีรี่ย์ญี่ปุ่น',source:MY_JAPAN}],'series-short':[{title:'ดูละครสั้น',source:MY_SHORT}],'series-movie':[{title:'ดูหนังออนไลน์',source:MY_MOVIE}],'series-24hd':[{title:'Series 24HD',source:RAW+'series24hd.json'}]};
 const state={rows:[],modalItems:[],page:1,perPage:30,activeSource:null,currentUrl:'',currentTitle:'',originalUrl:'',hls:null,dash:null,playTimer:null,preloaded:{},watchdog:null,lastTime:0,stuckCount:0,recoverCount:0,lastRecoverAt:0,cache:{},returnEpisodeItem:null};
 const $=id=>document.getElementById(id),content=$('content'),statusText=$('statusText'),video=$('video'),playerPanel=$('playerPanel'),native24Frame=$('native24Frame');
@@ -1173,36 +1162,17 @@ async function fetchText(url){
   }
 }
 async function loadUrl(url,parent=''){let text=await fetchText(url),trim=text.trim();if(trim.startsWith('{')||trim.startsWith('['))return normalize(JSON.parse(text),parent);if(trim.includes('#EXTM3U')||trim.includes('#EXTINF'))return parseM3U(text,parent);return[]}
-// TIEA MOVIE JSON CENTER V1: existing 8 feeds remain unchanged.
-const TIEA_MOVIE_ALL_JSON='https://raw.githubusercontent.com/tiea9999/037hd/main/json/'+encodeURIComponent('หนังทั้งหมด.json');
-function tieaMovieKey(item){
-  const title=String(item?.title||'').trim().toLowerCase().replace(/\s+/g,' ');
-  return title || String(item?.servers?.[0]?.url||'').trim().toLowerCase();
-}
-function tieaMovieMerge(newItems,oldItems){
-  const seen=new Set(),out=[];
-  for(const item of [...newItems,...oldItems]){
-    if(!item || item.kind==='folder')continue;
-    const key=tieaMovieKey(item);
-    if(!key||seen.has(key))continue;
-    seen.add(key);out.push(item);
-  }
-  return out;
-}
+// TIEA MOVIE 123HD ONLY: no dependency on 037HD JSON.
 async function loadSourcePack(key){
   if(key==='tv-main')return TV_LINKS;
   const pack=SOURCES[key]||[],all=[];
-  if(key==='movie-main'){
-    // New entries are appended at the end of the central JSON; show them first.
-    let fresh=[];
-    try{fresh=(await loadUrl(TIEA_MOVIE_ALL_JSON,'หนังทั้งหมด')).reverse();}
-    catch(e){console.warn('Central movie JSON unavailable; keeping old feeds',e);}
-    for(const src of pack){try{all.push(...await loadUrl(src.source,src.title))}catch(e){console.log('โหลดไม่ได้',src.source,e)}}
-    return tieaMovieMerge(fresh,all);
+  for(const src of pack){
+    try{all.push(...await loadUrl(src.source,src.title))}
+    catch(e){console.log('โหลดไม่ได้',src.source,e)}
   }
-  for(const src of pack){try{all.push(...await loadUrl(src.source,src.title))}catch(e){console.log('โหลดไม่ได้',src.source,e)}}
   return all;
 }
+
 async function loadFolder(item){state.activeSource='folder:'+item.title;setStatus('กำลังโหลด '+item.title+' ...');try{let items=await loadUrl(item.source,item.title);renderRows(makeRows(items),item.title);setStatus(items.length?'โหลด '+item.title+' สำเร็จ '+items.length+' รายการ':'โหลด '+item.title+' ได้ 0 รายการ')}catch(e){setStatus('โหลดไม่สำเร็จ '+e.message)}}
 
 function getUpdateTime(item){
@@ -1316,7 +1286,7 @@ function renderMoviePage(items,label='หนังทั้งหมด'){
 
   let hero=document.createElement('div');
   hero.className='hero';
-  hero.innerHTML='<div class="hero-title">🎬 หนังทั้งหมด</div><div class="hero-sub">รวมหนังทุกหมวดทุกปี • เลื่อนลงเพื่อดูแยกตามปี</div>';
+  hero.innerHTML='<div class="hero-title">🎬 หนังทั้งหมด</div><div class="hero-sub">รายการจาก 123HD • แยกปีจากชื่อหนัง (ถ้ามีปีระบุ)</div>';
   content.appendChild(hero);
 
   // แถวรวมทุกเรื่องก่อน
