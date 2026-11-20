@@ -886,7 +886,25 @@
 }
 </style>
 
-<style id="vip-auth-style">html:not(.vip-auth-ok) body> :not(#vipAuthGate):not(script){visibility:hidden!important}#vipAuthGate{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:#0a0c13;color:#fff;font:16px system-ui,Arial;padding:24px;text-align:center}#vipAuthGate[hidden],#vipMemberInfo[hidden]{display:none!important}#vipAuthGate .inner{max-width:460px}#vipAuthGate a,#vipAuthGate button,#vipMemberLogout{background:#b91f40;border:0;border-radius:9px;color:#fff;padding:10px 15px;font-weight:700;text-decoration:none;cursor:pointer}#vipAuthGate a[hidden],#vipAuthGate button[hidden]{display:none!important}#vipMemberInfo{margin:10px auto;max-width:1050px;padding:10px 14px;background:#19212b;border-radius:10px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}</style></head>
+<style id="vip-auth-style">html:not(.vip-auth-ok) body> :not(#vipAuthGate):not(script){visibility:hidden!important}#vipAuthGate{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:#0a0c13;color:#fff;font:16px system-ui,Arial;padding:24px;text-align:center}#vipAuthGate[hidden],#vipMemberInfo[hidden]{display:none!important}#vipAuthGate .inner{max-width:460px}#vipAuthGate a,#vipAuthGate button,#vipMemberLogout{background:#b91f40;border:0;border-radius:9px;color:#fff;padding:10px 15px;font-weight:700;text-decoration:none;cursor:pointer}#vipAuthGate a[hidden],#vipAuthGate button[hidden]{display:none!important}#vipMemberInfo{margin:10px auto;max-width:1050px;padding:10px 14px;background:#19212b;border-radius:10px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}</style>
+<!-- APP24 MOVIE CLEAN LAYOUT: UI only; keep playback and Firebase logic unchanged -->
+<style id="app24-movie-clean-layout">
+  .app{width:100%!important;max-width:100%!important;display:block!important;height:calc(100dvh - 72px)!important;min-height:0!important}
+  .app>.sidebar{display:none!important}
+  .app>.main{width:100%!important;max-width:100%!important;height:100%!important;min-width:0!important}
+  .main>.topbar{padding:10px clamp(12px,3vw,30px)!important;gap:10px!important}
+  .main>.content{padding:clamp(12px,2vw,24px)!important}
+  .main>.content>.grid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))!important;gap:12px!important}
+  #externalSettingsBtn,#reloadBtn{display:none!important}
+  .main .hero{max-width:100%!important}
+  @media(max-width:600px){
+    .app{height:calc(100dvh - 94px)!important}
+    .main>.content>.grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+    .main>.content>.grid>.menu-btn{font-size:16px!important;min-height:92px!important}
+    .main>.topbar{padding:9px 12px!important}
+  }
+</style>
+</head>
 
 <body><div id="vipAuthGate" role="status"><div class="inner"><h2>ตรวจสอบสมาชิก VIP</h2><p id="vipAuthMessage">กำลังตรวจสอบสมาชิก...</p><a id="vipAuthAction" hidden href="../member/login.html?from=app24">เข้าสู่ระบบ</a> <button id="vipAuthRetry" hidden type="button">ลองใหม่</button></div></div><div id="vipMemberInfo" hidden><div><strong id="vipMemberName"></strong><div id="vipMemberExpiry"></div></div><button id="vipMemberLogout" type="button">ออกจากระบบ</button></div><script type="module" src="vip-access.js"></script>
 <!-- BUILD: V7.2 ALPHA 4.7.6 24HD/123HD 1.5.7 STABLE -->
