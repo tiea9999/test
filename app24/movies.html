@@ -1206,54 +1206,58 @@ function movieYearOf(item){
 }
 
 function renderMoviePage(items,label='หนังทั้งหมด'){
+  // APP24: display lightweight year folders first, not thousands of posters.
   items=(items||[]).filter(Boolean);
-  const requestedYear=new URLSearchParams(location.search).get('year');
-  if(requestedYear && /^(?:19|20)\d{2}$/.test(requestedYear))items=items.filter(item=>movieYearOf(item)===requestedYear);
-  state.rows=[];
-  content.innerHTML='';
-
-  let hero=document.createElement('div');
-  hero.className='hero';
-  hero.innerHTML='<div class="hero-title">🎬 '+(requestedYear?'หนังปี '+requestedYear:'หนังทั้งหมด')+'</div><div class="hero-sub">แหล่งเดียวกับ TIEA TEST: 123HD • แยกปีจากชื่อหนัง</div><div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><a class="top-btn" href="movies.html">หนังทั้งหมด</a><a class="top-btn" href="movies.html?year=2026">ปี 2026</a><a class="top-btn" href="movies.html?year=2025">ปี 2025</a><a class="top-btn" href="index.html">🏠 APP24</a></div>';
-  content.appendChild(hero);
-
-  // แถวรวมทุกเรื่องก่อน
-  let allSec=document.createElement('div');
-  allSec.className='section';
-  allSec.innerHTML=`<div class="section-head"><div class="section-title">หนังทั้งหมด</div><div class="section-tools"><div class="badge">${items.length} รายการ</div><button class="see-all-btn">ดูทั้งหมด</button></div></div><div class="row"></div>`;
-  let allRow=allSec.querySelector('.row');
-  items.slice(0,30).forEach(item=>allRow.appendChild(createCard(item)));
-  allSec.querySelector('.see-all-btn').onclick=()=>openModal('หนังทั้งหมด',items);
-  content.appendChild(allSec);
-
-  // แยกตามปี โดยปีใหม่อยู่บน
-  let yearMap={};
-  items.forEach(item=>{
-    let y=movieYearOf(item);
-    if(!yearMap[y])yearMap[y]=[];
-    if(!yearMap[y].some(x=>x.title===item.title))yearMap[y].push(item);
-  });
-
-  let years=Object.keys(yearMap).sort((a,b)=>{
-    if(a==='ไม่ระบุปี')return 1;
-    if(b==='ไม่ระบุปี')return -1;
-    return Number(b)-Number(a);
-  });
-
-  years.forEach(y=>{
-    let sec=document.createElement('div');
-    sec.className='section';
-    let title=y==='ไม่ระบุปี'?'หนังไม่ระบุปี':'หนังปี '+y;
-    sec.innerHTML=`<div class="section-head"><div class="section-title">${title}</div><div class="section-tools"><div class="badge">${yearMap[y].length} รายการ</div><button class="see-all-btn">ดูทั้งหมด</button></div></div><div class="row"></div>`;
-    let row=sec.querySelector('.row');
-    yearMap[y].slice(0,30).forEach(item=>row.appendChild(createCard(item)));
-    sec.querySelector('.see-all-btn').onclick=()=>openModal(title,yearMap[y]);
-    content.appendChild(sec);
-  });
-
+  state.activeSource='movie-main';
+  const yearMap={};
+  for(const item of items){
+    const year=movieYearOf(item);
+    (yearMap[year]||(yearMap[year]=[])).push(item);
+  }
+  const years=Object.keys(yearMap).sort((a,b)=>a==='ไม่ระบุปี'?1:b==='ไม่ระบุปี'?-1:Number(b)-Number(a));
   state.rows=[{title:'หนังทั้งหมด',items},...years.map(y=>({title:y==='ไม่ระบุปี'?'หนังไม่ระบุปี':'หนังปี '+y,items:yearMap[y]}))];
-  setStatus(items.length?'พร้อมใช้งาน • หนังทั้งหมด '+items.length+' รายการ':'ไม่พบรายการหนัง');
-  setTimeout(()=>document.querySelector('.card,.menu-btn.active')?.focus(),100);
+  const requestedYear=new URLSearchParams(location.search).get('year');
+  if(requestedYear && yearMap[requestedYear]){
+    showMovieYear(requestedYear,yearMap[requestedYear]);
+    return;
+  }
+  content.innerHTML='';
+  const hero=document.createElement('div');
+  hero.className='hero';
+  hero.innerHTML='<div class="hero-title">🎬 เลือกหมวดหนัง</div><div class="hero-sub">เลือกปีที่ต้องการก่อนแสดงโปสเตอร์ • แหล่งหนัง 123HD</div>';
+  content.appendChild(hero);
+  const grid=document.createElement('div');
+  grid.className='grid';
+  grid.style.gridTemplateColumns='repeat(auto-fill,minmax(180px,1fr))';
+  function folder(title,count,callback){
+    const btn=document.createElement('button');
+    btn.type='button';btn.className='menu-btn';
+    btn.style.cssText='min-height:110px;text-align:center;font-size:20px';
+    const heading=document.createElement('div');heading.textContent=title;
+    const total=document.createElement('div');total.style.cssText='font-size:13px;color:#9deeff;margin-top:10px';total.textContent=count+' รายการ';
+    btn.append(heading,total);btn.onclick=callback;grid.appendChild(btn);
+  }
+  folder('🎬 หนังทั้งหมด',items.length,()=>showMovieYear('',items));
+  years.forEach(y=>folder(y==='ไม่ระบุปี'?'🎞️ ไม่ระบุปี':'🎞️ หนังปี '+y,yearMap[y].length,()=>showMovieYear(y,yearMap[y])));
+  content.appendChild(grid);
+  setStatus('พร้อมใช้งาน • เลือกหมวดหนัง');
+}
+function showMovieYear(year,items){
+  content.innerHTML='';
+  const hero=document.createElement('div');hero.className='hero';
+  const back=document.createElement('button');back.type='button';back.className='top-btn home';back.textContent='◀ เลือกปี';
+  back.onclick=()=>renderMoviePage(state.rows[0].items);
+  const title=document.createElement('div');title.className='hero-title';title.style.marginTop='12px';
+  title.textContent=year?(year==='ไม่ระบุปี'?'หนังไม่ระบุปี':'หนังปี '+year):'หนังทั้งหมด';
+  const desc=document.createElement('div');desc.className='hero-sub';desc.textContent=items.length+' รายการ';
+  hero.append(back,title,desc);content.appendChild(hero);
+  const sec=document.createElement('div');sec.className='section';
+  sec.innerHTML='<div class="section-head"><div class="section-title">รายการหนัง</div><div class="section-tools"><button class="see-all-btn">ดูทั้งหมด</button></div></div><div class="grid"></div>';
+  const grid=sec.querySelector('.grid');
+  items.slice(0,30).forEach(item=>grid.appendChild(createCard(item)));
+  sec.querySelector('.see-all-btn').onclick=()=>openModal(title.textContent,items);
+  content.appendChild(sec);
+  setStatus('พร้อมใช้งาน • '+items.length+' รายการ');
 }
 
 function renderHome(){
