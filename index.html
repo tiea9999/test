@@ -911,6 +911,7 @@ const LOGIN='./member/login.html', WAIT='./member/waiting.html';
 const gateText = text => {const el=document.getElementById('tieaVipGateText');if(el)el.textContent=text;};
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth=getAuth(app),db=getFirestore(app);
+setTimeout(()=>{if(!document.documentElement.classList.contains('tiea-vip-approved'))gateText('กำลังตรวจสอบสิทธิ์... หากค้างนาน กรุณาตรวจสอบอินเทอร์เน็ตแล้วโหลดใหม่');},5000);
 function showMemberInfo(user, d, exp) {
   const name=document.getElementById('tieaMemberName');
   const expiry=document.getElementById('tieaMemberExpiry');
@@ -950,7 +951,7 @@ onAuthStateChanged(auth,async user=>{
     location.replace(WAIT);
   }catch(err){
     console.error('TIEA VIP gate error',err);
-    gateText('ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาโหลดหน้าใหม่อีกครั้ง');
+    gateText('ตรวจสอบสิทธิ์ไม่สำเร็จ กรุณาโหลดหน้าใหม่อีกครั้ง (ยังไม่อนุญาตให้เข้าใช้งาน)');
   }
 },err=>{console.error(err);gateText('เข้าสู่ระบบไม่สำเร็จ กรุณาลองใหม่');});
 </script>
