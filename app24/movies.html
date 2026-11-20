@@ -904,6 +904,22 @@
     .main>.topbar{padding:9px 12px!important}
   }
 </style>
+
+<!-- APP24 YEAR PREVIEW: six large posters per year, two visible on mobile -->
+<style id="app24-year-six-posters">
+  .app24-year-preview{display:flex;gap:clamp(10px,1.1vw,18px);overflow-x:auto;overflow-y:hidden;padding:5px 3px 14px;scroll-snap-type:x proximity;}
+  .app24-year-preview>.card{flex:0 0 calc((100% - 5 * clamp(10px,1.1vw,18px)) / 6);min-width:0;min-height:0;scroll-snap-align:start;}
+  .app24-year-preview .poster-wrap{height:auto!important;aspect-ratio:2/3;}
+  .app24-year-preview .thumb{width:100%;height:100%;object-fit:contain;}
+  .app24-year-preview .card-body{padding:12px;}
+  .app24-year-preview .card-title{font-size:clamp(13px,1.1vw,17px);min-height:2.7em;}
+  @media(max-width:1000px){.app24-year-preview>.card{flex-basis:calc((100% - 3 * 12px)/4);}}
+  @media(max-width:600px){
+    .app24-year-preview{gap:12px;scroll-snap-type:x mandatory;}
+    .app24-year-preview>.card{flex-basis:calc((100% - 12px)/2);}
+    .app24-year-preview .card-title{font-size:15px;}
+  }
+</style>
 </head>
 
 <body><div id="vipAuthGate" role="status"><div class="inner"><h2>ตรวจสอบสมาชิก VIP</h2><p id="vipAuthMessage">กำลังตรวจสอบสมาชิก...</p><a id="vipAuthAction" hidden href="../member/login.html?from=app24">เข้าสู่ระบบ</a> <button id="vipAuthRetry" hidden type="button">ลองใหม่</button></div></div><div id="vipMemberInfo" hidden><div><strong id="vipMemberName"></strong><div id="vipMemberExpiry"></div></div><button id="vipMemberLogout" type="button">ออกจากระบบ</button></div><script type="module" src="vip-access.js"></script>
@@ -1224,7 +1240,7 @@ function movieYearOf(item){
 }
 
 function renderMoviePage(items,label='หนังทั้งหมด'){
-  // APP24: show a 20-poster preview for each year, with See All for the full year.
+  // APP24: show six large posters per year; See All keeps full-year browsing.
   items=(items||[]).filter(Boolean);
   state.activeSource='movie-main';
   const yearMap={};
@@ -1241,7 +1257,7 @@ function renderMoviePage(items,label='หนังทั้งหมด'){
   }
   content.innerHTML='';
   const hero=document.createElement('div');hero.className='hero';
-  hero.innerHTML='<div class="hero-title">🎬 หนังทั้งหมด</div><div class="hero-sub">แสดงโปสเตอร์ปีละ 20 เรื่อง • กดดูทั้งหมดเพื่อเลือกหนังเพิ่มเติม • แหล่งหนัง 123HD</div>';
+  hero.innerHTML='<div class="hero-title">🎬 หนังทั้งหมด</div><div class="hero-sub">แสดงโปสเตอร์ปีละ 6 เรื่อง • กดดูทั้งหมดเพื่อเลือกหนังเพิ่มเติม • แหล่งหนัง 123HD</div>';
   content.appendChild(hero);
   const sectionFor=(title,arr,year)=>{
     const sec=document.createElement('div');sec.className='section';
@@ -1252,8 +1268,8 @@ function renderMoviePage(items,label='หนังทั้งหมด'){
     const more=document.createElement('button');more.className='see-all-btn';more.type='button';more.textContent='ดูทั้งหมด';
     more.onclick=()=>showMovieYear(year,arr);
     tools.append(count,more);head.append(name,tools);
-    const row=document.createElement('div');row.className='row';
-    arr.slice(0,20).forEach(item=>row.appendChild(createCard(item)));
+    const row=document.createElement('div');row.className='row app24-year-preview';
+    arr.slice(0,6).forEach(item=>row.appendChild(createCard(item)));
     sec.append(head,row);content.appendChild(sec);
   };
   years.forEach(y=>sectionFor(y==='ไม่ระบุปี'?'หนังไม่ระบุปี':'หนังปี '+y,yearMap[y],y));
