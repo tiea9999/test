@@ -890,12 +890,23 @@
 }
 
 /* TIEA TV-1 MOVIE POSTER 350px - only movie cards, not TV/series */
-.card.movie-art-card { flex: 0 0 240px; min-height: 440px; }
+/* Movie titles and M3U language ribbons remain visible below/on the poster. */
+.card.movie-art-card { display:flex; flex-direction:column; overflow:hidden; }
+.card.movie-art-card .poster-wrap { flex:0 0 350px; overflow:hidden; }
+.card.movie-art-card .card-body { display:block; flex:0 0 auto; min-height:104px; padding:12px 12px 16px; }
+.card.movie-art-card .card-title { display:-webkit-box; -webkit-line-clamp:2; overflow:hidden; min-height:46px; color:#fff; }
+.card.movie-art-card .lang-ribbon { z-index:6; }
+@media(max-width:860px) {
+  .card.movie-art-card .poster-wrap { flex-basis:270px; }
+  .card.movie-art-card .card-body { min-height:104px; }
+}
+
+.card.movie-art-card { flex: 0 0 240px; min-height: 454px; }
 .card.movie-art-card .poster-wrap { height: 350px; background: #101010; }
 .card.movie-art-card .thumb { object-fit: contain; padding: 4px; }
 
 @media(max-width:860px) {
-  .card.movie-art-card { flex-basis: 190px; min-height: 355px; }
+  .card.movie-art-card { flex-basis: 190px; min-height: 374px; }
   .card.movie-art-card .poster-wrap { height: 270px; }
 
 }
@@ -1079,7 +1090,7 @@ function serversOf(item){let o=[],parentPage=pageUrlOf(item);if(Array.isArray(it
 function episodesOf(item,img=''){if(!Array.isArray(item.episodes))return[];const parentPage=pageUrlOf(item);return item.episodes.map((ep,i)=>({title:ep.title||ep.name||ep.ep_name||`EP${i+1}`,image:imgOf(ep)||img,servers:serversOf({...ep,page:pageUrlOf(ep)||parentPage,provider:ep.provider||item.provider||''}),page:pageUrlOf(ep)||parentPage,provider:ep.provider||item.provider||'',type:'episode'})).filter(e=>e.servers.length||e.page)}
 function calcStatus(item,eps){let raw=String(item.status||item.finish||item.end||item.complete||'').trim();if(raw)return raw;let title=String(item.title||''),l=Number(item.latest_ep||0),t=Number(item.total_ep||0);if(title.includes('จบเรื่อง')||title.includes('ครบทุกตอน')||title.includes('(END)'))return'จบแล้ว';if(t&&l&&l>=t)return'จบแล้ว';if(eps&&eps.some(e=>String(e.title||'').includes('ตอนจบ')))return'จบแล้ว';if(eps&&eps.length)return'ยังไม่จบ';return''}
 function normalize(data,parent=''){let out=[],seen=new Set();function add(obj){let k=[obj.kind,obj.title,obj.source,obj.servers?.[0]?.url,obj.episodes?.length].join('|').toLowerCase();if(seen.has(k))return;seen.add(k);out.push(obj)}function walk(n,pg=''){if(Array.isArray(n)){n.forEach(x=>walk(x,pg));return}if(!n||typeof n!=='object')return;let title=n.title||n.name||n.channel||'ไม่มีชื่อ',img=imgOf(n),gs=groupsOf(n,pg||parent),source=cleanUrl(n.source||n.url||n.link||n.file);if((n.type==='menu'||Array.isArray(n.items))&&Array.isArray(n.items)){n.items.forEach(x=>walk(x,title));return}if((n.type==='source'||source)&&source&&isJsonUrl(source)&&!n.episodes){add({kind:'folder',title,image:img,source,groups:gs,group:gs[0]||title,status:n.status||''});return}if(Array.isArray(n.data)){n.data.forEach(x=>walk(x,gs[0]));return}let eps=episodesOf(n,img),sv=serversOf(n);if(eps.length)add({kind:'series',title,image:img,groups:gs,group:gs[0],language:n.language||'',year:n.year||'',status:calcStatus(n,eps),latest_ep:n.latest_ep||eps.length,total_ep:n.total_ep||eps.length,updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',episodes:eps,raw:n});else if(sv.length)add({kind:'play',title,image:img,groups:gs,group:gs[0]||'อื่นๆ',language:n.language||'',year:n.year||'',status:calcStatus(n,[]),updated:n.updated||n.update||n.last_update||n.date||n.added||n.created||'',servers:sv,type:n.type||'video',raw:n})}walk(data,parent);return out}
-function parseM3U(text,parent='ทีวี'){let out=[],cur=null;text.split(/\r?\n/).forEach(raw=>{let line=raw.trim();if(!line)return;if(line.startsWith('#EXTINF:')){let logo=line.match(/tvg-logo="([^"]*)"/i)?.[1]||'',group=groupName(line.match(/group-title="([^"]*)"/i)?.[1]||parent),title=line.split(',').pop()?.trim()||'ช่อง';cur={kind:'play',title,image:logo,group,groups:[group],servers:[],type:'tv'}}else if(!line.startsWith('#')&&cur){cur.servers=[{name:'Main',url:line}];out.push(cur);cur=null}});return out}
+function parseM3U(text,parent='ทีวี'){let out=[],cur=null;text.split(/\r?\n/).forEach(raw=>{let line=raw.trim();if(!line)return;if(line.startsWith('#EXTINF:')){let logo=line.match(/tvg-logo="([^"]*)"/i)?.[1]||'',group=groupName(line.match(/group-title="([^"]*)"/i)?.[1]||parent),title=line.slice(line.indexOf(',')+1).trim()||line.match(/tvg-name="([^"]*)"/i)?.[1]||'ช่อง',language=line.match(/tvg-language="([^"]*)"/i)?.[1]||'',year=line.match(/tvg-year="([^"]*)"/i)?.[1]||'';cur={kind:'play',title,image:logo,group,groups:[group],language,year,servers:[],type:'tv'}}else if(!line.startsWith('#')&&cur){cur.servers=[{name:'Main',url:line}];out.push(cur);cur=null}});return out}
 function githubToJsdelivr(url){
   try{
     const u=new URL(url);
