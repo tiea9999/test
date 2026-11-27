@@ -1202,6 +1202,17 @@ function tieaIsTrueSportMfixerMain(){
   }catch(e){ return false; }
 }
 
+// TIEA 6395 SMOOTH V1 — player-only test
+const tiea6395Ids = new Set(["cinemax2", "hbosignature2", "axn2", "ccm2", "truemoviehits2", "truefilmhd-3", "truefilmhd2-2", "asianmore-2", "truefilmasia-2", "trueseries-2", "dreamworks-2", "discoveryasia-2", "discoveryasia", "history", "monomax1-3", "monomax1-4", "monomax2-2", "monomax2-3", "truesporthd3-2", "truepremierhd3", "truepremierhd4", "truepremierhd5", "truesport7-2", "bein1-2", "bein2-2", "bein3-2"]);
+function tieaIs6395Smooth(url){
+  try {
+    const u = new URL(url);
+    if (["6395online.com", "6395online.ddns.net"].includes(u.hostname)) return true;
+    return u.hostname === "movieproxy.tawatchai250958.workers.dev" &&
+      u.pathname === "/watch" && tiea6395Ids.has(u.searchParams.get("id"));
+  } catch (_) { return false; }
+}
+
 function useHLS_STABLE(url){
   const video = document.getElementById("html5-player");
   const jwBox = document.getElementById("jw-player");
@@ -1232,7 +1243,36 @@ function useHLS_STABLE(url){
     addPlaybackLog("ENGINE", "เริ่ม HLS แบบเดียวกับ TIEA Stream Analyzer");
 
     const tieaTrueSportMfixer = tieaIsTrueSportMfixerMain();
-    currentHls = new Hls(tieaIsDootvzV09(url) ? {
+    const tiea6395Smooth = tieaIs6395Smooth(url);
+    currentHls = new Hls(tiea6395Smooth ? {
+      enableWorker:true,
+      lowLatencyMode:false,
+      startFragPrefetch:true,
+      progressive:true,
+
+      // ⚽ กีฬา/สดไว: เข้าไว เหมาะกับบอล/กีฬา/ข่าวสด
+      maxBufferLength:80,
+      maxMaxBufferLength:120,
+      backBufferLength:30,
+      maxBufferHole:4,
+      highBufferWatchdogPeriod:8,
+      liveSyncDurationCount:8,
+      liveMaxLatencyDurationCount:20,
+
+      fragLoadingMaxRetry:10,
+      levelLoadingMaxRetry:8,
+      manifestLoadingMaxRetry:8,
+      fragLoadingTimeOut:28000,
+      levelLoadingTimeOut:22000,
+      manifestLoadingTimeOut:22000,
+
+      startLevel:-1,
+      abrEwmaDefaultEstimate:900000,
+      abrBandWidthFactor:.8,
+      abrBandWidthUpFactor:.65,
+      capLevelToPlayerSize:true,
+      testBandwidth:false
+    } : tieaIsDootvzV09(url) ? {
       enableWorker:true,
       lowLatencyMode:false,
       autoStartLoad:true,
@@ -1300,6 +1340,7 @@ function useHLS_STABLE(url){
       abrEwmaDefaultEstimate:1200000
     });
 
+    if(tiea6395Smooth) currentHls.__tiea6395Smooth = true;
     currentHls.attachMedia(video);
 
     currentHls.on(Hls.Events.MEDIA_ATTACHED, function(){
@@ -1586,7 +1627,7 @@ setInterval(trimLogs,45000);
 
 /* ลด memory ของ HLS โดยไม่สร้าง player ใหม่ */
 function tuneHls(h){
-  if(!h || h.__tieaLM2407)return;
+  if(!h || h.__tieaLM2407 || h.__tiea6395Smooth)return;
   h.__tieaLM2407=1;
   try{
     var c=h.config||{};
